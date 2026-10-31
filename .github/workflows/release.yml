@@ -5,6 +5,7 @@ name: Build & release ORION
 
 on:
   push:
+    branches: [main]
     tags: ["v*"]
   workflow_dispatch:
     inputs:
@@ -18,10 +19,16 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      TAG: ${{ github.event.inputs.tag || github.ref_name }}
     steps:
       - uses: actions/checkout@v4
+
+      - name: Work out the version
+        run: |
+          if [ -n "${{ github.event.inputs.tag }}" ]; then T="${{ github.event.inputs.tag }}";
+          elif [ "${{ github.ref_type }}" = "tag" ]; then T="${{ github.ref_name }}";
+          else T="v$(grep -oP '^VERSION = "\K[^"]+' core/config.py)"; fi
+          echo "TAG=$T" >> "$GITHUB_ENV"
+          echo "Building $T"
 
       - uses: actions/setup-node@v4
         with:
