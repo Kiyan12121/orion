@@ -84,7 +84,9 @@ echo  [3/3] Creating Desktop shortcut...
 "%PY%" make_shortcut.py
 echo.
 echo  ===============================================
-echo   DONE. Double-click ORION on your Desktop.
+echo   DONE. Open ORION from your Desktop or Start Menu
+echo   (or double-click START_ORION.bat in this folder).
+echo   Don't use dist\ORION\ORION.exe - it never gets updates.
 echo   Optional extras:
 echo     2_INSTALL_LOCAL_BRAIN.bat   - offline AI brain
 echo     4_INSTALL_VOICE_EXTRAS.bat  - "Hey Jarvis" wake word + Voice ID

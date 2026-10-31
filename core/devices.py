@@ -463,6 +463,13 @@ class Updater:
 
     @staticmethod
     def _python():
+        try:
+            with open(os.path.join(Updater.source_root(), "python_path.txt"), "r", encoding="utf-8") as fh:
+                p = fh.read().strip()
+            if os.path.exists(p):
+                return p
+        except Exception:
+            pass
         if not FROZEN:
             d = os.path.dirname(sys.executable)
             w = os.path.join(d, "pythonw.exe")
@@ -476,9 +483,9 @@ class Updater:
 
     @staticmethod
     def _relaunch(root, py):
-        lnk = os.path.join(os.path.expanduser("~"), "Desktop", "ORION.lnk")
-        if os.name == "nt" and os.path.exists(lnk):
-            os.startfile(lnk)                       # same way you normally open it
+        bat = os.path.join(root, "START_ORION.bat")
+        if os.name == "nt" and os.path.exists(bat):
+            subprocess.Popen(["cmd", "/c", bat], cwd=root, creationflags=0x08000000)
         elif py:
             subprocess.Popen([py, os.path.join(root, "ORION.pyw")], cwd=root,
                              creationflags=0x00000008 if os.name == "nt" else 0)
