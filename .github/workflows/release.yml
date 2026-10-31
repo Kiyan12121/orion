@@ -48,7 +48,7 @@ jobs:
           npm install --no-audit --no-fund
           npx cap add android
           # microphone + talking to the PC over the private network
-          sed -i 's#<application#<uses-permission android:name="android.permission.RECORD_AUDIO" />\n    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />\n    <application android:usesCleartextTraffic="true"#' android/app/src/main/AndroidManifest.xml
+          sed -i 's#<application#<uses-permission android:name="android.permission.RECORD_AUDIO" />\n    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />\n    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />\n    <application android:usesCleartextTraffic="true"#' android/app/src/main/AndroidManifest.xml
           # app icon
           for d in android/app/src/main/res/mipmap-*; do
             cp www/icon.png "$d/ic_launcher.png"; cp www/icon.png "$d/ic_launcher_round.png"; cp www/icon.png "$d/ic_launcher_foreground.png" || true

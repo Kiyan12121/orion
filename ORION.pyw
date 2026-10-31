@@ -23,6 +23,8 @@ from core import config as config_mod                       # noqa: E402
 from core import tools                                      # noqa: E402
 from core import autopilot, coder, schedule, skills         # noqa: E402,F401  (registers their tools)
 from core import browser, root, video, vision               # noqa: E402,F401
+from core.jobs import Jobs                                  # noqa: E402
+from core.routines import NightShift                        # noqa: E402
 from core.devices import Push, Remote, Sync, Updater        # noqa: E402
 from core.gaming import GamingMode, Hotkey                  # noqa: E402
 from core.listen import VoiceID, WakeListener, extras_status  # noqa: E402
@@ -76,6 +78,8 @@ class Api:
         self._sync.start()
         self._updater = Updater(self._cfg, self._emit)
         self._updater.start()
+        self._jobs = Jobs(self._cfg, self._run_job, lambda t, title=None: self._push.send(t, title), self._emit)
+        self._shift = NightShift(self._cfg, self._jobs, self._shift_notify, self._emit, self._updater)
         self._voice_id = VoiceID(self._cfg)
         self._wake = WakeListener(self._cfg, self._wake_command, self._emit, self._voice_id,
                                   busy=lambda: self._recorder.recording or self._busy.locked())
@@ -130,6 +134,15 @@ class Api:
         if r and r.afk:
             bits.append("User is AFK; ORION is answering their Root DMs.")
         return " ".join(bits)
+
+    def _run_job(self, j):
+        src = {"phone": "📱", "routine": "⏰", "voice": "🗂"}.get(j["source"], "🗂")
+        self._emit("message", id=uuid.uuid4().hex[:8], role="user", text=f"{src} JOB: {j['title']}")
+        return self._process(j["text"], j.get("autopilot", True), speak=False)
+
+    def _shift_notify(self, text, title=None):
+        self._emit("toast", level="info", text=(title + ": " if title else "") + text.split("\n")[0][:140])
+        self._push.send(text, title)
 
     def _wake_command(self, wav):
         prov = self._brain.groq_like
@@ -650,7 +663,11 @@ class Api:
                 "busy": self._busy.locked(), "gaming": self._gaming.active, "game": self._gaming.game,
                 "afk": self._root.afk, "busy_now": b["title"] if b else None,
                 "next": f"{nxt[0]['title']} · {nxt[0]['at']:%a %H:%M}" if nxt else None,
-                "today": [{"time": o["at"].strftime("%H:%M"), "title": o["title"]} for o in today]}
+                "today": [{"time": o["at"].strftime("%H:%M"), "title": o["title"]} for o in today],
+                "version": config_mod.VERSION, "title": self._cfg.get("user_title", "sir"),
+                "jobs_active": sum(1 for j in self._jobs.jobs if j["status"] in ("queued", "running", "waiting")),
+                "job_running": (self._jobs.current or {}).get("title"),
+                "stats": self.stats(), "root_unread": sum(1 for e in root.recent_log(20) if e["kind"] == "received")}
 
     def remote_action(self, action, value=None):
         if action == "stop":
@@ -664,7 +681,119 @@ class Api:
             return self._toolbox.run("lock_pc", {})
         if action == "theme" and value:
             return self.set_theme(value)
+        simple = {"vol_up": ("media", {"action": "volume_up", "steps": 3}), "vol_down": ("media", {"action": "volume_down", "steps": 3}),
+                  "mute": ("media", {"action": "mute"}), "play": ("media", {"action": "play_pause"}),
+                  "next": ("media", {"action": "next"}), "prev": ("media", {"action": "previous"}),
+                  "screenshot": ("save_screenshot", {}), "sleep": ("power", {"action": "sleep"}),
+                  "restart": ("power", {"action": "restart"}), "shutdown": ("power", {"action": "shutdown"})}
+        if action in simple:
+            t, a = simple[action]
+            return self._toolbox.run(t, a)
+        if action == "open" and value:
+            return self._toolbox.run("open_app", {"name": value})
+        if action == "report":
+            return self._shift.morning_report()
+        if action == "routine" and value:
+            self._shift.run_builtin(value)
+            return f"Running {value}."
         return "Unknown action."
+
+    def screen_jpeg(self):
+        try:
+            import io
+            import pyautogui
+            img = pyautogui.screenshot()
+            img.thumbnail((1280, 1280))
+            buf = io.BytesIO()
+            img.convert("RGB").save(buf, "JPEG", quality=70)
+            return buf.getvalue()
+        except Exception:
+            return None
+
+    def remote_get(self, path):
+        if path.startswith("/api/jobs/"):
+            j = self._jobs.get(path.split("/")[3])
+            if not j:
+                raise KeyError(path)
+            return j
+        if path == "/api/jobs":
+            return {"jobs": self._jobs.list(40)}
+        if path == "/api/schedule":
+            return self.schedule_get(14)
+        if path == "/api/routines":
+            return self._shift.listing()
+        if path == "/api/root":
+            return {"afk": self._root.afk, "note": self._root.afk_note, "log": root.recent_log(30)}
+        if path == "/api/stats":
+            return {**self.stats(), "meters": self._brain.meters()}
+        raise KeyError(path)
+
+    def remote_post(self, path, body):
+        if path == "/api/jobs":
+            j = self._jobs.add(body.get("text", ""), source="phone", heavy=bool(body.get("heavy")),
+                               autopilot=bool(body.get("autopilot", True)))
+            return j
+        if path.startswith("/api/jobs/") and path.endswith("/cancel"):
+            return {"ok": self._jobs.cancel(path.split("/")[3])}
+        if path == "/api/jobs/clear":
+            self._jobs.clear_done()
+            return {"ok": True}
+        if path == "/api/schedule":
+            return {"ok": self.schedule_add(body)}
+        if path == "/api/schedule/remove":
+            return {"ok": self.schedule_remove(body.get("id"))}
+        if path == "/api/routines":
+            return self.routines_action(body)
+        raise KeyError(path)
+
+    # ---------------------------------------------------------------- Night Shift panel
+    def jobs_get(self):
+        return {"jobs": self._jobs.list(60)}
+
+    def job_add(self, text, heavy=False):
+        return self._jobs.add(text, source="pc", heavy=bool(heavy))
+
+    def job_cancel(self, jid):
+        return self._jobs.cancel(jid)
+
+    def jobs_clear(self):
+        self._jobs.clear_done()
+        return True
+
+    def routines_get(self):
+        return self._shift.listing()
+
+    def routines_action(self, b):
+        a = b.get("action")
+        if a == "toggle_builtin":
+            self._shift.set_builtin(b["id"], on=b.get("on"))
+        elif a == "time_builtin":
+            self._shift.set_builtin(b["id"], hhmm=b.get("time"))
+        elif a == "run":
+            if b["id"] in __import__("core.routines", fromlist=["BUILTIN"]).BUILTIN:
+                self._shift.run_builtin(b["id"])
+            else:
+                c = next((c for c in self._shift.ns["custom"] if c["id"] == b["id"]), None)
+                if c:
+                    self._jobs.add(c["prompt"], source="routine", title=f"⏰ {c['name']}", heavy=c.get("heavy", False))
+        elif a == "add":
+            self._shift.add_custom(b.get("name", ""), b.get("prompt", ""), b.get("time", "09:00"),
+                                   b.get("days", "daily"), b.get("heavy", False))
+        elif a == "remove":
+            self._shift.remove_custom(b["id"])
+        elif a == "toggle_custom":
+            for c in self._shift.ns["custom"]:
+                if c["id"] == b["id"]:
+                    c["on"] = bool(b.get("on"))
+            self._shift._persist()
+        elif a == "settings":
+            ns = self._shift.ns
+            if "enabled" in b:
+                ns["enabled"] = bool(b["enabled"])
+            if b.get("idle_minutes"):
+                ns["idle_minutes"] = max(1, int(b["idle_minutes"]))
+            self._shift._persist()
+        return self._shift.listing()
 
     def transcribe_bytes(self, raw):
         prov = self._brain.groq_like

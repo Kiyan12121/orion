@@ -151,8 +151,22 @@ class Remote:
                     return
                 if self.path == "/api/state":
                     self._json(200, remote.api.remote_state())
+                elif self.path.startswith("/api/screen"):
+                    jpg = remote.api.screen_jpeg()
+                    if not jpg:
+                        self._json(503, {"error": "screenshot unavailable"})
+                        return
+                    self.send_response(200)
+                    self.send_header("Content-Type", "image/jpeg")
+                    self.send_header("Cache-Control", "no-store")
+                    self._cors()
+                    self.end_headers()
+                    self.wfile.write(jpg)
                 else:
-                    self._json(404, {"error": "not found"})
+                    try:
+                        self._json(200, remote.api.remote_get(self.path))
+                    except KeyError:
+                        self._json(404, {"error": "not found"})
 
             def do_POST(self):
                 if not self._authed():
@@ -171,7 +185,10 @@ class Remote:
                 elif self.path == "/api/action":
                     self._json(200, {"result": remote.api.remote_action(body.get("action", ""), body.get("value"))})
                 else:
-                    self._json(404, {"error": "not found"})
+                    try:
+                        self._json(200, remote.api.remote_post(self.path, body))
+                    except KeyError:
+                        self._json(404, {"error": "not found"})
 
         try:
             self.server = ThreadingHTTPServer(("0.0.0.0", int(self.rc.get("port", 7777))), H)

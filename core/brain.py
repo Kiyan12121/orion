@@ -46,7 +46,7 @@ SMART = re.compile(r"\b(code|script|program|build|make|create|write|fix|debug|ex
                    r"plan|research|compare|analy[sz]e|essay|app|bot|website|summari[sz]e|learn|teach|story|"
                    r"translate|calculate|work out|figure|recommend|should i|ideas?|design|review)\b", re.I)
 
-CORE = {"get_time", "open_app", "open_website", "web_search", "remember", "ask_claude",
+CORE = {"queue_job", "get_time", "open_app", "open_website", "web_search", "remember", "ask_claude",
         "request_more_tools", "set_theme", "schedule_add", "schedule_list", "check_availability"}
 GROUPS = {
     "computer": ({"type_text", "press_keys", "mouse_click", "scroll", "read_screen", "find_on_screen",
@@ -75,6 +75,9 @@ GROUPS = {
                  r"schedule|book|remind|calendar|free|busy|plan|tomorrow|tonight|monday|tuesday|wednesday|"
                  r"thursday|friday|saturday|sunday|week|appointment|revision|event|\bat \d|pm\b|am\b"),
     "skills": ({"skill_create", "skill_list", "skill_delete"}, r"learn|skill|teach yourself|new ability"),
+    "jobs": ({"queue_job", "list_jobs", "routine_add", "routine_list", "routine_run_now"},
+             r"queue|later|background|overnight|night|while i'?m|when i'?m away|routine|every (day|morning|night|week)|"
+             r"automat|job|tidy|clean ?up|back ?up|backup|temp|health"),
     "root": ({"root_check_messages", "root_read_chat", "root_send_message", "root_afk", "check_availability",
               "schedule_add"},
              r"\broot\b|message|messages|\bdm|dms|inbox|text |tell \w+|reply|afk|chat with|msg|ping"),

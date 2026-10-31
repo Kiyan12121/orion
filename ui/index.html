@@ -259,6 +259,19 @@ textarea.goal:focus,.inp:focus{border-color:var(--a);box-shadow:0 0 0 3px rgba(v
 .dm.in .ic{background:rgba(255,179,71,.18);color:var(--amber);border-color:rgba(255,179,71,.4)}
 .rl{font:12px/1.55 var(--mono);color:var(--dim);padding:5px 0;border-bottom:1px dashed var(--line)}
 .rl b{color:var(--a2);font-weight:500}.rl.sent b{color:var(--green)}.rl.error b{color:var(--red)}
+/* jobs + routines */
+.job{padding:9px 0;border-bottom:1px solid var(--line)}
+.job .top{display:flex;gap:8px;align-items:center}
+.job .top b{flex:1;font-size:14.5px;font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.job small{display:block;color:var(--dim);font-size:12.5px;margin-top:3px;line-height:1.4;user-select:text}
+.st{font:600 9.5px var(--mono);padding:2px 7px;border-radius:999px;border:1px solid var(--line2);color:var(--dim);letter-spacing:.06em;flex:none}
+.st.running{color:var(--amber);border-color:rgba(255,179,71,.5);animation:blink2 1.4s infinite}.st.done{color:var(--green);border-color:rgba(93,255,176,.4)}
+.st.failed{color:var(--red);border-color:rgba(255,79,123,.45)}.st.waiting{color:var(--violet);border-color:rgba(197,139,255,.45)}
+.rt{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--line)}
+.rt input[type=checkbox]{accent-color:var(--a);width:16px;height:16px;margin-top:3px;flex:none}
+.rt .tx{flex:1;min-width:0}.rt .tx b{font-size:14px;font-weight:600}.rt .tx small{display:block;color:var(--dim);font-size:12px;line-height:1.4}
+.rt .tx em{display:block;font-style:normal;font:11px var(--mono);color:var(--faint);margin-top:2px}
+.rt .tm{font:12px var(--mono);color:var(--a2);background:none;border:1px solid var(--line);padding:2px 4px;width:78px;color-scheme:dark}
 /* studio */
 .drop{border:1.5px dashed var(--line2);border-radius:6px;padding:20px;text-align:center;cursor:pointer;transition:.2s;background:rgba(var(--ar),.03)}
 .drop:hover{border-color:var(--a);background:rgba(var(--ar),.08)}
@@ -376,6 +389,7 @@ body.lite .r1,body.lite .r4,body.lite .r6{animation:none}
     <div class="dlogo" title="ORION"><i></i><b></b><s></s></div>
     <button class="nav on" data-page="comms"><svg viewBox="0 0 24 24"><path d="M4 5h16v10H9l-5 4z"/></svg><span class="tip">COMMS</span></button>
     <button class="nav" data-page="auto"><svg viewBox="0 0 24 24"><path d="M12 3l2.5 5.5L20 9l-4 4 1 6-5-3-5 3 1-6-4-4 5.5-.5z"/></svg><span class="tip">AUTOPILOT</span><span class="bdg" id="b-auto"></span></button>
+    <button class="nav" data-page="shift"><svg viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg><span class="tip">NIGHT SHIFT &amp; JOBS</span><span class="bdg" id="b-shift"></span></button>
     <button class="nav" data-page="sched"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg><span class="tip">SCHEDULE</span></button>
     <button class="nav" data-page="root"><svg viewBox="0 0 24 24"><path d="M12 21V11M12 11c0-4 3-7 7-7 0 4-3 7-7 7zM12 14c0-3-2.5-5.5-6-5.5 0 3 2.5 5.5 6 5.5z"/></svg><span class="tip">ROOT</span><span class="bdg" id="b-root"></span></button>
     <button class="nav" data-page="studio"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="13" height="12" rx="2"/><path d="M16 10l5-3v10l-5-3z"/></svg><span class="tip">STUDIO</span></button>
@@ -506,6 +520,28 @@ body.lite .r1,body.lite .r4,body.lite .r6{animation:none}
               <a class="ex">research the 3 best free Discord bot hosts and save a summary to my desktop</a></div></div>
             <div class="plannote" id="plannote"></div>
             <div class="planfin" id="planfin">✓ Mission complete — see COMMS for the summary.</div>
+          </div>
+        </div>
+        <!-- NIGHT SHIFT -->
+        <div class="page" id="page-shift">
+          <div class="ph">NIGHT SHIFT <span><span class="pill" id="nsPill">ON</span></span></div>
+          <div class="scroll">
+            <div class="lbl">QUEUE A JOB</div>
+            <div class="voicerow"><input class="inp" id="jobIn" placeholder="e.g. build me a tool that renames my screenshots by date"><button class="btn small" id="jobAdd" style="height:36px">QUEUE</button></div>
+            <label class="tog" style="margin-top:6px"><input type="checkbox" id="jobHeavy"> Heavy — wait until I'm away and not gaming</label>
+            <div class="lbl sp">JOBS <button class="mini" id="jobsClear" style="float:right">CLEAR FINISHED</button></div>
+            <div id="joblist"><div class="empty">No jobs yet. Anything you send from your phone appears here.</div></div>
+            <div class="lbl sp">ROUTINES</div>
+            <div id="routlist"></div>
+            <div class="card" style="margin-top:10px"><h4>NEW ROUTINE</h4>
+              <input class="inp" id="rtName" placeholder="Name — e.g. Morning DM summary" style="margin-bottom:6px">
+              <input class="inp" id="rtPrompt" placeholder="What ORION should do — e.g. check my Root messages and summarise them" style="margin-bottom:6px">
+              <div class="voicerow"><input class="inp" type="time" id="rtTime" value="07:00"><select class="inp" id="rtDays"><option value="daily">Every day</option><option value="weekdays">Weekdays</option><option value="weekends">Weekends</option></select><button class="btn small" id="rtAdd" style="height:36px">ADD</button></div>
+            </div>
+            <div class="lbl sp">SETTINGS</div>
+            <label class="tog"><input type="checkbox" id="nsOn"> Night Shift enabled</label>
+            <div class="voicerow" style="align-items:center;font-size:13.5px;color:var(--dim)">Heavy jobs wait until I've been away for <input class="inp" type="number" id="nsIdle" min="1" max="120" style="width:70px"> minutes</div>
+            <button class="btn small wide" id="nsReport" style="margin-top:10px">SEND MORNING REPORT NOW</button>
           </div>
         </div>
         <!-- SCHEDULE -->
@@ -686,6 +722,8 @@ window.ui={event(e){ switch(e.kind){
   case "enroll": enrollStep(e); break;
   case "wake": toast("Listening…"); break;
   case "synced": loadSched(); break;
+  case "jobs_changed": if($("#page-shift").classList.contains("on")) loadJobs(); else if(e.job&&e.job.status==="done") badge("shift"); break;
+  case "routines_changed": if($("#page-shift").classList.contains("on")) loadRoutines(); break;
   case "devices_changed": if($("#page-devices").classList.contains("on")) loadDevices(); break;
 }}};
 
@@ -704,7 +742,7 @@ $$("#themes button").forEach(b=>b.onclick=()=>{ applyTheme(b.dataset.t); api.set
 /* ================= navigation ================= */
 function go(p){ $$(".nav[data-page]").forEach(n=>n.classList.toggle("on",n.dataset.page===p)); $$(".page").forEach(x=>x.classList.toggle("on",x.id==="page-"+p));
   const b=$("#b-"+p); if(b) b.classList.remove("show");
-  ({sched:loadSched,skills:loadSkills,root:loadRoot,devices:loadDevices})[p]?.(); }
+  ({sched:loadSched,skills:loadSkills,root:loadRoot,devices:loadDevices,shift:loadShift})[p]?.(); }
 $$(".nav[data-page]").forEach(n=>n.onclick=()=>go(n.dataset.page));
 function badge(p){ const pg=$("#page-"+p); if(pg && !pg.classList.contains("on")) $("#b-"+p)?.classList.add("show"); }
 
@@ -868,6 +906,34 @@ $("#rootCheck").onclick=()=>{ $("#dmlist").innerHTML='<div class="empty">Reading
 $("#afkBtn").onclick=async()=>{ const on=!$("#afkchip").classList.contains("show"); toast(await api.root_afk(on,$("#afkNote").value)); };
 ["rWatch","rGame","rGameMode"].forEach(id=>$("#"+id).onchange=()=>api.root_settings({watch:$("#rWatch").checked,gaming_autoreply:$("#rGame").checked,gaming_reply:$("#rGameMode").value}));
 
+/* ================= night shift ================= */
+const ago=t=>{ if(!t) return ""; const s=Date.now()/1000-t; return s<60?"just now":s<3600?Math.floor(s/60)+"m ago":s<86400?Math.floor(s/3600)+"h ago":Math.floor(s/86400)+"d ago"; };
+async function loadJobs(){ const r=await api.jobs_get(); const js=r.jobs||[];
+  $("#joblist").innerHTML=js.length?js.map(j=>`<div class="job"><div class="top"><span class="st ${j.status}">${j.status.toUpperCase()}</span><b title="${esc(j.text)}">${esc(j.title)}</b>
+    ${["queued","running","waiting"].includes(j.status)?`<button class="x" data-cj="${j.id}" title="Cancel">×</button>`:""}</div>
+    <small>${j.status==="waiting"||j.status==="running"?esc(j.note):esc((j.result||"").slice(0,240))} · ${{phone:"📱 phone",routine:"⏰ routine",voice:"🗂 queued",pc:"🖥 PC"}[j.source]||j.source} · ${ago(j.finished||j.started||j.created)}</small></div>`).join("")
+    :'<div class="empty">No jobs yet. Anything you send from your phone appears here.</div>';
+  $$("[data-cj]").forEach(b=>b.onclick=async()=>{ await api.job_cancel(b.dataset.cj); loadJobs(); }); }
+async function loadRoutines(){ const r=await api.routines_get(); $("#nsOn").checked=r.enabled; $("#nsIdle").value=r.idle_minutes;
+  $("#nsPill").textContent=r.enabled?"ON":"OFF"; $("#nsPill").className="pill "+(r.enabled?"ok":"");
+  $("#routlist").innerHTML=r.routines.map(x=>`<div class="rt"><input type="checkbox" data-rt="${x.id}" data-b="${x.builtin}" ${x.on?"checked":""}>
+    <div class="tx"><b>${esc(x.name)}</b> <small>${esc(x.desc)}${x.builtin?"":` · ${esc(x.days)}`}</small>${x.result?`<em>${esc(x.result)}</em>`:""}</div>
+    ${x.builtin?`<input type="time" class="tm" data-tm="${x.id}" value="${x.time}">`:`<span class="tm" style="border:0">${esc(x.time)}</span>`}
+    <button class="mini" data-run="${x.id}" title="Run now">▶</button>${x.builtin?"":`<button class="x" data-rm="${x.id}">×</button>`}</div>`).join("");
+  $$("[data-rt]").forEach(c=>c.onchange=()=>api.routines_action({action:c.dataset.b==="true"?"toggle_builtin":"toggle_custom",id:c.dataset.rt,on:c.checked}));
+  $$("[data-tm]").forEach(c=>c.onchange=()=>api.routines_action({action:"time_builtin",id:c.dataset.tm,time:c.value}));
+  $$("[data-run]").forEach(b=>b.onclick=async()=>{ await api.routines_action({action:"run",id:b.dataset.run}); toast("Running now — result shows here when done."); });
+  $$("[data-rm]").forEach(b=>b.onclick=async()=>{ await api.routines_action({action:"remove",id:b.dataset.rm}); loadRoutines(); }); }
+function loadShift(){ loadJobs(); loadRoutines(); }
+$("#jobAdd").onclick=async()=>{ const t=$("#jobIn").value.trim(); if(!t) return; await api.job_add(t,$("#jobHeavy").checked); $("#jobIn").value=""; $("#jobHeavy").checked=false; toast("Queued."); loadJobs(); };
+$("#jobIn").addEventListener("keydown",e=>{ if(e.key==="Enter") $("#jobAdd").click(); });
+$("#jobsClear").onclick=async()=>{ await api.jobs_clear(); loadJobs(); };
+$("#rtAdd").onclick=async()=>{ const p=$("#rtPrompt").value.trim(); if(!p) return; await api.routines_action({action:"add",name:$("#rtName").value,prompt:p,time:$("#rtTime").value,days:$("#rtDays").value});
+  $("#rtName").value=""; $("#rtPrompt").value=""; toast("Routine added."); loadRoutines(); };
+$("#nsOn").onchange=()=>api.routines_action({action:"settings",enabled:$("#nsOn").checked}).then(loadRoutines);
+$("#nsIdle").onchange=()=>api.routines_action({action:"settings",idle_minutes:+$("#nsIdle").value});
+$("#nsReport").onclick=()=>{ api.routines_action({action:"run",id:"report"}); toast("Morning report sent to your phone."); };
+
 /* ================= studio ================= */
 let vidPath="latest";
 $("#drop").onclick=async()=>{ const p=await api.studio_pick(); if(p){ vidPath=p; $("#vidname").textContent=p.split(/[\\/]/).pop(); $("#vidinfo").textContent=p; } };
@@ -913,7 +979,8 @@ const CMDS=[["Check my Root messages","check my messages","ROOT"],["Go AFK","I'm
   ["Serious mode","serious mode","MODE"],["Standby mode","standby mode","MODE"],["Executive mode","executive mode","MODE"],["Hacker mode","hacker mode","MODE"],["Stealth mode","stealth mode","MODE"],
   ["Undo last file change","undo","FILES"],["Take a screenshot","screenshot","SYSTEM"],["Auto-cut my latest video","autocut my latest video","STUDIO"],["Make Shorts from my latest video","make 3 shorts from my latest video","STUDIO"],
   ["Lock PC","lock pc","SYSTEM"],["Open Autopilot",()=>go("auto"),"PAGE"],["Open Schedule",()=>go("sched"),"PAGE"],["Open Root",()=>go("root"),"PAGE"],["Open Studio",()=>go("studio"),"PAGE"],
-  ["Open Devices",()=>go("devices"),"PAGE"],["Open Skills",()=>go("skills"),"PAGE"],["Settings",()=>$("#nSet").click(),"PAGE"]];
+  ["Open Devices",()=>go("devices"),"PAGE"],["Open Skills",()=>go("skills"),"PAGE"],["Open Night Shift",()=>go("shift"),"PAGE"],["Morning report now",()=>api.routines_action({action:"run",id:"report"}),"SHIFT"],
+  ["Tidy Downloads now",()=>api.routines_action({action:"run",id:"tidy_downloads"}),"SHIFT"],["Back up ORION now",()=>api.routines_action({action:"run",id:"backup"}),"SHIFT"],["Settings",()=>$("#nSet").click(),"PAGE"]];
 let palSel=0, palList=[];
 function openPal(){ $("#palette").classList.add("show"); $("#palin").value=""; filterPal(); setTimeout(()=>$("#palin").focus(),10); }
 function closePal(){ $("#palette").classList.remove("show"); }
@@ -1020,7 +1087,16 @@ setTimeout(()=>{ if(api) return; const wait=ms=>new Promise(r=>setTimeout(r,ms))
     root_check:async()=>{ await wait(400); ui.event({kind:"root_snapshot",data:{view:"list",conversations:[{name:"demetreDev",preview:"You: Now yh",time:"40m",from_me:true},{name:"Adrian",preview:"pls help :sob:",time:"3d",from_me:false},{name:"Responeded",preview:"Now?",time:"4d",from_me:false}]}}); },
     root_afk:(on)=>A(on?"AFK mode on — I'll handle your Root DMs.":"AFK mode off."),root_settings:()=>A(true),studio_pick:()=>A(""),studio_run:()=>A(true),
     devices_info:()=>A({extras:{python:"C:\\Users\\kiyan\\AppData\\Local\\Python\\pythoncore-3.14-64\\pythonw.exe",frozen:false,wake_err:"ModuleNotFoundError: No module named 'openwakeword'",vid_err:"ModuleNotFoundError: No module named 'resemblyzer'"},version:"2.0",repo:"Kiyan12121/orion",remote_enabled:true,remote:{pin:"482913",port:7777,tailscale:["http://100.84.12.7:7777"],lan:["http://192.168.1.42:7777"]},ntfy:"orion-3f9a2c71e0b4d5a6",sync:{token:false,status:"off"},update:null,wake:{available:false,enabled:false,running:false,phrase:"hey jarvis"},voice_id:{available:false,enrolled:false,enabled:false}}),
-    devices_action:()=>A({}),voice_enroll:()=>A(true) };
+    devices_action:()=>A({}),
+    jobs_get:()=>A({jobs:[{id:"a1",title:"Build a screenshot renamer tool",text:"",status:"running",note:"writing main.py…",source:"phone",created:Date.now()/1000-120,result:""},
+      {id:"a2",title:"🎬 Shorts from stream_oct30.mp4",text:"",status:"waiting",note:"waiting — runs after 10 min of you being away",source:"routine",created:Date.now()/1000-600,result:""},
+      {id:"a3",title:"Research free Discord bot hosting",text:"",status:"done",note:"",source:"phone",created:0,finished:Date.now()/1000-3600,result:"Top 3: Oracle Cloud free tier, fly.io, Railway trial. Summary saved to Desktop."}]}),
+    job_add:()=>A({}),job_cancel:()=>A(true),jobs_clear:()=>A(true),
+    routines_get:()=>A({enabled:true,idle_minutes:10,routines:[{id:"tidy_downloads",name:"Tidy Downloads",desc:"Sorts files older than 7 days into Downloads\\Sorted\\<type>. Moves, never deletes.",time:"02:00",on:true,builtin:true,result:"Fri 02:00: Sorted 14 images, 3 installers into Downloads\\Sorted."},
+      {id:"backup",name:"Back up ORION",desc:"Zips projects, skills and memory (keeps 7).",time:"02:10",on:true,builtin:true,result:"Fri 02:10: Backed up 212 files (4 MB)."},
+      {id:"content",name:"Content: new videos → Shorts",desc:"New videos get auto-cut + 3 Shorts.",time:"03:00",on:false,builtin:true,result:""},
+      {id:"c1",name:"Morning DM summary",desc:"check my Root messages and summarise them",time:"07:00",days:"weekdays",on:true,builtin:false,result:""}]}),
+    routines_action:()=>A({enabled:true,idle_minutes:10,routines:[]}),voice_enroll:()=>A(true) };
   boot(); },1500);
 </script>
 </body>

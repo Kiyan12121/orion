@@ -4,68 +4,100 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
 <meta name="theme-color" content="#03060c">
-<meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="manifest" href="/manifest.json">
 <title>ORION</title>
-<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=JetBrains+Mono:wght@400;500&family=Orbitron:wght@700;800&display=swap" rel="stylesheet">
 <style>
-:root{--a:#3fd8ff;--a2:#8af5ff;--ar:63,216,255;--bg:#03060c;--text:#d6f1ff;--dim:#6b8ea3;--faint:#2b4556;--green:#5dffb0;--amber:#ffb347;--red:#ff4f7b;
-  --line:rgba(var(--ar),.15);--line2:rgba(var(--ar),.32);--ui:"Rajdhani",system-ui,sans-serif;--mono:"JetBrains Mono",monospace}
-body[data-theme=serious]{--a:#ff3d4a;--a2:#ff8a8f;--ar:255,61,74}
+:root{--a:#3fd8ff;--a2:#8af5ff;--ar:63,216,255;--bg:#02060b;--card:rgba(10,24,38,.72);--text:#dcf3ff;--dim:#7193a8;--faint:#2b4556;--green:#5dffb0;--amber:#ffb347;--red:#ff4f7b;--violet:#c58bff;
+  --line:rgba(var(--ar),.14);--line2:rgba(var(--ar),.32);--ui:"Rajdhani",system-ui,sans-serif;--mono:"JetBrains Mono",monospace;--disp:"Orbitron","Rajdhani",sans-serif}
+body[data-theme=serious]{--a:#ff3d4a;--a2:#ff9096;--ar:255,61,74}
 body[data-theme=stealth]{--a:#b9c4cc;--a2:#eef3f6;--ar:185,196,204}
 body[data-theme=executive]{--a:#e9b949;--a2:#ffe29a;--ar:233,185,73}
 body[data-theme=hacker]{--a:#2bff88;--a2:#a6ffcf;--ar:43,255,136}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--ui);overflow:hidden}
-body{background:radial-gradient(ellipse 120% 60% at 50% 0%,rgba(var(--ar),.16),transparent 60%),var(--bg)}
-.app{display:flex;flex-direction:column;height:100%;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
-header{display:flex;align-items:center;gap:12px;padding:14px 16px 10px}
-.core{width:42px;height:42px;border-radius:50%;position:relative;flex:none}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--ui);overflow:hidden;overscroll-behavior:none}
+body{background:radial-gradient(ellipse 130% 55% at 50% -5%,rgba(var(--ar),.2),transparent 60%),var(--bg)}
+button{font-family:inherit;color:inherit}
+.app{display:flex;flex-direction:column;height:100%;padding-top:env(safe-area-inset-top)}
+header{display:flex;align-items:center;gap:12px;padding:12px 16px 8px}
+.core{width:40px;height:40px;position:relative;flex:none}
 .core i{position:absolute;inset:0;border-radius:50%;border:1.5px dashed var(--a);animation:spin 10s linear infinite}
 .core b{position:absolute;inset:9px;border-radius:50%;background:radial-gradient(circle,var(--a2),rgba(var(--ar),.25) 70%);box-shadow:0 0 18px rgba(var(--ar),.7);animation:pulse 3s ease-in-out infinite}
-body.busy .core b{animation-duration:.7s}
-body.busy .core i{animation-duration:1.5s}
-h1{font-size:20px;letter-spacing:.32em;color:var(--a2);font-weight:700}
-.sub{font:11px var(--mono);color:var(--dim);display:flex;align-items:center;gap:6px;margin-top:2px}
-.dot{width:7px;height:7px;border-radius:50%;background:var(--faint)}
+body.busy .core b{animation-duration:.7s} body.busy .core i{animation-duration:1.4s}
+h1{font:800 17px var(--disp);letter-spacing:.34em;color:var(--a2)}
+.sub{font:11px var(--mono);color:var(--dim);display:flex;align-items:center;gap:6px;margin-top:3px}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--faint);flex:none}
 .dot.ok{background:var(--green);box-shadow:0 0 8px var(--green)} .dot.solo{background:var(--amber);box-shadow:0 0 8px var(--amber)}
-.hb{margin-left:auto;background:none;border:1px solid var(--line2);color:var(--dim);width:38px;height:38px;border-radius:10px;font-size:17px}
-.chips{display:flex;gap:8px;overflow-x:auto;padding:4px 16px 10px;scrollbar-width:none}
-.chips::-webkit-scrollbar{display:none}
-.chip{flex:none;border:1px solid var(--line2);background:rgba(var(--ar),.07);color:var(--a2);font:700 12px var(--ui);letter-spacing:.14em;padding:9px 13px;border-radius:999px;white-space:nowrap}
-.chip.on{background:rgba(var(--ar),.25);border-color:var(--a)}
-.chip.warn{color:#ff8fab;border-color:rgba(255,79,123,.45);background:rgba(255,79,123,.1)}
-.state{margin:0 16px 8px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:rgba(8,20,32,.6);font-size:13.5px;color:var(--dim);display:none}
-.state b{color:var(--text);font-weight:600}
-#log{flex:1;overflow-y:auto;padding:8px 16px 16px;display:flex;flex-direction:column;gap:12px}
-.m{max-width:88%;padding:10px 13px;border-radius:14px;font-size:16px;line-height:1.42;animation:rise .3s;user-select:text;word-wrap:break-word}
-.m.u{align-self:flex-end;background:rgba(130,160,190,.16);border-bottom-right-radius:4px}
-.m.a{align-self:flex-start;background:linear-gradient(135deg,rgba(var(--ar),.16),rgba(var(--ar),.05));border:1px solid var(--line);border-bottom-left-radius:4px}
-.m.s{align-self:center;color:var(--amber);font-size:13px;background:none;text-align:center}
-.m small{display:block;font:10px var(--mono);color:var(--dim);margin-top:5px;letter-spacing:.05em}
+.hb{margin-left:auto;background:rgba(var(--ar),.06);border:1px solid var(--line2);width:40px;height:40px;border-radius:12px;font-size:17px;display:grid;place-items:center}
+.views{flex:1;position:relative;min-height:0}
+.view{position:absolute;inset:0;overflow-y:auto;padding:6px 14px 18px;display:none;-webkit-overflow-scrolling:touch}
+.view.on{display:block;animation:fade .25s}
+#v-chat.on{display:flex;flex-direction:column;padding:0}
+nav.tabs{display:flex;border-top:1px solid var(--line);background:rgba(3,8,14,.95);padding-bottom:env(safe-area-inset-bottom)}
+nav.tabs button{flex:1;background:none;border:0;padding:9px 0 8px;display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--dim);font:700 10px var(--ui);letter-spacing:.14em;position:relative}
+nav.tabs svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.7}
+nav.tabs button.on{color:var(--a2)} nav.tabs button.on::before{content:"";position:absolute;top:-1px;left:30%;right:30%;height:2px;background:var(--a);box-shadow:0 0 10px var(--a)}
+nav.tabs .n{position:absolute;top:4px;right:calc(50% - 20px);min-width:16px;height:16px;border-radius:8px;background:var(--amber);color:#1a0f00;font:700 10px var(--mono);display:none;place-items:center;padding:0 4px}
+nav.tabs .n.show{display:grid}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px;position:relative}
+.card h3{font:700 11px var(--ui);letter-spacing:.28em;color:var(--dim);margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+.card h3 i{font-style:normal;color:var(--a);font-family:var(--mono);letter-spacing:0}
+.hello{font:600 24px var(--ui);margin:6px 2px 12px;line-height:1.2}.hello small{display:block;font-size:14px;color:var(--dim);font-weight:500;margin-top:4px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.stat{background:rgba(0,0,0,.25);border:1px solid var(--line);border-radius:12px;padding:10px;text-align:center}
+.stat b{display:block;font:500 20px var(--mono);color:var(--a2)} .stat span{font-size:11px;letter-spacing:.18em;color:var(--dim)}
+.bar{height:4px;background:rgba(var(--ar),.12);border-radius:2px;overflow:hidden;margin-top:6px}.bar div{height:100%;background:var(--a);border-radius:2px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
+.qa{background:rgba(var(--ar),.07);border:1px solid var(--line);border-radius:14px;padding:12px 4px 9px;display:flex;flex-direction:column;align-items:center;gap:5px;font:600 12px var(--ui);letter-spacing:.04em}
+.qa:active{transform:scale(.96);background:rgba(var(--ar),.18)}
+.qa em{font-style:normal;font-size:22px;line-height:1}
+.qa.on{background:rgba(var(--ar),.24);border-color:var(--a)}
+.qa.warn{color:#ff9fb6;border-color:rgba(255,79,123,.35);background:rgba(255,79,123,.08)}
+.row{display:flex;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line);font-size:15px}
+.row:last-child{border-bottom:0}
+.row .t{font:12.5px var(--mono);color:var(--a2);width:52px;flex:none}
+.row .x{margin-left:auto;background:none;border:0;color:var(--faint);font-size:20px;padding:0 4px}
+.empty{color:var(--dim);font-size:14.5px;line-height:1.5}
+.job{padding:11px 0;border-bottom:1px solid var(--line)}.job:last-child{border-bottom:0}
+.job .top{display:flex;gap:8px;align-items:center}.job .top b{flex:1;font-size:15.5px;font-weight:600;min-width:0}
+.job p{color:var(--dim);font-size:14px;margin-top:5px;line-height:1.45;user-select:text;white-space:pre-wrap}
+.job .meta{font:11px var(--mono);color:var(--faint);margin-top:4px}
+.st{font:700 10px var(--mono);padding:3px 8px;border-radius:999px;border:1px solid var(--line2);color:var(--dim);flex:none;letter-spacing:.05em}
+.st.running{color:var(--amber);border-color:rgba(255,179,71,.5);animation:b 1.4s infinite}.st.done{color:var(--green);border-color:rgba(93,255,176,.4)}
+.st.failed{color:var(--red);border-color:rgba(255,79,123,.45)}.st.waiting{color:var(--violet);border-color:rgba(197,139,255,.45)}.st.local{color:var(--amber)}
+#log{flex:1;overflow-y:auto;padding:10px 14px 14px;display:flex;flex-direction:column;gap:12px;-webkit-overflow-scrolling:touch}
+.m{max-width:88%;padding:10px 13px;border-radius:16px;font-size:16px;line-height:1.45;animation:rise .3s;user-select:text;word-wrap:break-word}
+.m.u{align-self:flex-end;background:rgba(130,160,190,.17);border-bottom-right-radius:5px}
+.m.a{align-self:flex-start;background:linear-gradient(135deg,rgba(var(--ar),.17),rgba(var(--ar),.05));border:1px solid var(--line);border-bottom-left-radius:5px}
+.m.s{align-self:center;color:var(--amber);font-size:13px;background:none;text-align:center;padding:2px}
+.m small{display:block;font:10px var(--mono);color:var(--dim);margin-top:6px}
 .m pre{font:12px var(--mono);background:rgba(0,0,0,.4);padding:8px;border-radius:8px;overflow-x:auto;margin:6px 0;white-space:pre}
 .typing span{display:inline-block;width:7px;height:7px;margin-right:4px;background:var(--a);border-radius:50%;animation:b 1s infinite}
 .typing span:nth-child(2){animation-delay:.15s}.typing span:nth-child(3){animation-delay:.3s}
-footer{display:flex;gap:10px;padding:10px 12px 14px;border-top:1px solid var(--line);background:rgba(3,8,14,.9)}
-#in{flex:1;background:rgba(0,0,0,.35);border:1px solid var(--line2);border-radius:24px;color:var(--text);font:500 17px var(--ui);padding:0 16px;height:48px;outline:0}
-#in:focus{border-color:var(--a)}
-.rb{width:48px;height:48px;border-radius:50%;border:1px solid var(--line2);background:rgba(var(--ar),.12);color:var(--a2);font-size:19px;flex:none;display:grid;place-items:center}
-.rb.rec{background:rgba(255,79,123,.3);border-color:var(--red);color:#fff;animation:mp 1.2s infinite}
+.compose{display:flex;gap:8px;padding:8px 12px 10px;border-top:1px solid var(--line);background:rgba(3,8,14,.9);align-items:flex-end}
+.inp{width:100%;background:rgba(0,0,0,.35);border:1px solid var(--line2);border-radius:12px;color:var(--text);font:500 16px var(--ui);padding:11px 13px;outline:0}
+.inp:focus{border-color:var(--a)}
+#in{border-radius:24px;padding:12px 16px;resize:none;max-height:120px;line-height:1.3;font-size:17px}
+.rb{width:48px;height:48px;border-radius:50%;border:1px solid var(--line2);background:rgba(var(--ar),.13);color:var(--a2);flex:none;display:grid;place-items:center}
 .rb svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.8}
-.veil{position:fixed;inset:0;background:rgba(2,5,10,.92);display:none;align-items:flex-end;z-index:9}
-.veil.show{display:flex}
-.sheet{width:100%;background:#071321;border-top:1px solid var(--line2);border-radius:18px 18px 0 0;padding:20px 18px calc(22px + env(safe-area-inset-bottom));max-height:90%;overflow:auto}
-.sheet h2{font-size:14px;letter-spacing:.32em;color:var(--a2);margin-bottom:14px}
-.sheet h3{font-size:11px;letter-spacing:.26em;color:var(--dim);margin:16px 0 8px}
+.rb.rec{background:rgba(255,79,123,.32);border-color:var(--red);color:#fff;animation:mp 1.2s infinite}
+.bgtoggle{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--dim);padding:6px 16px 0}
+.bgtoggle input{accent-color:var(--a)}
+.btn{width:100%;height:46px;border:1px solid var(--line2);border-radius:12px;background:rgba(var(--ar),.15);color:var(--a2);font:700 13px var(--ui);letter-spacing:.22em;margin-top:10px}
+.btn.ghost{background:none;color:var(--dim)} .btn.sm{height:36px;width:auto;padding:0 14px;margin:0;font-size:11px;letter-spacing:.16em}
+.screen{width:100%;border-radius:12px;border:1px solid var(--line2);display:block;background:#000;min-height:120px}
+.ctrls{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.veil{position:fixed;inset:0;background:rgba(2,5,10,.9);display:none;align-items:flex-end;z-index:9}
+.veil.show{display:flex;animation:fade .2s}
+.sheet{width:100%;background:#071321;border-top:1px solid var(--line2);border-radius:20px 20px 0 0;padding:20px 18px calc(22px + env(safe-area-inset-bottom));max-height:92%;overflow:auto}
+.sheet h2{font:800 13px var(--disp);letter-spacing:.32em;color:var(--a2);margin-bottom:12px}
+.sheet h4{font-size:11px;letter-spacing:.26em;color:var(--dim);margin:16px 0 6px}
 .sheet label{display:block;font-size:11px;letter-spacing:.2em;color:var(--dim);margin:10px 0 5px}
-.sheet input{width:100%;background:rgba(0,0,0,.35);border:1px solid var(--line2);border-radius:10px;color:var(--text);font:15px var(--mono);padding:11px 12px;outline:0}
 .sheet p{font-size:14px;line-height:1.5;color:var(--dim)}
-.btn{width:100%;height:48px;margin-top:14px;border:1px solid var(--line2);border-radius:12px;background:rgba(var(--ar),.15);color:var(--a2);font:700 13px var(--ui);letter-spacing:.24em}
-.btn.ghost{background:none;color:var(--dim)}
-.ev{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:15px}
-.ev span{font:12px var(--mono);color:var(--a2);width:56px;flex:none;padding-top:2px}
-@keyframes spin{to{transform:rotate(360deg)}}@keyframes pulse{50%{transform:scale(1.12)}}
-@keyframes rise{from{opacity:0;transform:translateY(6px)}}@keyframes b{50%{opacity:.25}}
+.toast{position:fixed;left:16px;right:16px;top:calc(env(safe-area-inset-top) + 12px);background:rgba(6,18,30,.97);border:1px solid var(--line2);border-left:3px solid var(--a);border-radius:12px;padding:12px 14px;font-size:14.5px;z-index:20;animation:drop .3s;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+@keyframes spin{to{transform:rotate(360deg)}}@keyframes pulse{50%{transform:scale(1.12)}}@keyframes fade{from{opacity:0}}
+@keyframes rise{from{opacity:0;transform:translateY(6px)}}@keyframes b{50%{opacity:.3}}@keyframes drop{from{opacity:0;transform:translateY(-14px)}}
 @keyframes mp{50%{box-shadow:0 0 0 10px rgba(255,79,123,.15)}}
 </style>
 </head>
@@ -76,143 +108,297 @@ footer{display:flex;gap:10px;padding:10px 12px 14px;border-top:1px solid var(--l
     <div><h1 id="name">ORION</h1><div class="sub"><span class="dot" id="dot"></span><span id="conn">connecting…</span></div></div>
     <button class="hb" id="setBtn">⚙</button>
   </header>
-  <div class="chips" id="chips">
-    <button class="chip" data-q="check my messages">✉ DMs</button>
-    <button class="chip" id="afkChip" data-act="afk">AFK</button>
-    <button class="chip" id="gameChip" data-act="gaming">🎮 GAMING</button>
-    <button class="chip" data-act="schedule">📅 TODAY</button>
-    <button class="chip" data-q="system status">PC STATUS</button>
-    <button class="chip" data-act="lock">🔒 LOCK PC</button>
-    <button class="chip warn" data-act="stop">■ STOP</button>
+
+  <div class="views">
+    <!-- HOME -->
+    <section class="view on" id="v-home">
+      <div class="hello" id="hello">Good day.<small id="helloSub">—</small></div>
+      <div class="card" id="pcCard"><h3>GAMING PC <i id="pcVer"></i></h3>
+        <div class="stats"><div class="stat"><b id="sCpu">–</b><span>CPU</span><div class="bar"><div id="bCpu" style="width:0"></div></div></div>
+          <div class="stat"><b id="sRam">–</b><span>RAM</span><div class="bar"><div id="bRam" style="width:0"></div></div></div>
+          <div class="stat"><b id="sJobs">–</b><span>JOBS</span><div class="bar"><div id="bJobs" style="width:0"></div></div></div></div>
+        <p class="empty" id="pcLine" style="margin-top:10px;font-size:13.5px"></p>
+      </div>
+      <div class="card"><h3>QUICK</h3>
+        <div class="grid">
+          <button class="qa" data-q="check my messages"><em>✉️</em>DMs</button>
+          <button class="qa" id="qaAfk" data-act="afk"><em>💤</em>AFK</button>
+          <button class="qa" id="qaGame" data-act="gaming"><em>🎮</em>Gaming</button>
+          <button class="qa" data-act="report"><em>🌅</em>Report</button>
+          <button class="qa" data-tab="pc"><em>🖥️</em>Screen</button>
+          <button class="qa" data-act="lock"><em>🔒</em>Lock</button>
+          <button class="qa" data-act="play"><em>⏯️</em>Media</button>
+          <button class="qa warn" data-act="stop"><em>■</em>Stop</button>
+        </div>
+      </div>
+      <div class="card"><h3>NEXT UP <button class="btn sm ghost" data-tab="sched" style="border:0;padding:0">ALL ›</button></h3><div id="homeSched"><p class="empty">—</p></div></div>
+      <div class="card"><h3>RECENT JOBS <button class="btn sm ghost" data-tab="jobs" style="border:0;padding:0">ALL ›</button></h3><div id="homeJobs"><p class="empty">—</p></div></div>
+    </section>
+
+    <!-- CHAT -->
+    <section class="view" id="v-chat">
+      <div id="log"></div>
+      <label class="bgtoggle"><input type="checkbox" id="bgMode"> Run as background job (notify me when done)</label>
+      <div class="compose">
+        <button class="rb" id="mic"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>
+        <textarea class="inp" id="in" rows="1" placeholder="Talk to ORION…"></textarea>
+        <button class="rb" id="go"><svg viewBox="0 0 24 24"><path d="M4 12h15M13 6l6 6-6 6"/></svg></button>
+      </div>
+    </section>
+
+    <!-- JOBS -->
+    <section class="view" id="v-jobs">
+      <div class="card"><h3>NEW JOB</h3>
+        <textarea class="inp" id="jobIn" rows="3" placeholder="e.g. make 3 Shorts from my latest stream · build a tool that… · research…"></textarea>
+        <div class="two" style="margin-top:8px"><label style="display:flex;gap:8px;align-items:center;font-size:13.5px;color:var(--dim)"><input type="checkbox" id="jobHeavy" style="accent-color:var(--a)"> Wait till I'm away</label>
+          <button class="btn sm" id="jobGo">QUEUE ON PC</button></div>
+      </div>
+      <div class="card"><h3>JOBS <button class="btn sm ghost" id="jobsClear" style="border:0;padding:0">CLEAR DONE</button></h3><div id="jobList"><p class="empty">No jobs yet.</p></div></div>
+      <div class="card"><h3>NIGHT SHIFT</h3><div id="routList"><p class="empty">Connect to your PC to see routines.</p></div></div>
+    </section>
+
+    <!-- SCHEDULE -->
+    <section class="view" id="v-sched">
+      <div class="card"><h3>ADD</h3>
+        <input class="inp" id="evT" placeholder="e.g. Gaming with Sam">
+        <div class="two" style="margin-top:8px"><input class="inp" type="date" id="evD"><input class="inp" type="time" id="evH" value="19:00"></div>
+        <button class="btn" id="evGo">+ ADD</button>
+      </div>
+      <div class="card"><h3>NEXT 14 DAYS</h3><div id="schedList"><p class="empty">Connect to your PC to see your schedule.</p></div></div>
+    </section>
+
+    <!-- PC -->
+    <section class="view" id="v-pc">
+      <div class="card"><h3>LIVE SCREEN <span><label style="font-size:11px;letter-spacing:.1em;display:inline-flex;gap:5px;align-items:center"><input type="checkbox" id="live" style="accent-color:var(--a)"> LIVE</label></span></h3>
+        <img class="screen" id="screen" alt="">
+        <button class="btn" id="snap">↻ REFRESH</button>
+      </div>
+      <div class="card"><h3>CONTROL</h3>
+        <div class="ctrls">
+          <button class="qa" data-act="vol_down"><em>🔉</em>Vol −</button><button class="qa" data-act="vol_up"><em>🔊</em>Vol +</button>
+          <button class="qa" data-act="mute"><em>🔇</em>Mute</button><button class="qa" data-act="play"><em>⏯️</em>Play</button>
+          <button class="qa" data-act="prev"><em>⏮️</em>Prev</button><button class="qa" data-act="next"><em>⏭️</em>Next</button>
+          <button class="qa" data-act="screenshot"><em>📸</em>Snap</button><button class="qa" data-act="lock"><em>🔒</em>Lock</button>
+        </div>
+        <div class="two" style="margin-top:10px;grid-template-columns:2fr 1fr"><input class="inp" id="openIn" placeholder="Open app… e.g. spotify"><button class="btn sm" id="openGo">OPEN</button></div>
+        <div class="ctrls" style="margin-top:10px">
+          <button class="qa" data-confirm="sleep" data-act="sleep"><em>🌙</em>Sleep</button><button class="qa" data-confirm="restart" data-act="restart"><em>🔁</em>Restart</button>
+          <button class="qa warn" data-confirm="shut down" data-act="shutdown"><em>⏻</em>Off</button><button class="qa" data-act="stop"><em>■</em>Stop</button>
+        </div>
+      </div>
+    </section>
   </div>
-  <div class="state" id="state"></div>
-  <div id="log"></div>
-  <footer>
-    <button class="rb" id="mic"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>
-    <input id="in" placeholder="Talk to ORION…" autocomplete="off">
-    <button class="rb" id="go"><svg viewBox="0 0 24 24"><path d="M4 12h15M13 6l6 6-6 6"/></svg></button>
-  </footer>
+
+  <nav class="tabs" id="tabs">
+    <button class="on" data-tab="home"><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>HOME</button>
+    <button data-tab="chat"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></svg>CHAT</button>
+    <button data-tab="jobs"><svg viewBox="0 0 24 24"><path d="M4 7h16v12H4zM9 7V4h6v3"/></svg>JOBS<span class="n" id="nJobs"></span></button>
+    <button data-tab="sched"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg>PLAN</button>
+    <button data-tab="pc"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M8 20h8M12 16v4"/></svg>PC</button>
+  </nav>
 </div>
 
 <div class="veil" id="vSet"><div class="sheet">
   <h2>CONNECTION</h2>
-  <p>Connect to ORION on your PC (open ORION → Devices on the PC to see the address and PIN). When the PC is off, ORION still answers here using its own cloud brain.</p>
-  <label>PC ADDRESS</label><input id="sAddr" placeholder="http://100.x.x.x:7777" inputmode="url">
-  <label>PIN</label><input id="sPin" inputmode="numeric" placeholder="6 digits">
-  <h3>WHEN THE PC IS OFF</h3>
-  <label>GROQ KEY (free — console.groq.com/keys)</label><input id="sKey" type="password" placeholder="gsk_…">
-  <label>WHAT ORION CALLS YOU</label><input id="sTitle" placeholder="sir">
+  <p>On your PC: ORION → Devices → Phone &amp; Laptop Access. Copy the 100.x.x.x address and PIN here. When the PC is off, ORION still chats using its own brain and queues PC jobs.</p>
+  <label>PC ADDRESS</label><input class="inp" id="sAddr" placeholder="http://100.x.x.x:7777" inputmode="url">
+  <label>PIN</label><input class="inp" id="sPin" inputmode="numeric" placeholder="6 digits">
+  <h4>WHEN THE PC IS OFF</h4>
+  <label>GROQ KEY (free — console.groq.com/keys)</label><input class="inp" id="sKey" type="password" placeholder="gsk_…">
+  <label>WHAT ORION CALLS YOU</label><input class="inp" id="sTitle" placeholder="sir">
+  <h4>APP</h4>
+  <label style="display:flex;gap:10px;align-items:center;letter-spacing:0;font-size:15px;color:var(--text)"><input type="checkbox" id="sMute" style="accent-color:var(--a)"> Mute spoken replies</label>
   <button class="btn" id="sSave">SAVE &amp; CONNECT</button>
   <button class="btn ghost" id="sClose">CLOSE</button>
 </div></div>
 
-<div class="veil" id="vSched"><div class="sheet">
-  <h2>TODAY</h2><div id="schedList"></div>
-  <button class="btn ghost" id="schedClose">CLOSE</button>
-</div></div>
-
 <script>
-const $=s=>document.querySelector(s);
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const store={get:(k,d="")=>{try{return localStorage.getItem("orion_"+k)??d}catch(e){return d}},set:(k,v)=>{try{localStorage.setItem("orion_"+k,v)}catch(e){}}};
-let pcOnline=false, state={}, busy=false, history=[];
-const sameOrigin = location.protocol.startsWith("http") && !location.hostname.match(/^(localhost)$/) && location.port;
-if(sameOrigin && !store.get("addr")) store.set("addr", location.origin);
-const addr=()=>store.get("addr").replace(/\/$/,""), pin=()=>store.get("pin");
+const J=(k,d)=>{ try{ return JSON.parse(store.get(k,"")) ?? d; }catch(e){ return d; } }, SJ=(k,v)=>store.set(k,JSON.stringify(v));
+let pcOnline=false, state={}, history=J("hist",[]), screenTimer=null;
+const sameOrigin=location.protocol.startsWith("http") && location.port && location.hostname!=="localhost";
+if(sameOrigin && !store.get("addr")) store.set("addr",location.origin);
+const addr=()=>store.get("addr").replace(/\/$/,""), pin=()=>store.get("pin"), title=()=>store.get("title","sir");
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const ago=t=>{ if(!t) return ""; const s=Date.now()/1000-t; return s<60?"just now":s<3600?Math.floor(s/60)+"m ago":s<86400?Math.floor(s/3600)+"h ago":Math.floor(s/86400)+"d ago"; };
+function render(t){ return String(t).split("```").map((p,i)=>i%2?`<pre>${esc(p.replace(/^\w*\n/,""))}</pre>`:esc(p).replace(/\*\*([^*]+)\*\*/g,"<b>$1</b>").replace(/(^|\s)\*([^*\n]+)\*(?=\s|[.,!?]|$)/g,"$1<i>$2</i>").replace(/\n/g,"<br>")).join(""); }
+function toast(t){ const d=document.createElement("div"); d.className="toast"; d.textContent=t; document.body.appendChild(d); setTimeout(()=>d.remove(),3800); }
+const Cap=window.Capacitor, Plug=(Cap&&Cap.Plugins)||{};
 
-function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
-function render(t){ return String(t).split("```").map((p,i)=>i%2?`<pre>${esc(p.replace(/^\w*\n/,""))}</pre>`:esc(p).replace(/\*\*([^*]+)\*\*/g,"<b>$1</b>").replace(/\n/g,"<br>")).join(""); }
-function add(role,text,meta){ const d=document.createElement("div"); d.className="m "+role; d.innerHTML=render(text)+(meta?`<small>${esc(meta)}</small>`:""); $("#log").appendChild(d); $("#log").scrollTop=1e9; return d; }
-function typing(){ const d=add("a",""); d.innerHTML='<span class="typing"><span></span><span></span><span></span></span>'; return d; }
+/* ---------- native notifications (inside the APK) ---------- */
+let nid=1; async function notify(title,body){ try{ if(Plug.LocalNotifications){ await Plug.LocalNotifications.schedule({notifications:[{id:nid++,title,body:String(body).slice(0,300)}]}); return; } }catch(e){}
+  if(document.hidden && "Notification" in window && Notification.permission==="granted") new Notification(title,{body:String(body).slice(0,300)}); }
+(async()=>{ try{ if(Plug.LocalNotifications) await Plug.LocalNotifications.requestPermissions(); else if("Notification" in window && Notification.permission==="default") Notification.requestPermission(); }catch(e){} })();
 
-async function api(path,body,timeout=150000){
+/* ---------- network ---------- */
+async function api(path,body,timeout=20000){
   const ctl=new AbortController(); const t=setTimeout(()=>ctl.abort(),timeout);
   try{ const r=await fetch(addr()+path,{method:body===undefined?"GET":"POST",signal:ctl.signal,
       headers:{"X-PIN":pin(),"Content-Type":body instanceof Blob?"application/octet-stream":"application/json"},
       body:body===undefined?undefined:(body instanceof Blob?body:JSON.stringify(body))});
-    if(r.status===401) throw new Error("Wrong PIN — check ⚙ settings."); return await r.json(); }
-  finally{ clearTimeout(t); }
-}
+    if(r.status===401) throw new Error("Wrong PIN — check ⚙ settings."); if(r.status===429) throw new Error("Locked out after wrong PINs — wait 10 min.");
+    return await r.json(); } finally{ clearTimeout(t); } }
 
 async function refresh(){
-  if(!addr()){ setConn(false); return; }
-  try{ state=await api("/api/state",undefined,6000); setConn(true); paint(); flushQueue(); }
-  catch(e){ setConn(false); }
+  if(!addr()){ setConn(false); paintHome(); return; }
+  try{ state=await api("/api/state",undefined,6000); setConn(true); paintHome(); flushQueue(); pollPending(); if($("#v-jobs").classList.contains("on")) loadJobs(); }
+  catch(e){ setConn(false); paintHome(); }
 }
-function setConn(on){ pcOnline=on; $("#dot").className="dot "+(on?"ok":"solo");
-  $("#conn").textContent=on?`PC online · ${state.brain||""}`.toLowerCase():(addr()?"PC offline · solo brain":"solo brain — tap ⚙ to link your PC"); }
-function paint(){ document.body.dataset.theme=state.theme||"standby"; $("#name").textContent=(state.name||"ORION").toUpperCase();
-  $("#afkChip").classList.toggle("on",!!state.afk); $("#afkChip").textContent=state.afk?"AFK ON":"AFK";
-  $("#gameChip").classList.toggle("on",!!state.gaming);
-  const bits=[]; if(state.busy_now) bits.push(`<b>Busy:</b> ${esc(state.busy_now)}`); if(state.gaming) bits.push(`<b>Gaming:</b> ${esc(state.game||"on")}`);
-  if(state.afk) bits.push(`<b>AFK</b> — ORION is answering your Root DMs`); if(state.next) bits.push(`<b>Next:</b> ${esc(state.next)}`);
-  $("#state").innerHTML=bits.join(" · "); $("#state").style.display=bits.length?"block":"none"; }
+function setConn(on){ const was=pcOnline; pcOnline=on; $("#dot").className="dot "+(on?"ok":"solo");
+  $("#conn").textContent=on?`PC online${state.job_running?" · working":""}`:(addr()?"PC offline · solo brain":"tap ⚙ to link your PC");
+  if(on&&!was&&addr()) toast("Connected to your PC."); }
 
-/* ---------- talking ---------- */
+/* ---------- home ---------- */
+function paintHome(){
+  const h=new Date().getHours(); const g=h<12?"Good morning":h<18?"Good afternoon":"Good evening";
+  $("#hello").innerHTML=`${g}, ${esc(title())}.<small id="helloSub">${pcOnline?(state.job_running?`Working on: ${esc(state.job_running)}`:(state.busy_now?`Busy: ${esc(state.busy_now)}`:"All systems online.")):"Your PC is offline — chat still works."}</small>`;
+  document.body.dataset.theme=state.theme||document.body.dataset.theme; $("#name").textContent=(state.name||"ORION").toUpperCase();
+  const s=state.stats||{}; $("#pcVer").textContent=state.version?"v"+state.version:"";
+  $("#sCpu").textContent=pcOnline&&s.cpu!=null?Math.round(s.cpu)+"%":"–"; $("#bCpu").style.width=(s.cpu||0)+"%";
+  $("#sRam").textContent=pcOnline&&s.ram!=null?Math.round(s.ram)+"%":"–"; $("#bRam").style.width=(s.ram||0)+"%";
+  const local=J("queue",[]).length; const jn=(state.jobs_active||0)+local; $("#sJobs").textContent=pcOnline||local?jn:"–"; $("#bJobs").style.width=Math.min(100,jn*25)+"%";
+  $("#nJobs").textContent=jn; $("#nJobs").classList.toggle("show",jn>0);
+  $("#pcLine").textContent=pcOnline?[state.gaming?`🎮 Gaming: ${state.game||"on"}`:"",state.afk?"💤 AFK — answering your DMs":"",state.root_unread?`✉ ${state.root_unread} DM(s) recently`:""].filter(Boolean).join(" · "):(local?`${local} job(s) waiting for your PC to come online.`:"");
+  $("#qaAfk").classList.toggle("on",!!state.afk); $("#qaGame").classList.toggle("on",!!state.gaming);
+  const today=state.today||[]; $("#homeSched").innerHTML=today.length?today.slice(0,4).map(e=>`<div class="row"><span class="t">${esc(e.time)}</span>${esc(e.title)}</div>`).join(""):`<p class="empty">${pcOnline?(state.next?`Nothing today. Next: ${esc(state.next)}`:"Nothing planned."):"—"}</p>`;
+  renderJobs($("#homeJobs"),(window._jobs||[]).slice(0,3),true);
+}
+
+/* ---------- chat (survives leaving the app: replies come from background jobs) ---------- */
+function add(role,text,meta,save=true){ const d=document.createElement("div"); d.className="m "+role; d.innerHTML=render(text)+(meta?`<small>${esc(meta)}</small>`:""); $("#log").appendChild(d); $("#log").scrollTop=1e9;
+  if(save){ const c=J("chatlog",[]); c.push([role,text,meta||""]); SJ("chatlog",c.slice(-80)); } return d; }
+function typing(id){ const d=add("a","",null,false); d.innerHTML='<span class="typing"><span></span><span></span><span></span></span>'; if(id) d.dataset.job=id; return d; }
+J("chatlog",[]).forEach(([r,t,m])=>add(r,t,m,false));
+
 async function send(text){
-  text=text.trim(); if(!text||busy) return; $("#in").value=""; add("u",text); busy=true; document.body.classList.add("busy"); const t=typing();
-  try{
-    if(pcOnline){ const r=await api("/api/send",{text}); t.remove(); add("a",r.reply,r.tier?`${r.tier}${r.model?" · "+r.model:""}`:""); speak(r.reply); }
-    else { const r=await solo(text); t.remove(); add("a",r,"solo · phone brain"); speak(r); }
-  }catch(e){ t.remove(); add("s",e.message||"Couldn't reach ORION."); }
-  busy=false; document.body.classList.remove("busy"); refresh();
+  text=(text||"").trim(); if(!text) return; $("#in").value=""; autoGrow(); add("u",text);
+  if(pcOnline){
+    try{ const j=await api("/api/jobs",{text,autopilot:$("#bgMode").checked,heavy:false});
+      const p=J("pending",[]); p.push({id:j.id,text,chat:true}); SJ("pending",p);
+      if($("#bgMode").checked){ add("s",`Queued as a job — I'll notify you when it's done.`); } else { typing(j.id); document.body.classList.add("busy"); }
+      pollPending(); }
+    catch(e){ add("s",e.message||"Couldn't reach your PC."); }
+  } else {
+    if(PC_WORDS.test(text) && addr()){ const q=J("queue",[]); q.push(text); SJ("queue",q); add("a",`Your PC is offline, ${title()}. I've queued that and will send it the moment it's back.`,"queued on phone"); paintHome(); return; }
+    document.body.classList.add("busy"); const t=typing();
+    try{ const r=await solo(text); t.remove(); add("a",r,"phone brain"); speak(r); } catch(e){ t.remove(); add("s",e.message); }
+    document.body.classList.remove("busy");
+  }
 }
+let polling=false;
+async function pollPending(){
+  if(polling||!pcOnline) return; polling=true;
+  try{ while(true){ let p=J("pending",[]); if(!p.length) break;
+      for(const it of p){ let j; try{ j=await api("/api/jobs/"+it.id,undefined,8000); }catch(e){ polling=false; return; }
+        if(["done","failed","cancelled"].includes(j.status)){
+          p=J("pending",[]).filter(x=>x.id!==it.id); SJ("pending",p);
+          $$(`[data-job="${it.id}"]`).forEach(e=>e.remove());
+          const txt=j.status==="done"?j.result:(j.status==="failed"?"⚠️ "+j.result:"Stopped.");
+          if(it.chat) add("a",txt,`${j.tier||"pc"} · ${j.status}`);
+          if(document.hidden||!$("#v-chat").classList.contains("on")) notify(it.chat?"ORION replied":"ORION job finished",txt);
+          if(it.chat && !document.hidden) speak(txt);
+        } else { const t=$(`[data-job="${it.id}"]`); if(t && j.note && j.status!=="queued") t.innerHTML=`<span class="typing"><span></span><span></span><span></span></span> <small style="display:inline;color:var(--dim);font-size:12px">${esc(j.note)}</small>`; } }
+      if(!J("pending",[]).length) break; await new Promise(r=>setTimeout(r,2500)); } }
+  finally{ polling=false; document.body.classList.toggle("busy",J("pending",[]).length>0); }
+}
+// re-attach "typing" bubbles for chat jobs still running after the app was closed
+J("pending",[]).filter(x=>x.chat).forEach(x=>typing(x.id));
 
-/* solo brain: works when the PC is off (chat only; PC jobs are queued) */
-const PC_WORDS=/\b(open|close|launch|lock|shut ?down|restart|volume|pause|play|skip|screenshot|type|click|file|folder|desktop|root|dm|message|afk|gaming|render|video|code|build|autopilot)\b/i;
+const PC_WORDS=/\b(open|close|launch|lock|shut ?down|restart|volume|pause|play|skip|screenshot|type|click|file|folder|desktop|root|dm|message|afk|gaming|render|video|shorts|code|build|autopilot|queue)\b/i;
 async function solo(text){
-  const key=store.get("key"); const title=store.get("title","sir");
-  if(PC_WORDS.test(text) && addr()){ const q=JSON.parse(store.get("queue","[]")); q.push(text); store.set("queue",JSON.stringify(q));
-    return `Your PC is offline, ${title}. I've queued that and will run it the moment it's back.`; }
-  if(!key) return "I'm in solo mode but have no brain key yet — tap ⚙ and add a free Groq key.";
-  history.push({role:"user",content:text}); history=history.slice(-12);
+  const key=store.get("key"); if(!key) return "I'm in solo mode without a brain key — tap ⚙ and add a free Groq key.";
+  history.push({role:"user",content:text}); history=history.slice(-14);
   const r=await fetch("https://api.groq.com/openai/v1/chat/completions",{method:"POST",headers:{"Authorization":"Bearer "+key,"Content-Type":"application/json"},
-    body:JSON.stringify({model:"openai/gpt-oss-20b",temperature:.5,messages:[{role:"system",content:`You are ORION, a calm, witty British AI butler on ${title}'s phone. Address them as "${title}". Keep replies short. Their PC is offline, so you can't control it right now. Today is ${new Date().toDateString()}.`},...history]})});
-  if(!r.ok) throw new Error("Groq error "+r.status); const j=await r.json(); const out=j.choices[0].message.content||"…";
-  history.push({role:"assistant",content:out}); return out;
-}
-async function flushQueue(){ const q=JSON.parse(store.get("queue","[]")); if(!q.length||busy) return; store.set("queue","[]");
-  add("s",`PC is back — running ${q.length} queued job${q.length>1?"s":""}.`); for(const t of q) await send(t); }
+    body:JSON.stringify({model:"openai/gpt-oss-20b",temperature:.5,messages:[{role:"system",content:`You are ORION, a calm, witty British AI butler on ${title()}'s phone. Address them as "${title()}". Keep replies short. Their PC is offline so you can't control it right now. Today is ${new Date().toDateString()}.`},...history]})});
+  if(!r.ok) throw new Error(r.status===429?"Free allowance used up — try again soon.":"Brain error "+r.status);
+  const out=(await r.json()).choices[0].message.content||"…"; history.push({role:"assistant",content:out}); SJ("hist",history.slice(-14)); return out; }
+async function flushQueue(){ const q=J("queue",[]); if(!q.length) return; SJ("queue",[]);
+  for(const t of q){ try{ const j=await api("/api/jobs",{text:t,autopilot:true}); const p=J("pending",[]); p.push({id:j.id,text:t,chat:false}); SJ("pending",p); }catch(e){ const r=J("queue",[]); r.push(t); SJ("queue",r); } }
+  toast(`PC is back — sent ${q.length} queued job${q.length>1?"s":""}.`); notify("ORION",`Your PC is back online. Sent ${q.length} queued job(s).`); }
 
 /* voice */
-let voices=[]; const loadV=()=>voices=speechSynthesis.getVoices(); try{ loadV(); speechSynthesis.onvoiceschanged=loadV; }catch(e){}
+let voices=[]; const loadV=()=>{ try{ voices=speechSynthesis.getVoices(); }catch(e){} }; loadV(); try{ speechSynthesis.onvoiceschanged=loadV; }catch(e){}
 function speak(t){ try{ if(store.get("mute")==="1") return; const u=new SpeechSynthesisUtterance(String(t).replace(/```[\s\S]*?```/g," code on screen ").replace(/[*_#`]/g,"").slice(0,600));
-  u.voice=voices.find(v=>/en-GB/i.test(v.lang)&&/female|sonia|libby|google uk english female/i.test(v.name))||voices.find(v=>/en-GB/i.test(v.lang))||null; u.rate=1.02; speechSynthesis.cancel(); speechSynthesis.speak(u);}catch(e){} }
-
-let rec=null, chunks=[];
-$("#mic").onclick=async()=>{
-  if(rec){ rec.stop(); return; }
-  try{ const s=await navigator.mediaDevices.getUserMedia({audio:true}); chunks=[]; rec=new MediaRecorder(s);
-    rec.ondataavailable=e=>chunks.push(e.data);
+  u.voice=voices.find(v=>/en-GB/i.test(v.lang)&&/female|sonia|libby|google uk english female/i.test(v.name))||voices.find(v=>/en-GB/i.test(v.lang))||null; u.rate=1.02; speechSynthesis.cancel(); speechSynthesis.speak(u); }catch(e){} }
+let rec=null,chunks=[];
+$("#mic").onclick=async()=>{ if(rec){ rec.stop(); return; }
+  try{ const s=await navigator.mediaDevices.getUserMedia({audio:true}); chunks=[]; rec=new MediaRecorder(s); rec.ondataavailable=e=>chunks.push(e.data);
     rec.onstop=async()=>{ s.getTracks().forEach(t=>t.stop()); $("#mic").classList.remove("rec"); const blob=new Blob(chunks,{type:rec.mimeType}); rec=null;
-      try{ let text=""; if(pcOnline){ text=(await api("/api/transcribe",blob)).text; }
+      try{ let text=""; if(pcOnline) text=(await api("/api/transcribe",blob,40000)).text;
         else if(store.get("key")){ const fd=new FormData(); fd.append("file",blob,"speech.webm"); fd.append("model","whisper-large-v3-turbo");
           const r=await fetch("https://api.groq.com/openai/v1/audio/transcriptions",{method:"POST",headers:{"Authorization":"Bearer "+store.get("key")},body:fd}); text=(await r.json()).text||""; }
-        if(text) send(text); }catch(e){ add("s","Couldn't hear that."); } };
-    rec.start(); $("#mic").classList.add("rec"); }catch(e){ add("s","Microphone blocked — allow mic access for this app."); }
-};
+        if(text) send(text); else add("s","Didn't catch that."); }catch(e){ add("s","Couldn't hear that."); } };
+    rec.start(); $("#mic").classList.add("rec"); }catch(e){ add("s","Microphone blocked — allow mic access for ORION in Android settings."); } };
+function autoGrow(){ const t=$("#in"); t.style.height="auto"; t.style.height=Math.min(120,t.scrollHeight)+"px"; }
+$("#in").addEventListener("input",autoGrow);
+$("#in").addEventListener("keydown",e=>{ if(e.key==="Enter"&&!e.shiftKey){ e.preventDefault(); send($("#in").value); } });
 $("#go").onclick=()=>send($("#in").value);
-$("#in").addEventListener("keydown",e=>{ if(e.key==="Enter") send($("#in").value); });
 
-/* quick actions */
-document.querySelectorAll(".chip").forEach(c=>c.onclick=async()=>{
-  if(c.dataset.q) return send(c.dataset.q);
-  const a=c.dataset.act;
-  if(a==="schedule"){ const items=state.today||[]; $("#schedList").innerHTML=items.length?items.map(e=>`<div class="ev"><span>${esc(e.time)}</span><div>${esc(e.title)}</div></div>`).join(""):"<p>Nothing scheduled today.</p>"; $("#vSched").classList.add("show"); return; }
-  if(!pcOnline){ add("s","That needs your PC online."); return; }
-  try{ const r=await api("/api/action",{action:a}); if(r.result) add("a",r.result); }catch(e){ add("s",e.message); } refresh();
-});
-$("#schedClose").onclick=()=>$("#vSched").classList.remove("show");
+/* ---------- jobs ---------- */
+function renderJobs(el,js,mini){
+  const local=J("queue",[]).map(t=>({id:"",title:t,status:"local",note:"waiting for your PC",created:0}));
+  const all=mini?js:[...local,...js];
+  el.innerHTML=all.length?all.map(j=>`<div class="job"><div class="top"><span class="st ${j.status}">${j.status==="local"?"ON PHONE":j.status.toUpperCase()}</span><b>${esc(j.title)}</b>
+    ${!mini&&["queued","running","waiting"].includes(j.status)?`<button class="btn sm ghost" data-cj="${j.id}" style="border:0;padding:0 4px">✕</button>`:""}</div>
+    ${!mini||j.status!=="done"?`<p>${esc(["running","waiting","local"].includes(j.status)?j.note:(j.result||"").slice(0,mini?120:900))}</p>`:`<p>${esc((j.result||"").slice(0,120))}</p>`}
+    ${mini?"":`<div class="meta">${{phone:"📱 phone",routine:"⏰ routine",voice:"🗂 queued",pc:"🖥 PC"}[j.source]||""} · ${ago(j.finished||j.started||j.created)}</div>`}</div>`).join("")
+    :`<p class="empty">${pcOnline?"No jobs yet.":"Connect to your PC to see jobs."}</p>`;
+  $$("[data-cj]").forEach(b=>b.onclick=async()=>{ try{ await api(`/api/jobs/${b.dataset.cj}/cancel`,{}); toast("Cancelling…"); loadJobs(); }catch(e){ toast(e.message); } });
+}
+async function loadJobs(){ if(!pcOnline){ renderJobs($("#jobList"),[]); return; }
+  try{ const r=await api("/api/jobs"); window._jobs=r.jobs; renderJobs($("#jobList"),r.jobs); paintHome(); }catch(e){}
+  try{ const r=await api("/api/routines"); $("#routList").innerHTML=r.routines.map(x=>`<div class="row"><span class="t">${esc(x.time)}</span><div style="flex:1;min-width:0"><b style="font-weight:600;${x.on?"":"opacity:.45"}">${esc(x.name)}</b>${x.result?`<div style="font:11px var(--mono);color:var(--faint);margin-top:2px">${esc(x.result)}</div>`:""}</div><button class="btn sm ghost" data-rr="${x.id}" style="border:0;padding:0 4px">▶</button></div>`).join("");
+    $$("[data-rr]").forEach(b=>b.onclick=async()=>{ await api("/api/routines",{action:"run",id:b.dataset.rr}); toast("Running on your PC."); setTimeout(loadJobs,1500); }); }catch(e){} }
+$("#jobGo").onclick=async()=>{ const t=$("#jobIn").value.trim(); if(!t) return;
+  if(!pcOnline){ const q=J("queue",[]); q.push(t); SJ("queue",q); $("#jobIn").value=""; toast("PC offline — queued on your phone."); loadJobs(); paintHome(); return; }
+  try{ const j=await api("/api/jobs",{text:t,heavy:$("#jobHeavy").checked,autopilot:true}); const p=J("pending",[]); p.push({id:j.id,text:t,chat:false}); SJ("pending",p);
+    $("#jobIn").value=""; $("#jobHeavy").checked=false; toast("Queued — you can close the app."); loadJobs(); pollPending(); }catch(e){ toast(e.message); } };
+$("#jobsClear").onclick=async()=>{ try{ await api("/api/jobs/clear",{}); loadJobs(); }catch(e){} };
 
-/* settings */
-$("#setBtn").onclick=()=>{ $("#sAddr").value=store.get("addr"); $("#sPin").value=store.get("pin"); $("#sKey").value=store.get("key"); $("#sTitle").value=store.get("title","sir"); $("#vSet").classList.add("show"); };
+/* ---------- schedule ---------- */
+async function loadSched(){ if(!pcOnline){ return; } try{ const r=await api("/api/schedule"); let h="",last="";
+  for(const e of r.items){ if(e.day!==last){ h+=`<div style="font:700 10.5px var(--ui);letter-spacing:.26em;color:var(--a);margin:12px 0 2px">${esc(e.day.toUpperCase())}</div>`; last=e.day; }
+    h+=`<div class="row"><span class="t">${esc(e.time)}</span><div style="flex:1">${esc(e.title)}${e.busy?' <span class="st waiting">BUSY</span>':""}${e.with?`<div style="font-size:12.5px;color:var(--dim)">with ${esc(e.with)}</div>`:""}</div><button class="x" data-rm="${e.id}">×</button></div>`; }
+  $("#schedList").innerHTML=h||'<p class="empty">Nothing planned.</p>';
+  $$("[data-rm]").forEach(b=>b.onclick=async()=>{ await api("/api/schedule/remove",{id:b.dataset.rm}); loadSched(); }); }catch(e){} }
+$("#evD").value=new Date().toISOString().slice(0,10);
+$("#evGo").onclick=async()=>{ const t=$("#evT").value.trim(); if(!t) return; if(!pcOnline){ toast("Needs your PC online."); return; }
+  try{ await api("/api/schedule",{title:t,date:$("#evD").value,time:$("#evH").value,duration:60}); $("#evT").value=""; toast("Added."); loadSched(); refresh(); }catch(e){ toast(e.message); } };
+
+/* ---------- PC screen + control ---------- */
+async function snap(){ if(!pcOnline){ toast("PC is offline."); return; }
+  try{ const r=await fetch(addr()+"/api/screen?"+Date.now(),{headers:{"X-PIN":pin()}}); if(!r.ok) throw 0; const b=await r.blob();
+    const old=$("#screen").src; $("#screen").src=URL.createObjectURL(b); if(old.startsWith("blob:")) URL.revokeObjectURL(old); }catch(e){ toast("Couldn't grab the screen."); } }
+$("#snap").onclick=snap;
+$("#live").onchange=()=>{ clearInterval(screenTimer); if($("#live").checked){ snap(); screenTimer=setInterval(()=>{ if(!document.hidden&&$("#v-pc").classList.contains("on")) snap(); },2500); } };
+$("#openGo").onclick=()=>act("open",$("#openIn").value.trim());
+async function act(a,v){ if(!pcOnline){ toast("That needs your PC online."); return; }
+  try{ const r=await api("/api/action",{action:a,value:v}); if(r.result) toast(String(r.result).split("\n")[0].slice(0,140)); }catch(e){ toast(e.message); } setTimeout(refresh,800); }
+document.addEventListener("click",e=>{ const b=e.target.closest("[data-act],[data-q],[data-tab]"); if(!b||b.closest("nav.tabs")) return;
+  if(b.dataset.tab){ go(b.dataset.tab); return; }
+  if(b.dataset.q){ go("chat"); send(b.dataset.q); return; }
+  if(b.dataset.confirm && !confirm(`Really ${b.dataset.confirm} your PC?`)) return;
+  act(b.dataset.act); });
+
+/* ---------- tabs ---------- */
+function go(t){ $$("nav.tabs button").forEach(b=>b.classList.toggle("on",b.dataset.tab===t)); $$(".view").forEach(v=>v.classList.toggle("on",v.id==="v-"+t));
+  store.set("tab",t); if(t==="jobs") loadJobs(); if(t==="sched") loadSched(); if(t==="pc"&&pcOnline&&!$("#screen").src) snap(); if(t==="chat") $("#log").scrollTop=1e9; }
+$$("nav.tabs button").forEach(b=>b.onclick=()=>go(b.dataset.tab));
+
+/* ---------- settings ---------- */
+$("#setBtn").onclick=()=>{ $("#sAddr").value=store.get("addr"); $("#sPin").value=store.get("pin"); $("#sKey").value=store.get("key"); $("#sTitle").value=title(); $("#sMute").checked=store.get("mute")==="1"; $("#vSet").classList.add("show"); };
 $("#sClose").onclick=()=>$("#vSet").classList.remove("show");
-$("#sSave").onclick=()=>{ let a=$("#sAddr").value.trim(); if(a&&!/^https?:\/\//.test(a)) a="http://"+a; if(a&&!/:\d+$/.test(a.replace(/\/$/,""))) a=a.replace(/\/$/,"")+":7777";
-  store.set("addr",a); store.set("pin",$("#sPin").value.trim()); store.set("key",$("#sKey").value.trim()); store.set("title",$("#sTitle").value.trim()||"sir");
-  $("#vSet").classList.remove("show"); refresh(); };
+$("#sSave").onclick=()=>{ let a=$("#sAddr").value.trim(); if(a&&!/^https?:\/\//.test(a)) a="http://"+a; if(a&&!/:\d+\/?$/.test(a)) a=a.replace(/\/$/,"")+":7777";
+  store.set("addr",a); store.set("pin",$("#sPin").value.trim()); store.set("key",$("#sKey").value.trim()); store.set("title",$("#sTitle").value.trim()||"sir"); store.set("mute",$("#sMute").checked?"1":"0");
+  $("#vSet").classList.remove("show"); toast("Saved."); refresh(); };
 
-add("a",`Good ${new Date().getHours()<12?"morning":new Date().getHours()<18?"afternoon":"evening"}, ${store.get("title","sir")}. ORION mobile online.`);
-refresh(); setInterval(refresh,15000);
-if(!addr() && !store.get("key")) setTimeout(()=>$("#setBtn").click(),600);
+/* ---------- lifecycle: catch up the moment you come back to the app ---------- */
+document.addEventListener("visibilitychange",()=>{ if(!document.hidden){ refresh(); } });
+try{ if(Plug.App) Plug.App.addListener("appStateChange",s=>{ if(s.isActive) refresh(); }); }catch(e){}
+setInterval(()=>{ if(!document.hidden) refresh(); },10000);
+go(store.get("tab","home")); refresh();
+if(!addr()&&!store.get("key")) setTimeout(()=>$("#setBtn").click(),700);
 </script>
 </body>
 </html>
