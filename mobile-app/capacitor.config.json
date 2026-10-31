@@ -1,0 +1,13 @@
+{
+  "appId": "dev.kiyan.orion",
+  "appName": "ORION",
+  "webDir": "www",
+  "backgroundColor": "#03060c",
+  "server": {
+    "androidScheme": "http",
+    "cleartext": true
+  },
+  "android": {
+    "allowMixedContent": true
+  }
+}

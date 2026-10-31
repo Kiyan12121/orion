@@ -1,0 +1,15 @@
+pywebview>=5.0
+requests
+edge-tts
+pyautogui
+psutil
+pyperclip
+keyboard
+pyttsx3
+pywin32; sys_platform == "win32"
+uiautomation; sys_platform == "win32"
+sounddevice
+numpy
+pillow
+pytesseract
+playwright

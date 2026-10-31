@@ -1,0 +1,13 @@
+{
+  "name": "orion-mobile",
+  "version": "2.0.0",
+  "private": true,
+  "description": "ORION phone app (Capacitor wrapper around ui/mobile.html)",
+  "dependencies": {
+    "@capacitor/android": "^6.2.0",
+    "@capacitor/core": "^6.2.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.2.0"
+  }
+}

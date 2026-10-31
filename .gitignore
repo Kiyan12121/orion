@@ -1,0 +1,12 @@
+config.json
+data/
+projects/
+skills/
+__pycache__/
+*.pyc
+dist/
+build/
+mobile-app/node_modules/
+mobile-app/android/
+mobile-app/www/
+ORION.apk

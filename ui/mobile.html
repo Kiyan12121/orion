@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#03060c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="/manifest.json">
+<title>ORION</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--a:#3fd8ff;--a2:#8af5ff;--ar:63,216,255;--bg:#03060c;--text:#d6f1ff;--dim:#6b8ea3;--faint:#2b4556;--green:#5dffb0;--amber:#ffb347;--red:#ff4f7b;
+  --line:rgba(var(--ar),.15);--line2:rgba(var(--ar),.32);--ui:"Rajdhani",system-ui,sans-serif;--mono:"JetBrains Mono",monospace}
+body[data-theme=serious]{--a:#ff3d4a;--a2:#ff8a8f;--ar:255,61,74}
+body[data-theme=stealth]{--a:#b9c4cc;--a2:#eef3f6;--ar:185,196,204}
+body[data-theme=executive]{--a:#e9b949;--a2:#ffe29a;--ar:233,185,73}
+body[data-theme=hacker]{--a:#2bff88;--a2:#a6ffcf;--ar:43,255,136}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--ui);overflow:hidden}
+body{background:radial-gradient(ellipse 120% 60% at 50% 0%,rgba(var(--ar),.16),transparent 60%),var(--bg)}
+.app{display:flex;flex-direction:column;height:100%;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+header{display:flex;align-items:center;gap:12px;padding:14px 16px 10px}
+.core{width:42px;height:42px;border-radius:50%;position:relative;flex:none}
+.core i{position:absolute;inset:0;border-radius:50%;border:1.5px dashed var(--a);animation:spin 10s linear infinite}
+.core b{position:absolute;inset:9px;border-radius:50%;background:radial-gradient(circle,var(--a2),rgba(var(--ar),.25) 70%);box-shadow:0 0 18px rgba(var(--ar),.7);animation:pulse 3s ease-in-out infinite}
+body.busy .core b{animation-duration:.7s}
+body.busy .core i{animation-duration:1.5s}
+h1{font-size:20px;letter-spacing:.32em;color:var(--a2);font-weight:700}
+.sub{font:11px var(--mono);color:var(--dim);display:flex;align-items:center;gap:6px;margin-top:2px}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--faint)}
+.dot.ok{background:var(--green);box-shadow:0 0 8px var(--green)} .dot.solo{background:var(--amber);box-shadow:0 0 8px var(--amber)}
+.hb{margin-left:auto;background:none;border:1px solid var(--line2);color:var(--dim);width:38px;height:38px;border-radius:10px;font-size:17px}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:4px 16px 10px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;border:1px solid var(--line2);background:rgba(var(--ar),.07);color:var(--a2);font:700 12px var(--ui);letter-spacing:.14em;padding:9px 13px;border-radius:999px;white-space:nowrap}
+.chip.on{background:rgba(var(--ar),.25);border-color:var(--a)}
+.chip.warn{color:#ff8fab;border-color:rgba(255,79,123,.45);background:rgba(255,79,123,.1)}
+.state{margin:0 16px 8px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:rgba(8,20,32,.6);font-size:13.5px;color:var(--dim);display:none}
+.state b{color:var(--text);font-weight:600}
+#log{flex:1;overflow-y:auto;padding:8px 16px 16px;display:flex;flex-direction:column;gap:12px}
+.m{max-width:88%;padding:10px 13px;border-radius:14px;font-size:16px;line-height:1.42;animation:rise .3s;user-select:text;word-wrap:break-word}
+.m.u{align-self:flex-end;background:rgba(130,160,190,.16);border-bottom-right-radius:4px}
+.m.a{align-self:flex-start;background:linear-gradient(135deg,rgba(var(--ar),.16),rgba(var(--ar),.05));border:1px solid var(--line);border-bottom-left-radius:4px}
+.m.s{align-self:center;color:var(--amber);font-size:13px;background:none;text-align:center}
+.m small{display:block;font:10px var(--mono);color:var(--dim);margin-top:5px;letter-spacing:.05em}
+.m pre{font:12px var(--mono);background:rgba(0,0,0,.4);padding:8px;border-radius:8px;overflow-x:auto;margin:6px 0;white-space:pre}
+.typing span{display:inline-block;width:7px;height:7px;margin-right:4px;background:var(--a);border-radius:50%;animation:b 1s infinite}
+.typing span:nth-child(2){animation-delay:.15s}.typing span:nth-child(3){animation-delay:.3s}
+footer{display:flex;gap:10px;padding:10px 12px 14px;border-top:1px solid var(--line);background:rgba(3,8,14,.9)}
+#in{flex:1;background:rgba(0,0,0,.35);border:1px solid var(--line2);border-radius:24px;color:var(--text);font:500 17px var(--ui);padding:0 16px;height:48px;outline:0}
+#in:focus{border-color:var(--a)}
+.rb{width:48px;height:48px;border-radius:50%;border:1px solid var(--line2);background:rgba(var(--ar),.12);color:var(--a2);font-size:19px;flex:none;display:grid;place-items:center}
+.rb.rec{background:rgba(255,79,123,.3);border-color:var(--red);color:#fff;animation:mp 1.2s infinite}
+.rb svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.8}
+.veil{position:fixed;inset:0;background:rgba(2,5,10,.92);display:none;align-items:flex-end;z-index:9}
+.veil.show{display:flex}
+.sheet{width:100%;background:#071321;border-top:1px solid var(--line2);border-radius:18px 18px 0 0;padding:20px 18px calc(22px + env(safe-area-inset-bottom));max-height:90%;overflow:auto}
+.sheet h2{font-size:14px;letter-spacing:.32em;color:var(--a2);margin-bottom:14px}
+.sheet h3{font-size:11px;letter-spacing:.26em;color:var(--dim);margin:16px 0 8px}
+.sheet label{display:block;font-size:11px;letter-spacing:.2em;color:var(--dim);margin:10px 0 5px}
+.sheet input{width:100%;background:rgba(0,0,0,.35);border:1px solid var(--line2);border-radius:10px;color:var(--text);font:15px var(--mono);padding:11px 12px;outline:0}
+.sheet p{font-size:14px;line-height:1.5;color:var(--dim)}
+.btn{width:100%;height:48px;margin-top:14px;border:1px solid var(--line2);border-radius:12px;background:rgba(var(--ar),.15);color:var(--a2);font:700 13px var(--ui);letter-spacing:.24em}
+.btn.ghost{background:none;color:var(--dim)}
+.ev{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:15px}
+.ev span{font:12px var(--mono);color:var(--a2);width:56px;flex:none;padding-top:2px}
+@keyframes spin{to{transform:rotate(360deg)}}@keyframes pulse{50%{transform:scale(1.12)}}
+@keyframes rise{from{opacity:0;transform:translateY(6px)}}@keyframes b{50%{opacity:.25}}
+@keyframes mp{50%{box-shadow:0 0 0 10px rgba(255,79,123,.15)}}
+</style>
+</head>
+<body data-theme="standby">
+<div class="app">
+  <header>
+    <div class="core"><i></i><b></b></div>
+    <div><h1 id="name">ORION</h1><div class="sub"><span class="dot" id="dot"></span><span id="conn">connecting…</span></div></div>
+    <button class="hb" id="setBtn">⚙</button>
+  </header>
+  <div class="chips" id="chips">
+    <button class="chip" data-q="check my messages">✉ DMs</button>
+    <button class="chip" id="afkChip" data-act="afk">AFK</button>
+    <button class="chip" id="gameChip" data-act="gaming">🎮 GAMING</button>
+    <button class="chip" data-act="schedule">📅 TODAY</button>
+    <button class="chip" data-q="system status">PC STATUS</button>
+    <button class="chip" data-act="lock">🔒 LOCK PC</button>
+    <button class="chip warn" data-act="stop">■ STOP</button>
+  </div>
+  <div class="state" id="state"></div>
+  <div id="log"></div>
+  <footer>
+    <button class="rb" id="mic"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>
+    <input id="in" placeholder="Talk to ORION…" autocomplete="off">
+    <button class="rb" id="go"><svg viewBox="0 0 24 24"><path d="M4 12h15M13 6l6 6-6 6"/></svg></button>
+  </footer>
+</div>
+
+<div class="veil" id="vSet"><div class="sheet">
+  <h2>CONNECTION</h2>
+  <p>Connect to ORION on your PC (open ORION → Devices on the PC to see the address and PIN). When the PC is off, ORION still answers here using its own cloud brain.</p>
+  <label>PC ADDRESS</label><input id="sAddr" placeholder="http://100.x.x.x:7777" inputmode="url">
+  <label>PIN</label><input id="sPin" inputmode="numeric" placeholder="6 digits">
+  <h3>WHEN THE PC IS OFF</h3>
+  <label>GROQ KEY (free — console.groq.com/keys)</label><input id="sKey" type="password" placeholder="gsk_…">
+  <label>WHAT ORION CALLS YOU</label><input id="sTitle" placeholder="sir">
+  <button class="btn" id="sSave">SAVE &amp; CONNECT</button>
+  <button class="btn ghost" id="sClose">CLOSE</button>
+</div></div>
+
+<div class="veil" id="vSched"><div class="sheet">
+  <h2>TODAY</h2><div id="schedList"></div>
+  <button class="btn ghost" id="schedClose">CLOSE</button>
+</div></div>
+
+<script>
+const $=s=>document.querySelector(s);
+const store={get:(k,d="")=>{try{return localStorage.getItem("orion_"+k)??d}catch(e){return d}},set:(k,v)=>{try{localStorage.setItem("orion_"+k,v)}catch(e){}}};
+let pcOnline=false, state={}, busy=false, history=[];
+const sameOrigin = location.protocol.startsWith("http") && !location.hostname.match(/^(localhost)$/) && location.port;
+if(sameOrigin && !store.get("addr")) store.set("addr", location.origin);
+const addr=()=>store.get("addr").replace(/\/$/,""), pin=()=>store.get("pin");
+
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+function render(t){ return String(t).split("```").map((p,i)=>i%2?`<pre>${esc(p.replace(/^\w*\n/,""))}</pre>`:esc(p).replace(/\*\*([^*]+)\*\*/g,"<b>$1</b>").replace(/\n/g,"<br>")).join(""); }
+function add(role,text,meta){ const d=document.createElement("div"); d.className="m "+role; d.innerHTML=render(text)+(meta?`<small>${esc(meta)}</small>`:""); $("#log").appendChild(d); $("#log").scrollTop=1e9; return d; }
+function typing(){ const d=add("a",""); d.innerHTML='<span class="typing"><span></span><span></span><span></span></span>'; return d; }
+
+async function api(path,body,timeout=150000){
+  const ctl=new AbortController(); const t=setTimeout(()=>ctl.abort(),timeout);
+  try{ const r=await fetch(addr()+path,{method:body===undefined?"GET":"POST",signal:ctl.signal,
+      headers:{"X-PIN":pin(),"Content-Type":body instanceof Blob?"application/octet-stream":"application/json"},
+      body:body===undefined?undefined:(body instanceof Blob?body:JSON.stringify(body))});
+    if(r.status===401) throw new Error("Wrong PIN — check ⚙ settings."); return await r.json(); }
+  finally{ clearTimeout(t); }
+}
+
+async function refresh(){
+  if(!addr()){ setConn(false); return; }
+  try{ state=await api("/api/state",undefined,6000); setConn(true); paint(); flushQueue(); }
+  catch(e){ setConn(false); }
+}
+function setConn(on){ pcOnline=on; $("#dot").className="dot "+(on?"ok":"solo");
+  $("#conn").textContent=on?`PC online · ${state.brain||""}`.toLowerCase():(addr()?"PC offline · solo brain":"solo brain — tap ⚙ to link your PC"); }
+function paint(){ document.body.dataset.theme=state.theme||"standby"; $("#name").textContent=(state.name||"ORION").toUpperCase();
+  $("#afkChip").classList.toggle("on",!!state.afk); $("#afkChip").textContent=state.afk?"AFK ON":"AFK";
+  $("#gameChip").classList.toggle("on",!!state.gaming);
+  const bits=[]; if(state.busy_now) bits.push(`<b>Busy:</b> ${esc(state.busy_now)}`); if(state.gaming) bits.push(`<b>Gaming:</b> ${esc(state.game||"on")}`);
+  if(state.afk) bits.push(`<b>AFK</b> — ORION is answering your Root DMs`); if(state.next) bits.push(`<b>Next:</b> ${esc(state.next)}`);
+  $("#state").innerHTML=bits.join(" · "); $("#state").style.display=bits.length?"block":"none"; }
+
+/* ---------- talking ---------- */
+async function send(text){
+  text=text.trim(); if(!text||busy) return; $("#in").value=""; add("u",text); busy=true; document.body.classList.add("busy"); const t=typing();
+  try{
+    if(pcOnline){ const r=await api("/api/send",{text}); t.remove(); add("a",r.reply,r.tier?`${r.tier}${r.model?" · "+r.model:""}`:""); speak(r.reply); }
+    else { const r=await solo(text); t.remove(); add("a",r,"solo · phone brain"); speak(r); }
+  }catch(e){ t.remove(); add("s",e.message||"Couldn't reach ORION."); }
+  busy=false; document.body.classList.remove("busy"); refresh();
+}
+
+/* solo brain: works when the PC is off (chat only; PC jobs are queued) */
+const PC_WORDS=/\b(open|close|launch|lock|shut ?down|restart|volume|pause|play|skip|screenshot|type|click|file|folder|desktop|root|dm|message|afk|gaming|render|video|code|build|autopilot)\b/i;
+async function solo(text){
+  const key=store.get("key"); const title=store.get("title","sir");
+  if(PC_WORDS.test(text) && addr()){ const q=JSON.parse(store.get("queue","[]")); q.push(text); store.set("queue",JSON.stringify(q));
+    return `Your PC is offline, ${title}. I've queued that and will run it the moment it's back.`; }
+  if(!key) return "I'm in solo mode but have no brain key yet — tap ⚙ and add a free Groq key.";
+  history.push({role:"user",content:text}); history=history.slice(-12);
+  const r=await fetch("https://api.groq.com/openai/v1/chat/completions",{method:"POST",headers:{"Authorization":"Bearer "+key,"Content-Type":"application/json"},
+    body:JSON.stringify({model:"openai/gpt-oss-20b",temperature:.5,messages:[{role:"system",content:`You are ORION, a calm, witty British AI butler on ${title}'s phone. Address them as "${title}". Keep replies short. Their PC is offline, so you can't control it right now. Today is ${new Date().toDateString()}.`},...history]})});
+  if(!r.ok) throw new Error("Groq error "+r.status); const j=await r.json(); const out=j.choices[0].message.content||"…";
+  history.push({role:"assistant",content:out}); return out;
+}
+async function flushQueue(){ const q=JSON.parse(store.get("queue","[]")); if(!q.length||busy) return; store.set("queue","[]");
+  add("s",`PC is back — running ${q.length} queued job${q.length>1?"s":""}.`); for(const t of q) await send(t); }
+
+/* voice */
+let voices=[]; const loadV=()=>voices=speechSynthesis.getVoices(); try{ loadV(); speechSynthesis.onvoiceschanged=loadV; }catch(e){}
+function speak(t){ try{ if(store.get("mute")==="1") return; const u=new SpeechSynthesisUtterance(String(t).replace(/```[\s\S]*?```/g," code on screen ").replace(/[*_#`]/g,"").slice(0,600));
+  u.voice=voices.find(v=>/en-GB/i.test(v.lang)&&/female|sonia|libby|google uk english female/i.test(v.name))||voices.find(v=>/en-GB/i.test(v.lang))||null; u.rate=1.02; speechSynthesis.cancel(); speechSynthesis.speak(u);}catch(e){} }
+
+let rec=null, chunks=[];
+$("#mic").onclick=async()=>{
+  if(rec){ rec.stop(); return; }
+  try{ const s=await navigator.mediaDevices.getUserMedia({audio:true}); chunks=[]; rec=new MediaRecorder(s);
+    rec.ondataavailable=e=>chunks.push(e.data);
+    rec.onstop=async()=>{ s.getTracks().forEach(t=>t.stop()); $("#mic").classList.remove("rec"); const blob=new Blob(chunks,{type:rec.mimeType}); rec=null;
+      try{ let text=""; if(pcOnline){ text=(await api("/api/transcribe",blob)).text; }
+        else if(store.get("key")){ const fd=new FormData(); fd.append("file",blob,"speech.webm"); fd.append("model","whisper-large-v3-turbo");
+          const r=await fetch("https://api.groq.com/openai/v1/audio/transcriptions",{method:"POST",headers:{"Authorization":"Bearer "+store.get("key")},body:fd}); text=(await r.json()).text||""; }
+        if(text) send(text); }catch(e){ add("s","Couldn't hear that."); } };
+    rec.start(); $("#mic").classList.add("rec"); }catch(e){ add("s","Microphone blocked — allow mic access for this app."); }
+};
+$("#go").onclick=()=>send($("#in").value);
+$("#in").addEventListener("keydown",e=>{ if(e.key==="Enter") send($("#in").value); });
+
+/* quick actions */
+document.querySelectorAll(".chip").forEach(c=>c.onclick=async()=>{
+  if(c.dataset.q) return send(c.dataset.q);
+  const a=c.dataset.act;
+  if(a==="schedule"){ const items=state.today||[]; $("#schedList").innerHTML=items.length?items.map(e=>`<div class="ev"><span>${esc(e.time)}</span><div>${esc(e.title)}</div></div>`).join(""):"<p>Nothing scheduled today.</p>"; $("#vSched").classList.add("show"); return; }
+  if(!pcOnline){ add("s","That needs your PC online."); return; }
+  try{ const r=await api("/api/action",{action:a}); if(r.result) add("a",r.result); }catch(e){ add("s",e.message); } refresh();
+});
+$("#schedClose").onclick=()=>$("#vSched").classList.remove("show");
+
+/* settings */
+$("#setBtn").onclick=()=>{ $("#sAddr").value=store.get("addr"); $("#sPin").value=store.get("pin"); $("#sKey").value=store.get("key"); $("#sTitle").value=store.get("title","sir"); $("#vSet").classList.add("show"); };
+$("#sClose").onclick=()=>$("#vSet").classList.remove("show");
+$("#sSave").onclick=()=>{ let a=$("#sAddr").value.trim(); if(a&&!/^https?:\/\//.test(a)) a="http://"+a; if(a&&!/:\d+$/.test(a.replace(/\/$/,""))) a=a.replace(/\/$/,"")+":7777";
+  store.set("addr",a); store.set("pin",$("#sPin").value.trim()); store.set("key",$("#sKey").value.trim()); store.set("title",$("#sTitle").value.trim()||"sir");
+  $("#vSet").classList.remove("show"); refresh(); };
+
+add("a",`Good ${new Date().getHours()<12?"morning":new Date().getHours()<18?"afternoon":"evening"}, ${store.get("title","sir")}. ORION mobile online.`);
+refresh(); setInterval(refresh,15000);
+if(!addr() && !store.get("key")) setTimeout(()=>$("#setBtn").click(),600);
+</script>
+</body>
+</html>

@@ -1,0 +1,71 @@
+# Push a tag like v2.0.1 (or press "Run workflow") and GitHub builds:
+#   ORION.apk        - the phone app (install on your S23)
+#   ORION-vX.zip     - the desktop update (ORION installs it itself)
+name: Build & release ORION
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Version tag to release (e.g. v2.0.1)"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      TAG: ${{ github.event.inputs.tag || github.ref_name }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Build Android app
+        working-directory: mobile-app
+        run: |
+          mkdir -p www
+          cp ../ui/mobile.html www/index.html
+          cp ../ui/orion.png www/icon.png
+          npm install --no-audit --no-fund
+          npx cap add android
+          # microphone + talking to the PC over the private network
+          sed -i 's#<application#<uses-permission android:name="android.permission.RECORD_AUDIO" />\n    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />\n    <application android:usesCleartextTraffic="true"#' android/app/src/main/AndroidManifest.xml
+          # app icon
+          for d in android/app/src/main/res/mipmap-*; do
+            cp www/icon.png "$d/ic_launcher.png"; cp www/icon.png "$d/ic_launcher_round.png"; cp www/icon.png "$d/ic_launcher_foreground.png" || true
+          done
+          rm -f android/app/src/main/res/mipmap-anydpi-v26/ic_launcher*.xml
+          npx cap sync android
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon
+          cp app/build/outputs/apk/debug/app-debug.apk ../../ORION.apk
+
+      - name: Package desktop update
+        run: |
+          mkdir -p dist/orion
+          rsync -a --exclude '.git' --exclude '.github' --exclude 'mobile-app' --exclude 'dist' --exclude 'ORION.apk' \
+                --exclude 'config.json' --exclude 'data' --exclude 'projects' --exclude 'skills' ./ dist/orion/
+          sed -i "s/^VERSION = .*/VERSION = \"${TAG#v}\"/" dist/orion/core/config.py
+          cd dist && zip -qr "../ORION-${TAG}.zip" orion
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.TAG }}
+          name: ORION ${{ env.TAG }}
+          files: |
+            ORION.apk
+            ORION-${{ env.TAG }}.zip
+          generate_release_notes: true

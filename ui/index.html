@@ -1,0 +1,1027 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ORION</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Orbitron:wght@600;800&display=swap" rel="stylesheet">
+<style>
+/* ======================= THEMES ======================= */
+:root,body[data-theme=standby]{--a:#3fd8ff;--a2:#8af5ff;--ar:63,216,255;--think:#ffb347;--thinkr:255,179,71;--listen:#ff4f7b;--listenr:255,79,123;--tint:20,80,120}
+body[data-theme=serious]{--a:#ff3d4a;--a2:#ff9096;--ar:255,61,74;--think:#ff9a3c;--thinkr:255,154,60;--listen:#ffffff;--listenr:255,255,255;--tint:110,15,20}
+body[data-theme=stealth]{--a:#b9c4cc;--a2:#eef3f6;--ar:185,196,204;--think:#7fa7c4;--thinkr:127,167,196;--listen:#ffffff;--listenr:255,255,255;--tint:40,45,50}
+body[data-theme=executive]{--a:#e9b949;--a2:#ffe29a;--ar:233,185,73;--think:#ffffff;--thinkr:255,255,255;--listen:#ff6b6b;--listenr:255,107,107;--tint:90,65,15}
+body[data-theme=hacker]{--a:#2bff88;--a2:#a6ffcf;--ar:43,255,136;--think:#d4ff3b;--thinkr:212,255,59;--listen:#ff3bd4;--listenr:255,59,212;--tint:10,70,35}
+body{--bg:#02050a;--text:#d9f2ff;--dim:#6f93a8;--faint:#2a4556;--green:#5dffb0;--amber:#ffb347;--red:#ff4f7b;--violet:#c58bff;
+  --line:rgba(var(--ar),.13);--line2:rgba(var(--ar),.3);--glass:rgba(7,18,30,.62);--glass2:rgba(10,26,42,.78);
+  --ui:"Rajdhani","Segoe UI",system-ui,sans-serif;--mono:"JetBrains Mono",Consolas,monospace;--disp:"Orbitron","Rajdhani",sans-serif;
+  --c:var(--a);--c2:var(--a2);--cr:var(--ar)}
+body.state-thinking{--c:var(--think);--c2:var(--think);--cr:var(--thinkr)}
+body.state-listening{--c:var(--listen);--c2:var(--listen);--cr:var(--listenr)}
+body[data-theme=stealth]{--text:#cfd8dd;--glass:rgba(14,16,18,.72)}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--text);font-family:var(--ui);font-size:15px;user-select:none}
+button{font-family:inherit}
+#bgfx{position:fixed;inset:0;z-index:0;pointer-events:none}
+.backdrop{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(ellipse 55% 60% at 50% 48%,rgba(var(--tint),.38),transparent 70%),
+    radial-gradient(ellipse 40% 30% at 85% 10%,rgba(var(--ar),.06),transparent 70%),
+    radial-gradient(ellipse 35% 35% at 10% 95%,rgba(var(--ar),.05),transparent 70%);transition:background 1s}
+.grid{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.55;
+  background:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:56px 56px;
+  mask-image:radial-gradient(ellipse 75% 70% at 50% 50%,#000 30%,transparent 85%)}
+.sweep{position:fixed;left:0;right:0;height:140px;z-index:0;pointer-events:none;top:-160px;
+  background:linear-gradient(180deg,transparent,rgba(var(--ar),.05) 70%,rgba(var(--ar),.12));animation:sweep 9s linear infinite}
+body.lite .sweep{display:none}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:90;
+  background:repeating-linear-gradient(0deg,rgba(255,255,255,.014) 0 1px,transparent 1px 3px),radial-gradient(ellipse at center,transparent 60%,rgba(0,0,0,.72))}
+body.lite::after{background:radial-gradient(ellipse at center,transparent 60%,rgba(0,0,0,.6))}
+
+.shell{position:relative;z-index:1;display:grid;grid-template-columns:66px minmax(0,1fr);grid-template-rows:100vh;height:100vh;overflow:hidden}
+
+/* ======================= DOCK ======================= */
+.dock{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 0;border-right:1px solid var(--line);
+  background:linear-gradient(180deg,rgba(var(--ar),.05),transparent 40%,rgba(var(--ar),.03))}
+.dlogo{width:40px;height:40px;position:relative;margin-bottom:14px;cursor:pointer}
+.dlogo i{position:absolute;inset:0;border-radius:50%;border:1.3px dashed var(--a);animation:spin 14s linear infinite}
+.dlogo b{position:absolute;inset:9px;border-radius:50%;border:1.6px solid var(--a2);box-shadow:0 0 12px rgba(var(--ar),.6)}
+.dlogo s{position:absolute;inset:15px;border-radius:50%;background:var(--a2);box-shadow:0 0 14px var(--a2)}
+.nav{width:46px;height:46px;border-radius:12px;border:1px solid transparent;background:none;color:var(--dim);cursor:pointer;display:grid;place-items:center;position:relative;transition:.2s}
+.nav svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.6}
+.nav:hover{color:var(--text);background:rgba(var(--ar),.07)}
+.nav.on{color:var(--a2);background:rgba(var(--ar),.14);border-color:var(--line2);box-shadow:0 0 18px rgba(var(--ar),.18) inset}
+.nav.on::before{content:"";position:absolute;left:-11px;top:10px;bottom:10px;width:3px;border-radius:2px;background:var(--a);box-shadow:0 0 10px var(--a)}
+.nav .tip{position:absolute;left:56px;background:var(--glass2);border:1px solid var(--line2);padding:4px 10px;font:600 11px var(--ui);letter-spacing:.2em;
+  white-space:nowrap;opacity:0;pointer-events:none;transform:translateX(-6px);transition:.15s;z-index:50;color:var(--text)}
+.nav:hover .tip{opacity:1;transform:none}
+.nav .bdg{position:absolute;top:7px;right:7px;width:8px;height:8px;border-radius:50%;background:var(--amber);box-shadow:0 0 8px var(--amber);display:none}
+.nav .bdg.show{display:block;animation:blink2 1s infinite}
+.dock .sp{flex:1}
+
+/* ======================= TOP BAR ======================= */
+.main{display:grid;grid-template-rows:60px minmax(0,1fr) 82px;min-width:0;min-height:0;height:100vh;overflow:hidden;padding:0 18px}
+header{display:flex;align-items:center;gap:16px;border-bottom:1px solid var(--line);min-width:0;overflow:hidden}
+.brand h1{font:800 19px var(--disp);letter-spacing:.42em;color:var(--a2);text-shadow:0 0 18px rgba(var(--ar),.55);white-space:nowrap}
+.brand small{display:block;font-size:9.5px;letter-spacing:.34em;color:var(--dim);font-weight:600;white-space:nowrap}
+.seg{display:flex;border:1px solid var(--line2);border-radius:4px;overflow:hidden;flex:none}
+.seg button{background:none;border:0;color:var(--dim);font:700 11px var(--ui);letter-spacing:.2em;padding:7px 13px;cursor:pointer;transition:.2s;white-space:nowrap}
+.seg button:hover{color:var(--text)}
+.seg button.on{background:rgba(var(--ar),.16);color:var(--a2);box-shadow:inset 0 -2px var(--a)}
+.themes{display:flex;gap:7px;align-items:center;flex:none}
+.themes button{width:14px;height:14px;border-radius:50%;border:1px solid rgba(255,255,255,.2);cursor:pointer;transition:.2s}
+.themes button:hover{transform:scale(1.25)}
+.themes button.on{box-shadow:0 0 0 2px var(--bg),0 0 0 3.5px currentColor,0 0 14px currentColor}
+.spacer{flex:1}
+.chip{display:none;align-items:center;gap:7px;font:700 10.5px var(--ui);letter-spacing:.2em;padding:5px 10px;border:1px solid;cursor:pointer;white-space:nowrap;border-radius:3px;flex:none}
+.chip.show{display:flex}
+.chip i{width:6px;height:6px;border-radius:50%;background:currentColor;animation:blink2 1s infinite}
+#apchip{color:var(--amber);border-color:rgba(255,179,71,.45);background:rgba(255,179,71,.08)}
+#gchip{color:var(--violet);border-color:rgba(197,139,255,.45);background:rgba(197,139,255,.1)}
+#afkchip{color:var(--green);border-color:rgba(93,255,176,.45);background:rgba(93,255,176,.08)}
+.links{display:flex;gap:12px;font-size:11px;letter-spacing:.15em;color:var(--dim);flex:none}
+.links span{display:flex;align-items:center;gap:6px;white-space:nowrap}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--faint);transition:.3s}
+.dot.ok{background:var(--green);box-shadow:0 0 8px var(--green)} .dot.bad{background:var(--red);box-shadow:0 0 8px var(--red)}
+.clock{text-align:right;flex:none}
+.clock b{font:500 20px var(--mono);letter-spacing:.04em;white-space:nowrap}
+.clock small{display:block;font-size:10px;letter-spacing:.2em;color:var(--dim);white-space:nowrap}
+.winbtns{display:flex;gap:2px;flex:none}
+.ib{width:31px;height:31px;display:grid;place-items:center;background:none;border:1px solid transparent;color:var(--dim);cursor:pointer;border-radius:4px;transition:.2s;position:relative}
+.ib:hover{border-color:var(--line2);color:var(--a2);background:rgba(var(--ar),.07)}
+.ib svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.6}
+.ib.danger:hover{color:var(--red);border-color:rgba(255,79,123,.4)}
+.ib .cnt{position:absolute;top:2px;right:2px;min-width:14px;height:14px;border-radius:7px;background:var(--a);color:#001018;font:700 9px var(--mono);display:none;place-items:center;padding:0 3px}
+.ib .cnt.show{display:grid}
+
+/* ======================= STAGE ======================= */
+.stage{display:grid;grid-template-columns:262px minmax(0,1fr) minmax(400px,37%);grid-template-rows:minmax(0,1fr);gap:18px;min-height:0;height:100%;overflow:hidden;padding:16px 0}
+.stage>*{min-height:0;max-height:100%}
+.panel{background:var(--glass);border:1px solid var(--line);position:relative;min-height:0;backdrop-filter:blur(10px);border-radius:3px;
+  box-shadow:0 10px 40px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.03);transition:border-color .5s}
+body.lite .panel{backdrop-filter:none;background:rgba(8,18,28,.94)}
+.panel::before,.panel::after{content:"";position:absolute;width:14px;height:14px;border:1.5px solid var(--a);opacity:.85;transition:border-color .5s;pointer-events:none}
+.panel::before{top:-1px;left:-1px;border-right:0;border-bottom:0}
+.panel::after{bottom:-1px;right:-1px;border-left:0;border-top:0}
+.ph{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;font-size:10.5px;font-weight:700;letter-spacing:.3em;color:var(--dim);border-bottom:1px solid var(--line);white-space:nowrap}
+.ph i{font-style:normal;color:var(--a);font-family:var(--mono);letter-spacing:0;font-weight:500}
+.ph button,.mini{background:none;border:1px solid var(--line2);color:var(--dim);font:700 9.5px var(--ui);letter-spacing:.2em;padding:3px 8px;cursor:pointer;border-radius:2px}
+.ph button:hover,.mini:hover{color:var(--a2);border-color:var(--a)}
+.left{display:flex;flex-direction:column;gap:14px;min-height:0;overflow:hidden}
+.pad{padding:12px 14px}
+.meter{margin-bottom:11px}
+.meter .row{display:flex;justify-content:space-between;font-size:11.5px;letter-spacing:.18em;color:var(--dim);margin-bottom:5px}
+.meter .row b{font:500 12.5px var(--mono);color:var(--text);letter-spacing:0}
+.bar{height:4px;background:rgba(var(--ar),.1);position:relative;overflow:hidden;border-radius:2px}
+.bar div{position:absolute;inset:0 auto 0 0;background:linear-gradient(90deg,var(--a),var(--a2));box-shadow:0 0 10px rgba(var(--ar),.6);transition:width .8s cubic-bezier(.2,.8,.2,1)}
+.bar.hot div{background:linear-gradient(90deg,var(--amber),var(--red))}
+.bar.segd{background:repeating-linear-gradient(90deg,rgba(var(--ar),.12) 0 6px,transparent 6px 8px)}
+#spark{width:100%;height:38px;display:block;margin-top:5px}
+.kv{display:grid;grid-template-columns:1fr auto;gap:4px 10px;font-size:11.5px;letter-spacing:.15em;color:var(--dim)}
+.kv b{font:500 11.5px var(--mono);color:var(--text);letter-spacing:0;text-align:right}
+.allow .prov{margin-bottom:10px}.allow .prov:last-child{margin-bottom:0}
+.allow .pn{display:flex;justify-content:space-between;font-size:11px;letter-spacing:.18em;color:var(--dim);margin-bottom:4px}
+.allow .pn b{font:500 11px var(--mono);color:var(--text);letter-spacing:0}
+.allow .sub{font:10.5px var(--mono);color:var(--faint);margin-top:3px;display:flex;justify-content:space-between;gap:6px}
+.allow .sub span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.none,.empty{font-size:13.5px;color:var(--dim);line-height:1.5}
+.actions{flex:1;display:flex;flex-direction:column;min-height:110px}
+#actlog{flex:1;overflow:auto;padding:7px 14px;font:11.5px/1.65 var(--mono);color:var(--dim)}
+#actlog div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;animation:fadein .3s}
+#actlog .ok b{color:var(--green)} #actlog .error b,#actlog .denied b,#actlog .blocked b{color:var(--red)}
+#actlog .running b{color:var(--amber)} #actlog em{font-style:normal;color:var(--text)}
+
+/* ======================= CORE ======================= */
+.core{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:0;position:relative;overflow:hidden}
+.orb{position:relative;width:min(52vh,500px,100%);aspect-ratio:1;flex:none}
+.orb svg,.orb canvas{position:absolute;inset:0;width:100%;height:100%}
+.orb svg *{transition:stroke .5s,fill .5s}
+.spin{transform-origin:250px 250px;animation:spin linear infinite}
+.r1{animation-duration:80s}.r2{animation-duration:42s;animation-direction:reverse}.r3{animation-duration:16s}
+.r4{animation-duration:26s;animation-direction:reverse}.r5{animation-duration:9s}.r6{animation-duration:120s;animation-direction:reverse}
+body.state-thinking .r3{animation-duration:1.9s}body.state-thinking .r4{animation-duration:3s}
+body.state-thinking .r2{animation-duration:7s}body.state-thinking .r5{animation-duration:1.2s}
+.radar{transform-origin:250px 250px;animation:spin 5s linear infinite;opacity:.55}
+body.state-thinking .radar{animation-duration:1.3s;opacity:.9}
+body.lite .radar{display:none}
+.corefill{animation:pulse 3.4s ease-in-out infinite;transform-origin:250px 250px}
+body.state-thinking .corefill{animation-duration:.8s}
+.statew{font:800 13px var(--disp);letter-spacing:.3em;fill:var(--c2)}
+.modew{font:500 9px var(--mono);letter-spacing:.32em;fill:var(--dim)}
+.ringtxt{font:600 10px var(--mono);letter-spacing:.42em;fill:var(--c);opacity:.55}
+.gauge-lbl{font:600 9px var(--mono);letter-spacing:.2em;fill:var(--dim)}
+.gauge-val{font:500 13px var(--mono);fill:var(--text)}
+.substatus{margin-top:14px;text-align:center;min-height:42px}
+.substatus b{display:block;font:800 13px var(--disp);letter-spacing:.38em;color:var(--c2);transition:color .4s}
+.substatus span{display:block;margin-top:7px;font:11.5px var(--mono);color:var(--dim)}
+.hint{position:absolute;bottom:0;left:0;right:0;text-align:center;font-size:10.5px;letter-spacing:.2em;color:var(--faint);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hint kbd{font:10.5px var(--mono);border:1px solid var(--line2);padding:1px 5px;color:var(--dim);border-radius:2px}
+#codeview{position:absolute;inset:0 0 30px;display:none;flex-direction:column;z-index:3}
+#codeview.show{display:flex;animation:fadein .25s}
+#codeview .ph b{color:var(--a2);font-family:var(--mono);letter-spacing:0;font-weight:500}
+#codeview pre{flex:1;overflow:auto;margin:0;padding:12px 0;font:12.5px/1.55 var(--mono);color:#cfe7f5;user-select:text;counter-reset:ln}
+#codeview pre .ln{padding:0 14px 0 0;white-space:pre}
+#codeview pre em{font-style:normal}
+#codeview pre .ln::before{counter-increment:ln;content:counter(ln);display:inline-block;width:42px;padding-right:12px;text-align:right;color:var(--faint);user-select:none}
+#codeview .kw{color:var(--a)} #codeview .st{color:#ffd38a} #codeview .cm{color:#5d7d90;font-style:italic} #codeview .nu{color:#ff9fc7}
+
+/* ======================= PAGES (right column) ======================= */
+.pages{display:flex;flex-direction:column;min-height:0;overflow:hidden}
+.page{display:none;flex:1 1 0;min-height:0;flex-direction:column;overflow:hidden}
+.page.on{display:flex;animation:pagein .3s cubic-bezier(.2,.8,.2,1)}
+.scroll{flex:1 1 0;min-height:0;overflow-y:auto;padding:14px 16px}
+.lbl{font-size:10px;letter-spacing:.3em;color:var(--dim);font-weight:700;margin:4px 0 8px}
+.lbl.sp{margin-top:18px}
+/* chat */
+#log{flex:1 1 0;min-height:0;overflow-y:scroll;overscroll-behavior:contain;padding:14px 16px;display:flex;flex-direction:column;gap:14px;user-select:text}
+.msg{max-width:94%;animation:rise .35s cubic-bezier(.2,.8,.2,1);display:flex;gap:10px}
+.msg .av{width:26px;height:26px;border-radius:50%;flex:none;margin-top:16px;border:1px solid var(--line2);background:radial-gradient(circle,rgba(var(--ar),.5),rgba(var(--ar),.05) 70%);box-shadow:0 0 10px rgba(var(--ar),.3)}
+.msg .col{min-width:0}
+.msg .who{font-size:9.5px;font-weight:700;letter-spacing:.3em;color:var(--dim);margin-bottom:4px;display:flex;gap:7px;align-items:center}
+.msg .who time{font:9px var(--mono);letter-spacing:0;color:var(--faint)}
+.msg .body{font-size:15.5px;line-height:1.5;font-weight:500;padding:10px 13px;border-left:2px solid var(--a);background:linear-gradient(90deg,rgba(var(--ar),.1),rgba(var(--ar),.02));border-radius:0 6px 6px 0;transition:border-color .5s}
+.msg.user{align-self:flex-end;flex-direction:row-reverse}
+.msg.user .av{display:none}
+.msg.user .who{justify-content:flex-end}
+.msg.user .body{border-left:0;border-right:2px solid var(--dim);background:linear-gradient(270deg,rgba(130,160,190,.12),transparent);border-radius:6px 0 0 6px;color:#eef8ff;text-align:right}
+.msg.system .av{display:none}
+.msg.system .body{border-color:var(--amber);color:var(--amber);font-size:13.5px;background:linear-gradient(90deg,rgba(255,179,71,.07),transparent)}
+.msg.stopped .body{opacity:.6}
+.tier{font:500 8.5px var(--mono);letter-spacing:.08em;padding:1px 6px;border:1px solid var(--line2);color:var(--a)}
+.tier.local{color:var(--green);border-color:rgba(93,255,176,.35)} .tier.claude{color:#e8a87c;border-color:rgba(232,168,124,.4)} .tier.reflex{color:var(--dim)}
+.model{font:400 8.5px var(--mono);color:var(--faint)}
+.body pre{font:12px/1.5 var(--mono);background:rgba(0,0,0,.45);border:1px solid var(--line);padding:10px;margin:8px 0;overflow:auto;white-space:pre;text-align:left;border-radius:4px}
+.body code{font:12.5px var(--mono);color:var(--a2)}
+.body a{color:var(--a2);cursor:pointer}
+.body ul{margin:4px 0 4px 18px}
+.copy{float:right;font:9.5px var(--mono);background:none;border:1px solid var(--line2);color:var(--dim);cursor:pointer;padding:1px 6px;margin:-4px -4px 0 6px}
+.cursor{display:inline-block;width:8px;height:15px;background:var(--a);margin-left:2px;vertical-align:-2px;animation:blink .8s steps(2) infinite}
+.typing span{display:inline-block;width:6px;height:6px;margin-right:4px;background:var(--a);border-radius:50%;animation:blink2 1s infinite}
+.typing span:nth-child(2){animation-delay:.15s}.typing span:nth-child(3){animation-delay:.3s}
+#toBottom{position:absolute;right:22px;bottom:62px;display:none;background:rgba(6,18,30,.95);border:1px solid var(--a);color:var(--a2);font:700 10px var(--ui);letter-spacing:.2em;padding:6px 11px;border-radius:999px;cursor:pointer;z-index:5;box-shadow:0 0 16px rgba(var(--ar),.3)}
+#toBottom.show{display:block}
+#page-comms{position:relative}
+.quick{display:flex;gap:6px;flex-wrap:wrap;padding:0 16px 12px}
+.quick button{background:rgba(var(--ar),.06);border:1px solid var(--line);color:var(--dim);font:600 11.5px var(--ui);letter-spacing:.08em;padding:5px 10px;border-radius:999px;cursor:pointer;transition:.2s}
+.quick button:hover{color:var(--a2);border-color:var(--line2);background:rgba(var(--ar),.12)}
+/* forms + cards */
+textarea.goal{width:100%;min-height:84px;resize:vertical;background:rgba(0,0,0,.35);border:1px solid var(--line2);color:var(--text);font:500 15px var(--ui);padding:10px 12px;outline:0;user-select:text;border-radius:3px}
+textarea.goal:focus,.inp:focus{border-color:var(--a);box-shadow:0 0 0 3px rgba(var(--ar),.1)}
+.inp{background:rgba(0,0,0,.35);border:1px solid var(--line2);color:var(--text);font:13.5px var(--ui);padding:8px 10px;outline:0;min-width:0;border-radius:3px;width:100%}
+.rowbtns{display:flex;gap:8px;margin:10px 0 4px}
+.btn{height:40px;padding:0 17px;background:rgba(var(--ar),.1);border:1px solid var(--line2);color:var(--a2);font:700 11.5px var(--ui);letter-spacing:.24em;cursor:pointer;transition:.2s;white-space:nowrap;border-radius:3px}
+.btn:hover{background:rgba(var(--ar),.2);box-shadow:0 0 16px rgba(var(--ar),.4)}
+.btn.deny{color:var(--red);border-color:rgba(255,79,123,.4);background:rgba(255,79,123,.08)}
+.btn.small{height:30px;padding:0 11px;font-size:10px}
+.btn.wide{width:100%}
+.btn.on{background:rgba(var(--ar),.28);border-color:var(--a)}
+.card{border:1px solid var(--line);background:rgba(0,0,0,.18);padding:12px 13px;margin-bottom:10px;border-radius:4px}
+.card h4{font-size:11px;letter-spacing:.26em;color:var(--a2);margin-bottom:7px;display:flex;justify-content:space-between;align-items:center}
+.card p{font-size:13.5px;line-height:1.5;color:var(--dim)}
+.card p b{color:var(--text);font-weight:600}
+.code{font:13px var(--mono);color:var(--a2);background:rgba(0,0,0,.35);border:1px solid var(--line);padding:6px 9px;border-radius:3px;display:inline-block;margin:3px 0;user-select:text;word-break:break-all}
+.tog{display:flex;align-items:center;gap:10px;font-size:14px;margin:7px 0;cursor:pointer}
+.tog input{accent-color:var(--a);width:16px;height:16px}
+.tog small{color:var(--dim);font-size:12px}
+.pill{font:600 9.5px var(--mono);padding:2px 7px;border:1px solid var(--line2);border-radius:999px;color:var(--dim);letter-spacing:.06em}
+.pill.ok{color:var(--green);border-color:rgba(93,255,176,.4)} .pill.warn{color:var(--amber);border-color:rgba(255,179,71,.4)}
+/* plan */
+.step{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--line);font-size:14.5px;line-height:1.35;animation:rise .3s}
+.step i{font-style:normal;font:600 12px var(--mono);width:18px;flex:none;color:var(--faint);padding-top:1px}
+.step.done{color:var(--dim)} .step.done i{color:var(--green)}
+.step.now{color:var(--a2)} .step.now i{color:var(--amber);animation:blink2 1s infinite}
+.plannote{font:12px var(--mono);color:var(--dim);margin-top:10px;min-height:16px}
+.planfin{margin-top:10px;padding:9px 11px;border-left:2px solid var(--green);background:rgba(93,255,176,.06);color:var(--green);font-size:13.5px;display:none}
+.ex{display:block;color:var(--a2);font-size:13.5px;cursor:pointer;padding:4px 0;opacity:.85}.ex:hover{opacity:1}
+/* schedule */
+.busyban{padding:8px 11px;border-left:2px solid var(--amber);background:rgba(255,179,71,.07);color:var(--amber);font-size:13px;margin-bottom:10px;display:none}
+.day{font-size:10px;letter-spacing:.28em;color:var(--a);font-weight:700;margin:12px 0 4px}
+.ev{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}
+.ev .t{font:500 12.5px var(--mono);color:var(--a2);width:94px;flex:none}
+.ev .n{flex:1;font-size:14.5px}
+.ev .n small{display:block;color:var(--dim);font-size:11.5px}
+.ev .tag{font:9px var(--mono);border:1px solid rgba(255,179,71,.4);color:var(--amber);padding:0 5px;margin-left:6px}
+.x{background:none;border:0;color:var(--faint);cursor:pointer;font-size:15px;padding:0 4px}.x:hover{color:var(--red)}
+.addev{border-top:1px solid var(--line);padding:11px 16px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px}
+.addev .full{grid-column:1/-1}
+.addev label{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--dim)}
+/* skills */
+.sk{padding:10px 0;border-bottom:1px solid var(--line)}
+.sk b{font:500 13.5px var(--mono);color:var(--a2)} .sk p{font-size:13.5px;margin:3px 0;line-height:1.4} .sk small{font-size:11px;color:var(--faint);font-family:var(--mono)}
+.sk .ctl{float:right;display:flex;gap:6px;align-items:center} .sk.off{opacity:.5}
+/* root */
+.dm{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px}
+.dm .ic{width:30px;height:30px;border-radius:50%;flex:none;background:rgba(var(--ar),.15);display:grid;place-items:center;font:700 12px var(--ui);color:var(--a2);border:1px solid var(--line2)}
+.dm .tx{flex:1;min-width:0}.dm .tx b{font-weight:600}.dm .tx small{display:block;color:var(--dim);font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dm .tm{font:10.5px var(--mono);color:var(--faint)}
+.dm.in .ic{background:rgba(255,179,71,.18);color:var(--amber);border-color:rgba(255,179,71,.4)}
+.rl{font:12px/1.55 var(--mono);color:var(--dim);padding:5px 0;border-bottom:1px dashed var(--line)}
+.rl b{color:var(--a2);font-weight:500}.rl.sent b{color:var(--green)}.rl.error b{color:var(--red)}
+/* studio */
+.drop{border:1.5px dashed var(--line2);border-radius:6px;padding:20px;text-align:center;cursor:pointer;transition:.2s;background:rgba(var(--ar),.03)}
+.drop:hover{border-color:var(--a);background:rgba(var(--ar),.08)}
+.drop b{display:block;font-size:15px;color:var(--a2);margin-bottom:4px;word-break:break-all}
+.drop span{font-size:12.5px;color:var(--dim)}
+.tools4{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.tool{border:1px solid var(--line);background:rgba(0,0,0,.2);padding:12px;cursor:pointer;text-align:left;color:var(--text);border-radius:4px;transition:.2s}
+.tool:hover{border-color:var(--a);background:rgba(var(--ar),.08)}
+.tool b{display:block;font-size:14px;letter-spacing:.06em;margin-bottom:3px;color:var(--a2)}
+.tool span{font-size:12px;color:var(--dim);line-height:1.35}
+.tool:disabled{opacity:.4;cursor:default}
+
+/* ======================= COMMAND BAR ======================= */
+footer{display:flex;align-items:center;gap:12px;border-top:1px solid var(--line)}
+.mic{width:54px;height:54px;border-radius:50%;border:1px solid var(--line2);background:radial-gradient(circle,rgba(var(--ar),.16),transparent 70%);color:var(--a2);cursor:pointer;display:grid;place-items:center;transition:.25s;flex:none}
+.mic svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.7}
+.mic:hover{box-shadow:0 0 22px rgba(var(--ar),.5);border-color:var(--a)}
+body.state-listening .mic{color:var(--listen);border-color:var(--listen);background:radial-gradient(circle,rgba(var(--listenr),.35),transparent 70%);animation:micpulse 1.2s infinite}
+.cmd{flex:1;display:flex;align-items:center;border:1px solid var(--line2);background:rgba(3,12,20,.82);height:50px;padding:0 8px 0 15px;transition:.25s;border-radius:3px;min-width:0}
+.cmd:focus-within{border-color:var(--a);box-shadow:0 0 24px rgba(var(--ar),.16)}
+.cmd .pr{font:500 13.5px var(--mono);color:var(--a);margin-right:10px}
+#input{flex:1;background:none;border:0;outline:0;color:var(--text);font:500 16.5px var(--ui);letter-spacing:.02em;min-width:0}
+#input::placeholder{color:var(--faint);letter-spacing:.08em}
+.cmd kbd{font:10px var(--mono);border:1px solid var(--line2);padding:2px 6px;color:var(--faint);border-radius:2px}
+#send{height:50px;min-width:118px}
+#send.stop{color:#ff8fab;border-color:rgba(255,79,123,.55);background:rgba(255,79,123,.12)}
+.btn.claude{color:#f0b892;border-color:rgba(232,168,124,.4);background:rgba(232,168,124,.08);height:50px}
+.btn.claude:hover{background:rgba(232,168,124,.18);box-shadow:0 0 16px rgba(232,168,124,.35)}
+
+/* ======================= OVERLAYS ======================= */
+#toasts{position:fixed;top:70px;right:22px;z-index:65;display:flex;flex-direction:column;gap:8px;align-items:flex-end;pointer-events:none}
+.toast{background:rgba(6,16,26,.96);border:1px solid var(--line2);border-left:3px solid var(--a);padding:10px 14px;font-size:13.5px;max-width:390px;animation:slidein .3s cubic-bezier(.2,.8,.2,1);box-shadow:0 8px 30px rgba(0,0,0,.5);border-radius:3px}
+.toast.warn{border-left-color:var(--amber)} .toast.out{animation:slideout .3s forwards}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(400px,90vw);background:rgba(5,13,22,.97);border-left:1px solid var(--line2);z-index:66;transform:translateX(100%);transition:transform .3s cubic-bezier(.2,.8,.2,1);display:flex;flex-direction:column}
+.drawer.show{transform:none;box-shadow:-20px 0 60px rgba(0,0,0,.5)}
+.nt{padding:10px 16px;border-bottom:1px solid var(--line);font-size:13.5px;line-height:1.45}
+.nt time{display:block;font:10px var(--mono);color:var(--faint);margin-bottom:2px}
+.veil{position:fixed;inset:0;background:rgba(2,5,10,.76);display:none;place-items:center;z-index:70}
+body:not(.lite) .veil{backdrop-filter:blur(6px)}
+.veil.show{display:grid;animation:fadein .2s}
+.modal{width:min(580px,94vw);max-height:88vh;overflow:auto;background:#061220;border:1px solid var(--line2);padding:22px 24px;position:relative;box-shadow:0 0 70px rgba(0,0,0,.6);border-radius:4px}
+.modal h2{font:800 13px var(--disp);letter-spacing:.34em;color:var(--a2);margin-bottom:14px}
+.modal h3{font-size:10.5px;letter-spacing:.3em;color:var(--dim);margin:18px 0 9px;padding-top:12px;border-top:1px solid var(--line)}
+.modal.warn{border-color:rgba(255,179,71,.5)} .modal.warn h2{color:var(--amber)}
+.modal p{line-height:1.5}
+.modal .act{font:12.5px var(--mono);background:rgba(0,0,0,.4);border:1px solid var(--line);padding:10px;margin:12px 0 16px;word-break:break-all;color:var(--amber)}
+.row2{display:flex;gap:10px;justify-content:flex-end;margin-top:18px}
+.field{margin-bottom:10px}
+.field label{display:flex;justify-content:space-between;font-size:10.5px;letter-spacing:.2em;color:var(--dim);margin-bottom:5px}
+.field label a{color:var(--a2);letter-spacing:.05em;font-size:11px;cursor:pointer}
+.field input,.field select{width:100%;background:rgba(0,0,0,.35);border:1px solid var(--line2);color:var(--text);font:13.5px var(--mono);padding:8px 10px;outline:0;border-radius:3px}
+.field select{font-family:var(--ui);font-size:14px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.voicerow{display:flex;gap:8px}.voicerow select{flex:1}
+.memlist{max-height:46vh;overflow:auto;font:12.5px/1.6 var(--mono)}
+.memlist div{padding:6px 0;border-bottom:1px solid var(--line)}
+/* palette */
+#palette{position:fixed;inset:0;z-index:75;display:none;justify-content:center;padding-top:14vh;background:rgba(2,5,10,.6)}
+#palette.show{display:flex;animation:fadein .15s}
+.pal{width:min(620px,92vw);background:#061220;border:1px solid var(--line2);box-shadow:0 30px 90px rgba(0,0,0,.7);border-radius:6px;overflow:hidden;align-self:flex-start}
+.pal input{width:100%;background:none;border:0;border-bottom:1px solid var(--line);color:var(--text);font:500 18px var(--ui);padding:16px 18px;outline:0}
+.pal .items{max-height:46vh;overflow:auto}
+.pal .it{display:flex;justify-content:space-between;padding:10px 18px;font-size:15px;cursor:pointer;color:var(--dim)}
+.pal .it small{font:11px var(--mono);color:var(--faint)}
+.pal .it.sel{background:rgba(var(--ar),.12);color:var(--a2)}
+/* update banner */
+#upd{position:fixed;left:50%;top:68px;transform:translateX(-50%);z-index:64;background:rgba(6,18,30,.96);border:1px solid var(--a);padding:8px 10px 8px 16px;display:none;align-items:center;gap:12px;font-size:13.5px;box-shadow:0 0 30px rgba(var(--ar),.25);border-radius:4px}
+#upd.show{display:flex;animation:rise .4s}
+/* boot */
+#boot{position:fixed;inset:0;background:#010307;z-index:95;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;transition:opacity .7s}
+#boot.gone{opacity:0;pointer-events:none}
+#boot .bring{width:120px;height:120px;position:relative;margin-bottom:8px}
+#boot .bring i{position:absolute;inset:0;border-radius:50%;border:2px solid transparent;border-top-color:var(--a);border-right-color:var(--a);animation:spin 1.1s linear infinite}
+#boot .bring b{position:absolute;inset:18px;border-radius:50%;border:1.5px dashed var(--a2);animation:spin 3s linear infinite reverse}
+#boot .bring s{position:absolute;inset:44px;border-radius:50%;background:var(--a2);box-shadow:0 0 30px var(--a2);animation:pulse 1.4s infinite}
+#boot h1{font:800 40px var(--disp);letter-spacing:.6em;color:var(--a2);text-shadow:0 0 30px rgba(var(--ar),.6);margin-left:.6em;animation:glitch 2.4s infinite}
+#boot .ver{font:11px var(--mono);color:var(--dim);letter-spacing:.3em;margin-top:-10px}
+#bootlines{font:12.5px/1.8 var(--mono);color:var(--dim);width:440px;min-height:120px}
+#bootlines b{color:var(--green);font-weight:500}
+#bootbar{width:440px;height:2px;background:rgba(var(--ar),.12)}
+#bootbar div{height:100%;width:0;background:var(--a);box-shadow:0 0 12px rgba(var(--ar),.7);transition:width .25s}
+
+::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-thumb{background:var(--line2);border-radius:3px}::-webkit-scrollbar-track{background:transparent}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{0%,100%{transform:scale(.94);opacity:.85}50%{transform:scale(1.05);opacity:1}}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}}
+@keyframes pagein{from{opacity:0;transform:translateX(14px)}}
+@keyframes fadein{from{opacity:0}}
+@keyframes blink{50%{opacity:0}}
+@keyframes blink2{0%,100%{opacity:.25}50%{opacity:1}}
+@keyframes slidein{from{opacity:0;transform:translateX(30px)}}
+@keyframes slideout{to{opacity:0;transform:translateX(30px)}}
+@keyframes micpulse{50%{box-shadow:0 0 0 12px rgba(var(--listenr),.06),0 0 34px rgba(var(--listenr),.6)}}
+@keyframes sweep{to{top:110vh}}
+@keyframes glitch{0%,92%,100%{transform:none;text-shadow:0 0 30px rgba(var(--ar),.6)}93%{transform:translateX(-3px);text-shadow:3px 0 #ff2d6f,-3px 0 #2df7ff}95%{transform:translateX(3px)}97%{transform:none}}
+body.lite .r1,body.lite .r4,body.lite .r6{animation:none}
+@media (max-width:1700px){.brand small{display:none}}
+@media (max-width:1500px){.stage{grid-template-columns:240px minmax(0,1fr) minmax(380px,38%)}.links{display:none}}
+@media (max-width:1250px){.stage{grid-template-columns:minmax(0,1fr) minmax(360px,48%)}.left{display:none}.themes{display:none}}
+</style>
+</head>
+<body class="state-idle" data-theme="standby">
+<canvas id="bgfx"></canvas><div class="backdrop"></div><div class="grid"></div><div class="sweep"></div>
+
+<div id="boot">
+  <div class="bring"><i></i><b></b><s></s></div>
+  <h1 id="bootname">ORION</h1><div class="ver" id="bootver">v2.0</div>
+  <div id="bootlines"></div>
+  <div id="bootbar"><div></div></div>
+</div>
+
+<div class="shell">
+  <!-- ============ DOCK ============ -->
+  <nav class="dock" id="dock">
+    <div class="dlogo" title="ORION"><i></i><b></b><s></s></div>
+    <button class="nav on" data-page="comms"><svg viewBox="0 0 24 24"><path d="M4 5h16v10H9l-5 4z"/></svg><span class="tip">COMMS</span></button>
+    <button class="nav" data-page="auto"><svg viewBox="0 0 24 24"><path d="M12 3l2.5 5.5L20 9l-4 4 1 6-5-3-5 3 1-6-4-4 5.5-.5z"/></svg><span class="tip">AUTOPILOT</span><span class="bdg" id="b-auto"></span></button>
+    <button class="nav" data-page="sched"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg><span class="tip">SCHEDULE</span></button>
+    <button class="nav" data-page="root"><svg viewBox="0 0 24 24"><path d="M12 21V11M12 11c0-4 3-7 7-7 0 4-3 7-7 7zM12 14c0-3-2.5-5.5-6-5.5 0 3 2.5 5.5 6 5.5z"/></svg><span class="tip">ROOT</span><span class="bdg" id="b-root"></span></button>
+    <button class="nav" data-page="studio"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="13" height="12" rx="2"/><path d="M16 10l5-3v10l-5-3z"/></svg><span class="tip">STUDIO</span></button>
+    <button class="nav" data-page="skills"><svg viewBox="0 0 24 24"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9V16h7v-2.1A6 6 0 0 0 12 3z"/></svg><span class="tip">SKILLS</span></button>
+    <button class="nav" data-page="devices"><svg viewBox="0 0 24 24"><rect x="2" y="4" width="14" height="10" rx="1.5"/><path d="M6 18h6M9 14v4"/><rect x="17" y="8" width="5" height="11" rx="1"/></svg><span class="tip">DEVICES</span><span class="bdg" id="b-dev"></span></button>
+    <div class="sp"></div>
+    <button class="nav" id="nMem"><svg viewBox="0 0 24 24"><path d="M12 3a7 7 0 0 0-4 12.7V19h8v-3.3A7 7 0 0 0 12 3zM9 22h6"/></svg><span class="tip">MEMORY</span></button>
+    <button class="nav" id="nSet"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg><span class="tip">SETTINGS</span></button>
+  </nav>
+
+  <div class="main">
+    <!-- ============ TOP BAR ============ -->
+    <header>
+      <div class="brand"><h1 id="name">ORION</h1><small>PERSONAL INTELLIGENCE SYSTEM</small></div>
+      <div class="seg" id="brains" title="Which brain to use"><button data-m="auto">AUTO</button><button data-m="cloud">CLOUD</button><button data-m="local">LOCAL</button></div>
+      <div class="themes" id="themes">
+        <button data-t="standby" style="background:#3fd8ff;color:#3fd8ff" title="Standby"></button>
+        <button data-t="serious" style="background:#ff3d4a;color:#ff3d4a" title="Serious"></button>
+        <button data-t="stealth" style="background:#b9c4cc;color:#b9c4cc" title="Stealth"></button>
+        <button data-t="executive" style="background:#e9b949;color:#e9b949" title="Executive"></button>
+        <button data-t="hacker" style="background:#2bff88;color:#2bff88" title="Hacker"></button>
+      </div>
+      <div class="spacer"></div>
+      <div class="chip" id="apchip"><i></i>AUTOPILOT</div>
+      <div class="chip" id="afkchip"><i></i>AFK</div>
+      <div class="chip" id="gchip"><i></i><span id="gname">GAMING</span></div>
+      <div class="links">
+        <span id="lcloud"><i class="dot" id="dcloud"></i>CLOUD <b id="ncloud" style="font-weight:500"></b></span>
+        <span id="llocal"><i class="dot" id="dlocal"></i>LOCAL</span>
+        <span><i class="dot ok" id="dvoice"></i>VOICE</span>
+      </div>
+      <div class="clock"><b id="clock">--:--:--</b><small id="date">—</small></div>
+      <div class="winbtns">
+        <button class="ib" id="bSpeak" title="Voice on/off"><svg viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4z"/><path id="spkwave" d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12"/></svg></button>
+        <button class="ib" id="gamingbtn" title="Gaming Mode"><svg viewBox="0 0 24 24"><path d="M6 9h12a4 4 0 0 1 3.9 4.9l-.6 2.6a2.5 2.5 0 0 1-4.3 1.1L15 15.5H9l-2 2.1a2.5 2.5 0 0 1-4.3-1.1l-.6-2.6A4 4 0 0 1 6 9z"/><path d="M8 11v3M6.5 12.5h3"/></svg></button>
+        <button class="ib" id="bBell" title="Notifications"><svg viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15zM10 20a2 2 0 0 0 4 0"/></svg><span class="cnt" id="ncount">0</span></button>
+        <button class="ib" id="bMin" title="Minimise"><svg viewBox="0 0 24 24"><path d="M5 18h14"/></svg></button>
+        <button class="ib" id="bFs" title="Fullscreen (F11)"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg></button>
+        <button class="ib danger" id="bQuit" title="Shut down ORION"><svg viewBox="0 0 24 24"><path d="M12 3v8M6.3 6.3a8 8 0 1 0 11.4 0"/></svg></button>
+      </div>
+    </header>
+
+    <!-- ============ STAGE ============ -->
+    <div class="stage">
+      <section class="left">
+        <div class="panel">
+          <div class="ph">TELEMETRY <i id="procs">—</i></div>
+          <div class="pad">
+            <div class="meter"><div class="row">CPU <b id="cpu">0%</b></div><div class="bar segd" id="cpubar"><div id="cpub" style="width:0"></div></div><canvas id="spark"></canvas></div>
+            <div class="meter"><div class="row">MEMORY <b id="ram">0%</b></div><div class="bar" id="rambar"><div id="ramb" style="width:0"></div></div></div>
+            <div class="meter" id="batm" style="display:none"><div class="row">BATTERY <b id="bat">—</b></div><div class="bar"><div id="batb" style="width:0"></div></div></div>
+            <div class="kv"><span>RAM</span><b id="ramgb">—</b><span>STORAGE</span><b id="diskfree">—</b><span>NETWORK</span><b id="net">—</b><span>UPTIME</span><b id="uptime">—</b></div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="ph">AI ALLOWANCE <i>TODAY</i></div>
+          <div class="pad allow" id="allow"><div class="none">No cloud keys yet.</div></div>
+        </div>
+        <div class="panel actions">
+          <div class="ph">ACTION LOG <span><i id="actcount" style="margin-right:8px">0</i><button id="undoBtn" title="Undo the last file change">UNDO</button></span></div>
+          <div id="actlog"><div>› standing by</div></div>
+        </div>
+      </section>
+
+      <section class="core">
+        <div class="orb">
+          <canvas id="wave"></canvas>
+          <svg viewBox="0 0 500 500">
+            <defs>
+              <radialGradient id="cg" cx="50%" cy="50%" r="50%">
+                <stop offset="0" stop-color="var(--c2)" stop-opacity=".95"/><stop offset=".45" stop-color="var(--c)" stop-opacity=".42"/><stop offset="1" stop-color="var(--c)" stop-opacity="0"/>
+              </radialGradient>
+              <linearGradient id="rad" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="var(--c)" stop-opacity="0"/><stop offset="1" stop-color="var(--c)" stop-opacity=".45"/></linearGradient>
+              <path id="txtring" d="M250,250 m-226,0 a226,226 0 1,1 452,0 a226,226 0 1,1 -452,0"/>
+            </defs>
+            <g class="spin r6"><text class="ringtxt"><textPath href="#txtring" id="ringtext">ORION · PERSONAL INTELLIGENCE SYSTEM · ALL SYSTEMS ONLINE · ORION · PERSONAL INTELLIGENCE SYSTEM ·</textPath></text></g>
+            <g class="spin r1" id="ticks"></g>
+            <!-- CPU / RAM gauges -->
+            <circle cx="250" cy="250" r="196" fill="none" stroke="var(--c)" stroke-opacity=".08" stroke-width="5"/>
+            <circle id="gcpu" cx="250" cy="250" r="196" fill="none" stroke="var(--c)" stroke-width="5" stroke-linecap="round" stroke-dasharray="0 1232" transform="rotate(-210 250 250)" style="transition:stroke-dasharray .9s"/>
+            <circle id="gram" cx="250" cy="250" r="196" fill="none" stroke="var(--c2)" stroke-opacity=".7" stroke-width="5" stroke-linecap="round" stroke-dasharray="0 1232" transform="rotate(30 250 250)" style="transition:stroke-dasharray .9s"/>
+            <text x="78" y="410" class="gauge-lbl">CPU</text><text x="78" y="426" class="gauge-val" id="gcpuv">0%</text>
+            <text x="395" y="410" class="gauge-lbl">RAM</text><text x="395" y="426" class="gauge-val" id="gramv">0%</text>
+            <g class="spin r2"><circle cx="250" cy="250" r="178" fill="none" stroke="var(--c)" stroke-opacity=".35" stroke-width="1.2" stroke-dasharray="70 18 6 18"/></g>
+            <g class="radar"><path d="M250 250 L250 85 A165 165 0 0 1 393 167 Z" fill="url(#rad)" opacity=".35"/></g>
+            <g class="spin r5"><circle cx="250" cy="250" r="165" fill="none" stroke="var(--c2)" stroke-opacity=".55" stroke-width="1.4" stroke-dasharray="14 300"/><circle cx="250" cy="85" r="4" fill="var(--c2)"/></g>
+            <g class="spin r3"><circle cx="250" cy="250" r="150" fill="none" stroke="var(--c)" stroke-width="3" stroke-dasharray="120 116" stroke-linecap="round" opacity=".85"/></g>
+            <g class="spin r4"><circle cx="250" cy="250" r="132" fill="none" stroke="var(--c2)" stroke-opacity=".5" stroke-width="1" stroke-dasharray="2 6"/>
+              <circle cx="250" cy="118" r="3.5" fill="var(--c2)"/><circle cx="250" cy="382" r="2" fill="var(--c)"/><circle cx="118" cy="250" r="2.5" fill="var(--c)"/></g>
+            <polygon points="250,138 347,194 347,306 250,362 153,306 153,194" fill="none" stroke="var(--c)" stroke-opacity=".18"/>
+            <g class="corefill"><circle id="coreglow" cx="250" cy="250" r="100" fill="url(#cg)"/></g>
+            <circle cx="250" cy="250" r="64" fill="#03101b" fill-opacity=".62" stroke="var(--c2)" stroke-opacity=".65"/>
+            <text x="250" y="250" text-anchor="middle" class="statew" id="stateword">ONLINE</text>
+            <text x="250" y="268" text-anchor="middle" class="modew" id="modeword">STANDBY</text>
+          </svg>
+        </div>
+        <div class="substatus"><b id="statusline">ALL SYSTEMS NOMINAL</b><span id="statusdetail">awaiting instruction</span></div>
+        <div class="panel" id="codeview">
+          <div class="ph">CODE · <b id="cvpath">—</b><span><button id="cvcopy">COPY</button> <button id="cvclose">◉ CORE</button></span></div>
+          <pre id="cvcode"></pre>
+        </div>
+        <div class="hint" id="hint"><kbd>Ctrl</kbd>+<kbd>K</kbd> commands · <kbd>Ctrl</kbd>+<kbd>Space</kbd> talk · <kbd>Esc</kbd> stop</div>
+      </section>
+
+      <!-- ============ PAGES ============ -->
+      <section class="panel pages">
+        <!-- COMMS -->
+        <div class="page on" id="page-comms">
+          <div class="ph">COMMS <span style="font-family:var(--mono);letter-spacing:0;font-weight:500;color:var(--faint)">UI 2.0.1</span><i id="brainlabel">AUTO BRAIN</i></div>
+          <div id="log"></div>
+          <button id="toBottom" title="Jump to latest">▼ LATEST</button>
+          <div class="quick" id="quick">
+            <button data-q="check my messages">✉ Root DMs</button><button data-q="what's on today">📅 Today</button>
+            <button data-q="what's using my RAM">⚙ RAM hogs</button><button data-q="look at my screen and tell me what you see">👁 Look</button>
+            <button data-q="I'm afk">💤 AFK</button>
+          </div>
+        </div>
+        <!-- AUTOPILOT -->
+        <div class="page" id="page-auto">
+          <div class="ph">AUTOPILOT <i id="apstate">READY</i></div>
+          <div class="scroll">
+            <div class="lbl">MISSION</div>
+            <textarea class="goal" id="goal" placeholder="Describe a goal… e.g. make me an app that closes everything except Discord and Spotify"></textarea>
+            <div class="rowbtns"><button class="btn" id="launch" style="flex:1">▶ LAUNCH AUTOPILOT</button><button class="btn small" id="openproj" style="height:40px">PROJECTS ↗</button></div>
+            <div class="plan" id="plan"><div class="empty" style="margin-top:8px">ORION plans the job, then builds, tests and fixes it on its own. Progress shows here.<br><br>Try:
+              <a class="ex">make me an app that closes everything except Discord and Spotify</a>
+              <a class="ex">build a python tool that sorts my Downloads folder by file type</a>
+              <a class="ex">research the 3 best free Discord bot hosts and save a summary to my desktop</a></div></div>
+            <div class="plannote" id="plannote"></div>
+            <div class="planfin" id="planfin">✓ Mission complete — see COMMS for the summary.</div>
+          </div>
+        </div>
+        <!-- SCHEDULE -->
+        <div class="page" id="page-sched">
+          <div class="ph">SCHEDULE <i>NEXT 14 DAYS</i></div>
+          <div class="scroll"><div class="busyban" id="busyban"></div><div id="evlist"></div></div>
+          <div class="addev">
+            <input class="inp full" id="evTitle" placeholder="Title — e.g. Gaming with Sam">
+            <input class="inp" type="date" id="evDate"><input class="inp" type="time" id="evTime" value="19:00">
+            <select class="inp" id="evDur"><option value="30">30 min</option><option value="60" selected>1 hour</option><option value="90">1.5 hours</option><option value="120">2 hours</option><option value="180">3 hours</option></select>
+            <select class="inp" id="evRep"><option value="none">One-off</option><option value="daily">Daily</option><option value="weekdays">Weekdays</option><option value="weekly">Weekly</option></select>
+            <input class="inp" id="evWith" placeholder="With (optional)">
+            <label><input type="checkbox" id="evBusy"> Busy / DND</label>
+            <button class="btn small full" id="evAdd">+ ADD TO SCHEDULE</button>
+          </div>
+        </div>
+        <!-- ROOT -->
+        <div class="page" id="page-root">
+          <div class="ph">ROOT <span><span class="pill" id="rootRun">—</span></span></div>
+          <div class="scroll">
+            <div class="card">
+              <h4>AFK MODE <button class="btn small" id="afkBtn">TURN ON</button></h4>
+              <p>While AFK, ORION answers your DMs as <b>your assistant</b>, tells friends when you're back and books games into your schedule. Friends can't make it do anything else.</p>
+              <input class="inp" id="afkNote" placeholder="Note for friends — e.g. back at 8pm" style="margin-top:8px">
+            </div>
+            <div class="rowbtns"><button class="btn" id="rootCheck" style="flex:1">✉ CHECK MESSAGES</button></div>
+            <div class="lbl sp">INBOX</div>
+            <div id="dmlist"><div class="empty">Press CHECK MESSAGES, or say "check my messages".</div></div>
+            <div class="lbl sp">IN-GAME</div>
+            <label class="tog"><input type="checkbox" id="rWatch"> Notice new DMs in the background <small>— only while Root is open</small></label>
+            <label class="tog"><input type="checkbox" id="rGame"> Reply to DMs while I'm in a game</label>
+            <div class="field" style="margin-top:6px"><label>WHEN GAMING, SEND REPLIES…</label>
+              <select class="inp" id="rGameMode"><option value="instant">Instantly (flicks to Root for ~1 second)</option><option value="queue">After the game ends</option></select></div>
+            <div class="lbl sp">ACTIVITY</div>
+            <div id="rootlog"><div class="empty">Nothing yet.</div></div>
+          </div>
+        </div>
+        <!-- STUDIO -->
+        <div class="page" id="page-studio">
+          <div class="ph">STUDIO <i>VIDEO EDITOR</i></div>
+          <div class="scroll">
+            <div class="drop" id="drop"><b id="vidname">Choose a video</b><span id="vidinfo">or ORION will use your newest video in Videos / Downloads</span></div>
+            <div class="tools4">
+              <button class="tool" data-v="autocut"><b>✂ AUTO-CUT</b><span>Remove silences, dead air and long pauses.</span></button>
+              <button class="tool" data-v="captions"><b>💬 CAPTIONS</b><span>Big punchy burned-in subtitles + .srt file.</span></button>
+              <button class="tool" data-v="shorts"><b>📱 SHORTS</b><span>3 vertical clips of the best moments, captioned.</span></button>
+              <button class="tool" data-v="metadata"><b>🏷 TITLE &amp; TAGS</b><span>Titles, description, chapters and tags.</span></button>
+            </div>
+            <div class="card" style="margin-top:14px"><h4>RESULT</h4><p id="studioOut">Renders run on the CPU — a 10-minute 1080p video takes roughly 10–20 minutes. Press STOP to cancel.</p></div>
+          </div>
+        </div>
+        <!-- SKILLS -->
+        <div class="page" id="page-skills">
+          <div class="ph">SKILLS <i id="skcount">0</i></div>
+          <div class="scroll">
+            <div class="empty" style="margin-bottom:6px">Say <b>"learn how to …"</b> and ORION writes a new ability, safety-checks it, tests it, and only keeps it if it works.</div>
+            <div id="sklist"></div>
+          </div>
+        </div>
+        <!-- DEVICES -->
+        <div class="page" id="page-devices">
+          <div class="ph">DEVICES <i id="verlbl">v2.0</i></div>
+          <div class="scroll" id="devscroll">
+            <div class="card"><h4>PHONE &amp; LAPTOP ACCESS <button class="btn small" id="remBtn">TURN ON</button></h4>
+              <p id="remInfo">Control this PC's ORION from your phone or laptop — anywhere, using Tailscale (free, private).</p></div>
+            <div class="card"><h4>PHONE NOTIFICATIONS <button class="btn small" id="pushBtn">TURN ON</button></h4>
+              <p id="pushInfo">Reminders, DMs and finished missions pushed to your phone with the free <b>ntfy</b> app.</p></div>
+            <div class="card"><h4>SYNC <span class="pill" id="syncPill">OFF</span></h4>
+              <p>Shares memory and schedule between your PC, laptop and phone using a private GitHub Gist.</p>
+              <div class="voicerow" style="margin-top:8px"><input class="inp" type="password" id="ghTok" placeholder="GitHub token (classic, 'gist' scope)"><button class="btn small" id="ghSave">SAVE</button></div>
+              <p style="margin-top:6px;font-size:12px"><a class="ex" style="display:inline" data-url="https://github.com/settings/tokens/new?scopes=gist&description=ORION%20sync">Create a token ↗</a></p></div>
+            <div class="card"><h4>WAKE WORD <button class="btn small" id="wakeBtn">TURN ON</button></h4>
+              <p id="wakeInfo">Say the wake phrase and ORION starts listening — no buttons.</p></div>
+            <div class="card"><h4>VOICE ID <button class="btn small" id="vidBtn">LEARN MY VOICE</button></h4>
+              <p id="vidInfo">ORION learns your voice and ignores everyone else.</p></div>
+            <div class="card"><h4>UPDATES <button class="btn small" id="updBtn">CHECK</button></h4>
+              <p id="updInfo">ORION updates itself from your GitHub repo.</p></div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ============ COMMAND BAR ============ -->
+    <footer>
+      <button class="mic" id="mic" title="Push to talk (Ctrl+Space)"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>
+      <div class="cmd"><span class="pr">&gt;_</span><input id="input" autocomplete="off" spellcheck="false" placeholder="Give an instruction…  (try “autopilot: …”)"><kbd>⌃K</kbd></div>
+      <button class="btn" id="send">EXECUTE</button>
+      <button class="btn claude" id="claude" title="Send what you've typed to Claude">ASK CLAUDE</button>
+    </footer>
+  </div>
+</div>
+
+<div id="toasts"></div>
+<div id="upd"><span id="updtxt">Update available</span><button class="btn small" id="updGo">INSTALL</button><button class="x" id="updX">×</button></div>
+
+<div class="drawer" id="drawer"><div class="ph">NOTIFICATIONS <span><button id="nclear">CLEAR</button> <button id="nclose">CLOSE</button></span></div><div style="flex:1;overflow:auto" id="nlist"><div class="nt"><div class="empty">Nothing yet.</div></div></div></div>
+
+<div id="palette"><div class="pal"><input id="palin" placeholder="Type a command or ask anything…"><div class="items" id="palitems"></div></div></div>
+
+<div class="veil" id="vConfirm"><div class="modal warn">
+  <h2>AUTHORISATION REQUIRED</h2><p>I'd like to perform this action:</p><div class="act" id="confirmText"></div>
+  <div class="row2"><button class="btn deny" id="cNo">DENY</button><button class="btn" id="cYes">AUTHORISE</button></div>
+</div></div>
+
+<div class="veil" id="vEnroll"><div class="modal">
+  <h2>VOICE ID</h2><p id="enrollTxt">Get ready…</p>
+  <div class="act" id="enrollLine" style="color:var(--a2);font-size:16px;font-family:var(--ui)"></div>
+  <div class="row2"><button class="btn" id="enrollClose">CLOSE</button></div>
+</div></div>
+
+<div class="veil" id="vSet"><div class="modal">
+  <h2>CONFIGURATION</h2>
+  <div class="two">
+    <div class="field"><label>ASSISTANT NAME</label><input type="text" id="sName"></div>
+    <div class="field"><label>WHAT IT CALLS YOU</label><input type="text" id="sTitle"></div>
+  </div>
+  <div class="field"><label>YOUR NAME (FOR FRIENDS ON ROOT)</label><input type="text" id="sOwner"></div>
+  <h3>AI BRAINS — EACH KEY ADDS ITS OWN FREE ALLOWANCE</h3>
+  <div id="sKeys"></div>
+  <div class="two">
+    <div class="field"><label>LOCAL MODEL (OLLAMA)</label><input type="text" id="sLocal" placeholder="qwen2.5:3b"></div>
+    <div class="field"><label>LOCAL VISION MODEL</label><input type="text" id="sLocalV" placeholder="moondream (optional)"></div>
+  </div>
+  <h3>VOICE</h3>
+  <div class="field"><label>VOICE</label><div class="voicerow"><select id="sVoice"></select><button class="btn small" id="sPreview">▶ PREVIEW</button></div></div>
+  <div class="field"><label>ENGINE</label><select id="sEngine"><option value="neural">Neural — natural (needs internet)</option><option value="offline">Offline — Windows voice</option></select></div>
+  <label class="tog"><input type="checkbox" id="sSpeak"> Speak replies out loud</label>
+  <h3>BEHAVIOUR</h3>
+  <label class="tog"><input type="checkbox" id="sSafe"> Safe mode <small>— ask before risky actions (blocklist + backups are always on)</small></label>
+  <label class="tog"><input type="checkbox" id="sFs"> Start in fullscreen</label>
+  <label class="tog"><input type="checkbox" id="sBoot"> Skip boot animation</label>
+  <div class="field" style="margin-top:8px"><label>VISUALS</label><select id="sVis"><option value="auto">Auto — lighter on low-RAM machines</option><option value="full">Full effects</option><option value="lite">Lite — best for old laptops</option></select></div>
+  <div class="row2"><button class="btn deny" id="sCancel">CANCEL</button><button class="btn" id="sSave">SAVE</button></div>
+</div></div>
+
+<div class="veil" id="vMem"><div class="modal">
+  <h2>LONG-TERM MEMORY</h2><div class="memlist" id="memlist"></div>
+  <p style="font-size:13px;color:var(--dim);margin-top:12px">Say "remember that…" to add, or "forget …" to remove.</p>
+  <div class="row2"><button class="btn deny" id="clearChat">CLEAR CHAT HISTORY</button><button class="btn" id="mClose">CLOSE</button></div>
+</div></div>
+
+<script>
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+let api=null, cfg={name:"ORION",title:"sir"}, state="idle", busy=false, micOn=false, micLevel=0, audioLevel=0, lite=false, speaking=false;
+let pendingConfirm=null, actN=0, current=null, notes=[], unread=0;
+const THEMES={standby:"STANDBY",serious:"SERIOUS",stealth:"STEALTH",executive:"EXECUTIVE",hacker:"HACKER"};
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const hhmm=()=>new Date().toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"});
+
+/* ================= events from Python ================= */
+window.ui={event(e){ switch(e.kind){
+  case "stream_start": startStream(e.id); break;
+  case "delta": appendStream(e.id,e.text); break;
+  case "stream_end": endStream(e); break;
+  case "message": addMsg(e.role,e.text,e.tier); break;
+  case "state": setState(e.state); break;
+  case "status": setStatus(null,e.text); break;
+  case "tool": logTool(e); break;
+  case "confirm": showConfirm(e); break;
+  case "claude": logLine(`<b>⇢</b> handed to <em>Claude</em>`); toast("Opened Claude with your request."); break;
+  case "toast": toast(e.text,e.level); break;
+  case "theme": applyTheme(e.theme); break;
+  case "audio": Voice.enqueue(e); break;
+  case "audio_stop": Voice.stop(); break;
+  case "speaking": setSpeaking(e.on); break;
+  case "stopped": setStatus("STOPPED","task cancelled"); apRunning(false); break;
+  case "plan": renderPlan(e); break;
+  case "code": showCode(e); break;
+  case "gaming": paintGaming(e.on,e.game); break;
+  case "schedule_changed": loadSched(); break;
+  case "skills_changed": loadSkills(); break;
+  case "root_snapshot": renderDMs(e.data); break;
+  case "root_log": addRootLog(e.entry); badge("root"); break;
+  case "root_afk": paintAfk(e.on,e.note); break;
+  case "root_text": break;
+  case "studio_done": $("#studioOut").innerHTML=esc(e.result).replace(/\n/g,"<br>"); $$(".tool").forEach(t=>t.disabled=false); break;
+  case "update": showUpdate(e); badge("dev"); break;
+  case "enroll": enrollStep(e); break;
+  case "wake": toast("Listening…"); break;
+  case "synced": loadSched(); break;
+  case "devices_changed": if($("#page-devices").classList.contains("on")) loadDevices(); break;
+}}};
+
+/* ================= state ================= */
+function setState(s){ state=s; document.body.classList.remove("state-idle","state-thinking","state-listening"); document.body.classList.add("state-"+s);
+  $("#stateword").textContent={idle:"ONLINE",thinking:"PROCESSING",listening:"LISTENING"}[s];
+  busy=s==="thinking"; const b=$("#send"); b.textContent=busy?"■ STOP":"EXECUTE"; b.classList.toggle("stop",busy);
+  if(s==="thinking") setStatus("PROCESSING","working on it…");
+  if(s==="listening") setStatus("LISTENING","speak now — Ctrl+Space or click to finish");
+  if(s==="idle"){ if(!speaking) setStatus("ALL SYSTEMS NOMINAL","awaiting instruction"); apRunning(false); } }
+function setSpeaking(on){ speaking=on; if(state==="idle") setStatus(on?"TRANSMITTING":"ALL SYSTEMS NOMINAL",on?"speaking":"awaiting instruction"); }
+function setStatus(a,b){ if(a!==null) $("#statusline").textContent=a; if(b!==undefined) $("#statusdetail").textContent=b; }
+function applyTheme(t){ if(!THEMES[t]) t="standby"; document.body.dataset.theme=t; $$("#themes button").forEach(b=>b.classList.toggle("on",b.dataset.t===t)); $("#modeword").textContent=THEMES[t]; }
+$$("#themes button").forEach(b=>b.onclick=()=>{ applyTheme(b.dataset.t); api.set_theme(b.dataset.t); });
+
+/* ================= navigation ================= */
+function go(p){ $$(".nav[data-page]").forEach(n=>n.classList.toggle("on",n.dataset.page===p)); $$(".page").forEach(x=>x.classList.toggle("on",x.id==="page-"+p));
+  const b=$("#b-"+p); if(b) b.classList.remove("show");
+  ({sched:loadSched,skills:loadSkills,root:loadRoot,devices:loadDevices})[p]?.(); }
+$$(".nav[data-page]").forEach(n=>n.onclick=()=>go(n.dataset.page));
+function badge(p){ const pg=$("#page-"+p); if(pg && !pg.classList.contains("on")) $("#b-"+p)?.classList.add("show"); }
+
+/* ================= chat ================= */
+function inline(s){ return esc(s).replace(/`([^`]+)`/g,"<code>$1</code>").replace(/\*\*([^*]+)\*\*/g,"<b>$1</b>").replace(/(^|[\s(])\*([^*\n]+)\*(?=[\s.,;:!?)]|$)/g,"$1<i>$2</i>").replace(/(https?:\/\/[^\s<)]+)/g,'<a data-url="$1">$1</a>'); }
+function render(t,streaming){ const parts=String(t).split("```"); return parts.map((p,i)=>{
+  if(i%2){ const nl=p.indexOf("\n"); const code=nl>-1&&/^[\w+#.-]*$/.test(p.slice(0,nl).trim())?p.slice(nl+1):p;
+    return `<pre>${streaming&&i===parts.length-1?"":'<button class="copy">COPY</button>'}${esc(code.replace(/\n$/,""))}</pre>`; }
+  let out="",inList=false; for(const l of p.split("\n")){ const m=l.match(/^\s*[-•*]\s+(.*)/);
+    if(m){ if(!inList){out+="<ul>";inList=true;} out+=`<li>${inline(m[1])}</li>`; } else { if(inList){out+="</ul>";inList=false;} out+=inline(l)+"<br>"; } }
+  if(inList) out+="</ul>"; return out.replace(/(<br>)+$/,""); }).join(""); }
+function msgEl(role,tier,model){ const d=document.createElement("div"); d.className="msg "+role;
+  const who=role==="user"?"YOU":role==="system"?"SYSTEM":cfg.name.toUpperCase();
+  d.innerHTML=`<div class="av"></div><div class="col"><div class="who">${who}<span class="tags"></span><time>${hhmm()}</time></div><div class="body"></div></div>`;
+  if(tier||model) setTags(d,tier,model); $("#log").appendChild(d); scrollChat(); return d; }
+function setTags(d,tier,model){ let h=""; if(tier&&tier!=="none") h+=`<span class="tier ${tier}">${tier.toUpperCase()}</span>`; if(model) h+=`<span class="model">${esc(model)}</span>`; d.querySelector(".tags").innerHTML=h; }
+function addMsg(role,text,tier){ const d=msgEl(role,tier); d.querySelector(".body").innerHTML=render(text); scrollChat(); if(role!=="user"&&!$("#page-comms").classList.contains("on")) {} }
+function scrollChat(force){ const l=$("#log"); if(force||l.scrollHeight-l.scrollTop-l.clientHeight<220) l.scrollTop=l.scrollHeight; }
+function startStream(id){ const d=msgEl("assistant"); d.querySelector(".body").innerHTML='<span class="typing"><span></span><span></span><span></span></span>'; current={id,el:d,text:""}; $("#log").scrollTop=1e9; }
+function appendStream(id,t){ if(!current||current.id!==id) return; current.text+=t; current.el.querySelector(".body").innerHTML=render(current.text,true)+'<span class="cursor"></span>'; scrollChat(); }
+function endStream(e){ if(!current||current.id!==e.id) return; const d=current.el;
+  if(e.stopped){ d.classList.add("stopped"); d.querySelector(".body").innerHTML=current.text?render(current.text)+" <i style='color:var(--dim)'>[stopped]</i>":"<i>Stopped.</i>"; }
+  else d.querySelector(".body").innerHTML=render(e.text||current.text||"Done.");
+  setTags(d,e.tier,e.model); current=null; scrollChat(); }
+(function(){ const l=$("#log");
+  // drive the scroll ourselves so it works in every WebView / touchpad / mouse
+  l.addEventListener("wheel",e=>{ e.preventDefault(); l.scrollTop+=e.deltaMode===1?e.deltaY*32:e.deltaMode===2?e.deltaY*l.clientHeight:e.deltaY; },{passive:false});
+  l.addEventListener("scroll",()=>$("#toBottom").classList.toggle("show",l.scrollHeight-l.scrollTop-l.clientHeight>300));
+  let drag=null; l.addEventListener("pointerdown",e=>{ if(e.pointerType==="touch") drag={y:e.clientY,t:l.scrollTop}; });
+  l.addEventListener("pointermove",e=>{ if(drag) l.scrollTop=drag.t-(e.clientY-drag.y); }); addEventListener("pointerup",()=>drag=null);
+  $("#toBottom").onclick=()=>{ l.scrollTop=l.scrollHeight; };
+  document.addEventListener("keydown",e=>{ if(document.activeElement.tagName==="INPUT"&&!["PageUp","PageDown"].includes(e.key)) return;
+    if(e.key==="PageUp"){ l.scrollTop-=l.clientHeight*.85; e.preventDefault(); } if(e.key==="PageDown"){ l.scrollTop+=l.clientHeight*.85; e.preventDefault(); } });
+})();
+$("#log").addEventListener("click",e=>{ if(e.target.classList.contains("copy")){ navigator.clipboard.writeText(e.target.parentElement.innerText.replace(/^COPY/,"")); e.target.textContent="COPIED"; }
+  const a=e.target.closest("a[data-url]"); if(a){ e.preventDefault(); api.open_link(a.dataset.url); } });
+document.addEventListener("click",e=>{ const a=e.target.closest("[data-url]"); if(a && !a.closest("#log")){ e.preventDefault(); api.open_link(a.dataset.url); } });
+function send(text){ if(busy&&text===undefined){ api.stop(); return; } const t=(text??$("#input").value).trim(); if(!t) return;
+  if(text===undefined) $("#input").value=""; Voice.unlock(); addMsg("user",t); go("comms"); scrollChat(true); api.send(t); }
+$("#send").onclick=()=>send(); $("#input").addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); send(); } });
+$("#claude").onclick=()=>{ const t=$("#input").value.trim(); api.ask_claude(t); $("#input").value=""; };
+$$("#quick button").forEach(b=>b.onclick=()=>send(b.dataset.q));
+
+/* ================= action log ================= */
+function logLine(html){ const d=document.createElement("div"); d.innerHTML=html; $("#actlog").appendChild(d); while($("#actlog").children.length>80) $("#actlog").firstChild.remove(); $("#actlog").scrollTop=1e9; return d; }
+const rows={};
+function logTool(e){ const key=e.name+e.args, icon={running:"◌",ok:"✓",error:"✕",denied:"⊘",blocked:"⛔"}[e.status], html=`<b>${icon}</b> <em>${esc(e.name)}</em>(${esc(e.args)})`;
+  if(e.status==="running"){ rows[key]=logLine(html); rows[key].className="running"; $("#actcount").textContent=++actN; setStatus(null,e.name.replace(/_/g," ")+"…"); }
+  else if(rows[key]){ rows[key].innerHTML=html; rows[key].className=e.status; delete rows[key]; if(e.status==="blocked") toast("Blocked a dangerous action.","warn"); } }
+$("#undoBtn").onclick=()=>api.undo();
+
+/* ================= toasts + notification centre ================= */
+function toast(text,level){ const t=document.createElement("div"); t.className="toast "+(level||""); t.textContent=text; $("#toasts").appendChild(t);
+  setTimeout(()=>{t.classList.add("out"); setTimeout(()=>t.remove(),300);},4400);
+  notes.unshift({t:hhmm(),text,level}); notes=notes.slice(0,80); if(!$("#drawer").classList.contains("show")){ unread++; paintBell(); } renderNotes(); }
+function paintBell(){ $("#ncount").textContent=unread>9?"9+":unread; $("#ncount").classList.toggle("show",unread>0); }
+function renderNotes(){ $("#nlist").innerHTML=notes.length?notes.map(n=>`<div class="nt"><time>${n.t}</time>${esc(n.text)}</div>`).join(""):'<div class="nt"><div class="empty">Nothing yet.</div></div>'; }
+$("#bBell").onclick=()=>{ $("#drawer").classList.toggle("show"); unread=0; paintBell(); };
+$("#nclose").onclick=()=>$("#drawer").classList.remove("show"); $("#nclear").onclick=()=>{ notes=[]; renderNotes(); };
+
+/* ================= confirm ================= */
+function showConfirm(e){ pendingConfirm=e.id; $("#confirmText").textContent=e.text; $("#vConfirm").classList.add("show"); }
+function answer(ok){ if(!pendingConfirm) return; api.confirm_reply(pendingConfirm,ok); pendingConfirm=null; $("#vConfirm").classList.remove("show"); }
+$("#cYes").onclick=()=>answer(true); $("#cNo").onclick=()=>answer(false);
+
+/* ================= voice out ================= */
+const Voice={ q:[],playing:false,ctx:null,an:null,data:null,el:null,
+  unlock(){ try{ if(!this.ctx){ this.ctx=new (window.AudioContext||window.webkitAudioContext)(); this.an=this.ctx.createAnalyser(); this.an.fftSize=256; this.data=new Uint8Array(this.an.frequencyBinCount); this.an.connect(this.ctx.destination); } if(this.ctx.state==="suspended") this.ctx.resume(); }catch(e){} },
+  enqueue(e){ this.q.push(e); if(!this.playing) this.next(); },
+  next(){ const e=this.q.shift(); if(!e){ this.playing=false; setSpeaking(false); return; } this.playing=true; setSpeaking(true); this.unlock();
+    const a=new Audio("data:audio/mpeg;base64,"+e.data); this.el=a;
+    try{ if(this.ctx&&this.ctx.state==="running"){ this.ctx.createMediaElementSource(a).connect(this.an); } }catch(err){}
+    a.onended=()=>this.next(); a.onerror=()=>{ api.audio_failed(e.text); this.next(); }; a.play().catch(()=>{ api.audio_failed(e.text); this.next(); }); },
+  stop(){ this.q=[]; if(this.el){ this.el.pause(); this.el=null; } this.playing=false; setSpeaking(false); },
+  level(){ if(!this.playing||!this.an) return 0; this.an.getByteFrequencyData(this.data); let s=0; for(let i=2;i<40;i++) s+=this.data[i]; return Math.min(1,s/38/170); } };
+document.addEventListener("pointerdown",()=>Voice.unlock(),{once:true});
+
+/* ================= mic ================= */
+async function toggleMic(){ Voice.unlock(); if(!micOn){ const ok=await api.mic_start(); if(!ok) return; micOn=true; pollMic(); }
+  else { micOn=false; const text=await api.mic_stop(); if(text){ send(text); } } }
+async function pollMic(){ while(micOn){ micLevel=await api.mic_level(); await new Promise(r=>setTimeout(r,70)); } micLevel=0; }
+$("#mic").onclick=toggleMic;
+
+/* ================= header ================= */
+$$("#brains button").forEach(b=>b.onclick=async()=>{ paintBrain(b.dataset.m); paintLinks(await api.set_brain(b.dataset.m)); });
+function paintBrain(m){ $$("#brains button").forEach(b=>b.classList.toggle("on",b.dataset.m===m)); $("#brainlabel").textContent=m.toUpperCase()+" BRAIN"; }
+function paintLinks(s){ if(!s) return; paintBrain(s.brain); $("#dcloud").className="dot "+(s.cloud.ok?"ok":(s.cloud.count?"bad":"")); $("#ncloud").textContent=s.cloud.count?`×${s.cloud.count}`:"";
+  $("#lcloud").title=s.cloud.count?"Cloud brains: "+s.cloud.labels.join(", "):"No cloud keys — add one in Settings"; $("#dlocal").className="dot "+(s.local.ok?"ok":"bad"); $("#llocal").title=s.local.ok?"Local: "+s.local.model:"Ollama not running"; }
+$("#bFs").onclick=()=>api.toggle_fullscreen(); $("#bMin").onclick=()=>api.minimize();
+$("#bQuit").onclick=()=>{ setStatus("SHUTTING DOWN","goodbye"); setTimeout(()=>api.quit(),350); };
+$("#bSpeak").onclick=async()=>paintSpeak(await api.toggle_speak());
+function paintSpeak(on){ $("#spkwave").style.opacity=on?1:.15; $("#dvoice").className="dot "+(on?"ok":""); }
+function paintGaming(on,game){ $("#gchip").classList.toggle("show",!!on); $("#gamingbtn").style.color=on?"var(--violet)":""; $("#gname").textContent=on?("GAMING · "+String(game||"").replace(/\.exe$/i,"").toUpperCase()).slice(0,24):"GAMING"; }
+$("#gamingbtn").onclick=async()=>paintGaming(await api.gaming_toggle(),"manual"); $("#gchip").onclick=async()=>paintGaming(await api.gaming_toggle(),"");
+function paintAfk(on,note){ $("#afkchip").classList.toggle("show",!!on); $("#afkchip").title=note||""; $("#afkBtn").textContent=on?"TURN OFF":"TURN ON"; $("#afkBtn").classList.toggle("on",!!on); }
+$("#afkchip").onclick=()=>go("root");
+
+/* ================= settings / memory ================= */
+$("#nSet").onclick=async()=>{ const s=await api.get_settings(); $("#sName").value=s.name; $("#sTitle").value=s.title; $("#sOwner").value=s.owner||""; $("#sLocal").value=s.local_model; $("#sLocalV").value=s.local_vision||"";
+  $("#sKeys").innerHTML=s.providers.map(p=>`<div class="field"><label>${esc(p.label.toUpperCase())} KEY ${p.key_url?`<a data-url="${esc(p.key_url)}">get a free key ↗</a>`:""}</label>
+    <input type="password" data-pid="${esc(p.id)}" value="${esc(p.key)}" placeholder="${p.id==="groq"?"gsk_…  (needed for voice + captions)":p.id==="gemini"?"best free vision brain":"optional — extra free allowance"}"></div>`).join("");
+  $("#sVoice").innerHTML=s.voices.map(([id,l])=>`<option value="${id}" ${id===s.voice?"selected":""}>${esc(l)}</option>`).join("");
+  $("#sEngine").value=s.engine; $("#sSpeak").checked=s.speak; $("#sSafe").checked=s.safe_mode; $("#sFs").checked=s.fullscreen; $("#sBoot").checked=s.skip_boot; $("#sVis").value=s.visuals; $("#vSet").classList.add("show"); };
+$("#sPreview").onclick=()=>{ Voice.unlock(); api.preview_voice($("#sVoice").value); }; $("#sCancel").onclick=()=>$("#vSet").classList.remove("show");
+$("#sSave").onclick=async()=>{ const keys={}; $$("#sKeys input").forEach(i=>keys[i.dataset.pid]=i.value);
+  const r=await api.save_settings({name:$("#sName").value,title:$("#sTitle").value,owner:$("#sOwner").value,keys,local_model:$("#sLocal").value,local_vision:$("#sLocalV").value,voice:$("#sVoice").value,engine:$("#sEngine").value,
+    speak:$("#sSpeak").checked,safe_mode:$("#sSafe").checked,fullscreen:$("#sFs").checked,skip_boot:$("#sBoot").checked,visuals:$("#sVis").value});
+  applyCfg(r); $("#vSet").classList.remove("show"); toast("Configuration saved."); paintLinks(await api.status()); pollMeters(); };
+$("#nMem").onclick=async()=>{ const m=await api.memories(); $("#memlist").innerHTML=m.length?m.map(x=>`<div>${esc(x)}</div>`).join(""):"<div>Nothing saved yet.</div>"; $("#vMem").classList.add("show"); };
+$("#mClose").onclick=()=>$("#vMem").classList.remove("show");
+$("#clearChat").onclick=async()=>{ await api.clear_chat(); $("#log").innerHTML=""; $("#vMem").classList.remove("show"); toast("Chat history cleared."); };
+
+/* ================= autopilot ================= */
+let apOn=false;
+function apRunning(on){ if(!on&&!apOn) return; apOn=on; $("#apchip").classList.toggle("show",on); $("#launch").textContent=on?"■ ABORT MISSION":"▶ LAUNCH AUTOPILOT"; $("#apstate").textContent=on?"RUNNING":"READY"; }
+$("#launch").onclick=()=>{ if(apOn||busy){ api.stop(); return; } const g=$("#goal").value.trim(); if(!g){ $("#goal").focus(); return; }
+  Voice.unlock(); addMsg("user","[AUTOPILOT] "+g); $("#planfin").style.display="none"; $("#plan").innerHTML='<div class="empty">Planning…</div>'; apRunning(true); api.autopilot(g); };
+$("#apchip").onclick=()=>go("auto"); $("#openproj").onclick=()=>api.projects_open();
+$$(".ex:not([data-url])").forEach(a=>a.onclick=()=>{ $("#goal").value=a.textContent; $("#goal").focus(); });
+function renderPlan(p){ if(!p.steps||!p.steps.length) return; badge("auto");
+  $("#plan").innerHTML=p.steps.map((st,i)=>{ const c=p.done||i<p.current?"done":i===p.current?"now":""; return `<div class="step ${c}"><i>${c==="done"?"✓":c==="now"?"▶":"○"}</i><span>${esc(st)}</span></div>`; }).join("");
+  $("#plannote").textContent=p.note?"› "+p.note:""; $("#planfin").style.display=p.done?"block":"none"; if(p.done){ apRunning(false); toast("Autopilot: mission complete."); } }
+
+/* ================= code viewer ================= */
+let cvText="";
+const TOK=/(#.*$|\/\/.*$)|("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')|\b(def|class|import|from|return|if|elif|else|for|while|try|except|finally|with|as|in|not|and|or|lambda|yield|function|const|let|var|async|await|new|True|False|None|true|false|null|print|self)\b|\b(\d+(?:\.\d+)?)\b/g;
+function hl(line){ let out="",last=0; line.replace(TOK,(m,cm,st,kw,nu,i)=>{ out+=esc(line.slice(last,i)); out+=`<em class="${cm?"cm":st?"st":kw?"kw":"nu"}">${esc(m)}</em>`; last=i+m.length; return m; }); return out+esc(line.slice(last)); }
+function showCode(e){ cvText=e.content; $("#cvpath").textContent=`${e.project} / ${e.path}`; $("#cvcode").innerHTML=e.content.split("\n").slice(0,2000).map(l=>`<div class="ln">${hl(l)||" "}</div>`).join("");
+  $("#codeview").classList.add("show"); $("#cvcode").scrollTop=0; }
+$("#cvclose").onclick=()=>$("#codeview").classList.remove("show"); $("#cvcopy").onclick=()=>{ navigator.clipboard.writeText(cvText); toast("Code copied."); };
+
+/* ================= schedule ================= */
+async function loadSched(){ const r=await api.schedule_get(14); const b=$("#busyban"); b.style.display=r.busy?"block":"none"; b.textContent=r.busy?`● DO NOT DISTURB — ${r.busy}`:"";
+  if(!r.items.length){ $("#evlist").innerHTML='<div class="empty">Nothing scheduled. Add below, or say "book gaming with Sam Saturday at 7".</div>'; return; }
+  let h="",last=""; for(const e of r.items){ if(e.day!==last){ h+=`<div class="day">${esc(e.day.toUpperCase())}</div>`; last=e.day; }
+    const sub=[e.with?"with "+e.with:"",e.repeat!=="none"?e.repeat:""].filter(Boolean).join(" · ");
+    h+=`<div class="ev"><span class="t">${e.time}–${e.until}</span><span class="n">${esc(e.title)}${e.busy?'<span class="tag">BUSY</span>':""}${sub?`<small>${esc(sub)}</small>`:""}</span><button class="x" data-id="${e.id}" title="Remove">×</button></div>`; }
+  $("#evlist").innerHTML=h; $$("#evlist .x").forEach(x=>x.onclick=async()=>{ await api.schedule_remove(x.dataset.id); loadSched(); }); }
+$("#evDate").value=new Date().toISOString().slice(0,10);
+$("#evAdd").onclick=async()=>{ const t=$("#evTitle").value.trim(); if(!t){ $("#evTitle").focus(); return; }
+  if(await api.schedule_add({title:t,date:$("#evDate").value,time:$("#evTime").value,duration:$("#evDur").value,repeat:$("#evRep").value,busy:$("#evBusy").checked,with:$("#evWith").value})){ $("#evTitle").value=""; $("#evWith").value=""; $("#evBusy").checked=false; toast("Added to schedule."); loadSched(); } };
+
+/* ================= skills ================= */
+async function loadSkills(){ const s=await api.skills_get(); $("#skcount").textContent=s.length;
+  $("#sklist").innerHTML=s.length?s.map(k=>`<div class="sk ${k.enabled===false?"off":""}"><div class="ctl"><button class="btn small" data-t="${esc(k.name)}" data-on="${k.enabled!==false}">${k.enabled===false?"ENABLE":"DISABLE"}</button><button class="x" data-d="${esc(k.name)}">×</button></div><b>${esc(k.name)}</b><p>${esc(k.description)}</p><small>learned ${esc(k.created||"")}</small></div>`).join(""):'<div class="empty">No skills yet. Try: "learn how to check the weather in Leicester".</div>';
+  $$("#sklist [data-t]").forEach(b=>b.onclick=async()=>{ await api.skill_toggle(b.dataset.t,b.dataset.on!=="true"); loadSkills(); });
+  $$("#sklist [data-d]").forEach(b=>b.onclick=async()=>{ await api.skill_remove(b.dataset.d); loadSkills(); }); }
+
+/* ================= root ================= */
+async function loadRoot(){ const r=await api.root_state(); $("#rootRun").textContent=r.running?"ROOT OPEN":"ROOT CLOSED"; $("#rootRun").className="pill "+(r.running?"ok":"warn");
+  paintAfk(r.afk,r.note); $("#afkNote").value=r.note||""; $("#rWatch").checked=r.settings.watch!==false; $("#rGame").checked=r.settings.gaming_autoreply!==false; $("#rGameMode").value=r.settings.gaming_reply||"instant";
+  $("#rootlog").innerHTML=""; (r.log||[]).slice().reverse().forEach(addRootLog); if(!(r.log||[]).length) $("#rootlog").innerHTML='<div class="empty">Nothing yet.</div>'; }
+function renderDMs(d){ if(!d) return; let h="";
+  if(d.view==="conversation"){ h=`<div class="lbl">OPEN CHAT · ${esc(d.with)}</div>`+(d.messages||[]).slice(-10).map(m=>`<div class="dm"><div class="ic">${esc((m.from||"?")[0]).toUpperCase()}</div><div class="tx"><b>${esc(m.from)}</b><small style="white-space:normal">${esc(m.text)}</small></div><span class="tm">${esc(m.time||"")}</span></div>`).join(""); }
+  else if(d.view==="text"){ h=`<pre style="font:12px var(--mono);white-space:pre-wrap;color:var(--dim)">${esc(d.raw)}</pre>`; }
+  else h=(d.conversations||[]).map(c=>`<div class="dm ${c.from_me?"":"in"}"><div class="ic">${esc((c.name||"?")[0]).toUpperCase()}</div><div class="tx"><b>${esc(c.name)}</b><small>${esc(c.preview)}</small></div><span class="tm">${esc(c.time||"")}</span></div>`).join("")||'<div class="empty">No conversations visible.</div>';
+  $("#dmlist").innerHTML=h; }
+function addRootLog(e){ if(!e) return; const ph=$("#rootlog .empty"); if(ph) ph.remove(); const d=document.createElement("div"); d.className="rl "+e.kind;
+  d.innerHTML=`${esc(e.t.slice(11))} <b>${esc(e.kind.toUpperCase())}</b> ${esc(e.who)}: ${esc(e.text)}`; $("#rootlog").prepend(d); }
+$("#rootCheck").onclick=()=>{ $("#dmlist").innerHTML='<div class="empty">Reading Root…</div>'; api.root_check(); };
+$("#afkBtn").onclick=async()=>{ const on=!$("#afkchip").classList.contains("show"); toast(await api.root_afk(on,$("#afkNote").value)); };
+["rWatch","rGame","rGameMode"].forEach(id=>$("#"+id).onchange=()=>api.root_settings({watch:$("#rWatch").checked,gaming_autoreply:$("#rGame").checked,gaming_reply:$("#rGameMode").value}));
+
+/* ================= studio ================= */
+let vidPath="latest";
+$("#drop").onclick=async()=>{ const p=await api.studio_pick(); if(p){ vidPath=p; $("#vidname").textContent=p.split(/[\\/]/).pop(); $("#vidinfo").textContent=p; } };
+$$(".tool[data-v]").forEach(t=>t.onclick=()=>{ $$(".tool").forEach(x=>x.disabled=true); $("#studioOut").textContent="Working… progress shows under the core. STOP cancels."; api.studio_run(t.dataset.v,vidPath); });
+
+/* ================= devices ================= */
+async function loadDevices(){ const d=await api.devices_info(); $("#verlbl").textContent="v"+d.version;
+  const r=d.remote; $("#remBtn").textContent=d.remote_enabled?"TURN OFF":"TURN ON"; $("#remBtn").classList.toggle("on",d.remote_enabled);
+  $("#remInfo").innerHTML=d.remote_enabled?`<b>PIN:</b> <span class="code">${esc(r.pin)}</span> <button class="mini" id="newPin">NEW PIN</button><br>
+    ${r.tailscale.length?`<b>Anywhere (Tailscale):</b><br>${r.tailscale.map(u=>`<span class="code">${esc(u)}</span>`).join(" ")}<br>`:`<b>Anywhere:</b> install <a class="ex" style="display:inline" data-url="https://tailscale.com/download">Tailscale ↗</a> on this PC and your phone (same account), then reopen this page.<br>`}
+    ${r.lan.length?`<b>Home Wi-Fi:</b> ${r.lan.map(u=>`<span class="code">${esc(u)}</span>`).join(" ")}<br>`:""}
+    Open the address on your phone (or in the ORION app) and enter the PIN. If Windows asks about the firewall, allow <b>Private networks</b>.`
+    :"Control this PC's ORION from your phone or laptop — anywhere, using Tailscale (free, private).";
+  const np=$("#newPin"); if(np) np.onclick=async()=>{ await api.devices_action("new_pin"); loadDevices(); };
+  $("#pushBtn").textContent=d.ntfy?"TURN OFF":"TURN ON"; $("#pushBtn").classList.toggle("on",!!d.ntfy);
+  $("#pushInfo").innerHTML=d.ntfy?`Install <a class="ex" style="display:inline" data-url="https://ntfy.sh/app">ntfy ↗</a> on your phone → <b>+</b> → subscribe to: <span class="code">${esc(d.ntfy)}</span> <button class="mini" id="pushTest">TEST</button><br><small style="color:var(--faint)">Keep the topic secret — anyone with it can read your notifications.</small>`:"Reminders, DMs and finished missions pushed to your phone with the free <b>ntfy</b> app.";
+  const pt=$("#pushTest"); if(pt) pt.onclick=()=>api.devices_action("push_test");
+  $("#syncPill").textContent=d.sync.token?(d.sync.status||"ON").toUpperCase():"OFF"; $("#syncPill").className="pill "+(d.sync.token?"ok":"");
+  const x=d.extras||{}; const fix=(err)=>x.frozen?`<span style="color:var(--amber)">${esc(err)}</span>`:
+    `Not working on this Python: <span class="code" style="font-size:11px">${esc(x.python||"")}</span><br><span style="color:var(--amber);font-size:12px">${esc(err||"")}</span><br>${x.installing?'<span class="pill warn">INSTALLING…</span>':'<button class="mini" data-fix="0">INSTALL WAKE WORD</button> <button class="mini" data-fix="1">INSTALL WAKE WORD + VOICE ID</button>'}`;
+  const w=d.wake; $("#wakeBtn").textContent=w.enabled?"TURN OFF":"TURN ON"; $("#wakeBtn").classList.toggle("on",w.enabled);
+  $("#wakeInfo").innerHTML=!w.available?fix(x.wake_err):`Say <b>"${esc(w.phrase)}"</b> and ORION starts listening. ${w.running?'<span class="pill ok">LISTENING</span>':""} ${w.error?`<br><span style="color:var(--amber)">${esc(w.error)}</span>`:""}`;
+  const v=d.voice_id; $("#vidBtn").textContent=v.enrolled?"RE-LEARN":"LEARN MY VOICE";
+  $("#vidInfo").innerHTML=!v.available?fix(x.vid_err):(v.enrolled?`Voice learned. ${v.enabled?'<span class="pill ok">ACTIVE</span>':'<span class="pill">OFF</span>'} <button class="mini" id="vidTog">${v.enabled?"DISABLE":"ENABLE"}</button>`:"ORION learns your voice from 3 short sentences and ignores everyone else.");
+  const vt=$("#vidTog"); if(vt) vt.onclick=async()=>{ await api.devices_action(v.enabled?"voiceid_off":"voiceid_on"); loadDevices(); };
+  $("#updInfo").innerHTML=d.update?`<b>${esc(d.update.version)}</b> is available. <button class="mini" id="updNow">INSTALL</button>`:`You're on <b>v${esc(d.version)}</b>. Repo: <span class="code">${esc(d.repo||"not set")}</span>`;
+  $$("[data-fix]").forEach(b=>b.onclick=async()=>{ await api.devices_action("install_extras",b.dataset.fix==="1"); toast("Installing — this takes a few minutes."); loadDevices(); });
+  const un=$("#updNow"); if(un) un.onclick=()=>api.devices_action("update_install"); }
+$("#remBtn").onclick=async()=>{ await api.devices_action($("#remBtn").classList.contains("on")?"remote_off":"remote_on"); loadDevices(); };
+$("#pushBtn").onclick=async()=>{ await api.devices_action($("#pushBtn").classList.contains("on")?"push_off":"push_on"); loadDevices(); };
+$("#ghSave").onclick=async()=>{ await api.devices_action("sync_token",$("#ghTok").value); $("#ghTok").value=""; toast("Sync token saved."); loadDevices(); };
+$("#wakeBtn").onclick=async()=>{ await api.devices_action($("#wakeBtn").classList.contains("on")?"wake_off":"wake_on"); loadDevices(); };
+$("#vidBtn").onclick=async()=>{ if(await api.voice_enroll()){ $("#enrollTxt").textContent="Read each line out loud when it appears (about 4 seconds each)."; $("#enrollLine").textContent="Get ready…"; $("#vEnroll").classList.add("show"); } };
+$("#enrollClose").onclick=()=>{ $("#vEnroll").classList.remove("show"); loadDevices(); };
+function enrollStep(e){ if(e.step>0){ $("#enrollTxt").textContent=`Line ${e.step} of 3 — read it now:`; $("#enrollLine").textContent=e.line; } else { $("#enrollTxt").textContent=e.step===0?"Done!":"Problem:"; $("#enrollLine").textContent=e.line; } }
+$("#updBtn").onclick=()=>api.devices_action("update_check").then(loadDevices);
+function showUpdate(u){ $("#updtxt").textContent=`ORION ${u.version} is available`; $("#upd").classList.add("show"); }
+$("#updGo").onclick=()=>api.devices_action("update_install"); $("#updX").onclick=()=>$("#upd").classList.remove("show");
+
+/* ================= command palette ================= */
+const CMDS=[["Check my Root messages","check my messages","ROOT"],["Go AFK","I'm afk","ROOT"],["I'm back","I'm back","ROOT"],["What's on today","what's on today","SCHEDULE"],
+  ["Look at my screen","look at my screen and tell me what you see","VISION"],["System status","system status","SYSTEM"],["Gaming mode on","gaming mode on","GAMING"],["Gaming mode off","gaming mode off","GAMING"],
+  ["Serious mode","serious mode","MODE"],["Standby mode","standby mode","MODE"],["Executive mode","executive mode","MODE"],["Hacker mode","hacker mode","MODE"],["Stealth mode","stealth mode","MODE"],
+  ["Undo last file change","undo","FILES"],["Take a screenshot","screenshot","SYSTEM"],["Auto-cut my latest video","autocut my latest video","STUDIO"],["Make Shorts from my latest video","make 3 shorts from my latest video","STUDIO"],
+  ["Lock PC","lock pc","SYSTEM"],["Open Autopilot",()=>go("auto"),"PAGE"],["Open Schedule",()=>go("sched"),"PAGE"],["Open Root",()=>go("root"),"PAGE"],["Open Studio",()=>go("studio"),"PAGE"],
+  ["Open Devices",()=>go("devices"),"PAGE"],["Open Skills",()=>go("skills"),"PAGE"],["Settings",()=>$("#nSet").click(),"PAGE"]];
+let palSel=0, palList=[];
+function openPal(){ $("#palette").classList.add("show"); $("#palin").value=""; filterPal(); setTimeout(()=>$("#palin").focus(),10); }
+function closePal(){ $("#palette").classList.remove("show"); }
+function filterPal(){ const q=$("#palin").value.toLowerCase().trim(); palList=CMDS.filter(c=>!q||c[0].toLowerCase().includes(q)||c[2].toLowerCase().includes(q));
+  if(q) palList.push([`Ask ORION: “${$("#palin").value}”`,$("#palin").value,"ASK"]); palSel=0; drawPal(); }
+function drawPal(){ $("#palitems").innerHTML=palList.map((c,i)=>`<div class="it ${i===palSel?"sel":""}" data-i="${i}">${esc(c[0])}<small>${c[2]}</small></div>`).join("");
+  $$("#palitems .it").forEach(el=>el.onclick=()=>runPal(+el.dataset.i)); }
+function runPal(i){ const c=palList[i]; if(!c) return; closePal(); typeof c[1]==="function"?c[1]():send(c[1]); }
+$("#palin").addEventListener("input",filterPal);
+$("#palin").addEventListener("keydown",e=>{ if(e.key==="ArrowDown"){ palSel=Math.min(palSel+1,palList.length-1); drawPal(); e.preventDefault(); }
+  else if(e.key==="ArrowUp"){ palSel=Math.max(palSel-1,0); drawPal(); e.preventDefault(); } else if(e.key==="Enter"){ runPal(palSel); } else if(e.key==="Escape") closePal(); });
+$("#palette").addEventListener("click",e=>{ if(e.target.id==="palette") closePal(); });
+
+/* ================= keys ================= */
+document.addEventListener("keydown",e=>{
+  if(e.ctrlKey&&e.code==="Space"){ e.preventDefault(); toggleMic(); }
+  else if(e.ctrlKey&&e.key.toLowerCase()==="k"){ e.preventDefault(); openPal(); }
+  else if(e.key==="F11"){ e.preventDefault(); api.toggle_fullscreen(); }
+  else if(e.key==="Escape"){ if(pendingConfirm){ answer(false); return; } if($("#palette").classList.contains("show")){ closePal(); return; }
+    const open=$$(".veil.show"); if(open.length) open.forEach(v=>v.classList.remove("show")); else if($("#drawer").classList.contains("show")) $("#drawer").classList.remove("show"); else if(busy||speaking) api.stop(); }
+  else if(pendingConfirm&&e.key==="Enter"){ e.preventDefault(); answer(true); }
+  else if(!e.ctrlKey&&!e.altKey&&e.key.length===1&&!["INPUT","SELECT","TEXTAREA"].includes(document.activeElement.tagName)&&!$(".veil.show")&&!$("#palette.show")) $("#input").focus();
+});
+
+/* ================= telemetry ================= */
+function tick(){ const d=new Date(); $("#clock").textContent=d.toLocaleTimeString("en-GB"); $("#date").textContent=d.toLocaleDateString("en-GB",{weekday:"short",day:"2-digit",month:"short",year:"numeric"}).toUpperCase(); }
+setInterval(tick,1000); tick();
+const cpuHist=Array(50).fill(0); let lastNet=null; const C=2*Math.PI*196, ARC=C*(140/360);
+const fmtUp=s=>{ const d=Math.floor(s/86400),h=Math.floor(s%86400/3600),m=Math.floor(s%3600/60); return (d?d+"d ":"")+h+"h "+m+"m"; };
+async function pollStats(){ try{ const s=await api.stats(); if(!s||s.cpu===undefined) return;
+  $("#cpu").textContent=s.cpu.toFixed(0)+"%"; $("#cpub").style.width=s.cpu+"%"; $("#cpubar").classList.toggle("hot",s.cpu>85);
+  $("#ram").textContent=s.ram.toFixed(0)+"%"; $("#ramb").style.width=s.ram+"%"; $("#rambar").classList.toggle("hot",s.ram>85);
+  $("#gcpu").setAttribute("stroke-dasharray",`${ARC*s.cpu/100} ${C}`); $("#gram").setAttribute("stroke-dasharray",`${ARC*s.ram/100} ${C}`);
+  $("#gcpuv").textContent=s.cpu.toFixed(0)+"%"; $("#gramv").textContent=s.ram.toFixed(0)+"%";
+  if(s.battery!=null){ $("#batm").style.display=""; $("#bat").textContent=s.battery+"%"+(s.plugged?" ⚡":""); $("#batb").style.width=s.battery+"%"; }
+  $("#ramgb").textContent=`${s.ram_used}/${s.ram_total} GB`; $("#diskfree").textContent=`${s.disk_free} GB free`; $("#procs").textContent=s.procs+" PROC"; $("#uptime").textContent=fmtUp(s.uptime);
+  if(lastNet!==null){ const kb=Math.max(0,(s.net-lastNet)/2048); $("#net").textContent=kb>1024?(kb/1024).toFixed(1)+" MB/s":kb.toFixed(0)+" KB/s"; }
+  lastNet=s.net; cpuHist.push(s.cpu); cpuHist.shift(); drawSpark(); }catch(e){} }
+function drawSpark(){ const c=$("#spark"),x=c.getContext("2d"),w=c.width=c.clientWidth*2,h=c.height=c.clientHeight*2; const col=getComputedStyle(document.body).getPropertyValue("--a").trim();
+  x.clearRect(0,0,w,h); x.beginPath(); cpuHist.forEach((v,i)=>{ const px=i/(cpuHist.length-1)*w,py=h-v/100*(h-4)-2; i?x.lineTo(px,py):x.moveTo(px,py); });
+  x.strokeStyle=col; x.lineWidth=2; x.stroke(); x.lineTo(w,h); x.lineTo(0,h); x.closePath(); const g=x.createLinearGradient(0,0,0,h); g.addColorStop(0,col+"55"); g.addColorStop(1,col+"00"); x.fillStyle=g; x.fill(); }
+const k=n=>n>=1e6?(n/1e6).toFixed(1)+"M":n>=1e3?(n/1e3).toFixed(1)+"k":String(n);
+async function pollMeters(){ try{ const ms=await api.meters(); if(!ms||!ms.length){ $("#allow").innerHTML=`<div class="none">No cloud keys yet — add one in Settings.</div>`; return; }
+  $("#allow").innerHTML=ms.map(m=>{ const hl=m.req_left!==null&&m.req_limit; const pct=hl?(m.req_left/m.req_limit*100):100; const tok=m.tok_left!==null&&m.tok_limit?`${k(m.tok_left)}/${k(m.tok_limit)} tok/min`:`${k(m.tokens)} tok today`;
+    return `<div class="prov"><div class="pn">${esc(m.label.toUpperCase())}<b>${hl?`${k(m.req_left)}/${k(m.req_limit)} left`:`${m.requests} req`}</b></div><div class="bar ${pct<15?"hot":""}"><div style="width:${pct}%"></div></div>
+      <div class="sub"><span>${esc((m.model||"").split("/").pop())}${m.resting?` · ${m.resting} resting`:""}</span><span>${tok}</span></div></div>`; }).join(""); }catch(e){} }
+
+/* ================= particles + core waveform ================= */
+const bg=$("#bgfx"),bx=bg.getContext("2d"); let parts=[];
+function initBg(){ bg.width=innerWidth; bg.height=innerHeight; parts=Array.from({length:lite?0:60},()=>({x:Math.random()*bg.width,y:Math.random()*bg.height,v:.12+Math.random()*.35,r:Math.random()*1.6+.3,o:Math.random()*.5+.15,d:Math.random()*Math.PI*2})); }
+addEventListener("resize",initBg);
+(function(){ const g=$("#ticks"); let s=""; for(let i=0;i<144;i++){ const a=i/144*Math.PI*2,r1=208,r2=i%12===0?221:214;
+  s+=`<line x1="${250+Math.cos(a)*r1}" y1="${250+Math.sin(a)*r1}" x2="${250+Math.cos(a)*r2}" y2="${250+Math.sin(a)*r2}" stroke="var(--c)" stroke-opacity="${i%12===0?.9:.3}" stroke-width="${i%12===0?2:1}"/>`; } g.innerHTML=s; })();
+const wv=$("#wave"),wx=wv.getContext("2d"); let phase=0,amps=Array(108).fill(0),lastFrame=0;
+function frame(t){ requestAnimationFrame(frame); if(lite&&t-lastFrame<33) return; lastFrame=t;
+  const size=Math.round(wv.clientWidth*(lite?1:2)); if(wv.width!==size){ wv.width=wv.height=size; }
+  const cx=size/2,R=size*.24,cs=getComputedStyle(document.body),col=cs.getPropertyValue("--c2").trim(); wx.clearRect(0,0,size,size); phase+=.05; audioLevel=Voice.level();
+  for(let i=0;i<amps.length;i++){ let target=.035+Math.sin(phase+i*.3)*.018;
+    if(state==="thinking") target=.12+Math.abs(Math.sin(phase*3+i*.5))*.18;
+    if(Voice.playing) target=.08+audioLevel*(.5+.5*Math.abs(Math.sin(phase*2.3+i*.41))); else if(speaking) target=.1+Math.random()*.45*Math.abs(Math.sin(phase*2+i*.2));
+    if(state==="listening") target=.06+micLevel*(.4+Math.random()*.6);
+    amps[i]+=(target-amps[i])*.25; const a=i/amps.length*Math.PI*2-Math.PI/2,len=amps[i]*size*.15;
+    wx.beginPath(); wx.moveTo(cx+Math.cos(a)*R,cx+Math.sin(a)*R); wx.lineTo(cx+Math.cos(a)*(R+len),cx+Math.sin(a)*(R+len)); wx.strokeStyle=col; wx.globalAlpha=.35+amps[i]; wx.lineWidth=size*.005; wx.lineCap="round"; wx.stroke(); }
+  wx.globalAlpha=1; $("#coreglow").setAttribute("r",100+audioLevel*24);
+  if(parts.length){ bx.clearRect(0,0,bg.width,bg.height); bx.fillStyle=cs.getPropertyValue("--a").trim();
+    for(const p of parts){ p.y-=p.v*(state==="thinking"?2.4:1); p.x+=Math.sin(phase*.3+p.d)*.15; if(p.y<-5){p.y=bg.height+5;p.x=Math.random()*bg.width;} bx.globalAlpha=p.o*.6; bx.beginPath(); bx.arc(p.x,p.y,p.r,0,7); bx.fill(); } bx.globalAlpha=1; } }
+
+/* ================= boot ================= */
+function applyCfg(c){ cfg=c; lite=!!c.lite; document.body.classList.toggle("lite",lite); initBg();
+  $("#name").textContent=c.name.toUpperCase(); $("#bootname").textContent=c.name.toUpperCase(); $("#bootver").textContent="v"+(c.version||"2.0"); document.title=c.name;
+  $("#ringtext").textContent=`${c.name.toUpperCase()} · PERSONAL INTELLIGENCE SYSTEM · ALL SYSTEMS ONLINE · ${c.name.toUpperCase()} · AT YOUR SERVICE ·`; applyTheme(c.theme||"standby"); paintSpeak(c.speak); }
+async function boot(){ const c=await api.init(); applyCfg(c); const st=api.status();
+  if(!c.skip_boot){ const lines=["Initialising core matrix",`Loading long-term memory  [${c.facts||0}]`,"Calibrating voice + vision","Linking cloud brains","Linking Root, Studio and devices",lite?"Interface online  [lite visuals]":"Interface online"]; let n=0;
+    for(const l of lines){ const d=document.createElement("div"); d.innerHTML=`› ${l} <b>…</b>`; $("#bootlines").appendChild(d); await new Promise(r=>setTimeout(r,130+Math.random()*110)); d.querySelector("b").textContent="OK"; $("#bootbar div").style.width=(++n/lines.length*100)+"%"; } }
+  paintLinks(await st); $("#boot").classList.add("gone");
+  (c.history||[]).forEach(m=>addMsg(m.role,m.content));
+  const hr=new Date().getHours(),greet=hr<12?"Good morning":hr<18?"Good afternoon":"Good evening";
+  if(!c.has_key) addMsg("system","No cloud brain keys yet. Open Settings (gear, bottom-left) and paste a free Groq key for full intelligence and voice.");
+  addMsg("assistant",`${greet}, ${c.title}. All systems are online.`,"reflex");
+  paintGaming(c.gaming,c.game); paintAfk(c.afk,c.afk_note);
+  if(c.hotkey) $("#hint").insertAdjacentHTML("beforeend",` · <kbd>${esc(c.hotkey)}</kbd> in-game`);
+  const p=await api.plan_get(); if(p&&p.steps&&p.steps.length) renderPlan(p);
+  $("#input").focus(); requestAnimationFrame(frame); setInterval(pollStats,2000); pollStats(); setInterval(pollMeters,6000); pollMeters(); setInterval(async()=>paintLinks(await api.status()),20000); }
+
+/* ================= start: real app, or browser preview with a fake backend ================= */
+window.addEventListener("pywebviewready",()=>{ api=window.pywebview.api; boot(); });
+setTimeout(()=>{ if(api) return; const wait=ms=>new Promise(r=>setTimeout(r,ms)); const A=async v=>v;
+  api={ init:()=>A({name:"ORION",title:"sir",version:"2.0",theme:"standby",brain:"auto",speak:true,has_key:true,facts:3,history:[],lite:false,hotkey:"ctrl+alt+space",gaming:false,afk:false}),
+    status:()=>A({brain:"auto",cloud:{ok:true,count:2,labels:["Groq","Gemini"]},local:{ok:false,model:"qwen2.5:3b"}}),
+    meters:()=>A([{label:"Groq",model:"openai/gpt-oss-120b",requests:154,tokens:412000,req_left:846,req_limit:1000,tok_left:6200,tok_limit:8000,resting:0},{label:"Gemini",model:"gemini-2.5-flash",requests:12,tokens:38000,req_left:null,req_limit:null,tok_left:null,tok_limit:null,resting:0}]),
+    stats:()=>A({cpu:25+Math.random()*25,ram:58,ram_used:9.3,ram_total:16,disk:48,disk_free:493,procs:212,net:Date.now()*40,uptime:20000,battery:null}),
+    send:async(t)=>{ ui.event({kind:"state",state:"thinking"}); ui.event({kind:"stream_start",id:"p"}); ui.event({kind:"tool",name:"root_check_messages",args:"",status:"running"}); await wait(600); ui.event({kind:"tool",name:"root_check_messages",args:"",status:"ok"});
+      for(const w of "You have 2 messages waiting, sir. **Adrian** asked for help and **Responeded** said “Now?”.".split(" ")){ ui.event({kind:"delta",id:"p",text:w+" "}); await wait(50); }
+      ui.event({kind:"stream_end",id:"p",text:"You have 2 messages waiting, sir. **Adrian** asked for help and **Responeded** said “Now?”.",tier:"cloud",model:"Groq gpt-oss-20b"}); ui.event({kind:"state",state:"idle"}); },
+    stop:()=>A(true),set_brain:m=>A({brain:m,cloud:{ok:true,count:2,labels:[]},local:{ok:false}}),set_theme:()=>A(),mic_start:()=>A(true),mic_stop:()=>A(""),mic_level:()=>A(Math.random()),ask_claude:()=>A(true),confirm_reply:()=>A(true),
+    toggle_fullscreen:()=>A(),minimize:()=>A(),quit:()=>A(),toggle_speak:()=>A(true),undo:()=>A(""),open_link:()=>A(),audio_failed:()=>A(),preview_voice:()=>A(),
+    get_settings:()=>A({name:"ORION",title:"sir",owner:"Kiyan",providers:[{id:"groq",label:"Groq",key:"gsk_x",key_url:"#"},{id:"gemini",label:"Gemini",key:"",key_url:"#"}],local_model:"qwen2.5:3b",local_vision:"",speak:true,engine:"neural",voice:"en-GB-SoniaNeural",voices:[["en-GB-SoniaNeural","Sonia — British, polished"]],safe_mode:false,fullscreen:true,visuals:"auto",skip_boot:false}),
+    save_settings:s=>A({name:s.name,title:s.title,speak:s.speak,theme:document.body.dataset.theme}),memories:()=>A(["Runs Script Super"]),clear_chat:()=>A(true),
+    autopilot:async()=>{ ui.event({kind:"state",state:"thinking"}); const st=["Create project close_all_apps","Write main.py with a keep-list","Test run and fix errors","Package as a double-clickable .exe"]; ui.event({kind:"plan",steps:st,current:2,done:false,note:"exit code 0 — tests pass"}); },
+    plan_get:()=>A({steps:[]}),projects_open:()=>A(),gaming_toggle:()=>A(true),
+    schedule_get:()=>A({busy:null,items:[{id:"a",title:"Revision — maths",day:"Thu 29 Oct",time:"17:00",until:"18:00",repeat:"weekdays",busy:true,with:""},{id:"b",title:"Gaming with Sam",day:"Sat 31 Oct",time:"19:00",until:"21:00",repeat:"none",busy:false,with:"Sam"}]}),
+    schedule_add:()=>A(true),schedule_remove:()=>A(true),skills_get:()=>A([{name:"weather_report",description:"Gets the current weather for a city",created:"2026-10-29 16:20",enabled:true}]),skill_toggle:()=>A(true),skill_remove:()=>A(true),
+    root_state:()=>A({running:true,afk:false,note:"",status:"checked 16:41",queue:0,settings:{watch:true,gaming_autoreply:true,gaming_reply:"instant"},log:[{t:"2026-10-29 16:20",kind:"received",who:"Adrian",text:"pls help :sob:"},{t:"2026-10-29 16:21",kind:"sent",who:"Adrian",text:"Kiyan's AI assistant here — he's in a match, back shortly."}]}),
+    root_check:async()=>{ await wait(400); ui.event({kind:"root_snapshot",data:{view:"list",conversations:[{name:"demetreDev",preview:"You: Now yh",time:"40m",from_me:true},{name:"Adrian",preview:"pls help :sob:",time:"3d",from_me:false},{name:"Responeded",preview:"Now?",time:"4d",from_me:false}]}}); },
+    root_afk:(on)=>A(on?"AFK mode on — I'll handle your Root DMs.":"AFK mode off."),root_settings:()=>A(true),studio_pick:()=>A(""),studio_run:()=>A(true),
+    devices_info:()=>A({extras:{python:"C:\\Users\\kiyan\\AppData\\Local\\Python\\pythoncore-3.14-64\\pythonw.exe",frozen:false,wake_err:"ModuleNotFoundError: No module named 'openwakeword'",vid_err:"ModuleNotFoundError: No module named 'resemblyzer'"},version:"2.0",repo:"Kiyan12121/orion",remote_enabled:true,remote:{pin:"482913",port:7777,tailscale:["http://100.84.12.7:7777"],lan:["http://192.168.1.42:7777"]},ntfy:"orion-3f9a2c71e0b4d5a6",sync:{token:false,status:"off"},update:null,wake:{available:false,enabled:false,running:false,phrase:"hey jarvis"},voice_id:{available:false,enrolled:false,enabled:false}}),
+    devices_action:()=>A({}),voice_enroll:()=>A(true) };
+  boot(); },1500);
+</script>
+</body>
+</html>
