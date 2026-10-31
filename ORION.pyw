@@ -565,9 +565,7 @@ class Api:
                 if not self._updater.check():
                     self._emit("toast", level="info", text=f"ORION {config_mod.VERSION} is up to date.")
             elif action == "update_install":
-                self._emit("toast", level="info", text="Installing update — ORION will restart…")
-                self._updater.install()
-                self.quit()
+                threading.Thread(target=self._do_update, daemon=True).start()
             elif action == "install_extras":
                 self._install_extras(bool(value))
             elif action == "wake_on":
@@ -585,6 +583,24 @@ class Api:
         except Exception as e:
             self._emit("toast", level="warn", text=str(e))
         return self.devices_info()
+
+    def _do_update(self):
+        def say(m):
+            log.info("update: %s", m)
+            self._emit("toast", level="info", text=m)
+            self._emit("status", text=m)
+        try:
+            self._emit("state", state="thinking")
+            self._updater.install(say)
+            time.sleep(1.5)
+            self.quit()
+        except Exception as e:
+            log.exception("update failed")
+            self._emit("state", state="idle")
+            self._emit("message", id=uuid.uuid4().hex[:8], role="system",
+                       text=f"Update failed: {e}\n\nManual fix: download the ORION zip from "
+                            f"github.com/Kiyan12121/orion/releases/latest, close ORION, unzip it over your "
+                            f"ORION folder (Replace all), then open ORION from the Desktop shortcut.")
 
     def _install_extras(self, voice_id=False):
         """Installs the voice extras into the EXACT Python ORION is running on (fixes 'not installed'

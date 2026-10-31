@@ -25,7 +25,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import requests
 
 from . import config as config_mod
-from .paths import APP_DIR, DATA_DIR, RES_DIR
+from .paths import APP_DIR, DATA_DIR, FROZEN, RES_DIR
 
 # ====================================================================== push notifications (ntfy)
 class Push:
@@ -369,36 +369,119 @@ class Updater:
                 pass
         threading.Thread(target=run, daemon=True).start()
 
-    def install(self):
+    @staticmethod
+    def source_root():
+        """The folder holding ORION.pyw. When running the built ORION.exe (orion\\dist\\ORION), that's two levels up."""
+        if os.path.exists(os.path.join(APP_DIR, "ORION.pyw")):
+            return APP_DIR
+        d = APP_DIR
+        for _ in range(3):
+            d = os.path.dirname(d)
+            if os.path.exists(os.path.join(d, "ORION.pyw")):
+                return d
+        return APP_DIR
+
+    @staticmethod
+    def _copy(src_file, dst_file, tries=8):
+        """Copy one file, retrying while OneDrive / antivirus has it locked."""
+        os.makedirs(os.path.dirname(dst_file), exist_ok=True)
+        last = None
+        for i in range(tries):
+            try:
+                shutil.copy2(src_file, dst_file)
+                return
+            except (PermissionError, OSError) as e:
+                last = e
+                time.sleep(0.6 + i * 0.4)
+        raise RuntimeError(f"Couldn't replace {os.path.basename(dst_file)} — it's locked "
+                           f"(OneDrive syncing or antivirus?). Pause OneDrive and try again. ({last})")
+
+    def install(self, log=lambda m: None):
+        if not self.latest:
+            self.check()
         if not self.latest:
             raise RuntimeError("No update available.")
+        new_ver = self.latest["version"].lstrip("v")
+        log(f"Downloading ORION {new_ver}…")
         h = {"Accept": "application/octet-stream"}
         tok = self.cfg.get("sync", {}).get("github_token")
         if tok:
             h["Authorization"] = f"token {tok}"
-        r = requests.get(self.latest["api_url"], headers=h, timeout=300)
-        r.raise_for_status()
+        try:
+            r = requests.get(self.latest["api_url"], headers=h, timeout=300)
+            r.raise_for_status()
+            data = r.content
+        except Exception:
+            r = requests.get(self.latest["url"], timeout=300)     # public download link as a fallback
+            r.raise_for_status()
+            data = r.content
         tmp = tempfile.mkdtemp(prefix="orion_up_")
-        zipfile.ZipFile(io.BytesIO(r.content)).extractall(tmp)
+        zipfile.ZipFile(io.BytesIO(data)).extractall(tmp)
         src = tmp
         entries = os.listdir(tmp)
         if len(entries) == 1 and os.path.isdir(os.path.join(tmp, entries[0])):
             src = os.path.join(tmp, entries[0])
+        root = self.source_root()
+        log(f"Installing into {root}…")
         backup = os.path.join(DATA_DIR, "backups", f"orion_{config_mod.VERSION}")
-        for name in os.listdir(src):
-            if name in KEEP:
+        n = 0
+        for dirpath, dirs, files in os.walk(src):
+            rel = os.path.relpath(dirpath, src)
+            top = rel.split(os.sep)[0]
+            if top in KEEP:
                 continue
-            dst = os.path.join(APP_DIR, name)
-            if os.path.exists(dst):
-                os.makedirs(backup, exist_ok=True)
-                shutil.move(dst, os.path.join(backup, name))
-            shutil.move(os.path.join(src, name), dst)
+            for f in files:
+                if rel == "." and f in KEEP:
+                    continue
+                s_file = os.path.join(dirpath, f)
+                d_file = os.path.normpath(os.path.join(root, rel, f))
+                if os.path.exists(d_file):
+                    try:
+                        self._copy(d_file, os.path.join(backup, rel, f), tries=2)
+                    except Exception:
+                        pass
+                self._copy(s_file, d_file)
+                n += 1
         shutil.rmtree(tmp, ignore_errors=True)
-        # restart
-        py = sys.executable
-        subprocess.Popen([py, os.path.join(APP_DIR, "ORION.pyw")], cwd=APP_DIR,
-                         creationflags=0x00000008 if os.name == "nt" else 0)
-        return True
+        # check it really landed
+        with open(os.path.join(root, "core", "config.py"), "r", encoding="utf-8") as fh:
+            got = next((ln.split('"')[1] for ln in fh if ln.startswith("VERSION =")), "?")
+        if got != new_ver:
+            raise RuntimeError(f"Update copied but version reads {got}, not {new_ver}.")
+        log(f"Installed {n} files. Updating packages…")
+        py = self._python()
+        if py:
+            try:
+                subprocess.run([py.replace("pythonw.exe", "python.exe"), "-m", "pip", "install", "-q", "-r",
+                                os.path.join(root, "requirements.txt")], timeout=600, cwd=root,
+                               creationflags=0x08000000 if os.name == "nt" else 0)
+            except Exception:
+                pass
+        log("Restarting ORION…")
+        self._relaunch(root, py)
+        return root
+
+    @staticmethod
+    def _python():
+        if not FROZEN:
+            d = os.path.dirname(sys.executable)
+            w = os.path.join(d, "pythonw.exe")
+            return w if os.path.exists(w) else sys.executable
+        for v in ("314", "313", "312", "311", "310"):
+            for base in (r"%LOCALAPPDATA%\Programs\Python\Python" + v, r"%LOCALAPPDATA%\Python\pythoncore-" + v[0] + "." + v[1:] + "-64"):
+                w = os.path.join(os.path.expandvars(base), "pythonw.exe")
+                if os.path.exists(w):
+                    return w
+        return None
+
+    @staticmethod
+    def _relaunch(root, py):
+        lnk = os.path.join(os.path.expanduser("~"), "Desktop", "ORION.lnk")
+        if os.name == "nt" and os.path.exists(lnk):
+            os.startfile(lnk)                       # same way you normally open it
+        elif py:
+            subprocess.Popen([py, os.path.join(root, "ORION.pyw")], cwd=root,
+                             creationflags=0x00000008 if os.name == "nt" else 0)
 
 
 def pin_hash(pin):
