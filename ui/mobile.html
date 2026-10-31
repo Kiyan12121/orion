@@ -96,6 +96,56 @@ nav.tabs .n.show{display:grid}
 .sheet label{display:block;font-size:11px;letter-spacing:.2em;color:var(--dim);margin:10px 0 5px}
 .sheet p{font-size:14px;line-height:1.5;color:var(--dim)}
 .toast{position:fixed;left:16px;right:16px;top:calc(env(safe-area-inset-top) + 12px);background:rgba(6,18,30,.97);border:1px solid var(--line2);border-left:3px solid var(--a);border-radius:12px;padding:12px 14px;font-size:14.5px;z-index:20;animation:drop .3s;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+/* ===== CALL MODE ===== */
+#call{position:fixed;inset:0;z-index:30;display:none;flex-direction:column;align-items:center;justify-content:space-between;
+  padding:calc(env(safe-area-inset-top) + 40px) 24px calc(env(safe-area-inset-bottom) + 34px);
+  background:radial-gradient(ellipse 90% 60% at 50% 30%,rgba(var(--ar),.28),transparent 70%),linear-gradient(180deg,#041019,#010307)}
+#call.show{display:flex;animation:fade .3s}
+.cTop{text-align:center}
+.cTop small{display:block;font:600 12px var(--ui);letter-spacing:.34em;color:var(--dim)}
+.cTop h2{font:800 30px var(--disp);letter-spacing:.3em;color:var(--a2);margin:12px 0 6px;text-shadow:0 0 24px rgba(var(--ar),.6)}
+.cTop span{font:14px var(--mono);color:var(--dim)}
+.cOrb{width:min(62vw,270px);aspect-ratio:1;position:relative;flex:none}
+.cOrb i,.cOrb b,.cOrb s{position:absolute;border-radius:50%}
+.cOrb i{inset:0;border:2px dashed rgba(var(--ar),.55);animation:spin 18s linear infinite}
+.cOrb b{inset:12%;border:2px solid var(--a);box-shadow:0 0 40px rgba(var(--ar),.45),inset 0 0 30px rgba(var(--ar),.25);transition:transform .08s}
+.cOrb s{inset:32%;background:radial-gradient(circle,var(--a2),rgba(var(--ar),.35) 60%,transparent 72%);transition:transform .08s}
+#call.ringing .cOrb b{animation:ring 1.2s ease-out infinite}
+@keyframes ring{0%{box-shadow:0 0 0 0 rgba(var(--ar),.55)}100%{box-shadow:0 0 0 46px rgba(var(--ar),0)}}
+.cState{font:600 15px var(--ui);letter-spacing:.2em;color:var(--a2);text-align:center;min-height:22px}
+.cSub{font-size:15px;color:var(--dim);text-align:center;max-width:520px;min-height:40px;line-height:1.4;margin-top:6px}
+.cBtns{display:flex;gap:28px;justify-content:center;align-items:flex-end}
+.cBtn{display:flex;flex-direction:column;align-items:center;gap:8px;font:600 12px var(--ui);letter-spacing:.14em;color:var(--dim);background:none;border:0}
+.cBtn em{width:70px;height:70px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:28px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14)}
+.cBtn.green em{background:#16c36b;border-color:#3be38d;box-shadow:0 0 30px rgba(22,195,107,.5);animation:bob 1.1s ease-in-out infinite}
+.cBtn.red em{background:#e8344f;border-color:#ff6b80;box-shadow:0 0 30px rgba(232,52,79,.45)}
+.cBtn.on em{background:rgba(var(--ar),.3);border-color:var(--a)}
+@keyframes bob{50%{transform:translateY(-5px)}}
+.phoneRow{display:flex;gap:8px;flex-wrap:wrap}
+.phoneRow .qa{flex:1 1 22%}
+
+/* ===== LANDSCAPE ===== */
+@media (orientation:landscape) and (max-height:620px){
+  .app{display:grid;grid-template-columns:76px 1fr;grid-template-rows:auto 1fr;padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right)}
+  header{grid-column:2;padding:8px 18px 4px}
+  .views{grid-column:2;grid-row:2}
+  nav.tabs{grid-column:1;grid-row:1/3;flex-direction:column;justify-content:center;border-top:0;border-right:1px solid var(--line);padding:0;gap:4px}
+  nav.tabs button{flex:none;padding:10px 0}
+  nav.tabs button.on::before{top:20%;bottom:20%;left:-1px;right:auto;width:2px;height:auto}
+  .view{padding:4px 18px 14px}
+  #v-home.on{display:grid;grid-template-columns:1.1fr 1fr;gap:0 14px;align-content:start}
+  #v-home .hello{grid-column:1/-1;margin:2px 2px 8px;font-size:21px}
+  #v-jobs.on,#v-sched.on{display:grid;grid-template-columns:1fr 1.25fr;gap:0 14px;align-content:start}
+  #v-jobs.on>.card:last-child{grid-column:1/-1}
+  #v-pc.on{display:grid;grid-template-columns:1.4fr 1fr;gap:0 14px;align-content:start}
+  #v-chat .m{max-width:70%}
+  .grid{grid-template-columns:repeat(4,1fr)}
+  #call{flex-direction:row;padding:20px 40px;gap:30px}
+  #call .cOrb{width:min(42vh,230px)}
+  .cMid{display:flex;flex-direction:column;align-items:center;gap:14px;flex:1}
+  .cBtns{flex-direction:column;gap:16px}
+}
+@media (orientation:landscape) and (min-height:621px){ #v-home.on{display:grid;grid-template-columns:1fr 1fr;gap:0 14px;align-content:start} #v-home .hello{grid-column:1/-1} }
 @keyframes spin{to{transform:rotate(360deg)}}@keyframes pulse{50%{transform:scale(1.12)}}@keyframes fade{from{opacity:0}}
 @keyframes rise{from{opacity:0;transform:translateY(6px)}}@keyframes b{50%{opacity:.3}}@keyframes drop{from{opacity:0;transform:translateY(-14px)}}
 @keyframes mp{50%{box-shadow:0 0 0 10px rgba(255,79,123,.15)}}
@@ -130,6 +180,15 @@ nav.tabs .n.show{display:grid}
           <button class="qa" data-act="play"><em>⏯️</em>Media</button>
           <button class="qa warn" data-act="stop"><em>■</em>Stop</button>
         </div>
+      </div>
+      <div class="card"><h3>PHONE</h3>
+        <div class="grid">
+          <button class="qa" data-ph="call"><em>📞</em>Call me</button>
+          <button class="qa" data-ph="alarm"><em>⏰</em>Alarm</button>
+          <button class="qa" data-ph="timer"><em>⏱️</em>Timer</button>
+          <button class="qa" id="qaBubble" data-ph="bubble"><em>🫧</em>Bubble</button>
+        </div>
+        <p class="empty" id="nativeNote" style="font-size:12.5px;margin-top:8px;display:none">Alarms, timers, torch and the floating bubble work in the installed ORION app.</p>
       </div>
       <div class="card"><h3>NEXT UP <button class="btn sm ghost" data-tab="sched" style="border:0;padding:0">ALL ›</button></h3><div id="homeSched"><p class="empty">—</p></div></div>
       <div class="card"><h3>RECENT JOBS <button class="btn sm ghost" data-tab="jobs" style="border:0;padding:0">ALL ›</button></h3><div id="homeJobs"><p class="empty">—</p></div></div>
@@ -198,6 +257,16 @@ nav.tabs .n.show{display:grid}
   </nav>
 </div>
 
+<div id="call">
+  <div class="cTop"><small id="cLabel">INCOMING CALL</small><h2 id="cName">ORION</h2><span id="cTime">mobile</span></div>
+  <div class="cMid" style="display:flex;flex-direction:column;align-items:center;gap:16px">
+    <div class="cOrb" id="cOrb"><i></i><b></b><s></s></div>
+    <div><div class="cState" id="cState">CALLING…</div><div class="cSub" id="cSub"></div></div>
+  </div>
+  <div class="cBtns" id="cRingBtns"><button class="cBtn red" id="cDecline"><em>✕</em>DECLINE</button><button class="cBtn green" id="cAccept"><em>📞</em>ACCEPT</button></div>
+  <div class="cBtns" id="cLiveBtns" style="display:none"><button class="cBtn" id="cMute"><em>🎙️</em>MUTE</button><button class="cBtn red" id="cHang"><em>✕</em>END</button><button class="cBtn" id="cTalk"><em>⏸</em>PAUSE</button></div>
+</div>
+
 <div class="veil" id="vSet"><div class="sheet">
   <h2>CONNECTION</h2>
   <p>On your PC: ORION → Devices → Phone &amp; Laptop Access. Copy the 100.x.x.x address and PIN here. When the PC is off, ORION still chats using its own brain and queues PC jobs.</p>
@@ -206,6 +275,10 @@ nav.tabs .n.show{display:grid}
   <h4>WHEN THE PC IS OFF</h4>
   <label>GROQ KEY (free — console.groq.com/keys)</label><input class="inp" id="sKey" type="password" placeholder="gsk_…">
   <label>WHAT ORION CALLS YOU</label><input class="inp" id="sTitle" placeholder="sir">
+  <h4>CALLS</h4>
+  <label>SCHEDULE A CALL FROM ORION (e.g. wake-up call)</label>
+  <div style="display:flex;gap:8px"><input class="inp" type="time" id="sCallT" value="07:00"><button class="btn sm" id="sCallGo">SET</button></div>
+  <p id="sCalls" style="margin-top:6px;font-size:13px"></p>
   <h4>APP</h4>
   <label style="display:flex;gap:10px;align-items:center;letter-spacing:0;font-size:15px;color:var(--text)"><input type="checkbox" id="sMute" style="accent-color:var(--a)"> Mute spoken replies</label>
   <button class="btn" id="sSave">SAVE &amp; CONNECT</button>
@@ -226,10 +299,42 @@ function render(t){ return String(t).split("```").map((p,i)=>i%2?`<pre>${esc(p.r
 function toast(t){ const d=document.createElement("div"); d.className="toast"; d.textContent=t; document.body.appendChild(d); setTimeout(()=>d.remove(),3800); }
 const Cap=window.Capacitor, Plug=(Cap&&Cap.Plugins)||{};
 
+/* ---------- native powers (inside the APK) ---------- */
+const reg=n=>{ try{ return (Cap&&Cap.registerPlugin)?Cap.registerPlugin(n):Plug[n]; }catch(e){ return Plug[n]; } };
+const Native=Cap&&Cap.isNativePlatform&&Cap.isNativePlatform()?reg("OrionNative"):null;
+const LN=Cap&&Cap.isNativePlatform&&Cap.isNativePlatform()?(Plug.LocalNotifications||reg("LocalNotifications")):null;
+
+async function phoneDo(a){   // runs an action on THIS phone; returns a short spoken result
+  const need=()=>{ throw new Error("That works in the installed ORION app (not the browser)."); };
+  switch(a.kind){
+    case "alarm": if(!Native) need(); await Native.setAlarm({hour:+a.hour,minute:+a.minute,message:a.message||"ORION"}); return `Alarm set for ${String(a.hour).padStart(2,"0")}:${String(a.minute).padStart(2,"0")}.`;
+    case "timer": if(!Native) need(); await Native.setTimer({seconds:+a.seconds,message:a.message||"ORION"}); return `Timer started for ${Math.round(a.seconds/60)||1} min.`;
+    case "open": if(!Native) need(); const r=await Native.openApp({name:a.name}); return `Opening ${r.opened||a.name}.`;
+    case "torch": if(!Native) need(); await Native.torch({on:!!a.on}); return "Torch "+(a.on?"on.":"off.");
+    case "call": incoming(a.reason||""); return "";
+  }
+  return "";
+}
+async function runPhoneActions(list){ for(const a of list||[]){ try{ const r=await phoneDo(a); if(r) toast(r); }catch(e){ toast(e.message||String(e)); } } }
+
+// quick phone commands handled on the phone itself (instant, work even when the PC is off)
+function phoneReflex(t){
+  t=t.toLowerCase().trim().replace(/^(hey |ok )?orion[, ]*/,"").replace(/[.!?]+$/,"");
+  let m=t.match(/^(?:set (?:an |my )?alarm|wake me(?: up)?)(?: for| at)? (\d{1,2})(?:[:.](\d{2}))?\s*(am|pm)?(?: .*)?$/);
+  if(m){ let h=+m[1],mi=+(m[2]||0); if(m[3]==="pm"&&h<12) h+=12; if(m[3]==="am"&&h===12) h=0; return {kind:"alarm",hour:h,minute:mi,message:"ORION"}; }
+  m=t.match(/^(?:set (?:a )?|start (?:a )?)?timer (?:for )?(\d+(?:\.\d+)?)\s*(s|sec|secs|seconds|m|min|mins|minutes|h|hour|hours)?$/);
+  if(m){ const u=(m[2]||"m")[0]; return {kind:"timer",seconds:Math.round(+m[1]*(u==="s"?1:u==="h"?3600:60))}; }
+  m=t.match(/^(?:turn )?(?:the )?(?:torch|flashlight)(?: (on|off))?$|^(?:turn )?(on|off) (?:the )?(?:torch|flashlight)$/);
+  if(m) return {kind:"torch",on:(m[1]||m[2]||"on")==="on"};
+  m=t.match(/^open (.+?)(?: on (?:my )?phone)$/); if(m) return {kind:"open",name:m[1]};
+  if(/^(call me|ring me|phone me)$/.test(t)) return {kind:"call",reason:""};
+  return null;
+}
+
 /* ---------- native notifications (inside the APK) ---------- */
-let nid=1; async function notify(title,body){ try{ if(Plug.LocalNotifications){ await Plug.LocalNotifications.schedule({notifications:[{id:nid++,title,body:String(body).slice(0,300)}]}); return; } }catch(e){}
+let nid=Date.now()%100000; async function notify(title,body){ try{ if(LN){ await LN.schedule({notifications:[{id:nid++,title,body:String(body).slice(0,300)}]}); return; } }catch(e){}
   if(document.hidden && "Notification" in window && Notification.permission==="granted") new Notification(title,{body:String(body).slice(0,300)}); }
-(async()=>{ try{ if(Plug.LocalNotifications) await Plug.LocalNotifications.requestPermissions(); else if("Notification" in window && Notification.permission==="default") Notification.requestPermission(); }catch(e){} })();
+(async()=>{ try{ if(LN) await LN.requestPermissions(); else if("Notification" in window && Notification.permission==="default") Notification.requestPermission(); }catch(e){} })();
 
 /* ---------- network ---------- */
 async function api(path,body,timeout=20000){
@@ -242,7 +347,7 @@ async function api(path,body,timeout=20000){
 
 async function refresh(){
   if(!addr()){ setConn(false); paintHome(); return; }
-  try{ state=await api("/api/state",undefined,6000); setConn(true); paintHome(); flushQueue(); pollPending(); if($("#v-jobs").classList.contains("on")) loadJobs(); }
+  try{ state=await api("/api/state",undefined,6000); setConn(true); paintHome(); runPhoneActions(state.phone_actions); flushQueue(); pollPending(); if($("#v-jobs").classList.contains("on")) loadJobs(); }
   catch(e){ setConn(false); paintHome(); }
 }
 function setConn(on){ const was=pcOnline; pcOnline=on; $("#dot").className="dot "+(on?"ok":"solo");
@@ -273,6 +378,7 @@ J("chatlog",[]).forEach(([r,t,m])=>add(r,t,m,false));
 
 async function send(text){
   text=(text||"").trim(); if(!text) return; $("#in").value=""; autoGrow(); add("u",text);
+  const px=phoneReflex(text); if(px){ try{ const r=await phoneDo(px); if(r){ add("a",r,"phone"); speak(r); } }catch(e){ add("s",e.message); } return; }
   if(pcOnline){
     try{ const j=await api("/api/jobs",{text,autopilot:$("#bgMode").checked,heavy:false});
       const p=J("pending",[]); p.push({id:j.id,text,chat:true}); SJ("pending",p);
@@ -381,6 +487,111 @@ document.addEventListener("click",e=>{ const b=e.target.closest("[data-act],[dat
   if(b.dataset.confirm && !confirm(`Really ${b.dataset.confirm} your PC?`)) return;
   act(b.dataset.act); });
 
+/* ---------- CALL MODE: ORION rings you, then you just talk ---------- */
+const Call={ on:false, live:false, muted:false, paused:false, stream:null, ctx:null, an:null, data:null, audio:null, t0:0, timer:null, ringNodes:null, hist:[] };
+function ringtone(on){
+  try{ if(!on){ if(Call.ringNodes){ clearInterval(Call.ringNodes.iv); Call.ringNodes.ctx.close(); } Call.ringNodes=null; return; }
+    const ctx=new (window.AudioContext||window.webkitAudioContext)(); const g=ctx.createGain(); g.gain.value=0; g.connect(ctx.destination);
+    [440,480].forEach(f=>{ const o=ctx.createOscillator(); o.frequency.value=f; o.connect(g); o.start(); });
+    const ring=()=>{ const t=ctx.currentTime; g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(.18,t+.05);
+      g.gain.setValueAtTime(.18,t+.4); g.gain.linearRampToValueAtTime(0,t+.45); g.gain.linearRampToValueAtTime(.18,t+.6); g.gain.setValueAtTime(.18,t+1); g.gain.linearRampToValueAtTime(0,t+1.05);
+      try{ navigator.vibrate&&navigator.vibrate([400,200,400]); }catch(e){} if(Native) Native.vibrate({ms:400}).catch(()=>{}); };
+    ring(); Call.ringNodes={ctx,iv:setInterval(ring,2400)}; }catch(e){} }
+function cSet(state,sub){ $("#cState").textContent=state; if(sub!==undefined) $("#cSub").textContent=sub; }
+function incoming(reason){
+  if(Call.on) return; Call.on=true; Call.reason=reason||""; go(store.get("tab","home"));
+  $("#call").classList.add("show","ringing"); $("#cLabel").textContent="INCOMING CALL"; $("#cTime").textContent="mobile";
+  $("#cRingBtns").style.display=""; $("#cLiveBtns").style.display="none"; cSet("RINGING…",reason?`“${reason}”`:"");
+  ringtone(true); Call.ringTimeout=setTimeout(()=>{ if(!Call.live) endCall("Missed call from ORION"); },35000);
+}
+async function acceptCall(){
+  clearTimeout(Call.ringTimeout); ringtone(false); $("#call").classList.remove("ringing");
+  $("#cRingBtns").style.display="none"; $("#cLiveBtns").style.display=""; $("#cLabel").textContent="ON CALL";
+  Call.live=true; Call.t0=Date.now(); Call.timer=setInterval(()=>{ const s=Math.floor((Date.now()-Call.t0)/1000); $("#cTime").textContent=`${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`; },1000);
+  try{ Call.stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}});
+    Call.ctx=new (window.AudioContext||window.webkitAudioContext)(); const src=Call.ctx.createMediaStreamSource(Call.stream);
+    Call.an=Call.ctx.createAnalyser(); Call.an.fftSize=1024; src.connect(Call.an); Call.data=new Uint8Array(Call.an.fftSize); orbLoop(); }
+  catch(e){ cSet("NO MICROPHONE","Allow microphone access for ORION in Android settings."); return; }
+  const greet=await callReply(Call.reason||"",true); if(!Call.live) return; await say(greet.reply,greet.audio); listenLoop();
+}
+function level(){ if(!Call.an) return 0; Call.an.getByteTimeDomainData(Call.data); let s=0; for(const v of Call.data){ const x=(v-128)/128; s+=x*x; } return Math.sqrt(s/Call.data.length); }
+function orbLoop(){ if(!Call.on) return; let l=0; if(Call.speaking&&Call.audio&&Call.outAn){ Call.outAn.getByteTimeDomainData(Call.outData); let s=0; for(const v of Call.outData){ const x=(v-128)/128; s+=x*x; } l=Math.sqrt(s/Call.outData.length)*3; }
+  else if(!Call.muted) l=level()*4; l=Math.min(1,l);
+  $("#cOrb b").style.transform=`scale(${1+l*.12})`; $("#cOrb s").style.transform=`scale(${1+l*.45})`; requestAnimationFrame(orbLoop); }
+async function listenLoop(){
+  while(Call.live){
+    if(Call.paused||Call.muted){ cSet(Call.muted?"MUTED":"PAUSED","Tap again to carry on."); await new Promise(r=>setTimeout(r,300)); continue; }
+    cSet("LISTENING…","Go ahead — I'm listening.");
+    const blob=await recordTurn(); if(!Call.live) return; if(!blob){ continue; }
+    cSet("THINKING…",""); let text="";
+    try{ text=await transcribe(blob); }catch(e){ cSet("ERROR","Couldn't hear that."); await new Promise(r=>setTimeout(r,1200)); continue; }
+    if(!text||text.replace(/[^a-z]/gi,"").length<2) continue;
+    $("#cSub").textContent=`“${text}”`;
+    if(/^(bye|goodbye|good bye|hang up|end (the )?call|that'?s all|cheers,? bye|see ya|later)\b/i.test(text.trim())){ await say(`Goodbye, ${title()}.`); endCall(); return; }
+    const px=phoneReflex(text); let r;
+    if(px){ try{ r={reply:(await phoneDo(px))||"Done."}; }catch(e){ r={reply:e.message}; } }
+    else r=await callReply(text,false);
+    if(!Call.live) return; await say(r.reply,r.audio);
+  }
+}
+function recordTurn(){ return new Promise(res=>{
+  const rec=new MediaRecorder(Call.stream); const chunks=[]; let spoke=false, quiet=0, start=Date.now(), floor=null, samples=[];
+  rec.ondataavailable=e=>chunks.push(e.data); rec.onstop=()=>res(spoke&&chunks.length?new Blob(chunks,{type:rec.mimeType}):null); rec.start(200);
+  const iv=setInterval(()=>{ if(!Call.live||Call.muted||Call.paused){ clearInterval(iv); spoke=false; rec.stop(); return; }
+    const l=level(); if(samples.length<5){ samples.push(l); floor=Math.min(...samples); return; }
+    const loud=l>Math.max(.02,floor*3);
+    if(loud){ spoke=true; quiet=0; } else if(spoke){ quiet+=100; if(quiet>=1100){ clearInterval(iv); rec.stop(); } }
+    if(!spoke&&Date.now()-start>12000){ clearInterval(iv); rec.stop(); }      // nobody spoke — listen again
+    if(Date.now()-start>25000){ clearInterval(iv); rec.stop(); } },100); }); }
+async function transcribe(blob){
+  if(pcOnline) return (await api("/api/transcribe",blob,40000)).text||"";
+  if(!store.get("key")) throw new Error("no key");
+  const fd=new FormData(); fd.append("file",blob,"speech.webm"); fd.append("model","whisper-large-v3-turbo"); fd.append("language","en");
+  const r=await fetch("https://api.groq.com/openai/v1/audio/transcriptions",{method:"POST",headers:{"Authorization":"Bearer "+store.get("key")},body:fd}); return (await r.json()).text||""; }
+async function callReply(text,first){
+  if(pcOnline){ try{ return await api("/api/call",{text,first},90000); }catch(e){} }
+  if(first){ const h=new Date().getHours(); return {reply:`${h<12?"Morning":h<18?"Afternoon":"Evening"}, ${title()}. ${text||"What can I do for you?"}`}; }
+  try{ return {reply:await solo("[Voice call — answer in 1-2 short spoken sentences, no markdown.] "+text)}; }catch(e){ return {reply:"Sorry, my brain's offline at the moment."}; } }
+function say(text,b64){ return new Promise(res=>{ if(!Call.live||!text){ res(); return; } cSet("SPEAKING…",text); Call.speaking=true;
+  const done=()=>{ Call.speaking=false; res(); };
+  if(b64){ const a=new Audio("data:audio/mpeg;base64,"+b64); Call.audio=a;
+    try{ const src=Call.ctx.createMediaElementSource(a); Call.outAn=Call.ctx.createAnalyser(); Call.outAn.fftSize=512; Call.outData=new Uint8Array(512); src.connect(Call.outAn); Call.outAn.connect(Call.ctx.destination); }catch(e){}
+    a.onended=done; a.onerror=()=>sayLocal(text,done); a.play().catch(()=>sayLocal(text,done)); }
+  else sayLocal(text,done); }); }
+function sayLocal(text,done){ try{ const u=new SpeechSynthesisUtterance(text.replace(/[*_#`]/g,""));
+  u.voice=voices.find(v=>/en-GB/i.test(v.lang)&&/female|sonia|libby|google uk english female/i.test(v.name))||voices.find(v=>/en-GB/i.test(v.lang))||null;
+  u.onend=done; u.onerror=done; speechSynthesis.cancel(); speechSynthesis.speak(u); }catch(e){ done(); } }
+function endCall(msg){ const was=Call.live; Call.on=Call.live=false; clearTimeout(Call.ringTimeout); clearInterval(Call.timer); ringtone(false);
+  try{ Call.audio&&Call.audio.pause(); speechSynthesis.cancel(); }catch(e){} try{ Call.stream&&Call.stream.getTracks().forEach(t=>t.stop()); Call.ctx&&Call.ctx.close(); }catch(e){}
+  Call.stream=Call.ctx=Call.an=null; $("#call").classList.remove("show","ringing");
+  if(msg){ toast(msg); if(document.hidden) notify("ORION","Missed call from ORION"); } else if(was) toast("Call ended."); }
+$("#cAccept").onclick=acceptCall; $("#cDecline").onclick=()=>endCall("Declined.");
+$("#cHang").onclick=()=>endCall(); $("#cMute").onclick=()=>{ Call.muted=!Call.muted; $("#cMute").classList.toggle("on",Call.muted); };
+$("#cTalk").onclick=()=>{ Call.paused=!Call.paused; $("#cTalk").classList.toggle("on",Call.paused); $("#cTalk em").textContent=Call.paused?"▶":"⏸"; };
+
+/* scheduled calls (wake-up calls) — fire even if the app is closed, via Android notifications */
+async function scheduleCall(hhmm){ const [h,m]=hhmm.split(":").map(Number); const at=new Date(); at.setHours(h,m,0,0); if(at<new Date()) at.setDate(at.getDate()+1);
+  if(!LN){ toast("Scheduled calls work in the installed app."); return; }
+  const id=Math.floor(at.getTime()/60000)%2000000000;
+  await LN.schedule({notifications:[{id,title:"📞 ORION is calling",body:"Tap to answer",schedule:{at,allowWhileIdle:true},extra:{action:"call",reason:"Your scheduled call, "+title()+"."},ongoing:false}]});
+  const calls=J("calls",[]); calls.push({id,at:at.getTime()}); SJ("calls",calls.filter(c=>c.at>Date.now())); paintCalls(); toast(`ORION will call you at ${hhmm}.`); }
+function paintCalls(){ const c=J("calls",[]).filter(x=>x.at>Date.now()); $("#sCalls").textContent=c.length?"Scheduled: "+c.map(x=>new Date(x.at).toLocaleString("en-GB",{weekday:"short",hour:"2-digit",minute:"2-digit"})).join(", "):""; }
+$("#sCallGo").onclick=()=>scheduleCall($("#sCallT").value);
+try{ if(LN) LN.addListener("localNotificationActionPerformed",e=>{ const x=(e.notification||{}).extra||{}; if(x.action==="call") incoming(x.reason||""); }); }catch(e){}
+
+/* phone quick buttons */
+document.addEventListener("click",async e=>{ const b=e.target.closest("[data-ph]"); if(!b) return; e.stopPropagation(); const k=b.dataset.ph;
+  try{ if(k==="call"){ incoming(""); return; }
+    if(k==="alarm"){ const t=prompt("Alarm time (e.g. 07:00 or 6:45am)","07:00"); if(!t) return; const px=phoneReflex("set alarm for "+t); if(!px) return toast("Couldn't read that time."); toast(await phoneDo(px)); return; }
+    if(k==="timer"){ const t=prompt("Timer — how many minutes?","10"); if(!t) return; toast(await phoneDo({kind:"timer",seconds:Math.round(+t*60)})); return; }
+    if(k==="bubble"){ if(!Native){ toast("The bubble works in the installed app."); return; }
+      if(store.get("bubble")==="1"){ await Native.hideBubble(); store.set("bubble","0"); $("#qaBubble").classList.remove("on"); toast("Bubble hidden."); return; }
+      const g=await Native.canOverlay(); if(!g.granted){ toast("Allow 'Display over other apps' for ORION, then tap Bubble again."); await Native.requestOverlay(); return; }
+      await Native.showBubble(); store.set("bubble","1"); $("#qaBubble").classList.add("on"); toast("Bubble on — tap it anywhere to call ORION, long-press to hide."); }
+  }catch(err){ toast(err.message||String(err)); } },true);
+
+async function checkLaunch(){ try{ if(Native){ const r=await Native.consumeLaunchAction(); if(r.action==="call"){ incoming(""); setTimeout(acceptCall,350); } } }catch(e){} }
+
 /* ---------- tabs ---------- */
 function go(t){ $$("nav.tabs button").forEach(b=>b.classList.toggle("on",b.dataset.tab===t)); $$(".view").forEach(v=>v.classList.toggle("on",v.id==="v-"+t));
   store.set("tab",t); if(t==="jobs") loadJobs(); if(t==="sched") loadSched(); if(t==="pc"&&pcOnline&&!$("#screen").src) snap(); if(t==="chat") $("#log").scrollTop=1e9; }
@@ -394,8 +605,9 @@ $("#sSave").onclick=()=>{ let a=$("#sAddr").value.trim(); if(a&&!/^https?:\/\//.
   $("#vSet").classList.remove("show"); toast("Saved."); refresh(); };
 
 /* ---------- lifecycle: catch up the moment you come back to the app ---------- */
-document.addEventListener("visibilitychange",()=>{ if(!document.hidden){ refresh(); } });
-try{ if(Plug.App) Plug.App.addListener("appStateChange",s=>{ if(s.isActive) refresh(); }); }catch(e){}
+document.addEventListener("visibilitychange",()=>{ if(!document.hidden){ refresh(); checkLaunch(); } });
+try{ const AppP=Plug.App||reg("App"); if(AppP&&Native) AppP.addListener("appStateChange",s=>{ if(s.isActive){ refresh(); checkLaunch(); } }); }catch(e){}
+if(!Native) $("#nativeNote").style.display=""; if(store.get("bubble")==="1") $("#qaBubble").classList.add("on"); paintCalls(); checkLaunch();
 setInterval(()=>{ if(!document.hidden) refresh(); },10000);
 go(store.get("tab","home")); refresh();
 if(!addr()&&!store.get("key")) setTimeout(()=>$("#setBtn").click(),700);

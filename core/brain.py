@@ -33,6 +33,7 @@ Rules:
 - Use web_search/fetch_page for anything current or unknown. Never invent facts. For sites that need
   clicking, searching or forms, use your own browser (browser_open, then browser_click/browser_type by number).
   Never type passwords or payment details — ask the user to do that via browser_show.
+- "Set an alarm" / "wake me up" / "call me" / "torch" mean the user's PHONE — use the phone_* tools.
 - Use the schedule tools for plans, bookings, reminders and "am I free" questions.
 - If the user shares something worth keeping (preferences, projects, people), call remember.
 - If a task is beyond your tools or huge, call ask_claude with a complete self-contained message.
@@ -75,6 +76,8 @@ GROUPS = {
                  r"schedule|book|remind|calendar|free|busy|plan|tomorrow|tonight|monday|tuesday|wednesday|"
                  r"thursday|friday|saturday|sunday|week|appointment|revision|event|\bat \d|pm\b|am\b"),
     "skills": ({"skill_create", "skill_list", "skill_delete"}, r"learn|skill|teach yourself|new ability"),
+    "phone": ({"phone_alarm", "phone_timer", "phone_open_app", "phone_call", "phone_torch"},
+              r"phone|alarm|wake me|timer on|ring me|call me|torch|flashlight|on my mobile|my s23"),
     "jobs": ({"queue_job", "list_jobs", "routine_add", "routine_list", "routine_run_now"},
              r"queue|later|background|overnight|night|while i'?m|when i'?m away|routine|every (day|morning|night|week)|"
              r"automat|job|tidy|clean ?up|back ?up|backup|temp|health"),

@@ -1,5 +1,6 @@
 """ORION — double-click to launch.  (.pyw = no console window)"""
 import json
+import re
 import logging
 import os
 import sys
@@ -24,6 +25,7 @@ from core import tools                                      # noqa: E402
 from core import autopilot, coder, schedule, skills         # noqa: E402,F401  (registers their tools)
 from core import browser, root, video, vision               # noqa: E402,F401
 from core.jobs import Jobs                                  # noqa: E402
+from core import phone                                      # noqa: E402
 from core.routines import NightShift                        # noqa: E402
 from core.devices import Push, Remote, Sync, Updater        # noqa: E402
 from core.gaming import GamingMode, Hotkey                  # noqa: E402
@@ -80,6 +82,7 @@ class Api:
         self._updater.start()
         self._jobs = Jobs(self._cfg, self._run_job, lambda t, title=None: self._push.send(t, title), self._emit)
         self._shift = NightShift(self._cfg, self._jobs, self._shift_notify, self._emit, self._updater)
+        tools.CTX["push_phone"] = lambda t: self._push.send(t, "ORION", 5, "iphone")
         self._voice_id = VoiceID(self._cfg)
         self._wake = WakeListener(self._cfg, self._wake_command, self._emit, self._voice_id,
                                   busy=lambda: self._recorder.recording or self._busy.locked())
@@ -667,6 +670,7 @@ class Api:
                 "version": config_mod.VERSION, "title": self._cfg.get("user_title", "sir"),
                 "jobs_active": sum(1 for j in self._jobs.jobs if j["status"] in ("queued", "running", "waiting")),
                 "job_running": (self._jobs.current or {}).get("title"),
+                "phone_actions": phone.take(),
                 "stats": self.stats(), "root_unread": sum(1 for e in root.recent_log(20) if e["kind"] == "received")}
 
     def remote_action(self, action, value=None):
@@ -744,7 +748,42 @@ class Api:
             return {"ok": self.schedule_remove(body.get("id"))}
         if path == "/api/routines":
             return self.routines_action(body)
+        if path == "/api/call":
+            return self.call_turn(body.get("text", ""), body.get("first", False))
+        if path == "/api/tts":
+            return {"audio": self._tts(body.get("text", ""))}
         raise KeyError(path)
+
+    # ---------------------------------------------------------------- phone call mode
+    def _tts(self, text):
+        """Natural voice (same as the PC's) as base64 mp3 for the phone."""
+        if not text or not self._speaker.neural_ok:
+            return None
+        try:
+            import asyncio
+            import base64
+            v = self._cfg["voice"]
+            audio = asyncio.run(self._speaker._neural(text[:900], v.get("neural_voice", "en-GB-SoniaNeural"),
+                                                      v.get("neural_rate", "+6%")))
+            return base64.b64encode(audio).decode() if audio else None
+        except Exception:
+            return None
+
+    def call_turn(self, text, first=False):
+        title = self._cfg.get("user_title", "sir")
+        if first:
+            reason = text.strip()
+            hr = time.localtime().tm_hour
+            g = "Morning" if hr < 12 else "Afternoon" if hr < 18 else "Evening"
+            reply = f"{g}, {title}. {reason}" if reason else f"{g}, {title}. What can I do for you?"
+        else:
+            self._emit("message", id=uuid.uuid4().hex[:8], role="user", text=f"📞 {text}")
+            reply, _tier, _model = self._process(
+                "[PHONE CALL — the user is talking to you out loud on a voice call. Reply in 1-2 short spoken "
+                "sentences, no lists, no markdown, no code.]\n" + text, False, speak=False)
+        clean = re.sub(r"```.*?```", " ", reply, flags=re.S)
+        clean = re.sub(r"[*_#`>]", "", clean)
+        return {"reply": clean.strip(), "audio": self._tts(clean.strip())}
 
     # ---------------------------------------------------------------- Night Shift panel
     def jobs_get(self):
