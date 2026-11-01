@@ -186,6 +186,79 @@ public class OrionNativePlugin extends Plugin {
         call.resolve(ret);
     }
 
+    // ---------------------------------------------------------------- built-in Android voice (fallback)
+    private android.speech.tts.TextToSpeech tts;
+    private boolean ttsReady = false;
+
+    private void ensureTts(Runnable then) {
+        if (tts != null && ttsReady) { then.run(); return; }
+        if (tts != null) { new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> ensureTts(then), 300); return; }
+        tts = new android.speech.tts.TextToSpeech(getContext(), status -> {
+            ttsReady = status == android.speech.tts.TextToSpeech.SUCCESS;
+            if (ttsReady) {
+                tts.setLanguage(java.util.Locale.UK);
+                tts.setSpeechRate(1.02f);
+            }
+            then.run();
+        });
+    }
+
+    /** Speaks with the phone's own voice (used when the PC's natural voice isn't available). Resolves when done. */
+    @PluginMethod
+    public void speak(PluginCall call) {
+        final String text = call.getString("text", "");
+        final boolean inCall = Boolean.TRUE.equals(call.getBoolean("call", false));
+        call.setKeepAlive(true);
+        ensureTts(() -> {
+            if (!ttsReady) { call.reject("no tts"); return; }
+            String id = "orion" + System.nanoTime();
+            tts.setOnUtteranceProgressListener(new android.speech.tts.UtteranceProgressListener() {
+                @Override public void onStart(String u) { }
+                @Override public void onDone(String u) { call.resolve(); }
+                @Override public void onError(String u) { call.resolve(); }
+            });
+            android.os.Bundle p = new android.os.Bundle();
+            p.putInt(android.speech.tts.TextToSpeech.Engine.KEY_PARAM_STREAM,
+                    inCall ? android.media.AudioManager.STREAM_VOICE_CALL : android.media.AudioManager.STREAM_MUSIC);
+            tts.speak(text, android.speech.tts.TextToSpeech.QUEUE_FLUSH, p, id);
+        });
+    }
+
+    @PluginMethod
+    public void stopSpeaking(PluginCall call) {
+        if (tts != null) tts.stop();
+        call.resolve();
+    }
+
+    /** Call audio on the loudspeaker (Android puts it on the quiet earpiece while the mic is on). */
+    @PluginMethod
+    public void setSpeaker(PluginCall call) {
+        boolean on = Boolean.TRUE.equals(call.getBoolean("on", true));
+        boolean reset = Boolean.TRUE.equals(call.getBoolean("reset", false));
+        try {
+            android.media.AudioManager am = (android.media.AudioManager) getContext().getSystemService(Context.AUDIO_SERVICE);
+            if (on) {
+                am.setMode(android.media.AudioManager.MODE_IN_COMMUNICATION);
+                int max = am.getStreamMaxVolume(android.media.AudioManager.STREAM_VOICE_CALL);
+                if (am.getStreamVolume(android.media.AudioManager.STREAM_VOICE_CALL) < max * 0.7)
+                    am.setStreamVolume(android.media.AudioManager.STREAM_VOICE_CALL, (int) Math.ceil(max * 0.8), 0);
+            }
+            if (Build.VERSION.SDK_INT >= 31) {
+                if (on) {
+                    for (android.media.AudioDeviceInfo d : am.getAvailableCommunicationDevices()) {
+                        if (d.getType() == android.media.AudioDeviceInfo.TYPE_BUILTIN_SPEAKER) { am.setCommunicationDevice(d); break; }
+                    }
+                } else {
+                    am.clearCommunicationDevice();
+                }
+            } else {
+                am.setSpeakerphoneOn(on);
+            }
+            if (reset) am.setMode(android.media.AudioManager.MODE_NORMAL);
+        } catch (Exception ignored) { }
+        call.resolve();
+    }
+
     /** Keep the phone linked to the PC in the background (calls + find my phone with the app closed). */
     @PluginMethod
     public void startLink(PluginCall call) {

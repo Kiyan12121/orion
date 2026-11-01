@@ -12,6 +12,9 @@ public class MainActivity extends BridgeActivity {
     public void onCreate(Bundle savedInstanceState) {
         registerPlugin(OrionNativePlugin.class);
         super.onCreate(savedInstanceState);
+        try {   // let ORION's voice play without a tap first (needed when a call opens the app)
+            getBridge().getWebView().getSettings().setMediaPlaybackRequiresUserGesture(false);
+        } catch (Exception ignored) { }
         wakeForCall(getIntent());
     }
 

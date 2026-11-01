@@ -121,6 +121,7 @@ nav.tabs .n.show{display:grid}
 .cBtn.red em{background:#e8344f;border-color:#ff6b80;box-shadow:0 0 30px rgba(232,52,79,.45)}
 .cBtn.on em{background:rgba(var(--ar),.3);border-color:var(--a)}
 @keyframes bob{50%{transform:translateY(-5px)}}
+#cLiveBtns{gap:14px}#cLiveBtns .cBtn em{width:62px;height:62px;font-size:24px}
 .phoneRow{display:flex;gap:8px;flex-wrap:wrap}
 .phoneRow .qa{flex:1 1 22%}
 
@@ -390,7 +391,7 @@ nav.tabs button{font-size:9.5px;letter-spacing:.1em}
     <div><div class="cState" id="cState">CALLING…</div><div class="cSub" id="cSub"></div></div>
   </div>
   <div class="cBtns" id="cRingBtns"><button class="cBtn red" id="cDecline"><em>✕</em>DECLINE</button><button class="cBtn green" id="cAccept"><em>📞</em>ACCEPT</button></div>
-  <div class="cBtns" id="cLiveBtns" style="display:none"><button class="cBtn" id="cMute"><em>🎙️</em>MUTE</button><button class="cBtn red" id="cHang"><em>✕</em>END</button><button class="cBtn" id="cTalk"><em>⏸</em>PAUSE</button></div>
+  <div class="cBtns" id="cLiveBtns" style="display:none"><button class="cBtn" id="cMute"><em>🎙️</em>MUTE</button><button class="cBtn on" id="cSpk"><em>🔊</em>SPEAKER</button><button class="cBtn red" id="cHang"><em>✕</em>END</button><button class="cBtn" id="cTalk"><em>⏸</em>PAUSE</button></div>
 </div>
 
 <div class="veil" id="vSet"><div class="sheet">
@@ -582,7 +583,13 @@ async function flushQueue(){ const q=J("queue",[]); if(!q.length) return; SJ("qu
 
 /* voice */
 let voices=[]; const loadV=()=>{ try{ voices=speechSynthesis.getVoices(); }catch(e){} }; loadV(); try{ speechSynthesis.onvoiceschanged=loadV; }catch(e){}
-function speak(t){ try{ if(store.get("mute")==="1") return; const u=new SpeechSynthesisUtterance(String(t).replace(/```[\s\S]*?```/g," code on screen ").replace(/[*_#`]/g,"").slice(0,600));
+let chatAudio=null;
+async function speak(t){ if(store.get("mute")==="1") return; const clean=String(t).replace(/```[\s\S]*?```/g," code on screen ").replace(/[*_#`]/g,"").slice(0,600);
+  try{ chatAudio&&chatAudio.pause(); }catch(e){}
+  if(pcOnline){ try{ const r=await api("/api/tts",{text:clean},15000); if(r.audio){ chatAudio=new Audio("data:audio/mpeg;base64,"+r.audio); await chatAudio.play(); return; } }catch(e){} }  // same natural voice as the PC
+  if(Native&&Native.speak){ try{ await Native.speak({text:clean}); }catch(e){} return; }
+  speakWeb(t); }
+function speakWeb(t){ try{ const u=new SpeechSynthesisUtterance(String(t).replace(/```[\s\S]*?```/g," code on screen ").replace(/[*_#`]/g,"").slice(0,600));
   u.voice=voices.find(v=>/en-GB/i.test(v.lang)&&/female|sonia|libby|google uk english female/i.test(v.name))||voices.find(v=>/en-GB/i.test(v.lang))||null; u.rate=1.02; speechSynthesis.cancel(); speechSynthesis.speak(u); }catch(e){} }
 
 /* ---------- smart listening: talk as long as you like; ORION works out when you've finished ----------
@@ -706,12 +713,14 @@ async function acceptCall(){
   Call.live=true; Call.t0=Date.now(); Call.timer=setInterval(()=>{ const s=Math.floor((Date.now()-Call.t0)/1000); $("#cTime").textContent=`${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`; },1000);
   try{ Call.stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}});
     Call.ctx=new (window.AudioContext||window.webkitAudioContext)(); const src=Call.ctx.createMediaStreamSource(Call.stream);
-    Call.an=Call.ctx.createAnalyser(); Call.an.fftSize=1024; src.connect(Call.an); Call.data=new Uint8Array(Call.an.fftSize); orbLoop(); }
+    Call.an=Call.ctx.createAnalyser(); Call.an.fftSize=1024; src.connect(Call.an); Call.data=new Uint8Array(Call.an.fftSize); orbLoop();
+    try{ await Call.ctx.resume(); }catch(e){}
+    setSpeaker(store.get("callSpeaker","1")==="1"); }
   catch(e){ cSet("NO MICROPHONE","Allow microphone access for ORION in Android settings."); return; }
   const greet=await callReply(Call.reason||"",true); if(!Call.live) return; await say(greet.reply,greet.audio); listenLoop();
 }
 function level(){ if(!Call.an) return 0; Call.an.getByteTimeDomainData(Call.data); let s=0; for(const v of Call.data){ const x=(v-128)/128; s+=x*x; } return Math.sqrt(s/Call.data.length); }
-function orbLoop(){ if(!Call.on) return; let l=0; if(Call.speaking&&Call.audio&&Call.outAn){ Call.outAn.getByteTimeDomainData(Call.outData); let s=0; for(const v of Call.outData){ const x=(v-128)/128; s+=x*x; } l=Math.sqrt(s/Call.outData.length)*3; }
+function orbLoop(){ if(!Call.on) return; let l=0; if(Call.speaking){ l=.35+.3*Math.abs(Math.sin(Date.now()/140))*Math.abs(Math.sin(Date.now()/370)); } else if(false&&Call.outAn){ Call.outAn.getByteTimeDomainData(Call.outData); let s=0; for(const v of Call.outData){ const x=(v-128)/128; s+=x*x; } l=Math.sqrt(s/Call.outData.length)*3; }
   else if(!Call.muted) l=level()*4; l=Math.min(1,l);
   $("#cOrb b").style.transform=`scale(${1+l*.12})`; $("#cOrb s").style.transform=`scale(${1+l*.45})`; requestAnimationFrame(orbLoop); }
 async function listenLoop(){
@@ -741,20 +750,26 @@ async function callReply(text,first){
   if(first){ const h=new Date().getHours(); return {reply:`${h<12?"Morning":h<18?"Afternoon":"Evening"}, ${title()}. ${text||"What can I do for you?"}`}; }
   try{ return {reply:await solo("[Voice call — answer in 1-2 short spoken sentences, no markdown.] "+text)}; }catch(e){ return {reply:"Sorry, my brain's offline at the moment."}; } }
 function say(text,b64){ return new Promise(res=>{ if(!Call.live||!text){ res(); return; } cSet("SPEAKING…",text); Call.speaking=true;
-  const done=()=>{ Call.speaking=false; res(); };
+  let fin=false; const done=()=>{ if(fin) return; fin=true; clearTimeout(guard); Call.speaking=false; res(); };
+  const guard=setTimeout(done,Math.max(6000,text.length*110));        // never get stuck if audio stalls
   if(b64){ const a=new Audio("data:audio/mpeg;base64,"+b64); Call.audio=a;
-    try{ const src=Call.ctx.createMediaElementSource(a); Call.outAn=Call.ctx.createAnalyser(); Call.outAn.fftSize=512; Call.outData=new Uint8Array(512); src.connect(Call.outAn); Call.outAn.connect(Call.ctx.destination); }catch(e){}
+    a.volume=1;
     a.onended=done; a.onerror=()=>sayLocal(text,done); a.play().catch(()=>sayLocal(text,done)); }
   else sayLocal(text,done); }); }
-function sayLocal(text,done){ try{ const u=new SpeechSynthesisUtterance(text.replace(/[*_#`]/g,""));
+function sayLocal(text,done){ const clean=text.replace(/[*_#`]/g,"");
+  if(Native&&Native.speak){ Native.speak({text:clean,call:true}).then(done,()=>done()); return; }     // phone's own voice (WebView has no speechSynthesis)
+  try{ const u=new SpeechSynthesisUtterance(text.replace(/[*_#`]/g,""));
   u.voice=voices.find(v=>/en-GB/i.test(v.lang)&&/female|sonia|libby|google uk english female/i.test(v.name))||voices.find(v=>/en-GB/i.test(v.lang))||null;
   u.onend=done; u.onerror=done; speechSynthesis.cancel(); speechSynthesis.speak(u); }catch(e){ done(); } }
-function endCall(msg){ const was=Call.live; Call.on=Call.live=false; clearTimeout(Call.ringTimeout); clearInterval(Call.timer); ringtone(false);
-  try{ Call.audio&&Call.audio.pause(); speechSynthesis.cancel(); }catch(e){} try{ Call.stream&&Call.stream.getTracks().forEach(t=>t.stop()); Call.ctx&&Call.ctx.close(); }catch(e){}
+/* Android sends call audio to the quiet earpiece once the mic is on — put it on the loudspeaker instead */
+async function setSpeaker(on){ Call.speaker=on; store.set("callSpeaker",on?"1":"0"); const b=$("#cSpk"); if(b){ b.classList.toggle("on",on); b.querySelector("em").textContent=on?"🔊":"🔈"; }
+  try{ if(Native&&Native.setSpeaker) await Native.setSpeaker({on}); }catch(e){} }
+function endCall(msg){ try{ if(Native&&Native.setSpeaker) Native.setSpeaker({on:false,reset:true}); }catch(e){} const was=Call.live; Call.on=Call.live=false; clearTimeout(Call.ringTimeout); clearInterval(Call.timer); ringtone(false);
+  try{ Call.audio&&Call.audio.pause(); Native&&Native.stopSpeaking&&Native.stopSpeaking(); speechSynthesis.cancel(); }catch(e){} try{ Call.stream&&Call.stream.getTracks().forEach(t=>t.stop()); Call.ctx&&Call.ctx.close(); }catch(e){}
   Call.stream=Call.ctx=Call.an=null; $("#call").classList.remove("show","ringing");
   if(msg){ toast(msg); if(document.hidden) notify("ORION","Missed call from ORION"); } else if(was) toast("Call ended."); }
 $("#cAccept").onclick=acceptCall; $("#cDecline").onclick=()=>endCall("Declined.");
-$("#cHang").onclick=()=>endCall(); $("#cMute").onclick=()=>{ Call.muted=!Call.muted; $("#cMute").classList.toggle("on",Call.muted); };
+$("#cHang").onclick=()=>endCall(); $("#cSpk").onclick=()=>setSpeaker(!Call.speaker); $("#cMute").onclick=()=>{ Call.muted=!Call.muted; $("#cMute").classList.toggle("on",Call.muted); };
 $("#cTalk").onclick=()=>{ Call.paused=!Call.paused; $("#cTalk").classList.toggle("on",Call.paused); $("#cTalk em").textContent=Call.paused?"▶":"⏸"; };
 
 /* scheduled calls (wake-up calls) — fire even if the app is closed, via Android notifications */
