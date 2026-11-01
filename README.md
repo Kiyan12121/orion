@@ -1,4 +1,18 @@
-# ORION 2.0 — Personal Intelligence System
+# ORION 3.0 — Personal Intelligence System
+
+## New in 3.0
+- **Dashboard:** your PC, today's plan, jobs, revision, money, gaming and health on one screen.
+- **Study:** flashcards with spaced repetition, "quiz me" out loud, focus sessions that block games and distractions, and exam countdowns.
+- **Gaming:** hours played per game, a booster, "clip that" (Ctrl+Alt+C), break reminders, and a party planner that books games and invites friends on Root.
+- **Ventures:** an earnings tracker, a Hatchlands dev queue built overnight, a lead finder for automation clients, and a content pipeline.
+- **Brain & Memory:** ORION learns about you from your chats, sorts what it knows, picks the memories that matter for each message, notices things you ask a lot and turns them into **shortcuts**, and handles **missions** (big multi-step jobs in the background).
+- **Health check:** every part of ORION is checked, each with a FIX button. Cloud backup and restore are included.
+- **Calls:** ORION rings your phone when a job finishes or a reminder is due, even with the app closed. It respects quiet hours and stays silent while you're gaming. It also has **Find my phone** (rings loudly even on silent), plus clipboard and file sharing between your phone and PC.
+- **Hidden browser by default:** web research happens out of sight, and pages only open on your screen when you ask to see them.
+- **No hand-over:** if every AI is out of allowance, ORION queues the request and retries it automatically.
+- **Mini mode:** a small always-on-top orb (click it to talk, double-click it to open ORION).
+- **Lite profile** for 4 GB laptops, and the local brain now picks the best installed model automatically.
+
 
 ## Install / update
 - **New PC:** unzip, then double-click **`1_SETUP.bat`**. It installs Python if needed, the packages, ffmpeg (video) and Tesseract (screen reading), and adds a Desktop shortcut.
@@ -9,6 +23,10 @@
 | Page | What it does |
 |---|---|
 | **Comms** | Chat, with quick buttons. Replies stream in and are spoken aloud. |
+| **Dashboard** | Everything at a glance. |
+| **Study / Gaming / Ventures** | See "New in 3.0". |
+| **Brain** | Memories, shortcuts and habits. |
+| **Health** | Checks, fixes and cloud backup. |
 | **Autopilot** | Give it a goal and it plans, builds, tests and fixes on its own. You can also say "autopilot: …". |
 | **Schedule** | Bookings, repeats, reminders, busy/DND blocks and a daily briefing. |
 | **Root** | Your Root DMs: check messages, AFK mode, in-game replies and an activity log. |
@@ -34,6 +52,7 @@ ORION uses the Root desktop app the way you would: it looks at the window and cl
 Pick a video, or leave it blank to use your newest video in Videos/Downloads. Renders use the CPU, so a 10-minute 1080p video takes about 10–20 minutes, and STOP cancels. Shorts come out at 1080×1920 with big captions. Captions need the Groq key (for Whisper).
 
 ## Devices
+- **Calls:** in the phone app's ⚙ settings, leave *Stay linked in the background* on. Android may ask you to allow notifications and *full-screen notifications*. Allow both so ORION can ring you.
 - **Phone and laptop access:** turn it on, install **Tailscale** (free) on this PC and your phone with the same account, then open the shown address on your phone and enter the PIN. If Windows asks about the firewall, allow *Private networks*.
 - **Phone notifications:** install the free **ntfy** app and subscribe to the topic shown.
 - **Sync:** paste a GitHub token with the `gist` scope. Memory and schedule are then shared across your PC, laptop and phone through a private Gist.

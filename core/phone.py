@@ -18,7 +18,7 @@ def push(kind, **data):
     with _lock:
         QUEUE.append(a)
         del QUEUE[:-30]
-    online = time.time() - LAST_SEEN[0] < 45
+    online = time.time() - LAST_SEEN[0] < 60
     if not online:
         notify = CTX.get("push_phone")
         if notify:
@@ -26,8 +26,24 @@ def push(kind, **data):
                     "timer": "⏱ Open ORION on your phone to start the timer.",
                     "call": "📞 ORION is calling — open the app to answer.",
                     "open": "📱 Open ORION on your phone to finish that.",
-                    "torch": "🔦 Open ORION on your phone to use the torch."}.get(kind, "Open ORION on your phone."))
+                    "torch": "🔦 Open ORION on your phone to use the torch.",
+                    "ring": "📢 ORION is trying to find your phone!",
+                    "clip": "📋 ORION sent you something — open the app to copy it.",
+                    "file": "📁 ORION sent you a file — open the app to save it."}.get(kind, "Open ORION on your phone."))
     return a, online
+
+
+URGENT = ("call", "ring")      # the phone's background link service wakes the phone for these
+
+
+def wake():
+    """Called by the phone's always-on background service (~every 20s, even with the app closed).
+    Hands over calls / find-my-phone rings so the phone can ring right away."""
+    LAST_SEEN[0] = time.time()
+    with _lock:
+        out = [a for a in QUEUE if a["kind"] in URGENT]
+        QUEUE[:] = [a for a in QUEUE if a["kind"] not in URGENT]
+    return out
 
 
 def take():
@@ -93,3 +109,34 @@ def phone_call(reason=""):
 def phone_torch(on):
     _, online = push("torch", on=bool(on))
     return _say(online, "Torch " + ("on." if on else "off."))
+
+
+@tool("FIND MY PHONE: make the user's phone ring loudly (even on silent) so they can find it.")
+def find_my_phone():
+    _, online = push("ring")
+    return _say(online, "Ringing your phone now.")
+
+
+@tool("Send text or a link to the user's PHONE clipboard (they tap to copy it).",
+      {"text": ("string", "What to send", True)})
+def phone_send_text(text):
+    _, online = push("clip", text=str(text)[:5000])
+    return _say(online, "Sent to your phone.")
+
+
+@tool("Send a FILE from this PC to the user's phone.", {"path": ("string", "Full path of the file", True)})
+def send_file_to_phone(path):
+    import os
+    import shutil
+    from .paths import DATA_DIR
+    path = os.path.expandvars(os.path.expanduser(path.strip().strip('"')))
+    if not os.path.isfile(path):
+        return f"ERROR: no file at {path}"
+    if os.path.getsize(path) > 200 * 2**20:
+        return "ERROR: that file is over 200 MB — too big to send."
+    out = os.path.join(DATA_DIR, "outbox")
+    os.makedirs(out, exist_ok=True)
+    name = re.sub(r"[^\w.\- ]", "_", os.path.basename(path))
+    shutil.copy2(path, os.path.join(out, name))
+    _, online = push("file", name=name, size=os.path.getsize(path))
+    return _say(online, f"Sending {name} to your phone.")

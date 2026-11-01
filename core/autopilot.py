@@ -13,8 +13,7 @@ AUTOPILOT MODE — you are working autonomously on a goal. The user is not watch
    finish with make_exe and tell the user where the .exe is.
 6. When finished: update_plan with done=true, then give a SHORT summary — what you built/did, where it
    is, how to use it, and anything you couldn't do.
-7. If the job is far too big, or you're stuck after retries, call ask_claude with full context
-   (goal, what you tried, the key file contents, the errors).
+7. If you're stuck after retries, finish with an honest summary of what works, what doesn't and why.
 """
 
 

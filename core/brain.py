@@ -1,4 +1,4 @@
-"""The thinking part.  reflex -> cloud pool (Groq, Cerebras, ...) -> local Ollama -> Claude.
+"""The thinking part.  reflex -> cloud pool (Groq, Cerebras, ...) -> local Ollama -> queue & retry later.
 
 The agent keeps going even if a provider runs out mid-task: it hands the SAME conversation to the
 next provider, so actions are never repeated. In Autopilot it will also wait out short rate limits.
@@ -8,7 +8,7 @@ import platform
 import re
 import time
 
-from . import reflexes
+from . import learning, reflexes
 from .autopilot import AUTOPILOT_RULES
 from .providers import AuthError, Cancelled, ProviderError
 from .tools import REGISTRY
@@ -36,7 +36,9 @@ Rules:
 - "Set an alarm" / "wake me up" / "call me" / "torch" mean the user's PHONE — use the phone_* tools.
 - Use the schedule tools for plans, bookings, reminders and "am I free" questions.
 - If the user shares something worth keeping (preferences, projects, people), call remember.
-- If a task is beyond your tools or huge, call ask_claude with a complete self-contained message.
+- Web work happens in YOUR hidden browser (web_search, fetch_page, browser_*, open_website). Never pop pages up on
+  the user's screen unless they ask to see it (open_website show=true).
+- If a task is huge, break it down and use queue_job / autopilot. Never mention Claude or other assistants.
 - Never claim you did something you didn't. If a tool returns ERROR, say so briefly and try another way.
 
 Now: {now}. System: {os}.{extra}
@@ -47,7 +49,7 @@ SMART = re.compile(r"\b(code|script|program|build|make|create|write|fix|debug|ex
                    r"plan|research|compare|analy[sz]e|essay|app|bot|website|summari[sz]e|learn|teach|story|"
                    r"translate|calculate|work out|figure|recommend|should i|ideas?|design|review)\b", re.I)
 
-CORE = {"queue_job", "get_time", "open_app", "open_website", "web_search", "remember", "ask_claude",
+CORE = {"queue_job", "mission_start", "get_time", "open_app", "open_website", "web_search", "remember",
         "request_more_tools", "set_theme", "schedule_add", "schedule_list", "check_availability"}
 GROUPS = {
     "computer": ({"type_text", "press_keys", "mouse_click", "scroll", "read_screen", "find_on_screen",
@@ -55,9 +57,10 @@ GROUPS = {
                  r"click|type|press|screen|scroll|window|button|close|tab|key|mouse|select|menu|notepad|"
                  r"into|then|and (then )?(type|click|search)"),
     "system": ({"system_status", "media", "set_timer", "lock_pc", "power", "save_screenshot", "run_command",
-                "list_running_apps", "close_app", "gaming_mode"},
+                "list_running_apps", "close_app", "gaming_mode", "clip_that", "gaming_stats", "party_plan"},
                r"volume|music|song|play|pause|skip|timer|cpu|ram|memory usage|battery|shut ?down|"
-               r"restart|sleep|lock|screenshot|command|powershell|install|process|running|slow|wifi|ip|gam"),
+               r"restart|sleep|lock|screenshot|command|powershell|install|process|running|slow|wifi|ip|gam|clip|party|"
+               r"hours played|play with|invite"),
     "files": ({"list_files", "read_file", "write_file", "open_path", "clipboard_get", "clipboard_set",
                "undo_last_change", "run_command"},
               r"file|folder|desktop|downloads|documents|save|\.txt|\.bat|clipboard|copy|paste|undo|delete|"
@@ -75,9 +78,18 @@ GROUPS = {
     "schedule": ({"schedule_add", "schedule_list", "schedule_remove", "check_availability", "set_timer"},
                  r"schedule|book|remind|calendar|free|busy|plan|tomorrow|tonight|monday|tuesday|wednesday|"
                  r"thursday|friday|saturday|sunday|week|appointment|revision|event|\bat \d|pm\b|am\b"),
-    "skills": ({"skill_create", "skill_list", "skill_delete"}, r"learn|skill|teach yourself|new ability"),
-    "phone": ({"phone_alarm", "phone_timer", "phone_open_app", "phone_call", "phone_torch"},
-              r"phone|alarm|wake me|timer on|ring me|call me|torch|flashlight|on my mobile|my s23"),
+    "skills": ({"skill_create", "skill_list", "skill_delete", "shortcut_add", "shortcut_list", "shortcut_remove"},
+               r"learn|skill|teach yourself|new ability|shortcut|when i say|every time i say|macro"),
+    "ventures": ({"dev_task_add", "dev_task_list", "leads_find", "earning_add", "earnings_summary", "mission_start"},
+                 r"hatchlands|roblox|luau|dev queue|to-?do|leads?|prospect|businesses|pitch|client|earn|made £|"
+                 r"money|income|profit|sold|sale|paid|£\d"),
+    "study": ({"study_make_flashcards", "study_quiz", "study_mark", "focus_start", "focus_stop", "exam_add",
+               "study_stats"},
+              r"revis|study|flashcard|quiz me|test me|exam|gcse|homework|focus|pomodoro|mock|paper \d|biology|"
+              r"chemistry|physics|maths|english lit|history|geography"),
+    "phone": ({"phone_alarm", "phone_timer", "phone_open_app", "phone_call", "phone_torch", "find_my_phone",
+               "phone_send_text", "send_file_to_phone"},
+              r"phone|alarm|wake me|timer on|ring me|call me|torch|flashlight|on my mobile|my s23|lost|where'?s my"),
     "jobs": ({"queue_job", "list_jobs", "routine_add", "routine_list", "routine_run_now"},
              r"queue|later|background|overnight|night|while i'?m|when i'?m away|routine|every (day|morning|night|week)|"
              r"automat|job|tidy|clean ?up|back ?up|backup|temp|health"),
@@ -143,7 +155,7 @@ class Brain:
             return [self.local]
         return list(self.cloud) + [self.local]
 
-    def _system(self, autopilot=False):
+    def _system(self, autopilot=False, text=""):
         title = self.cfg.get("user_title", "sir")
         extra = self.extra_context() or ""
         if autopilot:
@@ -152,7 +164,7 @@ class Brain:
                               title_cap=title.capitalize(), os=platform.platform(),
                               now=time.strftime("%A %d %B %Y, %H:%M"),
                               theme=THEMES.get(self.cfg.get("theme"), THEMES["standby"]),
-                              extra=("\n" + extra) if extra else "", facts=self.memory.facts_text())
+                              extra=("\n" + extra) if extra else "", facts=self.memory.facts_text(text))
 
     # ------------------------------------------------------------------ main entry
     def handle(self, text, on_delta=None, cancel=None, autopilot=False):
@@ -163,6 +175,10 @@ class Brain:
             autopilot, text = True, text[m.end():]
 
         if not autopilot:
+            sc = learning.expand(text)
+            if sc:
+                self.emit("toast", level="info", text=f"⚡ Shortcut: {sc[:80]}")
+                text = sc
             r = reflexes.match(text, name)
             if r:
                 tool_name, args, reply_fn = r
@@ -178,13 +194,33 @@ class Brain:
             return reply, ("local" if prov.local else "cloud"), f"{prov.label} {model.split('/')[-1]}"
         except AllFailed as e:
             title = self.cfg.get("user_title", "sir")
-            self.tools.run("ask_claude", {"question": text})
             why = "\n".join("• " + x.strip() for x in str(e).split(";") if x.strip())
-            return (f"My own brains couldn't take that one, {title}, so I've passed it to Claude.\n{why}"), "claude", None
+            retry = ""
+            from .tools import CTX
+            jobs = CTX.get("jobs")
+            import threading
+            if (jobs and not text.startswith("[") and self.cfg.get("retry_when_out", True)
+                    and threading.get_ident() != CTX.get("job_thread")):
+                j = jobs.add(text, source="retry", title="Retry: " + text[:60], autopilot=autopilot)
+                jobs.retry_later(j["id"])
+                retry = f" I've queued it (ticket {j['id']}) and will retry automatically once a brain is free."
+            return (f"Every brain I have is out of allowance right now, {title}.{retry}\n{why}"), "reflex", None
 
     def _log(self, user, reply):
         self.memory.add_turn("user", user)
         self.memory.add_turn("assistant", reply)
+        try:
+            learning.log_request(user)
+        except Exception:
+            pass
+        if self.memory.due_for_learning() and self.cfg.get("auto_learn", True):
+            import threading
+
+            def learn():
+                n = self.memory.learn_from_chat(self)
+                if n:
+                    self.emit("toast", level="info", text=f"🧠 Learned {n} new thing(s) about you.")
+            threading.Thread(target=learn, daemon=True).start()
 
     def quick(self, system, user, allowed=frozenset(), tier="smart", max_steps=4):
         """A small, fenced-off agent: only the given tools, no memory, no streaming.
@@ -272,7 +308,7 @@ class Brain:
                 m["content"] = m["content"][:120] + " …[trimmed]"
 
     def _agent(self, text, on_delta, cancel, autopilot):
-        messages = [{"role": "system", "content": self._system(autopilot)}]
+        messages = [{"role": "system", "content": self._system(autopilot, text)}]
         messages += self.memory.recent(4 if autopilot else 10)
         messages.append({"role": "user", "content": text})
         recent_user = [m["content"] for m in self.memory.recent(4) if m["role"] == "user"]

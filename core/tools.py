@@ -81,7 +81,7 @@ def _need(lib, name):
 
 # ---------------------------------------------------------------------------------------------
 # Context set by the app at start-up
-CTX = {"memory": None, "config": {}, "notify": lambda text: None, "open_claude": None,
+CTX = {"memory": None, "config": {}, "notify": lambda text: None, 
        "set_theme": None, "cancel": threading.Event()}
 
 # ---------------------------------------------------------------------------------------------
@@ -254,16 +254,28 @@ def list_running_apps():
     return ", ".join(names[:120])
 
 
-@tool("Open a website URL, or search Google if given plain words.",
-      {"url_or_query": ("string", "A URL or a search query", True)})
-def open_website(url_or_query):
+@tool("Visit a website or search. By DEFAULT this uses ORION's own hidden browser and returns what the page says "
+      "(nothing pops up on the user's screen). Only set show=true when the user explicitly wants to SEE it on their "
+      "screen / in Chrome (e.g. 'show me', 'open it on my screen', 'put YouTube on').",
+      {"url_or_query": ("string", "A URL or a search query", True),
+       "show": ("boolean", "true = open in the user's own browser on screen", False)})
+def open_website(url_or_query, show=False):
     s = url_or_query.strip()
     if re.match(r"^(https?://)?[\w-]+(\.[\w-]+)+(/\S*)?$", s):
         url = s if s.startswith("http") else "https://" + s
     else:
-        url = "https://www.google.com/search?q=" + urllib.parse.quote(s)
-    webbrowser.open(url)
-    return f"Opened {url}"
+        url = "https://www.bing.com/search?q=" + urllib.parse.quote(s)
+    if show:
+        webbrowser.open(url)
+        return f"Opened {url} on the user's screen."
+    try:
+        from .browser import browser_open
+        return "(Opened in ORION's hidden browser — the user can't see it. Tell them what you found.)\n" + browser_open(url)
+    except Exception as e:
+        try:
+            return "(Read without a browser.)\n" + fetch_page(url)
+        except Exception:
+            return f"ERROR: couldn't load {url} in the hidden browser ({e})."
 
 
 # ---------------------------------------------------------------------------------------------
@@ -674,9 +686,10 @@ def clipboard_set(text):
 # ---------------------------------------------------------------------------------------------
 # Memory & escalation
 @tool("Save a long-term fact about the user or their projects (preferences, names, goals) so you "
-      "remember it in future sessions.", {"fact": ("string", "The fact, as one short sentence", True)})
-def remember(fact):
-    CTX["memory"].add_fact(fact)
+      "remember it in future sessions.", {"fact": ("string", "The fact, as one short sentence", True),
+                                          "category": ("string", "person | project | preference | goal | fact", False)})
+def remember(fact, category="fact"):
+    CTX["memory"].add_fact(fact, category or "fact")
     return "Saved to memory."
 
 
@@ -684,15 +697,6 @@ def remember(fact):
 def forget(keyword):
     n = CTX["memory"].forget(keyword)
     return f"Forgot {n} item(s)."
-
-
-@tool("Hand over to Claude: opens Claude with a question already written. Use when you can't do "
-      "the task with your tools, aren't confident, or the user wants in-depth help, teaching, "
-      "big coding jobs or advice.",
-      {"question": ("string", "A complete, self-contained message for Claude including all context", True)})
-def ask_claude(question):
-    CTX["open_claude"](question)
-    return "Opened Claude with the question (also copied to clipboard)."
 
 
 @tool("Switch ORION's mode (colours + personality): standby, serious, stealth, executive or hacker.",

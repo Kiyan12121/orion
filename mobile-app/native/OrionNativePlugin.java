@@ -1,6 +1,11 @@
 package dev.kiyan.orion;
 
+import android.app.DownloadManager;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.os.Environment;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -174,7 +179,90 @@ public class OrionNativePlugin extends Plugin {
         Intent i = getActivity() != null ? getActivity().getIntent() : null;
         String a = i != null ? i.getStringExtra("orion_action") : null;
         if (i != null) i.removeExtra("orion_action");
+        String why = i != null ? i.getStringExtra("orion_reason") : null;
+        if (i != null) i.removeExtra("orion_reason");
         ret.put("action", a == null ? "" : a);
+        ret.put("reason", why == null ? "" : why);
         call.resolve(ret);
+    }
+
+    /** Keep the phone linked to the PC in the background (calls + find my phone with the app closed). */
+    @PluginMethod
+    public void startLink(PluginCall call) {
+        SharedPreferences.Editor e = getContext().getSharedPreferences(LinkService.PREFS, Context.MODE_PRIVATE).edit();
+        e.putString("addr", call.getString("addr", "")).putString("pin", call.getString("pin", "")).putBoolean("on", true).apply();
+        try {
+            LinkService.start(getContext());
+            JSObject ret = new JSObject();
+            boolean fs = true;
+            if (Build.VERSION.SDK_INT >= 34) {
+                android.app.NotificationManager nm = (android.app.NotificationManager) getContext().getSystemService(Context.NOTIFICATION_SERVICE);
+                fs = nm.canUseFullScreenIntent();
+            }
+            ret.put("fullScreen", fs);
+            call.resolve(ret);
+        } catch (Exception ex) { call.reject(ex.getMessage()); }
+    }
+
+    /** Android 14+: let ORION's calls appear full-screen (like a real incoming call). */
+    @PluginMethod
+    public void openFullScreenSettings(PluginCall call) {
+        try {
+            Intent i = Build.VERSION.SDK_INT >= 34
+                    ? new Intent(Settings.ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT, Uri.parse("package:" + getContext().getPackageName()))
+                    : new Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).putExtra(Settings.EXTRA_APP_PACKAGE, getContext().getPackageName());
+            launch(i);
+        } catch (Exception ex) { }
+        call.resolve();
+    }
+
+    @PluginMethod
+    public void stopLink(PluginCall call) {
+        getContext().getSharedPreferences(LinkService.PREFS, Context.MODE_PRIVATE).edit().putBoolean("on", false).apply();
+        getContext().stopService(new Intent(getContext(), LinkService.class));
+        call.resolve();
+    }
+
+    @PluginMethod
+    public void stopRing(PluginCall call) {
+        Intent i = new Intent(getContext(), LinkService.class).setAction(LinkService.STOP_RING);
+        try { if (Build.VERSION.SDK_INT >= 26) getContext().startForegroundService(i); else getContext().startService(i); }
+        catch (Exception ignored) { }
+        call.resolve();
+    }
+
+    @PluginMethod
+    public void copyText(PluginCall call) {
+        ClipboardManager cm = (ClipboardManager) getContext().getSystemService(Context.CLIPBOARD_SERVICE);
+        cm.setPrimaryClip(ClipData.newPlainText("ORION", call.getString("text", "")));
+        call.resolve();
+    }
+
+    @PluginMethod
+    public void readClipboard(PluginCall call) {
+        ClipboardManager cm = (ClipboardManager) getContext().getSystemService(Context.CLIPBOARD_SERVICE);
+        JSObject ret = new JSObject();
+        String t = "";
+        try {
+            ClipData d = cm.getPrimaryClip();
+            if (d != null && d.getItemCount() > 0 && d.getItemAt(0).getText() != null) t = d.getItemAt(0).getText().toString();
+        } catch (Exception ignored) { }
+        ret.put("text", t);
+        call.resolve(ret);
+    }
+
+    /** Save a file the PC sent to the phone's Downloads folder. */
+    @PluginMethod
+    public void download(PluginCall call) {
+        try {
+            String name = call.getString("name", "file");
+            DownloadManager.Request r = new DownloadManager.Request(Uri.parse(call.getString("url", "")));
+            r.addRequestHeader("X-PIN", call.getString("pin", ""));
+            r.setTitle(name);
+            r.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+            r.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "ORION/" + name);
+            ((DownloadManager) getContext().getSystemService(Context.DOWNLOAD_SERVICE)).enqueue(r);
+            call.resolve();
+        } catch (Exception ex) { call.reject(ex.getMessage()); }
     }
 }

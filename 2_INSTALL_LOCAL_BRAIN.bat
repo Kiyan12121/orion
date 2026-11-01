@@ -1,13 +1,17 @@
 @echo off
 title ORION - Local brain
 echo.
-echo  Installs Ollama + a small AI that runs fully on this computer (offline backup brain).
+echo  Installs Ollama + an AI that runs fully on this computer (offline backup brain).
+echo  ORION picks the right size for your RAM automatically.
 echo.
-echo    [1] Gaming PC (8GB+ RAM)  - qwen2.5:3b    (~2 GB download, smarter)
-echo    [2] Laptop (4GB RAM)      - qwen2.5:1.5b  (~1 GB download, lighter)
+set "MODEL=qwen2.5:3b"
+for /f %%R in ('powershell -NoProfile -Command "[math]::Round((Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory/1GB)"') do set "RAM=%%R"
+if defined RAM (
+  rem 3b is the sweet spot for an older CPU - 7b is too slow without a strong GPU
+  if %RAM% LSS 7 set "MODEL=qwen2.5:1.5b"
+)
+echo  This PC has about %RAM% GB of RAM - using %MODEL%
 echo.
-choice /c 12 /n /m "  Choose 1 or 2: "
-if errorlevel 2 (set "MODEL=qwen2.5:1.5b") else (set "MODEL=qwen2.5:3b")
 
 set "OLLAMA=ollama"
 where ollama >nul 2>nul
@@ -31,6 +35,6 @@ echo.
 echo  Downloading %MODEL% ...
 "%OLLAMA%" pull %MODEL%
 echo.
-echo  Done. In ORION: Settings ^> Local model ^> type  %MODEL%  ^> Save.
-echo  ORION uses it automatically when the cloud brains are offline or out of allowance.
+echo  Done. ORION finds it automatically (Settings ^> Local model = auto).
+echo  It's used when the cloud brains are offline or out of allowance.
 pause

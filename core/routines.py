@@ -46,10 +46,14 @@ BUILTIN = {
                        "desc": "Looks for a new ORION version on GitHub."},
     "content":        {"name": "Content: new videos → Shorts", "time": "03:00", "days": "daily", "heavy": True,
                        "desc": "Any new video in your Videos folder gets auto-cut, plus 3 captioned Shorts and titles."},
+    "learn":          {"name": "Learn from the day", "time": "02:30", "days": "daily", "heavy": False,
+                       "desc": "Pulls new facts about you from today's chats and spots things you ask a lot (→ shortcuts)."},
+    "devqueue":       {"name": "Dev queue (Hatchlands etc.)", "time": "01:00", "days": "daily", "heavy": True,
+                       "desc": "Works through your coding to-do list overnight and saves the scripts for review."},
     "report":         {"name": "Morning report", "time": "07:30", "days": "daily", "heavy": False,
                        "desc": "Sends your phone a summary of everything ORION did overnight."},
 }
-DEFAULT_ON = {"tidy_downloads", "clear_temp", "backup", "health", "updates", "report"}
+DEFAULT_ON = {"tidy_downloads", "clear_temp", "backup", "health", "updates", "report", "learn", "devqueue"}
 DAYS = {"daily": [0, 1, 2, 3, 4, 5, 6], "weekdays": [0, 1, 2, 3, 4], "weekends": [5, 6]}
 
 
@@ -282,6 +286,9 @@ class NightShift:
 
     def run_builtin(self, k):
         """Quick upkeep runs straight away in a thread; AI/heavy work goes through the job queue."""
+        if CTX.get("lite") and k in ("content", "devqueue"):
+            self._record(k, "Skipped — this machine is in Lite mode.")
+            return
         if k == "content":
             st = _state()
             vids = new_videos(st)
@@ -295,6 +302,26 @@ class NightShift:
             return
         if k == "report":
             self.morning_report()
+            return
+        if k == "devqueue":
+            try:
+                from .ventures import queue_dev_tasks
+                self._record(k, queue_dev_tasks(self.jobs))
+            except Exception as e:
+                self._record(k, f"Failed: {e}")
+            return
+        if k == "learn":
+            def learn():
+                res = []
+                mem, brain = CTX.get("memory"), CTX.get("brain")
+                if mem and brain and mem.history:
+                    res.append(f"learned {mem.learn_from_chat(brain)} new fact(s)")
+                from .learning import nightly_digest
+                tip = nightly_digest()
+                if tip:
+                    res.append(tip)
+                self._record(k, "; ".join(res) or "Nothing new.")
+            threading.Thread(target=learn, daemon=True).start()
             return
 
         def run():
@@ -330,6 +357,14 @@ class NightShift:
                 lines.append(f"• {BUILTIN.get(e['id'], {}).get('name', e['id'])}: {e['text']}")
         for j in self.jobs.since(since):
             lines.append(f"• {'✅' if j['status'] == 'done' else '⚠️'} {j['title']}: {(j['result'] or '')[:140]}")
+        try:
+            from .study import overview
+            o = overview()
+            if o["exams"]:
+                e = o["exams"][0]
+                lines.append(f"• 📚 {e['subject']} in {e['days']} day(s). Revision streak: {o['streak']} day(s).")
+        except Exception:
+            pass
         try:
             from .schedule import briefing_text
             lines.append(briefing_text(self.cfg.get("user_title", "sir")))

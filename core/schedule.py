@@ -225,6 +225,8 @@ class Scheduler:
                     who = f" with {o['with']}" if o.get("with") else ""
                     self.notify(f"Reminder, {self.cfg.get('user_title', 'sir')}: {o['title']}{who} {when}.", True)
                     fired.add(key)
+                    if str(o.get("notes", "")).startswith("PARTY:") and CTX.get("party_reminder"):
+                        threading.Thread(target=CTX["party_reminder"], args=(o, when), daemon=True).start()
                     changed = True
             bt = self.cfg.get("briefing_time", "07:30")
             today = now.strftime("%Y-%m-%d")

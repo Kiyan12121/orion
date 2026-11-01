@@ -25,7 +25,9 @@ from core import tools                                      # noqa: E402
 from core import autopilot, coder, schedule, skills         # noqa: E402,F401  (registers their tools)
 from core import browser, root, video, vision               # noqa: E402,F401
 from core.jobs import Jobs                                  # noqa: E402
-from core import phone                                      # noqa: E402
+from core import phone, calls                               # noqa: E402
+from core import health, learning, study, ventures          # noqa: E402
+from core import gaming as gaming_mod                        # noqa: E402
 from core.routines import NightShift                        # noqa: E402
 from core.devices import Push, Remote, Sync, Updater        # noqa: E402
 from core.gaming import GamingMode, Hotkey                  # noqa: E402
@@ -62,7 +64,7 @@ class Api:
         self._cancel = threading.Event()
         self._pending = {}
         tools.CTX.update(memory=self._memory, config=self._cfg, notify=self._notify,
-                         open_claude=self._open_claude, set_theme=self._set_theme, cancel=self._cancel,
+                         set_theme=self._set_theme, cancel=self._cancel,
                          emit=self._emit)
         skills.load_all()
         self._toolbox = tools.Toolbox(self._cfg, self._emit, self._confirm)
@@ -70,9 +72,16 @@ class Api:
         self._speaker = Speaker(self._cfg, self._emit)
         self._recorder = Recorder()
         self._gaming = GamingMode(self._cfg, self._emit, self._notify, self._brain)
-        self._scheduler = schedule.Scheduler(self._cfg, self._notify)
+        self._scheduler = schedule.Scheduler(self._cfg, self._sched_notify)
         self._hotkey = Hotkey(self._cfg.get("hotkey", "ctrl+alt+space"), self._hk_start, self._hk_stop)
         tools.CTX["brain"] = self._brain
+        tools.CTX["lite"] = self.lite_profile
+        try:   # instant "clip that" hotkey, works inside games
+            import keyboard
+            keyboard.add_hotkey(self._cfg.setdefault("gaming", {}).get("clip_hotkey", "ctrl+alt+c"),
+                                lambda: threading.Thread(target=self.clip_now, daemon=True).start())
+        except Exception:
+            pass
         self._push = Push(self._cfg)
         self._root = root.RootWatcher(self._cfg, self._notify, self._brain)
         self._remote = Remote(self._cfg, self)
@@ -81,6 +90,7 @@ class Api:
         self._updater = Updater(self._cfg, self._emit)
         self._updater.start()
         self._jobs = Jobs(self._cfg, self._run_job, lambda t, title=None: self._push.send(t, title), self._emit)
+        self._jobs.on_finish = self._job_finished
         self._shift = NightShift(self._cfg, self._jobs, self._shift_notify, self._emit, self._updater)
         tools.CTX["push_phone"] = lambda t: self._push.send(t, "ORION", 5, "iphone")
         self._voice_id = VoiceID(self._cfg)
@@ -91,11 +101,65 @@ class Api:
                 self._remote.start()
             except Exception as e:
                 log.warning(str(e))
-        if self._cfg.get("wake", {}).get("enabled"):
+        if self._cfg.get("wake", {}).get("enabled") and not self.lite_profile:
             self._wake.start()
+        threading.Thread(target=self._health_bg, daemon=True).start()
+
+    @property
+    def lite_profile(self):
+        """Laptop lite mode: 4 GB machines skip the heavy extras (wake word, clip buffer, overnight video work)."""
+        p = self._cfg.get("profile", "auto")
+        return p == "lite" or (p == "auto" and _ram_gb() <= 6.5)
+
+    def _health_bg(self):
+        """Quietly check health a minute after start; flag the dock if something's broken."""
+        time.sleep(60)
+        try:
+            bad = [c for c in health.run_checks(self) if c["state"] == "bad"]
+            if bad:
+                self._emit("health_badge", count=len(bad))
+        except Exception:
+            log.exception("health check failed")
+
+    def health_get(self):
+        return health.run_checks(self)
+
+    def health_fix(self, fid):
+        def run():
+            try:
+                msg = health.fix(self, fid)
+            except Exception as e:
+                msg = f"Fix failed: {e}"
+            self._emit("health_fixed", id=fid, text=msg)
+        threading.Thread(target=run, daemon=True).start()
+        return True
+
+    def backup_now(self):
+        try:
+            return health.backup_cloud(self._cfg)
+        except Exception as e:
+            return f"Backup failed: {e}"
+
+    def restore_now(self):
+        try:
+            return health.restore_cloud(self._cfg)
+        except Exception as e:
+            return f"Restore failed: {e}"
+
+    def profile_set(self, p):
+        if p in ("auto", "full", "lite"):
+            self._cfg["profile"] = p
+            config_mod.save(self._cfg)
+        return self.lite_profile
 
     # ---------------------------------------------------------------- plumbing
     def _emit(self, kind, **data):
+        mini = getattr(self, "_mini", None)
+        if mini and kind in ("state", "speaking", "theme", "toast", "stream_end"):
+            try:
+                mini.evaluate_js(f"window.ui && window.ui.event({json.dumps({'kind': kind, **data})})")
+            except Exception:
+                self._mini = None
         if not self._window:
             return
         try:
@@ -143,9 +207,20 @@ class Api:
         self._emit("message", id=uuid.uuid4().hex[:8], role="user", text=f"{src} JOB: {j['title']}")
         return self._process(j["text"], j.get("autopilot", True), speak=False)
 
+    def _sched_notify(self, text, important=True):
+        self._notify(text, important)
+        if important:
+            calls.maybe_call(self._cfg, "reminders", text, getattr(self, "_gaming", None))
+
+    def _job_finished(self, j):
+        if j["status"] in ("done", "failed") and calls.worth_calling(self._cfg, j):
+            calls.maybe_call(self._cfg, "jobs", calls.job_reason(j), self._gaming)
+
     def _shift_notify(self, text, title=None):
         self._emit("toast", level="info", text=(title + ": " if title else "") + text.split("\n")[0][:140])
         self._push.send(text, title)
+        if title == "ORION morning report":
+            calls.maybe_call(self._cfg, "morning", "Here's your morning report. " + text[:250], self._gaming)
 
     def _wake_command(self, wav):
         prov = self._brain.groq_like
@@ -169,16 +244,6 @@ class Api:
             self._emit("message", id=uuid.uuid4().hex[:8], role="user", text=text)
             self.send(text)
 
-    def _open_claude(self, question):
-        try:
-            import pyperclip
-            pyperclip.copy(question)
-        except Exception:
-            pass
-        base = self._cfg.get("claude_url", "https://claude.ai/new")
-        webbrowser.open(f"{base}?q={urllib.parse.quote(question[:3000])}")
-        self._emit("claude", text=question)
-
     def _set_theme(self, theme):
         self._cfg["theme"] = theme
         config_mod.save(self._cfg)
@@ -188,7 +253,7 @@ class Api:
     def init(self):
         c = self._cfg
         vis = c.get("visuals", "auto")
-        lite = vis == "lite" or (vis == "auto" and _ram_gb() <= 6.5)
+        lite = vis == "lite" or (vis == "auto" and self.lite_profile)
         return {"name": c["assistant_name"], "title": c["user_title"], "version": config_mod.VERSION,
                 "theme": c["theme"], "brain": c["brain"], "speak": c["voice"]["speak_replies"],
                 "safe_mode": c["safe_mode"], "lite": lite, "skip_boot": c.get("skip_boot", False),
@@ -342,10 +407,6 @@ class Api:
         return text
 
     # ---------------------------------------------------------------- controls
-    def ask_claude(self, text=""):
-        self._open_claude(text or "Hey Claude — I've got a question for you.")
-        return True
-
     def set_brain(self, mode):
         if mode in ("auto", "cloud", "local"):
             self._cfg["brain"] = mode
@@ -746,6 +807,23 @@ class Api:
             return {"afk": self._root.afk, "note": self._root.afk_note, "log": root.recent_log(30)}
         if path == "/api/stats":
             return {**self.stats(), "meters": self._brain.meters()}
+        if path == "/api/wake":
+            return {"actions": phone.wake(), "title": self._cfg.get("user_title", "sir")}
+        if path == "/api/clip":
+            try:
+                import pyperclip
+                return {"text": pyperclip.paste()[:20000]}
+            except Exception:
+                return {"text": ""}
+        if path == "/api/calls":
+            return calls.settings(self._cfg)
+        simple = {"/api/health": self.health_get, "/api/study": self.study_get, "/api/ventures": self.ventures_get,
+                  "/api/gaming": self.gaming_get, "/api/brain": self.brain_get}
+        if path.split("?")[0] in simple:
+            return simple[path.split("?")[0]]()
+        if path.startswith("/api/study/cards"):
+            q = urllib.parse.parse_qs(urllib.parse.urlparse(path).query)
+            return {"cards": self.study_cards((q.get("deck") or [""])[0])}
         raise KeyError(path)
 
     def remote_post(self, path, body):
@@ -768,7 +846,71 @@ class Api:
             return self.call_turn(body.get("text", ""), body.get("first", False))
         if path == "/api/tts":
             return {"audio": self._tts(body.get("text", ""))}
+        if path == "/api/clip":
+            try:
+                import pyperclip
+                pyperclip.copy(body.get("text", ""))
+                self._emit("toast", level="info", text="📋 Clipboard received from your phone.")
+                return {"ok": True}
+            except Exception as e:
+                return {"ok": False, "error": str(e)}
+        if path == "/api/calls":
+            return self.calls_save(body)
+        if path == "/api/study/mark":
+            return {"ok": self.study_mark(body.get("deck"), int(body.get("i", 0)), body.get("ok"))}
+        if path == "/api/study/make":
+            return {"ok": self.study_make(body.get("topic", ""), body.get("notes", ""), int(body.get("count", 12)))}
+        if path == "/api/study":
+            return self.study_action(body)
+        if path == "/api/ventures":
+            return self.ventures_action(body)
+        if path == "/api/brain":
+            return self.brain_action(body)
+        if path == "/api/gaming":
+            return self.gaming_set(body)
+        if path == "/api/clipnow":
+            return {"result": self.clip_now()}
+        if path == "/api/health/fix":
+            return {"ok": self.health_fix(body.get("id", ""))}
         raise KeyError(path)
+
+    def file_drop(self, name, raw):
+        """Phone -> PC file drop: saved to Downloads\\ORION Drop."""
+        name = re.sub(r"[^\w.\- ]", "_", os.path.basename(name or "file"))[:120] or "file"
+        folder = os.path.join(os.path.expanduser("~"), "Downloads", "ORION Drop")
+        os.makedirs(folder, exist_ok=True)
+        fp = os.path.join(folder, name)
+        base, ext = os.path.splitext(fp)
+        n = 1
+        while os.path.exists(fp):
+            fp = f"{base} ({n}){ext}"
+            n += 1
+        with open(fp, "wb") as f:
+            f.write(raw)
+        self._emit("toast", level="info", text=f"📁 {os.path.basename(fp)} arrived from your phone.")
+        return {"ok": True, "path": fp}
+
+    def calls_get(self):
+        return calls.settings(self._cfg)
+
+    def calls_save(self, b):
+        c = calls.settings(self._cfg)
+        for k in ("jobs", "reminders", "morning", "dms", "not_while_gaming"):
+            if k in b:
+                c[k] = bool(b[k])
+        for k in ("quiet_from", "quiet_to"):
+            if re.match(r"^\d{2}:\d{2}$", str(b.get(k, ""))):
+                c[k] = b[k]
+        config_mod.save(self._cfg)
+        return c
+
+    def call_me(self, reason=""):
+        phone.push("call", reason=reason)
+        return True
+
+    def ring_phone(self):
+        phone.push("ring")
+        return True
 
     # ---------------------------------------------------------------- phone call mode
     def _tts(self, text):
@@ -874,8 +1016,148 @@ class Api:
     def memories(self):
         return [f["text"] for f in self._memory.facts]
 
+    # ---------------------------------------------------------------- brain page (memory, shortcuts, habits)
+    def brain_get(self):
+        return {"facts": [{"i": i, "text": f["text"], "cat": f.get("cat", "fact"), "t": f.get("t", ""),
+                           "src": f.get("src", "you")} for i, f in enumerate(self._memory.facts)],
+                "shortcuts": learning.shortcuts(), "suggest": learning.suggestions(), "habits": learning.habits(),
+                "local": self._brain.local.fast[0], "auto_learn": self._cfg.get("auto_learn", True)}
+
+    def brain_action(self, b):
+        a = b.get("action")
+        if a == "fact_add":
+            self._memory.add_fact(b.get("text", ""), b.get("cat", "fact"))
+        elif a == "fact_del":
+            self._memory.remove(int(b.get("i", -1)))
+        elif a == "short_add":
+            learning.add_shortcut(b.get("phrase", ""), b.get("does", ""))
+        elif a == "short_del":
+            learning.remove_shortcut(b.get("phrase", ""))
+        elif a == "auto_learn":
+            self._cfg["auto_learn"] = bool(b.get("on"))
+            config_mod.save(self._cfg)
+        elif a == "learn_now":
+            threading.Thread(target=lambda: self._emit(
+                "toast", level="info", text=f"🧠 Learned {self._memory.learn_from_chat(self._brain)} new thing(s).")).start()
+        return self.brain_get()
+
+    # ---------------------------------------------------------------- ventures + gaming pages
+    def ventures_get(self):
+        return {"dev": ventures.dev_sync(self._jobs), "earn": ventures.earn_summary(),
+                "content": self._shift.ns["builtin"].get("content", {}).get("on", False)}
+
+    def ventures_action(self, b):
+        a = b.get("action")
+        if a == "dev_add":
+            ventures.dev_add(b.get("task", ""), b.get("project") or "Hatchlands")
+        elif a == "dev_del":
+            ventures.dev_remove(b.get("id"))
+        elif a == "dev_now":
+            ventures.queue_dev_tasks(self._jobs, [b.get("id")])
+        elif a == "earn_add":
+            ventures.earn_add(b.get("venture", "Other"), float(b.get("amount") or 0), b.get("note", ""), b.get("date") or None)
+        elif a == "earn_del":
+            ventures.earn_remove(b.get("id"))
+        elif a == "leads":
+            self._toolbox.run("leads_find", {"business_type": b.get("type", ""), "area": b.get("area", ""),
+                                             "offer": b.get("offer", "")})
+        elif a == "content":
+            self._shift.set_builtin("content", on=bool(b.get("on")))
+        return self.ventures_get()
+
+    def gaming_get(self):
+        g = self._cfg.setdefault("gaming", {})
+        return {**gaming_mod.game_stats(int(7)), "active": self._gaming.active,
+                "game": gaming_mod.nice_name(self._gaming.game) if self._gaming.active else None,
+                "settings": {"auto": g.get("auto", True), "boost": g.get("boost", True),
+                             "clip_buffer": g.get("clip_buffer", False), "break_every_min": g.get("break_every_min", 120),
+                             "high_performance": g.get("high_performance", True)}}
+
+    def gaming_set(self, b):
+        g = self._cfg.setdefault("gaming", {})
+        for k in ("auto", "boost", "clip_buffer", "high_performance"):
+            if k in b:
+                g[k] = bool(b[k])
+        if "break_every_min" in b:
+            g["break_every_min"] = max(0, int(b["break_every_min"] or 0))
+        config_mod.save(self._cfg)
+        return self.gaming_get()
+
+    def clip_now(self):
+        r = self._gaming.clip(30)
+        self._emit("toast", level="info", text="🎬 " + r)
+        return r
+
+    # ---------------------------------------------------------------- study page
+    def study_get(self):
+        return study.overview()
+
+    def study_cards(self, deck=""):
+        return study.due_cards(deck or None, 30)
+
+    def study_mark(self, deck, i, ok):
+        study.mark(deck, i, bool(ok))
+        return True
+
+    def study_make(self, topic, notes="", count=12):
+        def run():
+            try:
+                cards = study.make_cards(topic, notes, count)
+                n = study.add_deck(topic.strip()[:60], cards)
+                self._emit("study", ok=True, text=f"Made {len(cards)} cards — '{topic[:60]}' now has {n}.")
+            except Exception as e:
+                self._emit("study", ok=False, text=f"Couldn't make cards: {e}")
+        threading.Thread(target=run, daemon=True).start()
+        return True
+
+    def study_action(self, b):
+        a = b.get("action")
+        if a == "focus":
+            study.FOCUS.start(int(b.get("minutes", 25)), b.get("subject", ""), int(b.get("brk", 5)), b.get("total") or None)
+        elif a == "unfocus":
+            study.FOCUS.stop()
+        elif a == "exam":
+            study.exam_add(b.get("subject", ""), b.get("date", ""))
+        elif a == "exam_del":
+            with study._lock:
+                d = study._load()
+                d["exams"] = [e for e in d["exams"] if e["subject"] != b.get("subject")]
+                study._save(d)
+        elif a == "deck_del":
+            with study._lock:
+                d = study._load()
+                d["decks"].pop(b.get("deck", ""), None)
+                study._save(d)
+        return study.overview()
+
     def clear_chat(self):
         self._memory.clear_history()
+        return True
+
+    def mini_toggle(self):
+        """Mini mode: ORION shrinks to a small always-on-top orb in the corner (click it to talk)."""
+        import webview
+        if getattr(self, "_mini", None):
+            try:
+                self._mini.destroy()
+            except Exception:
+                pass
+            self._mini = None
+            if self._window:
+                self._window.restore()
+            return False
+        x, y = 40, 40
+        try:
+            import ctypes
+            x = ctypes.windll.user32.GetSystemMetrics(0) - 190
+            y = ctypes.windll.user32.GetSystemMetrics(1) - 240
+        except Exception:
+            pass
+        self._mini = webview.create_window("ORION mini", url=os.path.join(os.path.dirname(UI_PATH), "mini.html"),
+                                           js_api=self, width=140, height=150, x=x, y=y, frameless=True,
+                                           on_top=True, easy_drag=True, resizable=False, background_color="#02060b")
+        if self._window:
+            self._window.minimize()
         return True
 
     def toggle_fullscreen(self):

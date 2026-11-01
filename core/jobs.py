@@ -41,6 +41,7 @@ class Jobs:
         self.notify = notify
         self.emit = emit
         self.current = None
+        self.on_finish = None          # hook: called with the job when it finishes (auto-calls)
         self.wake = threading.Event()
         self.jobs = self._load()
         for j in self.jobs:                       # anything "running" when ORION closed goes back in the queue
@@ -108,6 +109,14 @@ class Jobs:
             self.jobs = [j for j in self.jobs if j["status"] in ("queued", "running", "waiting")]
         self._changed()
 
+    def retry_later(self, jid, minutes=15):
+        """Park a job until the AI allowance comes back."""
+        j = self.get(jid)
+        if j:
+            j["retry_at"] = time.time() + minutes * 60
+            j["status"], j["note"] = "waiting", "waiting for a brain to be free — retries automatically"
+            self._changed(j)
+
     def since(self, ts):
         return [j for j in self.jobs if (j["finished"] or 0) > ts and j["status"] in ("done", "failed")]
 
@@ -126,6 +135,8 @@ class Jobs:
         for j in sorted(self.jobs, key=lambda x: x["created"]):
             if j["status"] not in ("queued", "waiting"):
                 continue
+            if j.get("retry_at") and j["retry_at"] > time.time():
+                continue
             if j["heavy"]:
                 ok, why = self._can_run_heavy()
                 if not ok:
@@ -137,6 +148,7 @@ class Jobs:
         return None
 
     def _loop(self):
+        CTX["job_thread"] = threading.get_ident()
         time.sleep(6)
         while True:
             j = self._next()
@@ -149,6 +161,11 @@ class Jobs:
             self._changed(j)
             try:
                 reply, tier, model = self.runner(j)
+                if (reply or "").startswith("Every brain I have is out") and j.get("tries", 0) < 12:
+                    j["tries"] = j.get("tries", 0) + 1
+                    self.current = None
+                    self.retry_later(j["id"], 15 if j["tries"] < 4 else 60)
+                    continue
                 stopped = reply == "Stopped."
                 j.update(status="cancelled" if stopped else "done", result=reply or "Done.", tier=tier,
                          note="" if not stopped else "cancelled")
@@ -161,6 +178,11 @@ class Jobs:
                 icon = "✅" if j["status"] == "done" else "⚠️"
                 self.notify(f"{icon} {j['title']}\n{(j['result'] or '')[:300]}",
                             "ORION job finished" if j["status"] == "done" else "ORION job failed")
+                if self.on_finish:
+                    try:
+                        self.on_finish(j)
+                    except Exception:
+                        pass
 
 
 # ------------------------------------------------------------------ AI tools

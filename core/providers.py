@@ -8,6 +8,7 @@ Speed tricks in here:
 """
 import datetime
 import json
+import re
 import os
 import threading
 import time
@@ -76,6 +77,47 @@ def record_usage(pid, tokens):
             pass
 
 
+# best -> worst chat models for an i5 / 16 GB PC (the GT 710 can't help, so it's all CPU + RAM)
+LOCAL_RANK = ["qwen2.5:7b", "llama3.1:8b", "qwen3:8b", "gemma3:4b", "qwen3:4b", "qwen2.5:3b", "llama3.2:3b",
+              "phi3:mini", "phi4-mini", "gemma2:2b", "qwen2.5:1.5b", "qwen3:1.7b", "llama3.2:1b", "qwen2.5:0.5b"]
+
+
+def _ram_gb():
+    try:
+        import psutil
+        return psutil.virtual_memory().total / 2**30
+    except Exception:
+        return 8
+
+
+def recommended_local():
+    """What 2_INSTALL_LOCAL_BRAIN.bat / Health check suggests downloading for this machine."""
+    r = _ram_gb()
+    return "qwen2.5:3b" if r >= 7 else "qwen2.5:1.5b"     # 7b is too slow on an older CPU
+
+
+def best_local(base_url="http://localhost:11434/v1"):
+    """The smartest installed Ollama model this machine can comfortably run."""
+    try:
+        tags = requests.get(base_url.replace("/v1", "") + "/api/tags", timeout=3).json().get("models", [])
+    except Exception:
+        return None
+    names = [m["name"] for m in tags if not re.search(r"embed|moondream|llava|vision", m["name"])]
+    if not names:
+        return None
+    sizes = {m["name"]: m.get("size", 0) / 2**30 for m in tags}
+    budget = _ram_gb() * 0.55                     # leave room for Windows + a game
+
+    def rank(n):
+        base = n if ":" in n else n + ":latest"
+        for i, r in enumerate(LOCAL_RANK):
+            if base.startswith(r):
+                return i
+        return len(LOCAL_RANK)
+    fits = [n for n in names if sizes.get(n, 0) <= budget] or names
+    return sorted(fits, key=rank)[0]
+
+
 class Provider:
     def __init__(self, spec, local=False):
         self.id = spec.get("id", "local" if local else spec.get("label", "?").lower())
@@ -84,7 +126,10 @@ class Provider:
         self.api_key = spec.get("api_key", "") if not local else "ollama"
         self.local = local
         if local:
-            self.fast = self.smart = [spec.get("model", "qwen2.5:3b")]
+            want = spec.get("model", "auto") or "auto"
+            if want == "auto":
+                want = best_local(self.base_url) or recommended_local()
+            self.fast = self.smart = [want]
         else:
             self.fast = list(spec.get("fast", []))
             self.smart = list(spec.get("smart", []))
@@ -226,12 +271,7 @@ class Provider:
         raise ProviderError(last_err)
 
     def _installed_local(self):
-        try:
-            tags = requests.get(self.base_url.replace("/v1", "") + "/api/tags", timeout=3).json().get("models", [])
-            names = [m["name"] for m in tags if "embed" not in m["name"] and "moondream" not in m["name"]]
-            return names[0] if names else None
-        except Exception:
-            return None
+        return best_local(self.base_url)
 
     @staticmethod
     def _read_plain(r):

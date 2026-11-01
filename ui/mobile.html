@@ -124,6 +124,51 @@ nav.tabs .n.show{display:grid}
 .phoneRow{display:flex;gap:8px;flex-wrap:wrap}
 .phoneRow .qa{flex:1 1 22%}
 
+
+/* ===== v3 phone design ===== */
+body{background:radial-gradient(ellipse 140% 50% at 50% -8%,rgba(var(--ar),.26),transparent 62%),radial-gradient(ellipse 80% 40% at 100% 100%,rgba(var(--ar),.08),transparent 70%),var(--bg)}
+.card{background:linear-gradient(160deg,rgba(14,34,52,.78),rgba(6,16,26,.82));border:1px solid var(--line);box-shadow:0 10px 30px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.04);backdrop-filter:blur(8px)}
+.hero{display:flex;align-items:center;gap:14px;margin:4px 2px 12px}
+.hero .hello{margin:0}
+.horb{width:74px;height:74px;position:relative;flex:none}
+.horb i,.horb b,.horb u,.horb s{position:absolute;border-radius:50%}
+.horb i{inset:0;border:1.5px dashed rgba(var(--ar),.7);animation:spin 14s linear infinite}
+.horb b{inset:8px;border:2px solid var(--a);border-left-color:transparent;border-right-color:transparent;animation:spin 4s linear infinite reverse}
+.horb u{inset:16px;background:conic-gradient(from 0deg,rgba(var(--ar),.5) 0 8%,transparent 8% 10%,rgba(var(--ar),.5) 10% 18%,transparent 18% 20%,rgba(var(--ar),.5) 20% 28%,transparent 28% 30%,rgba(var(--ar),.5) 30% 38%,transparent 38% 40%,rgba(var(--ar),.5) 40% 48%,transparent 48% 50%,rgba(var(--ar),.5) 50% 58%,transparent 58% 60%,rgba(var(--ar),.5) 60% 68%,transparent 68% 70%,rgba(var(--ar),.5) 70% 78%,transparent 78% 80%,rgba(var(--ar),.5) 80% 88%,transparent 88% 90%,rgba(var(--ar),.5) 90% 98%,transparent 98%);
+  -webkit-mask:radial-gradient(circle,transparent 52%,#000 54%);mask:radial-gradient(circle,transparent 52%,#000 54%);animation:spin 30s linear infinite}
+.horb s{inset:26px;background:radial-gradient(circle,#fff,var(--a2) 30%,rgba(var(--ar),.3) 70%,transparent 74%);box-shadow:0 0 26px rgba(var(--ar),.8);animation:pulse 3s ease-in-out infinite}
+body.busy .horb s{animation-duration:.7s}body.busy .horb b{animation-duration:1.2s}
+.glance{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+.gl{background:linear-gradient(160deg,rgba(var(--ar),.12),rgba(0,0,0,.25));border:1px solid var(--line);border-radius:14px;padding:10px 4px 8px;text-align:center}
+.gl:active{transform:scale(.96)}
+.gl em{font-style:normal;font-size:18px;display:block}
+.gl b{display:block;font:500 15px var(--mono);color:var(--a2);margin:4px 0 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gl span{font:700 8.5px var(--ui);letter-spacing:.14em;color:var(--dim)}
+.subnav{display:flex;gap:6px;overflow-x:auto;padding:4px 0 12px;scrollbar-width:none}.subnav::-webkit-scrollbar{display:none}
+.subnav button{flex:none;background:rgba(var(--ar),.06);border:1px solid var(--line);border-radius:999px;padding:8px 14px;font:600 13.5px var(--ui);color:var(--dim)}
+.subnav button.on{color:var(--a2);border-color:var(--a);background:rgba(var(--ar),.16)}
+.msub{display:none}.msub.on{display:block;animation:fade .25s}
+.ftimer{display:flex;gap:14px;align-items:center}
+.fring{width:108px;height:108px;border-radius:50%;flex:none;display:grid;place-items:center;position:relative;background:conic-gradient(var(--a) calc(var(--p,0)*1%),rgba(var(--ar),.12) 0)}
+.fring::before{content:"";position:absolute;inset:7px;border-radius:50%;background:#071321}
+.fring b{position:relative;font:500 22px var(--mono)}
+.mcard{min-height:150px;border:1px solid var(--line2);border-radius:14px;padding:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:10px;
+  background:radial-gradient(ellipse at 50% 0%,rgba(var(--ar),.18),rgba(4,14,24,.9) 70%);font-size:17px;font-weight:600;line-height:1.4;position:relative}
+.mcard small{position:absolute;top:8px;left:12px;font:600 9px var(--mono);letter-spacing:.16em;color:var(--dim)}
+.mcard em{font-style:normal;color:var(--a2);font-size:15.5px;display:none}.mcard.flip em{display:block;animation:fade .3s}
+.bigm{font:500 34px var(--mono);color:var(--text)}
+.mbars{display:flex;align-items:flex-end;gap:6px;height:90px;margin:14px 0 16px}
+.mbars div{flex:1;background:linear-gradient(0deg,rgba(var(--ar),.25),var(--a));border-radius:4px 4px 0 0;position:relative;min-height:2px}
+.mbars div span{position:absolute;bottom:-16px;left:50%;transform:translateX(-50%);font:9px var(--mono);color:var(--faint)}
+.hb2{display:flex;align-items:center;gap:8px;margin:8px 0;font-size:14px}.hb2 b{width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+.hb2 div{flex:1;height:7px;border-radius:4px;background:rgba(var(--ar),.1);overflow:hidden}.hb2 div i{display:block;height:100%;background:var(--a);border-radius:4px}
+.hb2 span{font:12px var(--mono);color:var(--dim);width:58px;text-align:right}
+.hc{display:flex;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}.hc:last-child{border-bottom:0}
+.hc i{font-style:normal;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;border:1px solid;flex:none;font-size:13px}
+.hc.ok i{color:var(--green);border-color:rgba(93,255,176,.4)}.hc.warn i{color:var(--amber);border-color:rgba(255,179,71,.4)}.hc.bad i{color:var(--red);border-color:rgba(255,79,123,.5)}
+.hc div{flex:1;min-width:0}.hc b{font-size:14.5px;font-weight:600}.hc small{display:block;color:var(--dim);font-size:12.5px;line-height:1.35}
+nav.tabs button{font-size:9.5px;letter-spacing:.1em}
+
 /* ===== LANDSCAPE ===== */
 @media (orientation:landscape) and (max-height:620px){
   .app{display:grid;grid-template-columns:76px 1fr;grid-template-rows:auto 1fr;padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right)}
@@ -138,6 +183,8 @@ nav.tabs .n.show{display:grid}
   #v-jobs.on,#v-sched.on{display:grid;grid-template-columns:1fr 1.25fr;gap:0 14px;align-content:start}
   #v-jobs.on>.card:last-child{grid-column:1/-1}
   #v-pc.on{display:grid;grid-template-columns:1.4fr 1fr;gap:0 14px;align-content:start}
+  #v-home .hero,#v-home .glance{grid-column:1/-1}
+  .msub.on{display:grid;grid-template-columns:1fr 1fr;gap:0 14px;align-content:start}
   #v-chat .m{max-width:70%}
   .grid{grid-template-columns:repeat(4,1fr)}
   #call{flex-direction:row;padding:20px 40px;gap:30px}
@@ -147,6 +194,13 @@ nav.tabs .n.show{display:grid}
 }
 @media (orientation:landscape) and (min-height:621px){ #v-home.on{display:grid;grid-template-columns:1fr 1fr;gap:0 14px;align-content:start} #v-home .hello{grid-column:1/-1} }
 @keyframes spin{to{transform:rotate(360deg)}}@keyframes pulse{50%{transform:scale(1.12)}}@keyframes fade{from{opacity:0}}
+.share{position:fixed;left:12px;right:12px;bottom:calc(84px + env(safe-area-inset-bottom));z-index:60;background:rgba(6,18,30,.97);border:1px solid var(--line2);border-radius:18px;padding:14px 16px;box-shadow:0 20px 60px rgba(0,0,0,.6);animation:rise .3s}
+.share b{display:block;font-size:15px;color:var(--a2);margin-bottom:6px}.share p{font:13px/1.45 var(--mono);color:var(--dim);max-height:30vh;overflow:auto;word-break:break-word;user-select:text}
+.share div{display:flex;gap:8px;justify-content:flex-end;margin-top:10px}
+#found{position:fixed;inset:0;z-index:95;background:radial-gradient(circle,rgba(var(--ar),.35),#02060b 70%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;animation:flash 1s infinite}
+#found h2{font:800 30px var(--disp);letter-spacing:.3em;color:var(--a2)}#found p{color:var(--dim)}
+#found .fo{width:160px;height:160px;position:relative}#found .fo i,#found .fo b{position:absolute;inset:0;border-radius:50%;border:3px solid var(--a);animation:ping 1.2s infinite}#found .fo b{animation-delay:.6s}
+@keyframes ping{from{transform:scale(.4);opacity:1}to{transform:scale(1.3);opacity:0}}@keyframes flash{50%{background-color:rgba(var(--ar),.12)}}
 @keyframes rise{from{opacity:0;transform:translateY(6px)}}@keyframes b{50%{opacity:.3}}@keyframes drop{from{opacity:0;transform:translateY(-14px)}}
 @keyframes mp{50%{box-shadow:0 0 0 10px rgba(255,79,123,.15)}}
 </style>
@@ -162,7 +216,16 @@ nav.tabs .n.show{display:grid}
   <div class="views">
     <!-- HOME -->
     <section class="view on" id="v-home">
-      <div class="hello" id="hello">Good day.<small id="helloSub">—</small></div>
+      <div class="hero">
+        <div class="horb" id="horb"><i></i><b></b><u></u><s></s></div>
+        <div class="hello" id="hello">Good day.<small id="helloSub">—</small></div>
+      </div>
+      <div class="glance" id="glance">
+        <div class="gl" data-tab="more" data-sub="study"><em>📚</em><b id="glStudy">–</b><span>REVISION</span></div>
+        <div class="gl" data-tab="more" data-sub="money"><em>💷</em><b id="glMoney">–</b><span>THIS MONTH</span></div>
+        <div class="gl" data-tab="more" data-sub="games"><em>🎮</em><b id="glGame">–</b><span>GAMING · 7D</span></div>
+        <div class="gl" data-tab="more" data-sub="health"><em>🩺</em><b id="glHealth">CHECK</b><span>HEALTH</span></div>
+      </div>
       <div class="card" id="pcCard"><h3>GAMING PC <i id="pcVer"></i></h3>
         <div class="stats"><div class="stat"><b id="sCpu">–</b><span>CPU</span><div class="bar"><div id="bCpu" style="width:0"></div></div></div>
           <div class="stat"><b id="sRam">–</b><span>RAM</span><div class="bar"><div id="bRam" style="width:0"></div></div></div>
@@ -228,6 +291,14 @@ nav.tabs .n.show{display:grid}
 
     <!-- PC -->
     <section class="view" id="v-pc">
+      <div class="card"><h3>SHARE WITH PC</h3>
+        <div class="ctrls">
+          <button class="qa" id="clipUp"><em>📤</em>Clip → PC</button><button class="qa" id="clipDown"><em>📥</em>PC clip</button>
+          <button class="qa" id="fileUp"><em>📁</em>File → PC</button><button class="qa" id="ringTest"><em>📢</em>Test ring</button>
+        </div>
+        <input type="file" id="fileIn" multiple style="display:none">
+        <p class="empty" id="shareNote" style="font-size:12.5px;margin-top:8px">Files land in Downloads › ORION Drop on your PC. Say "send this file to my phone" on the PC for the other way.</p>
+      </div>
       <div class="card"><h3>LIVE SCREEN <span><label style="font-size:11px;letter-spacing:.1em;display:inline-flex;gap:5px;align-items:center"><input type="checkbox" id="live" style="accent-color:var(--a)"> LIVE</label></span></h3>
         <img class="screen" id="screen" alt="">
         <button class="btn" id="snap">↻ REFRESH</button>
@@ -246,6 +317,50 @@ nav.tabs .n.show{display:grid}
         </div>
       </div>
     </section>
+
+    <!-- MORE -->
+    <section class="view" id="v-more">
+      <div class="subnav" id="subnav">
+        <button data-sub="study" class="on">📚 Study</button><button data-sub="money">💷 Money</button><button data-sub="games">🎮 Gaming</button>
+        <button data-sub="brain">🧠 Brain</button><button data-sub="health">🩺 Health</button>
+      </div>
+      <div class="msub on" id="s-study">
+        <div class="card"><h3>FOCUS <i id="mFocusSt"></i></h3>
+          <div class="ftimer"><div class="fring" id="mRing"><b id="mTime">25:00</b></div>
+            <div style="flex:1"><input class="inp" id="mSubj" placeholder="What are you revising?"><button class="btn" id="mFocus">▶ START 25 MIN</button></div></div>
+          <p class="empty" style="font-size:12.5px;margin-top:8px">Runs on your PC: games get closed and YouTube/TikTok minimised until the round ends.</p></div>
+        <div class="card"><h3>FLASHCARDS <i id="mCardN"></i></h3>
+          <div class="mcard" id="mCard"><small id="mDeck">—</small><span id="mQ">Connect to your PC to revise.</span><em id="mA"></em></div>
+          <div class="two" style="margin-top:10px"><button class="btn sm ghost" id="mWrong" style="color:#ff9fb6">✕ WRONG</button><button class="btn sm" id="mRight" style="color:var(--green)">✓ GOT IT</button></div>
+          <p class="empty" style="font-size:12.5px;margin-top:8px">Tap the card to see the answer.</p></div>
+        <div class="card"><h3>EXAMS</h3><div id="mExams"><p class="empty">—</p></div></div>
+        <div class="card"><h3>NEW DECK</h3><input class="inp" id="mTopic" placeholder="Topic — e.g. GCSE Physics forces"><button class="btn" id="mMake">✦ MAKE FLASHCARDS</button></div>
+      </div>
+      <div class="msub" id="s-money">
+        <div class="card"><h3>THIS MONTH</h3><div class="bigm" id="mMonth">£0</div><p class="empty" id="mTotal">—</p>
+          <div class="two" style="margin-top:10px"><select class="inp" id="mVen"></select><input class="inp" id="mAmt" type="number" step="0.01" inputmode="decimal" placeholder="£"></div>
+          <input class="inp" id="mNote" placeholder="What for?" style="margin-top:8px"><button class="btn" id="mLog">+ LOG IT</button></div>
+        <div class="card"><h3>BY VENTURE</h3><div id="mBy"><p class="empty">—</p></div></div>
+        <div class="card"><h3>DEV QUEUE <i>OVERNIGHT</i></h3><div id="mDev"><p class="empty">—</p></div>
+          <input class="inp" id="mDevT" placeholder="e.g. a daily login reward system" style="margin-top:8px"><button class="btn" id="mDevAdd">+ ADD TO HATCHLANDS QUEUE</button></div>
+      </div>
+      <div class="msub" id="s-games">
+        <div class="card"><h3>THIS WEEK</h3><div class="bigm" id="mGTot">0h</div><p class="empty" id="mGSub">—</p>
+          <div class="mbars" id="mGBars"></div></div>
+        <div class="card"><h3>BY GAME</h3><div id="mGBy"><p class="empty">—</p></div></div>
+        <div class="card"><h3>QUICK</h3><div class="grid" style="grid-template-columns:repeat(3,1fr)">
+          <button class="qa" data-act="gaming"><em>🎮</em>Gaming</button><button class="qa" id="mClip"><em>🎬</em>Clip that</button><button class="qa" data-q="book a gaming party"><em>📨</em>Party</button></div></div>
+      </div>
+      <div class="msub" id="s-brain">
+        <div class="card"><h3>SHORTCUTS</h3><div id="mShorts"><p class="empty">—</p></div>
+          <input class="inp" id="mScP" placeholder="When I say… e.g. bedtime" style="margin-top:8px"><input class="inp" id="mScD" placeholder="…do this: lock the PC and set a 7am alarm" style="margin-top:8px">
+          <button class="btn" id="mScAdd">+ ADD SHORTCUT</button></div>
+        <div class="card"><h3>WHAT ORION KNOWS <i id="mFactN"></i></h3><div id="mFacts"><p class="empty">—</p></div></div>
+      </div>
+      <div class="msub" id="s-health">
+        <div class="card"><h3>HEALTH CHECK <button class="btn sm ghost" id="mHRe" style="border:0;padding:0">RE-CHECK</button></h3><div id="mHealth"><p class="empty">Connect to your PC.</p></div></div>
+      </div>
+    </section>
   </div>
 
   <nav class="tabs" id="tabs">
@@ -254,6 +369,7 @@ nav.tabs .n.show{display:grid}
     <button data-tab="jobs"><svg viewBox="0 0 24 24"><path d="M4 7h16v12H4zM9 7V4h6v3"/></svg>JOBS<span class="n" id="nJobs"></span></button>
     <button data-tab="sched"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg>PLAN</button>
     <button data-tab="pc"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M8 20h8M12 16v4"/></svg>PC</button>
+    <button data-tab="more"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>MORE</button>
   </nav>
 </div>
 
@@ -279,6 +395,13 @@ nav.tabs .n.show{display:grid}
   <label>SCHEDULE A CALL FROM ORION (e.g. wake-up call)</label>
   <div style="display:flex;gap:8px"><input class="inp" type="time" id="sCallT" value="07:00"><button class="btn sm" id="sCallGo">SET</button></div>
   <p id="sCalls" style="margin-top:6px;font-size:13px"></p>
+  <label style="display:flex;gap:10px;align-items:center;letter-spacing:0;font-size:15px;color:var(--text);margin-top:10px"><input type="checkbox" id="sLink" style="accent-color:var(--a)"> Stay linked in the background <small style="color:var(--dim)">— ORION can ring you with the app closed</small></label>
+  <label style="margin-top:12px">ORION RINGS ME WHEN…</label>
+  <label style="display:flex;gap:10px;align-items:center;letter-spacing:0;font-size:15px;color:var(--text)"><input type="checkbox" id="cJobs" style="accent-color:var(--a)"> A job finishes</label>
+  <label style="display:flex;gap:10px;align-items:center;letter-spacing:0;font-size:15px;color:var(--text)"><input type="checkbox" id="cRem" style="accent-color:var(--a)"> A schedule reminder is due</label>
+  <label style="display:flex;gap:10px;align-items:center;letter-spacing:0;font-size:15px;color:var(--text)"><input type="checkbox" id="cMorn" style="accent-color:var(--a)"> Morning report</label>
+  <label>QUIET HOURS (no calls)</label>
+  <div style="display:flex;gap:8px"><input class="inp" type="time" id="cQf" value="23:00"><input class="inp" type="time" id="cQt" value="07:00"></div>
   <h4>APP</h4>
   <label style="display:flex;gap:10px;align-items:center;letter-spacing:0;font-size:15px;color:var(--text)"><input type="checkbox" id="sMute" style="accent-color:var(--a)"> Mute spoken replies</label>
   <button class="btn" id="sSave">SAVE &amp; CONNECT</button>
@@ -312,9 +435,31 @@ async function phoneDo(a){   // runs an action on THIS phone; returns a short sp
     case "open": if(!Native) need(); const r=await Native.openApp({name:a.name}); return `Opening ${r.opened||a.name}.`;
     case "torch": if(!Native) need(); await Native.torch({on:!!a.on}); return "Torch "+(a.on?"on.":"off.");
     case "call": incoming(a.reason||""); return "";
+    case "ring": foundRing(true); return "";
+    case "clip": shareCard("📋 ORION sent you text", a.text, "COPY", async()=>{ await copyText(a.text); toast("Copied."); }); return "";
+    case "file": shareCard("📁 ORION sent you a file", `${a.name} · ${Math.max(1,Math.round((a.size||0)/1024))} KB`, "SAVE", ()=>saveFile(a.name)); return "";
   }
   return "";
 }
+/* ---------- share: clipboard, files, find my phone ---------- */
+async function copyText(t){ if(Native&&Native.copyText) return Native.copyText({text:t}); try{ await navigator.clipboard.writeText(t); }catch(e){ prompt("Copy this:",t); } }
+async function readClip(){ if(Native&&Native.readClipboard) return (await Native.readClipboard()).text||""; try{ return await navigator.clipboard.readText(); }catch(e){ return prompt("Paste what to send:")||""; } }
+async function saveFile(name){
+  const url=addr()+"/api/files/"+encodeURIComponent(name);
+  if(Native&&Native.download){ await Native.download({url,name,pin:pin()}); toast("Downloading to Downloads/ORION…"); return; }
+  const r=await fetch(url,{headers:{"X-PIN":pin()}}); const b=await r.blob(); const a=document.createElement("a"); a.href=URL.createObjectURL(b); a.download=name; a.click(); }
+function shareCard(head,body,btn,fn){ const d=document.createElement("div"); d.className="share"; d.innerHTML=`<b>${esc(head)}</b><p>${esc(String(body).slice(0,400))}</p><div><button class="btn sm ghost">DISMISS</button><button class="btn sm">${btn}</button></div>`;
+  d.querySelectorAll("button")[0].onclick=()=>d.remove(); d.querySelectorAll("button")[1].onclick=async()=>{ try{ await fn(); }catch(e){ toast(e.message||String(e)); } d.remove(); }; document.body.appendChild(d); notify("ORION",head); }
+let ringing=false;
+function foundRing(on){ ringing=on; let o=$("#found"); if(on){ if(!o){ o=document.createElement("div"); o.id="found"; o.innerHTML=`<div class="fo"><i></i><b></b></div><h2>FOUND IT</h2><p>Tap anywhere to stop</p>`; o.onclick=()=>foundRing(false); document.body.appendChild(o); }
+    ringtone(true); if(navigator.vibrate) navigator.vibrate([1000,400,1000,400,1000,400,1000]); }
+  else { ringtone(false); if(o) o.remove(); if(Native&&Native.stopRing) Native.stopRing(); } }
+async function syncLink(){ if(!Native||!Native.startLink) return; try{ if(store.get("link","1")==="1"&&addr()&&pin()){ const r=await Native.startLink({addr:addr(),pin:pin()});
+      if(r&&r.fullScreen===false&&store.get("fsAsked")!=="1"){ store.set("fsAsked","1"); shareCard("📞 Let ORION ring you properly","Allow full-screen notifications so ORION's calls look like a real incoming call, even when your phone is locked.","ALLOW",()=>Native.openFullScreenSettings()); } }
+    else await Native.stopLink(); }catch(e){} }
+async function loadCalls(){ try{ const c=await api("/api/calls"); $("#cJobs").checked=!!c.jobs; $("#cRem").checked=!!c.reminders; $("#cMorn").checked=!!c.morning; $("#cQf").value=c.quiet_from; $("#cQt").value=c.quiet_to; }catch(e){} }
+async function saveCalls(){ try{ await api("/api/calls",{jobs:$("#cJobs").checked,reminders:$("#cRem").checked,morning:$("#cMorn").checked,quiet_from:$("#cQf").value,quiet_to:$("#cQt").value}); }catch(e){} }
+
 async function runPhoneActions(list){ for(const a of list||[]){ try{ const r=await phoneDo(a); if(r) toast(r); }catch(e){ toast(e.message||String(e)); } } }
 
 // quick phone commands handled on the phone itself (instant, work even when the PC is off)
@@ -347,7 +492,7 @@ async function api(path,body,timeout=20000){
 
 async function refresh(){
   if(!addr()){ setConn(false); paintHome(); return; }
-  try{ state=await api("/api/state",undefined,6000); setConn(true); paintHome(); runPhoneActions(state.phone_actions); flushQueue(); pollPending(); if($("#v-jobs").classList.contains("on")) loadJobs(); }
+  try{ state=await api("/api/state",undefined,6000); setConn(true); paintHome(); if(!window._gl||Date.now()-window._gl>60000){ window._gl=Date.now(); glance(); } runPhoneActions(state.phone_actions); flushQueue(); pollPending(); if($("#v-jobs").classList.contains("on")) loadJobs(); }
   catch(e){ setConn(false); paintHome(); }
 }
 function setConn(on){ const was=pcOnline; pcOnline=on; $("#dot").className="dot "+(on?"ok":"solo");
@@ -357,7 +502,7 @@ function setConn(on){ const was=pcOnline; pcOnline=on; $("#dot").className="dot 
 /* ---------- home ---------- */
 function paintHome(){
   const h=new Date().getHours(); const g=h<12?"Good morning":h<18?"Good afternoon":"Good evening";
-  $("#hello").innerHTML=`${g}, ${esc(title())}.<small id="helloSub">${pcOnline?(state.job_running?`Working on: ${esc(state.job_running)}`:(state.busy_now?`Busy: ${esc(state.busy_now)}`:"All systems online.")):"Your PC is offline — chat still works."}</small>`;
+  document.body.classList.toggle("busy",!!(pcOnline&&state.job_running)); $("#hello").innerHTML=`${g}, ${esc(title())}.<small id="helloSub">${pcOnline?(state.job_running?`Working on: ${esc(state.job_running)}`:(state.busy_now?`Busy: ${esc(state.busy_now)}`:"All systems online.")):"Your PC is offline — chat still works."}</small>`;
   document.body.dataset.theme=state.theme||document.body.dataset.theme; $("#name").textContent=(state.name||"ORION").toUpperCase();
   const s=state.stats||{}; $("#pcVer").textContent=state.version?"v"+state.version:"";
   $("#sCpu").textContent=pcOnline&&s.cpu!=null?Math.round(s.cpu)+"%":"–"; $("#bCpu").style.width=(s.cpu||0)+"%";
@@ -482,7 +627,7 @@ $("#openGo").onclick=()=>act("open",$("#openIn").value.trim());
 async function act(a,v){ if(!pcOnline){ toast("That needs your PC online."); return; }
   try{ const r=await api("/api/action",{action:a,value:v}); if(r.result) toast(String(r.result).split("\n")[0].slice(0,140)); }catch(e){ toast(e.message); } setTimeout(refresh,800); }
 document.addEventListener("click",e=>{ const b=e.target.closest("[data-act],[data-q],[data-tab]"); if(!b||b.closest("nav.tabs")) return;
-  if(b.dataset.tab){ go(b.dataset.tab); return; }
+  if(b.dataset.tab){ go(b.dataset.tab); if(b.dataset.sub) goSub(b.dataset.sub); return; }
   if(b.dataset.q){ go("chat"); send(b.dataset.q); return; }
   if(b.dataset.confirm && !confirm(`Really ${b.dataset.confirm} your PC?`)) return;
   act(b.dataset.act); });
@@ -590,24 +735,72 @@ document.addEventListener("click",async e=>{ const b=e.target.closest("[data-ph]
       await Native.showBubble(); store.set("bubble","1"); $("#qaBubble").classList.add("on"); toast("Bubble on — tap it anywhere to call ORION, long-press to hide."); }
   }catch(err){ toast(err.message||String(err)); } },true);
 
-async function checkLaunch(){ try{ if(Native){ const r=await Native.consumeLaunchAction(); if(r.action==="call"){ incoming(""); setTimeout(acceptCall,350); } } }catch(e){} }
+async function checkLaunch(){ try{ if(Native){ const r=await Native.consumeLaunchAction(); if(r.action==="call"){ incoming(r.reason||""); setTimeout(acceptCall,350); } else if(r.action==="ring"){ if(Native.stopRing) Native.stopRing(); toast("📢 Found it!"); } } }catch(e){} }
+
+
+/* ---------- MORE: study, money, gaming, brain, health ---------- */
+const money=v=>"£"+(+v||0).toFixed(2).replace(/\.00$/,""), hm=m=>m>=60?`${Math.floor(m/60)}h${String(m%60).padStart(2,"0")}`:`${m}m`;
+function hb2(rows,fmt){ const mx=Math.max(1,...rows.map(r=>r[1])); return rows.length?rows.map(r=>`<div class="hb2"><b>${esc(r[0])}</b><div><i style="width:${r[1]/mx*100}%"></i></div><span>${esc(fmt(r[1]))}</span></div>`).join(""):'<p class="empty">Nothing yet.</p>'; }
+function goSub(n){ store.set("sub",n); $$("#subnav button").forEach(b=>b.classList.toggle("on",b.dataset.sub===n)); $$(".msub").forEach(x=>x.classList.toggle("on",x.id==="s-"+n));
+  if(!pcOnline){ return; } ({study:loadStudyM,money:loadMoneyM,games:loadGamesM,brain:loadBrainM,health:loadHealthM})[n]?.(); }
+$$("#subnav button").forEach(b=>b.onclick=()=>goSub(b.dataset.sub));
+let MC=[], MCUR=null, MF=null, mfTick=null;
+async function loadStudyM(){ try{ const o=await api("/api/study"); paintFocusM(o.focus);
+    $("#mExams").innerHTML=o.exams.length?o.exams.slice(0,5).map(e=>`<div class="row"><span class="t">${e.days}d</span>${esc(e.subject)}<small style="margin-left:auto;color:var(--faint);font:11px var(--mono)">${esc(e.date)}</small></div>`).join(""):'<p class="empty">Add exams on your PC (Study page) or say "my Maths Paper 1 is on 14 May".</p>';
+    MC=(await api("/api/study/cards")).cards||[]; nextM(); }catch(e){} }
+function nextM(){ MCUR=MC.shift()||null; $("#mCard").classList.remove("flip");
+  if(!MCUR){ $("#mDeck").textContent=""; $("#mQ").textContent="No cards due — nice work."; $("#mA").textContent=""; $("#mCardN").textContent=""; return; }
+  $("#mDeck").textContent=MCUR.deck.toUpperCase(); $("#mQ").textContent=MCUR.q; $("#mA").textContent=MCUR.a; $("#mCardN").textContent=(MC.length+1)+" LEFT"; }
+$("#mCard").onclick=()=>$("#mCard").classList.toggle("flip");
+async function markM(ok){ if(!MCUR) return; try{ await api("/api/study/mark",{deck:MCUR.deck,i:MCUR.i,ok}); }catch(e){} if(!ok) MC.push({...MCUR}); nextM(); }
+$("#mRight").onclick=()=>markM(true); $("#mWrong").onclick=()=>markM(false);
+$("#mMake").onclick=async()=>{ const t=$("#mTopic").value.trim(); if(!t) return; try{ await api("/api/study/make",{topic:t}); $("#mTopic").value=""; toast("Making cards on your PC — they'll be ready in a moment."); }catch(e){ toast(e.message); } };
+function paintFocusM(f){ MF=f; MF._t=Date.now(); clearInterval(mfTick); const tick=()=>{ const left=MF.phase==="off"?MF.work*60:Math.max(0,MF.left-(Date.now()-MF._t)/1000), tot=(MF.phase==="break"?MF.brk:MF.work)*60;
+    $("#mTime").textContent=`${String(Math.floor(left/60)).padStart(2,"0")}:${String(Math.floor(left%60)).padStart(2,"0")}`; $("#mRing").style.setProperty("--p",MF.phase==="off"?0:100-left/tot*100); };
+  $("#mFocusSt").textContent=f.phase==="off"?"":f.phase==="work"?"FOCUSING":"BREAK"; $("#mFocus").textContent=f.phase==="off"?"▶ START 25 MIN":"■ END SESSION"; tick(); if(f.phase!=="off") mfTick=setInterval(tick,1000); }
+$("#mFocus").onclick=async()=>{ try{ const o=await api("/api/study",MF&&MF.phase!=="off"?{action:"unfocus"}:{action:"focus",minutes:25,brk:5,subject:$("#mSubj").value.trim()}); paintFocusM(o.focus); }catch(e){ toast(e.message); } };
+async function loadMoneyM(){ try{ const v=await api("/api/ventures"), E=v.earn; $("#mMonth").textContent=money(E.this_month); $("#mTotal").textContent=`All time ${money(E.total)}`;
+    if(!$("#mVen").options.length) $("#mVen").innerHTML=E.ventures.map(x=>`<option>${esc(x)}</option>`).join(""); $("#mBy").innerHTML=hb2(E.by_venture,money);
+    $("#mDev").innerHTML=v.dev.length?v.dev.slice(-6).reverse().map(t=>`<div class="row"><span class="st ${t.status==="done"?"done":t.status==="queued"?"running":""}">${t.status.toUpperCase()}</span>${esc(t.task.slice(0,70))}</div>`).join(""):'<p class="empty">Nothing queued.</p>'; }catch(e){} }
+$("#mLog").onclick=async()=>{ const a=+$("#mAmt").value; if(!a) return toast("How much?"); try{ await api("/api/ventures",{action:"earn_add",venture:$("#mVen").value,amount:a,note:$("#mNote").value}); $("#mAmt").value=$("#mNote").value=""; toast(`Logged ${money(a)} 💷`); loadMoneyM(); }catch(e){ toast(e.message); } };
+$("#mDevAdd").onclick=async()=>{ const t=$("#mDevT").value.trim(); if(!t) return; try{ await api("/api/ventures",{action:"dev_add",task:t,project:"Hatchlands"}); $("#mDevT").value=""; toast("Added — built tonight."); loadMoneyM(); }catch(e){ toast(e.message); } };
+async function loadGamesM(){ try{ const g=await api("/api/gaming"); $("#mGTot").textContent=hm(g.total_mins); $("#mGSub").textContent=`${g.sessions} sessions · ${g.all_time_hours}h all time${g.active?" · playing "+g.game+" now":""}`;
+    const mx=Math.max(1,...g.daily.map(d=>d.mins)); $("#mGBars").innerHTML=g.daily.map(d=>`<div style="height:${Math.max(2,d.mins/mx*100)}%"><span>${d.day.slice(3)}</span></div>`).join(""); $("#mGBy").innerHTML=hb2(g.by_game,hm); }catch(e){} }
+$("#mClip").onclick=async()=>{ try{ const r=await api("/api/clipnow",{}); toast(r.result||"Clipped."); }catch(e){ toast(e.message); } };
+async function loadBrainM(){ try{ const b=await api("/api/brain"); $("#mFactN").textContent=b.facts.length;
+    $("#mShorts").innerHTML=b.shortcuts.length?b.shortcuts.map(x=>`<div class="row"><b>“${esc(x.phrase)}”</b><small style="color:var(--dim)">→ ${esc(x.does.slice(0,60))}</small></div>`).join(""):'<p class="empty">None yet.</p>';
+    $("#mFacts").innerHTML=b.facts.slice(-12).reverse().map(f=>`<div class="row" style="font-size:14px"><span class="st">${esc(f.cat)}</span>${esc(f.text)}</div>`).join("")||'<p class="empty">Nothing yet.</p>'; }catch(e){} }
+$("#mScAdd").onclick=async()=>{ const p=$("#mScP").value.trim(), d=$("#mScD").value.trim(); if(!p||!d) return toast("Fill in both."); try{ await api("/api/brain",{action:"short_add",phrase:p,does:d}); $("#mScP").value=$("#mScD").value=""; toast(`Say "${p}" any time.`); loadBrainM(); }catch(e){ toast(e.message); } };
+async function loadHealthM(){ $("#mHealth").innerHTML='<p class="empty">Checking…</p>'; try{ const h=await api("/api/health",undefined,40000); const bad=h.filter(c=>c.state!=="ok").length;
+    $("#glHealth").textContent=bad?bad+" ⚠":"✓";
+    $("#mHealth").innerHTML=h.map(c=>`<div class="hc ${c.state}"><i>${{ok:"✓",warn:"!",bad:"✕"}[c.state]}</i><div><b>${esc(c.name)}</b><small>${esc(c.detail)}</small></div>${c.fix&&!c.fix.startsWith("open:")?`<button class="btn sm" data-hfix="${esc(c.fix)}">${esc(c.fix_label||"FIX")}</button>`:""}</div>`).join("");
+    $$("[data-hfix]").forEach(b=>b.onclick=async()=>{ b.textContent="…"; try{ await api("/api/health/fix",{id:b.dataset.hfix}); toast("Fixing on your PC…"); }catch(e){ toast(e.message); } }); }catch(e){ $("#mHealth").innerHTML='<p class="empty">Couldn\'t reach your PC.</p>'; } }
+$("#mHRe").onclick=loadHealthM;
+async function glance(){ if(!pcOnline) return; try{ const [st,v,g]=await Promise.all([api("/api/study"),api("/api/ventures"),api("/api/gaming")]);
+  $("#glStudy").textContent=st.today+"m"; $("#glMoney").textContent=money(v.earn.this_month); $("#glGame").textContent=hm(g.total_mins); }catch(e){} }
 
 /* ---------- tabs ---------- */
 function go(t){ $$("nav.tabs button").forEach(b=>b.classList.toggle("on",b.dataset.tab===t)); $$(".view").forEach(v=>v.classList.toggle("on",v.id==="v-"+t));
-  store.set("tab",t); if(t==="jobs") loadJobs(); if(t==="sched") loadSched(); if(t==="pc"&&pcOnline&&!$("#screen").src) snap(); if(t==="chat") $("#log").scrollTop=1e9; }
+  store.set("tab",t); if(t==="more") goSub(store.get("sub","study")); if(t==="jobs") loadJobs(); if(t==="sched") loadSched(); if(t==="pc"&&pcOnline&&!$("#screen").src) snap(); if(t==="chat") $("#log").scrollTop=1e9; }
 $$("nav.tabs button").forEach(b=>b.onclick=()=>go(b.dataset.tab));
 
 /* ---------- settings ---------- */
-$("#setBtn").onclick=()=>{ $("#sAddr").value=store.get("addr"); $("#sPin").value=store.get("pin"); $("#sKey").value=store.get("key"); $("#sTitle").value=title(); $("#sMute").checked=store.get("mute")==="1"; $("#vSet").classList.add("show"); };
+$("#setBtn").onclick=()=>{ $("#sAddr").value=store.get("addr"); $("#sPin").value=store.get("pin"); $("#sKey").value=store.get("key"); $("#sTitle").value=title(); $("#sMute").checked=store.get("mute")==="1"; $("#sLink").checked=store.get("link","1")==="1"; loadCalls(); $("#vSet").classList.add("show"); };
 $("#sClose").onclick=()=>$("#vSet").classList.remove("show");
 $("#sSave").onclick=()=>{ let a=$("#sAddr").value.trim(); if(a&&!/^https?:\/\//.test(a)) a="http://"+a; if(a&&!/:\d+\/?$/.test(a)) a=a.replace(/\/$/,"")+":7777";
   store.set("addr",a); store.set("pin",$("#sPin").value.trim()); store.set("key",$("#sKey").value.trim()); store.set("title",$("#sTitle").value.trim()||"sir"); store.set("mute",$("#sMute").checked?"1":"0");
+  store.set("link",$("#sLink").checked?"1":"0"); syncLink(); saveCalls();
   $("#vSet").classList.remove("show"); toast("Saved."); refresh(); };
+$("#clipUp").onclick=async()=>{ try{ const t=await readClip(); if(!t) return toast("Your clipboard is empty."); await api("/api/clip",{text:t}); toast("Sent to your PC's clipboard."); }catch(e){ toast(e.message); } };
+$("#clipDown").onclick=async()=>{ try{ const r=await api("/api/clip"); if(!r.text) return toast("PC clipboard is empty."); await copyText(r.text); toast("Copied from your PC."); }catch(e){ toast(e.message); } };
+$("#fileUp").onclick=()=>$("#fileIn").click();
+$("#fileIn").onchange=async e=>{ for(const f of e.target.files){ try{ toast(`Sending ${f.name}…`); await api("/api/drop?name="+encodeURIComponent(f.name),f,120000); toast(`✓ ${f.name} is on your PC.`); }catch(err){ toast(err.message); } } e.target.value=""; };
+$("#ringTest").onclick=()=>{ foundRing(true); setTimeout(()=>{ if(ringing) foundRing(false); },4000); };
 
 /* ---------- lifecycle: catch up the moment you come back to the app ---------- */
 document.addEventListener("visibilitychange",()=>{ if(!document.hidden){ refresh(); checkLaunch(); } });
 try{ const AppP=Plug.App||reg("App"); if(AppP&&Native) AppP.addListener("appStateChange",s=>{ if(s.isActive){ refresh(); checkLaunch(); } }); }catch(e){}
-if(!Native) $("#nativeNote").style.display=""; if(store.get("bubble")==="1") $("#qaBubble").classList.add("on"); paintCalls(); checkLaunch();
+if(!Native) $("#nativeNote").style.display=""; if(store.get("bubble")==="1") $("#qaBubble").classList.add("on"); paintCalls(); checkLaunch(); syncLink();
 setInterval(()=>{ if(!document.hidden) refresh(); },10000);
 go(store.get("tab","home")); refresh();
 if(!addr()&&!store.get("key")) setTimeout(()=>$("#setBtn").click(),700);

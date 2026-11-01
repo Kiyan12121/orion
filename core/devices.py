@@ -10,6 +10,7 @@ import hashlib
 import hmac
 import io
 import json
+import urllib.parse
 import os
 import secrets
 import shutil
@@ -151,6 +152,20 @@ class Remote:
                     return
                 if self.path == "/api/state":
                     self._json(200, remote.api.remote_state())
+                elif self.path.startswith("/api/files/"):
+                    name = os.path.basename(urllib.parse.unquote(self.path[len("/api/files/"):].split("?")[0]))
+                    fp = os.path.join(DATA_DIR, "outbox", name)
+                    if not name or not os.path.isfile(fp):
+                        self._json(404, {"error": "no such file"})
+                        return
+                    self.send_response(200)
+                    self.send_header("Content-Type", "application/octet-stream")
+                    self.send_header("Content-Length", str(os.path.getsize(fp)))
+                    self.send_header("Content-Disposition", f'attachment; filename="{name}"')
+                    self._cors()
+                    self.end_headers()
+                    with open(fp, "rb") as f:
+                        shutil.copyfileobj(f, self.wfile)
                 elif self.path.startswith("/api/screen"):
                     jpg = remote.api.screen_jpeg()
                     if not jpg:
@@ -175,6 +190,10 @@ class Remote:
                 raw = self.rfile.read(n) if n else b""
                 if self.path == "/api/transcribe":
                     self._json(200, {"text": remote.api.transcribe_bytes(raw)})
+                    return
+                if self.path.startswith("/api/drop"):
+                    q = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
+                    self._json(200, remote.api.file_drop((q.get("name") or ["file"])[0], raw))
                     return
                 try:
                     body = json.loads(raw or b"{}")

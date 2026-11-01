@@ -354,6 +354,100 @@ body:not(.lite) .veil{backdrop-filter:blur(6px)}
 #bootbar{width:440px;height:2px;background:rgba(var(--ar),.12)}
 #bootbar div{height:100%;width:0;background:var(--a);box-shadow:0 0 12px rgba(var(--ar),.7);transition:width .25s}
 
+
+
+/* arc-reactor segments around the core: glow harder while ORION speaks */
+.reactor{animation-duration:60s}
+.reactor .rseg{fill:rgba(var(--cr),.16);stroke:var(--c2);stroke-opacity:.55;stroke-width:1;animation:segglow 3s ease-in-out infinite}
+body.speaking .reactor .rseg{animation-duration:.55s;fill:rgba(var(--cr),.42)}
+body.state-thinking .reactor{animation-duration:6s}
+body.speaking .corefill{animation-duration:.5s}
+@keyframes segglow{0%,100%{fill-opacity:.5}50%{fill-opacity:1;filter:drop-shadow(0 0 6px var(--c))}}
+body.lite .reactor .rseg{animation:none}
+/* ======================= v3: WIDE PAGES + DASHBOARD ======================= */
+.dock{gap:4px;overflow-y:auto;overflow-x:hidden}.dock::-webkit-scrollbar{width:0}
+.nav{width:44px;height:42px;flex:none}
+.stage.wide{grid-template-columns:262px minmax(0,1fr)}
+.stage.wide .core{display:none}
+.wtitle{display:flex;align-items:baseline;gap:14px;margin:2px 0 14px}
+.wtitle h2{font:800 15px var(--disp);letter-spacing:.34em;color:var(--a2)}
+.wtitle span{font:12px var(--mono);color:var(--dim)}
+.dgrid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:14px}
+.tile{grid-column:span 4;border:1px solid var(--line);background:linear-gradient(160deg,rgba(var(--ar),.07),rgba(0,0,0,.25));border-radius:8px;padding:14px 16px;position:relative;overflow:hidden;min-height:118px;animation:rise .4s both}
+.tile::after{content:"";position:absolute;inset:0;border-radius:8px;pointer-events:none;box-shadow:inset 0 1px 0 rgba(255,255,255,.04)}
+.tile.s3{grid-column:span 3}.tile.s5{grid-column:span 5}.tile.s6{grid-column:span 6}.tile.s7{grid-column:span 7}.tile.s8{grid-column:span 8}.tile.s12{grid-column:span 12}
+.tile h5{font:700 10px var(--ui);letter-spacing:.3em;color:var(--dim);margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
+.tile h5 i{font-style:normal;font:500 10px var(--mono);letter-spacing:0;color:var(--faint)}
+.big{font:500 34px var(--mono);color:var(--text);line-height:1.05;letter-spacing:-.02em}
+.big small{font-size:14px;color:var(--dim);margin-left:4px}
+.sub2{font-size:12.5px;color:var(--dim);margin-top:4px;line-height:1.4}
+.tile canvas{width:100%;height:56px;display:block;margin-top:8px}
+.ring{width:92px;height:92px;border-radius:50%;display:grid;place-items:center;flex:none;
+  background:conic-gradient(var(--a) calc(var(--p,0)*1%),rgba(var(--ar),.1) 0);transition:--p .8s;position:relative}
+.ring::before{content:"";position:absolute;inset:7px;border-radius:50%;background:#06121f}
+.ring b{position:relative;font:500 18px var(--mono)}
+.ring.hot{background:conic-gradient(var(--amber) calc(var(--p,0)*1%),rgba(255,179,71,.12) 0)}
+.rings{display:flex;gap:16px;align-items:center;justify-content:space-around}
+.rings div{text-align:center;font:600 10px var(--ui);letter-spacing:.22em;color:var(--dim)}
+.rings div .ring{margin:0 auto 7px}
+.bars{display:flex;align-items:flex-end;gap:5px;height:84px;margin-top:6px}
+.bars div{flex:1;background:linear-gradient(0deg,rgba(var(--ar),.25),var(--a));border-radius:3px 3px 0 0;min-height:2px;position:relative;transition:height .6s cubic-bezier(.2,.8,.2,1)}
+.bars div span{position:absolute;bottom:-17px;left:50%;transform:translateX(-50%);font:9.5px var(--mono);color:var(--faint);white-space:nowrap}
+.bars div em{position:absolute;top:-16px;left:50%;transform:translateX(-50%);font:9.5px var(--mono);color:var(--dim);font-style:normal;white-space:nowrap}
+.bars.withlbl{margin-bottom:18px}
+.hbar{display:flex;align-items:center;gap:10px;margin:7px 0;font-size:13.5px}
+.hbar b{width:150px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hbar div{flex:1;height:8px;background:rgba(var(--ar),.1);border-radius:4px;overflow:hidden}
+.hbar div i{display:block;height:100%;background:linear-gradient(90deg,var(--a),var(--a2));border-radius:4px;box-shadow:0 0 10px rgba(var(--ar),.5)}
+.hbar span{font:12px var(--mono);color:var(--dim);width:64px;text-align:right}
+.li{display:flex;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
+.li:last-child{border-bottom:0}
+.li .t{font:500 12px var(--mono);color:var(--a2);width:54px;flex:none}
+.li .g{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.li small{color:var(--dim);font-size:12px}
+.cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+.cols3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.chk{display:flex;gap:12px;align-items:center;padding:11px 0;border-bottom:1px solid var(--line)}
+.chk .ic{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:14px;flex:none;border:1px solid}
+.chk.ok .ic{color:var(--green);border-color:rgba(93,255,176,.4);background:rgba(93,255,176,.08)}
+.chk.warn .ic{color:var(--amber);border-color:rgba(255,179,71,.4);background:rgba(255,179,71,.08)}
+.chk.bad .ic{color:var(--red);border-color:rgba(255,79,123,.45);background:rgba(255,79,123,.1);animation:blink2 1.6s infinite}
+.chk .tx{flex:1;min-width:0}.chk .tx b{font-size:14.5px;font-weight:600}.chk .tx small{display:block;color:var(--dim);font-size:12.5px;line-height:1.4;margin-top:2px}
+.score{display:flex;gap:18px;align-items:center}
+.score .ring{width:110px;height:110px}.score .ring b{font-size:24px}
+/* study */
+.fcard{perspective:1200px;height:230px;cursor:pointer;margin:6px 0 12px}
+.fcard .in{position:relative;width:100%;height:100%;transition:transform .6s cubic-bezier(.2,.8,.2,1);transform-style:preserve-3d}
+.fcard.flip .in{transform:rotateY(180deg)}
+.fcard .fa,.fcard .fb{position:absolute;inset:0;backface-visibility:hidden;border:1px solid var(--line2);border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:22px 26px;text-align:center;
+  background:radial-gradient(ellipse at 50% 0%,rgba(var(--ar),.16),rgba(4,14,24,.92) 70%);font-size:19px;line-height:1.4;font-weight:600}
+.fcard .fb{transform:rotateY(180deg);color:var(--a2);background:radial-gradient(ellipse at 50% 0%,rgba(93,255,176,.12),rgba(4,14,24,.92) 70%)}
+.fcard small{position:absolute;top:12px;left:16px;font:600 9.5px var(--mono);letter-spacing:.2em;color:var(--dim)}
+.timer{display:flex;flex-direction:column;align-items:center;gap:10px}
+.timer .ring{width:170px;height:170px}.timer .ring::before{inset:10px}.timer .ring b{font-size:34px}
+.timer .ph2{font:700 11px var(--ui);letter-spacing:.3em;color:var(--a2)}
+.deck{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line)}
+.deck b{flex:1;font-weight:600;font-size:14.5px}.deck small{color:var(--dim);font:11.5px var(--mono)}
+.exam{display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--line)}
+.exam .d{font:500 22px var(--mono);color:var(--a2);width:56px;text-align:center}.exam .d small{display:block;font-size:9px;letter-spacing:.2em;color:var(--dim)}
+.exam b{flex:1;font-weight:600}
+.fact{display:flex;gap:9px;align-items:flex-start;padding:7px 0;border-bottom:1px solid var(--line);font-size:13.5px;line-height:1.4}
+.fact .cat{font:600 9px var(--mono);padding:2px 6px;border-radius:999px;border:1px solid var(--line2);color:var(--a);flex:none;margin-top:1px;text-transform:uppercase;letter-spacing:.06em}
+.fact .cat.person{color:var(--violet);border-color:rgba(197,139,255,.4)}.fact .cat.preference{color:var(--green);border-color:rgba(93,255,176,.4)}
+.fact .cat.goal{color:var(--amber);border-color:rgba(255,179,71,.4)}.fact .cat.project{color:var(--a2)}
+.fact span{flex:1;user-select:text}.fact em{font-style:normal;font:10px var(--mono);color:var(--faint)}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.chips button{background:none;border:1px solid var(--line);color:var(--dim);font:600 10.5px var(--ui);letter-spacing:.14em;padding:4px 10px;border-radius:999px;cursor:pointer}
+.tile .tog{flex-wrap:wrap}.tile .tog small{flex-basis:100%;margin-left:26px;margin-top:-4px}
+.chips button.on{color:var(--a2);border-color:var(--a);background:rgba(var(--ar),.1)}
+/* toasts v3 */
+.toast{display:flex;gap:10px;align-items:flex-start;padding:11px 14px 13px;position:relative;overflow:hidden;border-radius:4px;backdrop-filter:blur(8px)}
+.toast::before{content:"◆";color:var(--a);font-size:10px;margin-top:3px}
+.toast.warn::before{color:var(--amber)}
+.toast::after{content:"";position:absolute;left:0;bottom:0;height:2px;background:var(--a);box-shadow:0 0 8px var(--a);animation:ttl 4.6s linear forwards}
+@keyframes ttl{from{width:100%}to{width:0}}
+@media (max-width:1250px){.stage.wide{grid-template-columns:minmax(0,1fr)}.tile,.tile.s3,.tile.s5{grid-column:span 6}.tile.s7,.tile.s8{grid-column:span 12}}
+
 ::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-thumb{background:var(--line2);border-radius:3px}::-webkit-scrollbar-track{background:transparent}
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes pulse{0%,100%{transform:scale(.94);opacity:.85}50%{transform:scale(1.05);opacity:1}}
@@ -388,15 +482,20 @@ body.lite .r1,body.lite .r4,body.lite .r6{animation:none}
   <nav class="dock" id="dock">
     <div class="dlogo" title="ORION"><i></i><b></b><s></s></div>
     <button class="nav on" data-page="comms"><svg viewBox="0 0 24 24"><path d="M4 5h16v10H9l-5 4z"/></svg><span class="tip">COMMS</span></button>
+    <button class="nav" data-page="dash"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="10" rx="1.5"/><rect x="13" y="3" width="8" height="6" rx="1.5"/><rect x="13" y="11" width="8" height="10" rx="1.5"/><rect x="3" y="15" width="8" height="6" rx="1.5"/></svg><span class="tip">DASHBOARD</span></button>
     <button class="nav" data-page="auto"><svg viewBox="0 0 24 24"><path d="M12 3l2.5 5.5L20 9l-4 4 1 6-5-3-5 3 1-6-4-4 5.5-.5z"/></svg><span class="tip">AUTOPILOT</span><span class="bdg" id="b-auto"></span></button>
     <button class="nav" data-page="shift"><svg viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg><span class="tip">NIGHT SHIFT &amp; JOBS</span><span class="bdg" id="b-shift"></span></button>
     <button class="nav" data-page="sched"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg><span class="tip">SCHEDULE</span></button>
+    <button class="nav" data-page="study"><svg viewBox="0 0 24 24"><path d="M3 7l9-4 9 4-9 4z"/><path d="M7 9v5c0 1.7 2.2 3 5 3s5-1.3 5-3V9M21 7v6"/></svg><span class="tip">STUDY</span><span class="bdg" id="b-study"></span></button>
+    <button class="nav" data-page="gaming"><svg viewBox="0 0 24 24"><path d="M6 9h12a4 4 0 0 1 3.9 4.9l-.6 2.6a2.5 2.5 0 0 1-4.3 1.1L15 15.5H9l-2 2.1a2.5 2.5 0 0 1-4.3-1.1l-.6-2.6A4 4 0 0 1 6 9z"/><path d="M8 11v3M6.5 12.5h3M16 12h.01M18 13.5h.01"/></svg><span class="tip">GAMING</span></button>
+    <button class="nav" data-page="ventures"><svg viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg><span class="tip">VENTURES</span></button>
     <button class="nav" data-page="root"><svg viewBox="0 0 24 24"><path d="M12 21V11M12 11c0-4 3-7 7-7 0 4-3 7-7 7zM12 14c0-3-2.5-5.5-6-5.5 0 3 2.5 5.5 6 5.5z"/></svg><span class="tip">ROOT</span><span class="bdg" id="b-root"></span></button>
     <button class="nav" data-page="studio"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="13" height="12" rx="2"/><path d="M16 10l5-3v10l-5-3z"/></svg><span class="tip">STUDIO</span></button>
     <button class="nav" data-page="skills"><svg viewBox="0 0 24 24"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9V16h7v-2.1A6 6 0 0 0 12 3z"/></svg><span class="tip">SKILLS</span></button>
     <button class="nav" data-page="devices"><svg viewBox="0 0 24 24"><rect x="2" y="4" width="14" height="10" rx="1.5"/><path d="M6 18h6M9 14v4"/><rect x="17" y="8" width="5" height="11" rx="1"/></svg><span class="tip">DEVICES</span><span class="bdg" id="b-dev"></span></button>
     <div class="sp"></div>
-    <button class="nav" id="nMem"><svg viewBox="0 0 24 24"><path d="M12 3a7 7 0 0 0-4 12.7V19h8v-3.3A7 7 0 0 0 12 3zM9 22h6"/></svg><span class="tip">MEMORY</span></button>
+    <button class="nav" data-page="brain"><svg viewBox="0 0 24 24"><path d="M9 4a3 3 0 0 0-3 3 3 3 0 0 0-2 5 3 3 0 0 0 2 5 3 3 0 0 0 3 3h1V4zM15 4a3 3 0 0 1 3 3 3 3 0 0 1 2 5 3 3 0 0 1-2 5 3 3 0 0 1-3 3h-1V4z"/></svg><span class="tip">BRAIN &amp; MEMORY</span></button>
+    <button class="nav" data-page="health"><svg viewBox="0 0 24 24"><path d="M3 12h4l2-5 4 10 2-5h6"/></svg><span class="tip">HEALTH CHECK</span><span class="bdg" id="b-health"></span></button>
     <button class="nav" id="nSet"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg><span class="tip">SETTINGS</span></button>
   </nav>
 
@@ -426,6 +525,7 @@ body.lite .r1,body.lite .r4,body.lite .r6{animation:none}
         <button class="ib" id="bSpeak" title="Voice on/off"><svg viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4z"/><path id="spkwave" d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12"/></svg></button>
         <button class="ib" id="gamingbtn" title="Gaming Mode"><svg viewBox="0 0 24 24"><path d="M6 9h12a4 4 0 0 1 3.9 4.9l-.6 2.6a2.5 2.5 0 0 1-4.3 1.1L15 15.5H9l-2 2.1a2.5 2.5 0 0 1-4.3-1.1l-.6-2.6A4 4 0 0 1 6 9z"/><path d="M8 11v3M6.5 12.5h3"/></svg></button>
         <button class="ib" id="bBell" title="Notifications"><svg viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15zM10 20a2 2 0 0 0 4 0"/></svg><span class="cnt" id="ncount">0</span></button>
+        <button class="ib" id="bMini" title="Mini mode — a small orb in the corner"><svg viewBox="0 0 24 24"><circle cx="17" cy="17" r="4"/><path d="M4 4h10v6H4z"/></svg></button>
         <button class="ib" id="bMin" title="Minimise"><svg viewBox="0 0 24 24"><path d="M5 18h14"/></svg></button>
         <button class="ib" id="bFs" title="Fullscreen (F11)"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg></button>
         <button class="ib danger" id="bQuit" title="Shut down ORION"><svg viewBox="0 0 24 24"><path d="M12 3v8M6.3 6.3a8 8 0 1 0 11.4 0"/></svg></button>
@@ -480,6 +580,7 @@ body.lite .r1,body.lite .r4,body.lite .r6{animation:none}
             <g class="spin r4"><circle cx="250" cy="250" r="132" fill="none" stroke="var(--c2)" stroke-opacity=".5" stroke-width="1" stroke-dasharray="2 6"/>
               <circle cx="250" cy="118" r="3.5" fill="var(--c2)"/><circle cx="250" cy="382" r="2" fill="var(--c)"/><circle cx="118" cy="250" r="2.5" fill="var(--c)"/></g>
             <polygon points="250,138 347,194 347,306 250,362 153,306 153,194" fill="none" stroke="var(--c)" stroke-opacity=".18"/>
+            <g class="reactor spin" id="reactor"><path class="rseg" style="animation-delay:0.00s" d="M321.8 255.0 L341.5 259.2 A92 92 0 0 1 329.4 296.4 L311.1 288.2 A72 72 0 0 0 321.8 255.0 Z"/><path class="rseg" style="animation-delay:0.12s" d="M305.2 296.3 L318.7 311.2 A92 92 0 0 1 287.0 334.2 L277.0 316.8 A72 72 0 0 0 305.2 296.3 Z"/><path class="rseg" style="animation-delay:0.24s" d="M267.4 319.9 L269.6 339.9 A92 92 0 0 1 230.4 339.9 L232.6 319.9 A72 72 0 0 0 267.4 319.9 Z"/><path class="rseg" style="animation-delay:0.36s" d="M223.0 316.8 L213.0 334.2 A92 92 0 0 1 181.3 311.2 L194.8 296.3 A72 72 0 0 0 223.0 316.8 Z"/><path class="rseg" style="animation-delay:0.48s" d="M188.9 288.2 L170.6 296.4 A92 92 0 0 1 158.5 259.2 L178.2 255.0 A72 72 0 0 0 188.9 288.2 Z"/><path class="rseg" style="animation-delay:0.60s" d="M178.2 245.0 L158.5 240.8 A92 92 0 0 1 170.6 203.6 L188.9 211.8 A72 72 0 0 0 178.2 245.0 Z"/><path class="rseg" style="animation-delay:0.72s" d="M194.8 203.7 L181.3 188.8 A92 92 0 0 1 213.0 165.8 L223.0 183.2 A72 72 0 0 0 194.8 203.7 Z"/><path class="rseg" style="animation-delay:0.84s" d="M232.6 180.1 L230.4 160.1 A92 92 0 0 1 269.6 160.1 L267.4 180.1 A72 72 0 0 0 232.6 180.1 Z"/><path class="rseg" style="animation-delay:0.96s" d="M277.0 183.2 L287.0 165.8 A92 92 0 0 1 318.7 188.8 L305.2 203.7 A72 72 0 0 0 277.0 183.2 Z"/><path class="rseg" style="animation-delay:1.08s" d="M311.1 211.8 L329.4 203.6 A92 92 0 0 1 341.5 240.8 L321.8 245.0 A72 72 0 0 0 311.1 211.8 Z"/></g>
             <g class="corefill"><circle id="coreglow" cx="250" cy="250" r="100" fill="url(#cg)"/></g>
             <circle cx="250" cy="250" r="64" fill="#03101b" fill-opacity=".62" stroke="var(--c2)" stroke-opacity=".65"/>
             <text x="250" y="250" text-anchor="middle" class="statew" id="stateword">ONLINE</text>
@@ -498,12 +599,13 @@ body.lite .r1,body.lite .r4,body.lite .r6{animation:none}
       <section class="panel pages">
         <!-- COMMS -->
         <div class="page on" id="page-comms">
-          <div class="ph">COMMS <span style="font-family:var(--mono);letter-spacing:0;font-weight:500;color:var(--faint)">UI 2.0.1</span><i id="brainlabel">AUTO BRAIN</i></div>
+          <div class="ph">COMMS <span style="font-family:var(--mono);letter-spacing:0;font-weight:500;color:var(--faint)">UI 3.0</span><i id="brainlabel">AUTO BRAIN</i></div>
           <div id="log"></div>
           <button id="toBottom" title="Jump to latest">▼ LATEST</button>
           <div class="quick" id="quick">
             <button data-q="check my messages">✉ Root DMs</button><button data-q="what's on today">📅 Today</button>
             <button data-q="what's using my RAM">⚙ RAM hogs</button><button data-q="look at my screen and tell me what you see">👁 Look</button>
+            <button data-q="quiz me on my flashcards">📚 Quiz me</button><button data-q="find my phone">📢 Find phone</button>
             <button data-q="I'm afk">💤 AFK</button>
           </div>
         </div>
@@ -607,6 +709,13 @@ body.lite .r1,body.lite .r4,body.lite .r6{animation:none}
           <div class="scroll" id="devscroll">
             <div class="card"><h4>PHONE &amp; LAPTOP ACCESS <button class="btn small" id="remBtn">TURN ON</button></h4>
               <p id="remInfo">Control this PC's ORION from your phone or laptop — anywhere, using Tailscale (free, private).</p></div>
+            <div class="card"><h4>CALLS FROM ORION <span><button class="btn small" id="callMe">📞 CALL ME</button> <button class="btn small" id="ringPhone">📢 FIND PHONE</button></span></h4>
+              <p>ORION rings your phone (full-screen call, even with the app closed) when…</p>
+              <label class="tog"><input type="checkbox" id="clJobs"> A job finishes</label>
+              <label class="tog"><input type="checkbox" id="clRem"> A schedule reminder is due</label>
+              <label class="tog"><input type="checkbox" id="clMorn"> Morning report</label>
+              <label class="tog"><input type="checkbox" id="clGame"> …but never while I'm gaming</label>
+              <div class="voicerow" style="align-items:center;font-size:13.5px;color:var(--dim)">Quiet hours <input class="inp" type="time" id="clQf" style="width:110px"> to <input class="inp" type="time" id="clQt" style="width:110px"></div></div>
             <div class="card"><h4>PHONE NOTIFICATIONS <button class="btn small" id="pushBtn">TURN ON</button></h4>
               <p id="pushInfo">Reminders, DMs and finished missions pushed to your phone with the free <b>ntfy</b> app.</p></div>
             <div class="card"><h4>SYNC <span class="pill" id="syncPill">OFF</span></h4>
@@ -621,6 +730,138 @@ body.lite .r1,body.lite .r4,body.lite .r6{animation:none}
               <p id="updInfo">ORION updates itself from your GitHub repo.</p></div>
           </div>
         </div>
+
+        <!-- DASHBOARD -->
+        <div class="page" id="page-dash" data-wide="1">
+          <div class="scroll">
+            <div class="wtitle"><h2>DASHBOARD</h2><span id="dashSub">—</span></div>
+            <div class="dgrid">
+              <div class="tile s5"><h5>SYSTEM <i id="dUp">—</i></h5>
+                <div class="rings"><div><div class="ring" id="rCpu"><b>0%</b></div>CPU</div><div><div class="ring" id="rRam"><b>0%</b></div>RAM</div><div><div class="ring" id="rDisk"><b>0%</b></div>DISK</div></div></div>
+              <div class="tile s7"><h5>LIVE LOAD <i>LAST 2 MIN</i></h5><canvas id="dLoad" style="height:110px"></canvas></div>
+              <div class="tile s3"><h5>TODAY</h5><div id="dToday"><div class="empty">—</div></div></div>
+              <div class="tile s3"><h5>JOBS</h5><div class="big" id="dJobs">0</div><div class="sub2" id="dJobsSub">nothing running</div></div>
+              <div class="tile s3"><h5>REVISION</h5><div class="big" id="dStudy">0<small>min today</small></div><div class="sub2" id="dStudySub">—</div></div>
+              <div class="tile s3"><h5>EARNED THIS MONTH</h5><div class="big" id="dEarn">£0</div><div class="sub2" id="dEarnSub">—</div></div>
+              <div class="tile s6"><h5>GAMING THIS WEEK <i id="dGameTot">—</i></h5><div class="bars withlbl" id="dGame"></div></div>
+              <div class="tile s6"><h5>WHEN YOU USE ORION <i id="dHabit">—</i></h5><div class="bars" id="dHours" style="height:70px;gap:2px"></div></div>
+              <div class="tile s6"><h5>AI ALLOWANCE</h5><div class="allow" id="dAllow"></div></div>
+              <div class="tile s6"><h5>HEALTH <button class="mini" data-go="health">OPEN</button></h5><div id="dHealth"><div class="empty">Checking…</div></div></div>
+            </div>
+          </div>
+        </div>
+        <!-- STUDY -->
+        <div class="page" id="page-study" data-wide="1">
+          <div class="scroll">
+            <div class="wtitle"><h2>STUDY</h2><span id="stSub">—</span></div>
+            <div class="dgrid">
+              <div class="tile s4"><h5>FOCUS</h5>
+                <div class="timer"><div class="ring" id="fRing"><b id="fTime">25:00</b></div><div class="ph2" id="fPhase">READY</div>
+                  <input class="inp" id="fSubj" placeholder="What are you revising?">
+                  <div class="voicerow" style="width:100%"><select class="inp" id="fMin"><option value="25">25 / 5</option><option value="45">45 / 10</option><option value="15">15 / 3</option></select>
+                    <select class="inp" id="fTot"><option value="">Until I stop</option><option value="60">1 hour</option><option value="120">2 hours</option><option value="180">3 hours</option></select></div>
+                  <button class="btn wide" id="fGo">▶ START FOCUS</button>
+                  <div class="sub2" style="text-align:center">Games get closed and YouTube/TikTok get minimised during focus rounds.</div></div></div>
+              <div class="tile s8"><h5>FLASHCARDS <i id="fcInfo">—</i></h5>
+                <div id="fcArea"><div class="fcard" id="fcard"><div class="in"><div class="fa"><small id="fcDeck">—</small><span id="fcQ">Make a deck below, then revise here.</span></div><div class="fb"><small>ANSWER</small><span id="fcA"></span></div></div></div>
+                  <div class="rowbtns"><button class="btn deny" id="fcWrong" style="flex:1">✕ GOT IT WRONG</button><button class="btn" id="fcFlip" style="flex:1">FLIP</button><button class="btn" id="fcRight" style="flex:1;color:var(--green)">✓ GOT IT</button></div></div>
+                <div class="sub2">Cards you get right come back later (1, 3, 7, 14, 30 days). Or say <b>"quiz me on biology"</b> and ORION asks you out loud.</div></div>
+              <div class="tile s4"><h5>EXAMS</h5><div id="exList"><div class="empty">No exams added.</div></div>
+                <div class="voicerow" style="margin-top:8px"><input class="inp" id="exSub" placeholder="Maths Paper 1"><input class="inp" type="date" id="exDate" style="width:150px"><button class="btn small" id="exAdd">+</button></div></div>
+              <div class="tile s4"><h5>DECKS</h5><div id="dkList"><div class="empty">No decks yet.</div></div></div>
+              <div class="tile s4"><h5>NEW DECK</h5>
+                <input class="inp" id="mkTopic" placeholder="Topic — e.g. GCSE Chemistry bonding" style="margin-bottom:6px">
+                <textarea class="goal" id="mkNotes" style="min-height:70px;font-size:13px" placeholder="Paste your notes (optional) — cards are made from them"></textarea>
+                <button class="btn wide" id="mkGo" style="margin-top:8px">✦ MAKE FLASHCARDS</button></div>
+              <div class="tile s12"><h5>THIS WEEK <i id="stWeek">—</i></h5><div class="bars withlbl" id="stBars"></div></div>
+            </div>
+          </div>
+        </div>
+        <!-- GAMING -->
+        <div class="page" id="page-gaming" data-wide="1">
+          <div class="scroll">
+            <div class="wtitle"><h2>GAMING</h2><span id="gmSub">—</span></div>
+            <div class="dgrid">
+              <div class="tile s4"><h5>THIS WEEK</h5><div class="big" id="gmTot">0h</div><div class="sub2" id="gmTotSub">—</div>
+                <div class="rowbtns"><button class="btn" id="gmToggle" style="flex:1">🎮 GAMING MODE</button><button class="btn" id="gmClip" style="flex:1">🎬 CLIP THAT</button></div>
+                <div class="sub2"><kbd style="font:10px var(--mono);border:1px solid var(--line2);padding:1px 5px">Ctrl+Alt+C</kbd> or say "clip that" mid-game.</div></div>
+              <div class="tile s8"><h5>DAILY</h5><div class="bars withlbl" id="gmDaily" style="height:110px"></div></div>
+              <div class="tile s6"><h5>BY GAME</h5><div id="gmBy"><div class="empty">Play something and it'll show up here.</div></div></div>
+              <div class="tile s6"><h5>BOOK A PARTY</h5>
+                <input class="inp" id="ptGame" placeholder="Game — e.g. Roblox" style="margin-bottom:6px">
+                <div class="voicerow" style="margin-bottom:6px"><input class="inp" type="date" id="ptDate"><input class="inp" type="time" id="ptTime" value="19:00"></div>
+                <input class="inp" id="ptWho" placeholder="Friends' Root names, comma separated" style="margin-bottom:8px">
+                <button class="btn wide" id="ptGo">📨 BOOK &amp; INVITE ON ROOT</button>
+                <div class="sub2">Adds it to your schedule, DMs everyone now and again 10 minutes before.</div></div>
+              <div class="tile s12"><h5>BOOSTER &amp; SETTINGS</h5><div class="cols">
+                <div><label class="tog"><input type="checkbox" id="gsAuto"> Turn on Gaming Mode when a game starts</label>
+                  <label class="tog"><input type="checkbox" id="gsBoost"> Booster — game gets top priority, background apps slowed</label>
+                  <label class="tog"><input type="checkbox" id="gsHP"> High-performance power plan while playing</label></div>
+                <div><label class="tog"><input type="checkbox" id="gsBuf"> ORION clip buffer <small>— records the last 60s (uses some CPU). Off = Windows Game Bar</small></label>
+                  <div class="voicerow" style="align-items:center;font-size:13.5px;color:var(--dim)">Break reminder every <select class="inp" id="gsBreak" style="flex:none;width:130px"><option value="0">Never</option><option value="60">1 hour</option><option value="90">1.5 hours</option><option value="120">2 hours</option><option value="180">3 hours</option></select></div></div>
+              </div></div>
+            </div>
+          </div>
+        </div>
+        <!-- VENTURES -->
+        <div class="page" id="page-ventures" data-wide="1">
+          <div class="scroll">
+            <div class="wtitle"><h2>VENTURES</h2><span>money, projects and leads</span></div>
+            <div class="dgrid">
+              <div class="tile s4"><h5>THIS MONTH</h5><div class="big" id="vMonth">£0</div><div class="sub2" id="vTotal">All time £0</div>
+                <div class="voicerow" style="margin-top:10px"><select class="inp" id="vVen"></select><input class="inp" id="vAmt" type="number" step="0.01" placeholder="£" style="width:90px"></div>
+                <div class="voicerow" style="margin-top:6px"><input class="inp" id="vNote" placeholder="What for?"><button class="btn small" id="vAdd" style="height:36px">LOG</button></div></div>
+              <div class="tile s4"><h5>LAST 6 MONTHS</h5><div class="bars withlbl" id="vMonths" style="height:110px"></div></div>
+              <div class="tile s4"><h5>BY VENTURE</h5><div id="vBy"><div class="empty">Log your first £ to see this.</div></div></div>
+              <div class="tile s7"><h5>DEV QUEUE <i>BUILT OVERNIGHT</i></h5>
+                <div class="voicerow" style="margin-bottom:8px"><input class="inp" id="dvTask" placeholder="e.g. a pet hatching system with rarity tiers and a hatch animation"><input class="inp" id="dvProj" value="Hatchlands" style="width:130px"><button class="btn small" id="dvAdd" style="height:36px">ADD</button></div>
+                <div id="dvList"><div class="empty">Nothing queued. Night Shift builds these while you sleep and saves the scripts for you to check.</div></div></div>
+              <div class="tile s5"><h5>LEAD FINDER <i>AUTOMATION SERVICES</i></h5>
+                <div class="voicerow" style="margin-bottom:6px"><input class="inp" id="ldType" placeholder="Business type — e.g. barbers"><input class="inp" id="ldArea" placeholder="Area" value="Leicester" style="width:130px"></div>
+                <input class="inp" id="ldOffer" placeholder="Your offer (optional) — e.g. booking bots + reminders" style="margin-bottom:8px">
+                <button class="btn wide" id="ldGo">🔎 FIND LEADS &amp; DRAFT EMAILS</button>
+                <div class="sub2">Runs in the background. Saves a spreadsheet + personalised email drafts to Documents › ORION Leads. Nothing is sent.</div>
+                <label class="tog" style="margin-top:12px"><input type="checkbox" id="vContent"> Content pipeline <small>— new videos become captioned Shorts + titles overnight</small></label></div>
+              <div class="tile s12"><h5>RECENT</h5><div id="vRecent"><div class="empty">—</div></div></div>
+            </div>
+          </div>
+        </div>
+        <!-- BRAIN -->
+        <div class="page" id="page-brain" data-wide="1">
+          <div class="scroll">
+            <div class="wtitle"><h2>BRAIN &amp; MEMORY</h2><span id="brSub">—</span></div>
+            <div class="dgrid">
+              <div class="tile s7"><h5>WHAT I KNOW ABOUT YOU <span><button class="mini" id="brLearn">LEARN NOW</button></span></h5>
+                <div class="chips" id="brCats"></div>
+                <div id="brFacts" style="max-height:46vh;overflow:auto"></div>
+                <div class="voicerow" style="margin-top:8px"><input class="inp" id="brNew" placeholder="Add something — e.g. my best mate is Sam"><select class="inp" id="brCat" style="flex:none;width:140px"><option>person</option><option>project</option><option>preference</option><option>goal</option><option selected>fact</option></select><button class="btn small" id="brAdd" style="height:36px">ADD</button></div>
+                <label class="tog" style="margin-top:8px"><input type="checkbox" id="brAuto"> Learn about me automatically from our chats</label></div>
+              <div class="tile s5"><h5>SHORTCUTS <i>INSTANT COMMANDS</i></h5>
+                <div id="brShorts"><div class="empty">None yet.</div></div>
+                <input class="inp" id="scPhrase" placeholder="When I say… e.g. gaming setup" style="margin:8px 0 6px">
+                <div class="voicerow"><input class="inp" id="scDoes" placeholder="…do this: open Discord and Spotify, gaming mode on"><button class="btn small" id="scAdd" style="height:36px">ADD</button></div>
+                <h5 style="margin-top:16px">NOTICED YOU ASK A LOT</h5><div id="brSuggest"><div class="empty">Nothing yet — I'll spot patterns as you use me.</div></div></div>
+              <div class="tile s12"><h5>HOW THE BRAIN WORKS</h5><div class="sub2" id="brHow"></div>
+                <div class="rowbtns"><button class="btn small" id="brClear">CLEAR CHAT HISTORY</button><button class="btn small" data-go="skills">SKILLS ›</button></div></div>
+            </div>
+          </div>
+        </div>
+        <!-- HEALTH -->
+        <div class="page" id="page-health" data-wide="1">
+          <div class="scroll">
+            <div class="wtitle"><h2>HEALTH CHECK</h2><span id="hcSub">—</span></div>
+            <div class="dgrid">
+              <div class="tile s4"><h5>OVERALL</h5><div class="score"><div class="ring" id="hcRing"><b>—</b></div><div><div class="sub2" id="hcSum">Checking everything…</div>
+                <button class="btn small" id="hcRe" style="margin-top:10px">↻ RE-CHECK</button></div></div></div>
+              <div class="tile s4"><h5>CLOUD BACKUP</h5><div class="sub2">Memory, schedule, study decks, shortcuts, earnings, skills — to a private GitHub Gist (uses your Sync token).</div>
+                <div class="rowbtns"><button class="btn small" id="bkUp" style="flex:1">⇪ BACK UP NOW</button><button class="btn small deny" id="bkDown" style="flex:1">⇩ RESTORE</button></div>
+                <div class="sub2" id="bkOut"></div></div>
+              <div class="tile s4"><h5>DEVICE PROFILE</h5><select class="inp" id="hcProf"><option value="auto">Auto — Lite on 4 GB laptops</option><option value="full">Full — every feature</option><option value="lite">Lite — light and fast</option></select>
+                <div class="sub2" style="margin-top:8px">Lite turns off the wake word, clip buffer, heavy animations and overnight video work. Restart ORION after changing.</div></div>
+              <div class="tile s12"><h5>CHECKS</h5><div id="hcList"><div class="empty">Running checks…</div></div></div>
+            </div>
+          </div>
+        </div>
       </section>
     </div>
 
@@ -629,7 +870,6 @@ body.lite .r1,body.lite .r4,body.lite .r6{animation:none}
       <button class="mic" id="mic" title="Push to talk (Ctrl+Space)"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>
       <div class="cmd"><span class="pr">&gt;_</span><input id="input" autocomplete="off" spellcheck="false" placeholder="Give an instruction…  (try “autopilot: …”)"><kbd>⌃K</kbd></div>
       <button class="btn" id="send">EXECUTE</button>
-      <button class="btn claude" id="claude" title="Send what you've typed to Claude">ASK CLAUDE</button>
     </footer>
   </div>
 </div>
@@ -662,7 +902,7 @@ body.lite .r1,body.lite .r4,body.lite .r6{animation:none}
   <h3>AI BRAINS — EACH KEY ADDS ITS OWN FREE ALLOWANCE</h3>
   <div id="sKeys"></div>
   <div class="two">
-    <div class="field"><label>LOCAL MODEL (OLLAMA)</label><input type="text" id="sLocal" placeholder="qwen2.5:3b"></div>
+    <div class="field"><label>LOCAL MODEL (OLLAMA) — "auto" picks the best</label><input type="text" id="sLocal" placeholder="auto — picks the best installed model"></div>
     <div class="field"><label>LOCAL VISION MODEL</label><input type="text" id="sLocalV" placeholder="moondream (optional)"></div>
   </div>
   <h3>VOICE</h3>
@@ -701,7 +941,6 @@ window.ui={event(e){ switch(e.kind){
   case "status": setStatus(null,e.text); break;
   case "tool": logTool(e); break;
   case "confirm": showConfirm(e); break;
-  case "claude": logLine(`<b>⇢</b> handed to <em>Claude</em>`); toast("Opened Claude with your request."); break;
   case "toast": toast(e.text,e.level); break;
   case "theme": applyTheme(e.theme); break;
   case "audio": Voice.enqueue(e); break;
@@ -725,6 +964,10 @@ window.ui={event(e){ switch(e.kind){
   case "jobs_changed": if($("#page-shift").classList.contains("on")) loadJobs(); else if(e.job&&e.job.status==="done") badge("shift"); break;
   case "routines_changed": if($("#page-shift").classList.contains("on")) loadRoutines(); break;
   case "devices_changed": if($("#page-devices").classList.contains("on")) loadDevices(); break;
+  case "focus": e._t=Date.now(); paintFocus(e); break;
+  case "study": toast(e.text,e.ok?"":"warn"); $("#mkGo").textContent="✦ MAKE FLASHCARDS"; $("#mkGo").disabled=false; if(e.ok){ $("#mkTopic").value=$("#mkNotes").value=""; CARD=null; } if(on("study")) loadStudy(); break;
+  case "health_badge": $("#b-health").classList.add("show"); break;
+  case "health_fixed": toast(e.text); HC=null; if(on("health")) setTimeout(loadHealth,800); break;
 }}};
 
 /* ================= state ================= */
@@ -734,7 +977,7 @@ function setState(s){ state=s; document.body.classList.remove("state-idle","stat
   if(s==="thinking") setStatus("PROCESSING","working on it…");
   if(s==="listening") setStatus("LISTENING","speak now — Ctrl+Space or click to finish");
   if(s==="idle"){ if(!speaking) setStatus("ALL SYSTEMS NOMINAL","awaiting instruction"); apRunning(false); } }
-function setSpeaking(on){ speaking=on; if(state==="idle") setStatus(on?"TRANSMITTING":"ALL SYSTEMS NOMINAL",on?"speaking":"awaiting instruction"); }
+function setSpeaking(on){ speaking=on; document.body.classList.toggle("speaking",!!on); if(state==="idle") setStatus(on?"TRANSMITTING":"ALL SYSTEMS NOMINAL",on?"speaking":"awaiting instruction"); }
 function setStatus(a,b){ if(a!==null) $("#statusline").textContent=a; if(b!==undefined) $("#statusdetail").textContent=b; }
 function applyTheme(t){ if(!THEMES[t]) t="standby"; document.body.dataset.theme=t; $$("#themes button").forEach(b=>b.classList.toggle("on",b.dataset.t===t)); $("#modeword").textContent=THEMES[t]; }
 $$("#themes button").forEach(b=>b.onclick=()=>{ applyTheme(b.dataset.t); api.set_theme(b.dataset.t); });
@@ -742,7 +985,9 @@ $$("#themes button").forEach(b=>b.onclick=()=>{ applyTheme(b.dataset.t); api.set
 /* ================= navigation ================= */
 function go(p){ $$(".nav[data-page]").forEach(n=>n.classList.toggle("on",n.dataset.page===p)); $$(".page").forEach(x=>x.classList.toggle("on",x.id==="page-"+p));
   const b=$("#b-"+p); if(b) b.classList.remove("show");
-  ({sched:loadSched,skills:loadSkills,root:loadRoot,devices:loadDevices,shift:loadShift})[p]?.(); }
+  const pg=$("#page-"+p); $(".stage").classList.toggle("wide",!!(pg&&pg.dataset.wide));
+  ({sched:loadSched,skills:loadSkills,root:loadRoot,devices:loadDevices,shift:loadShift,dash:loadDash,study:loadStudy,gaming:loadGaming,ventures:loadVentures,brain:loadBrain,health:loadHealth})[p]?.(); }
+document.addEventListener("click",e=>{ const g=e.target.closest("[data-go]"); if(g) go(g.dataset.go); });
 $$(".nav[data-page]").forEach(n=>n.onclick=()=>go(n.dataset.page));
 function badge(p){ const pg=$("#page-"+p); if(pg && !pg.classList.contains("on")) $("#b-"+p)?.classList.add("show"); }
 
@@ -783,7 +1028,6 @@ document.addEventListener("click",e=>{ const a=e.target.closest("[data-url]"); i
 function send(text){ if(busy&&text===undefined){ api.stop(); return; } const t=(text??$("#input").value).trim(); if(!t) return;
   if(text===undefined) $("#input").value=""; Voice.unlock(); addMsg("user",t); go("comms"); scrollChat(true); api.send(t); }
 $("#send").onclick=()=>send(); $("#input").addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); send(); } });
-$("#claude").onclick=()=>{ const t=$("#input").value.trim(); api.ask_claude(t); $("#input").value=""; };
 $$("#quick button").forEach(b=>b.onclick=()=>send(b.dataset.q));
 
 /* ================= action log ================= */
@@ -851,7 +1095,6 @@ $("#sSave").onclick=async()=>{ const keys={}; $$("#sKeys input").forEach(i=>keys
   const r=await api.save_settings({name:$("#sName").value,title:$("#sTitle").value,owner:$("#sOwner").value,keys,local_model:$("#sLocal").value,local_vision:$("#sLocalV").value,voice:$("#sVoice").value,engine:$("#sEngine").value,
     speak:$("#sSpeak").checked,safe_mode:$("#sSafe").checked,fullscreen:$("#sFs").checked,skip_boot:$("#sBoot").checked,visuals:$("#sVis").value});
   applyCfg(r); $("#vSet").classList.remove("show"); toast("Configuration saved."); paintLinks(await api.status()); pollMeters(); };
-$("#nMem").onclick=async()=>{ const m=await api.memories(); $("#memlist").innerHTML=m.length?m.map(x=>`<div>${esc(x)}</div>`).join(""):"<div>Nothing saved yet.</div>"; $("#vMem").classList.add("show"); };
 $("#mClose").onclick=()=>$("#vMem").classList.remove("show");
 $("#clearChat").onclick=async()=>{ await api.clear_chat(); $("#log").innerHTML=""; $("#vMem").classList.remove("show"); toast("Chat history cleared."); };
 
@@ -940,7 +1183,7 @@ $("#drop").onclick=async()=>{ const p=await api.studio_pick(); if(p){ vidPath=p;
 $$(".tool[data-v]").forEach(t=>t.onclick=()=>{ $$(".tool").forEach(x=>x.disabled=true); $("#studioOut").textContent="Working… progress shows under the core. STOP cancels."; api.studio_run(t.dataset.v,vidPath); });
 
 /* ================= devices ================= */
-async function loadDevices(){ const d=await api.devices_info(); $("#verlbl").textContent="v"+d.version;
+async function loadDevices(){ loadCalls(); const d=await api.devices_info(); $("#verlbl").textContent="v"+d.version;
   const r=d.remote; $("#remBtn").textContent=d.remote_enabled?"TURN OFF":"TURN ON"; $("#remBtn").classList.toggle("on",d.remote_enabled);
   $("#remInfo").innerHTML=d.remote_enabled?`<b>PIN:</b> <span class="code">${esc(r.pin)}</span> <button class="mini" id="newPin">NEW PIN</button><br>
     ${r.tailscale.length?`<b>Anywhere (Tailscale):</b><br>${r.tailscale.map(u=>`<span class="code">${esc(u)}</span>`).join(" ")}<br>`:`<b>Anywhere:</b> install <a class="ex" style="display:inline" data-url="https://tailscale.com/download">Tailscale ↗</a> on this PC and your phone (same account), then reopen this page.<br>`}
@@ -969,6 +1212,150 @@ $("#wakeBtn").onclick=async()=>{ await api.devices_action($("#wakeBtn").classLis
 $("#vidBtn").onclick=async()=>{ if(await api.voice_enroll()){ $("#enrollTxt").textContent="Read each line out loud when it appears (about 4 seconds each)."; $("#enrollLine").textContent="Get ready…"; $("#vEnroll").classList.add("show"); } };
 $("#enrollClose").onclick=()=>{ $("#vEnroll").classList.remove("show"); loadDevices(); };
 function enrollStep(e){ if(e.step>0){ $("#enrollTxt").textContent=`Line ${e.step} of 3 — read it now:`; $("#enrollLine").textContent=e.line; } else { $("#enrollTxt").textContent=e.step===0?"Done!":"Problem:"; $("#enrollLine").textContent=e.line; } }
+
+/* ================= v3 pages ================= */
+const on=id=>$("#page-"+id)?.classList.contains("on");
+const money=v=>"£"+(+v||0).toFixed(2).replace(/\.00$/,"");
+const hm=m=>m>=60?`${Math.floor(m/60)}h ${String(m%60).padStart(2,"0")}m`:`${m}m`;
+function setRing(el,pct,label){ if(!el) return; el.style.setProperty("--p",Math.max(0,Math.min(100,pct))); el.classList.toggle("hot",pct>=85); const b=el.querySelector("b"); if(b) b.textContent=label??Math.round(pct)+"%"; }
+function bars(el,items,{fmt=v=>v,label=x=>x.l,vals=true}={}){ const mx=Math.max(1,...items.map(x=>x.v)); el.innerHTML=items.map(x=>`<div style="height:${Math.max(2,x.v/mx*100)}%" title="${esc(fmt(x.v))}">${x.v&&vals?`<em>${esc(fmt(x.v))}</em>`:""}${label(x)!=null?`<span>${esc(label(x))}</span>`:""}</div>`).join(""); }
+function hbars(el,rows,fmt){ const mx=Math.max(1,...rows.map(r=>r[1])); el.innerHTML=rows.length?rows.map(r=>`<div class="hbar"><b>${esc(r[0])}</b><div><i style="width:${r[1]/mx*100}%"></i></div><span>${esc(fmt(r[1]))}</span></div>`).join(""):'<div class="empty">Nothing yet.</div>'; }
+
+/* ---- dashboard ---- */
+const LOAD={cpu:[],ram:[]};
+function pushLoad(s){ LOAD.cpu.push(s.cpu||0); LOAD.ram.push(s.ram||0); for(const k in LOAD) if(LOAD[k].length>60) LOAD[k].shift();
+  if(on("dash")){ setRing($("#rCpu"),s.cpu||0); setRing($("#rRam"),s.ram||0); setRing($("#rDisk"),s.disk||0); drawLoad(); $("#dUp").textContent=s.uptime?("UP "+hm(Math.floor(s.uptime/60))):""; } }
+function drawLoad(){ const c=$("#dLoad"); if(!c) return; const x=c.getContext("2d"),w=c.width=c.clientWidth*2,h=c.height=c.clientHeight*2; x.clearRect(0,0,w,h);
+  const st=getComputedStyle(document.body), A1=st.getPropertyValue("--a").trim(), A2=st.getPropertyValue("--a2").trim();
+  x.strokeStyle="rgba(120,160,190,.12)"; x.lineWidth=1; for(let i=1;i<4;i++){ x.beginPath(); x.moveTo(0,h*i/4); x.lineTo(w,h*i/4); x.stroke(); }
+  const line=(arr,col,fill)=>{ if(arr.length<2) return; x.beginPath(); arr.forEach((v,i)=>{ const px=i/(59)*w, py=h-(v/100)*h*.92-4; i?x.lineTo(px,py):x.moveTo(px,py); });
+    x.strokeStyle=col; x.lineWidth=3; x.shadowColor=col; x.shadowBlur=10; x.stroke(); x.shadowBlur=0;
+    if(fill){ x.lineTo((arr.length-1)/59*w,h); x.lineTo(0,h); x.closePath(); const g=x.createLinearGradient(0,0,0,h); g.addColorStop(0,col+"55"); g.addColorStop(1,col+"00"); x.fillStyle=g; x.fill(); } };
+  line(LOAD.ram,A2,false); line(LOAD.cpu,A1,true); }
+async function loadDash(){
+  const h=new Date().getHours(); $("#dashSub").textContent=`${h<12?"Good morning":h<18?"Good afternoon":"Good evening"}, ${cfg.title}. Here's everything at a glance.`;
+  try{ const sc=await api.schedule_get(1); const today=(sc.items||[]).slice(0,4);
+    $("#dToday").innerHTML=today.length?today.map(e=>`<div class="li"><span class="t">${esc(e.time)}</span><span class="g">${esc(e.title)}</span></div>`).join(""):'<div class="empty">Nothing planned.</div>'; }catch(e){}
+  try{ const j=(await api.jobs_get()).jobs||[]; const act=j.filter(x=>["running","waiting","queued"].includes(x.status)); $("#dJobs").textContent=act.length;
+    const run=act.find(x=>x.status==="running"); $("#dJobsSub").textContent=run?("Working on: "+run.title):(act.length?"waiting to run":"nothing running"); }catch(e){}
+  try{ const st=await api.study_get(); $("#dStudy").innerHTML=`${st.today}<small>min today</small>`; const ex=st.exams[0];
+    $("#dStudySub").textContent=(ex?`${ex.subject} in ${ex.days} day${ex.days===1?"":"s"} · `:"")+`streak ${st.streak} day${st.streak===1?"":"s"}`; }catch(e){}
+  try{ const v=await api.ventures_get(); $("#dEarn").textContent=money(v.earn.this_month); $("#dEarnSub").textContent=`All time ${money(v.earn.total)}`; }catch(e){}
+  try{ const g=await api.gaming_get(); $("#dGameTot").textContent=hm(g.total_mins); bars($("#dGame"),g.daily.map(d=>({v:d.mins,l:d.day})),{fmt:hm}); }catch(e){}
+  try{ const b=await api.brain_get(); const hb=b.habits||{}; if(hb.by_hour){ bars($("#dHours"),hb.by_hour.map((v,i)=>({v,l:i%6===0?String(i).padStart(2,"0"):null})),{fmt:v=>v+" asks",vals:false}); $("#dHabit").textContent=`BUSIEST ${String(hb.busiest_hour).padStart(2,"0")}:00 · ${hb.this_week} THIS WEEK`; } else $("#dHours").innerHTML='<div class="empty">Not enough data yet.</div>'; }catch(e){}
+  try{ const ms=await api.meters(); $("#dAllow").innerHTML=ms.length?ms.map(m=>{ const pct=m.tok_limit?100-m.tok_left/m.tok_limit*100:Math.min(100,m.requests/10);
+      return `<div class="hbar"><b>${esc(m.label)}</b><div><i style="width:${100-pct}%"></i></div><span>${m.resting?"resting":(m.req_left!=null?m.req_left+" left":m.requests+" used")}</span></div>`; }).join(""):'<div class="empty">No cloud keys yet.</div>'; }catch(e){}
+  drawLoad(); loadHealthMini();
+}
+let HC=null;
+async function loadHealthMini(){ try{ if(!HC) HC=await api.health_get(); const bad=HC.filter(c=>c.state!=="ok");
+  $("#dHealth").innerHTML=bad.length?bad.slice(0,4).map(c=>`<div class="li"><span class="t" style="color:${c.state==="bad"?"var(--red)":"var(--amber)"}">${c.state==="bad"?"✕ FIX":"! WARN"}</span><span class="g">${esc(c.name)} <small>— ${esc(c.detail)}</small></span></div>`).join(""):'<div class="li"><span class="t" style="color:var(--green)">✓ OK</span><span class="g">Every system is healthy.</span></div>'; }catch(e){} }
+
+/* ---- health ---- */
+async function loadHealth(){ $("#hcSub").textContent="checking…"; try{ HC=await api.health_get(); }catch(e){ return; }
+  const ok=HC.filter(c=>c.state==="ok").length, pct=Math.round(ok/HC.length*100); setRing($("#hcRing"),pct,pct+"%");
+  const bad=HC.filter(c=>c.state==="bad").length, warn=HC.filter(c=>c.state==="warn").length;
+  $("#hcSum").innerHTML=`<b style="color:var(--text)">${ok}</b> fine · <b style="color:var(--amber)">${warn}</b> could be better · <b style="color:var(--red)">${bad}</b> broken`;
+  $("#hcSub").textContent=bad?`${bad} thing${bad>1?"s":""} need fixing`:"looking good";
+  $("#b-health").classList.toggle("show",bad>0);
+  $("#hcList").innerHTML=HC.map(c=>`<div class="chk ${c.state}"><div class="ic">${{ok:"✓",warn:"!",bad:"✕"}[c.state]}</div><div class="tx"><b>${esc(c.name)}</b><small>${esc(c.detail)}</small></div>${c.fix?`<button class="btn small" data-fix2="${esc(c.fix)}">${esc(c.fix_label||"FIX")}</button>`:""}</div>`).join("");
+  $$("[data-fix2]").forEach(b=>b.onclick=()=>{ b.disabled=true; b.textContent="WORKING…"; api.health_fix(b.dataset.fix2); });
+  try{ const st=await api.init(); }catch(e){} }
+$("#hcRe").onclick=()=>{ HC=null; loadHealth(); };
+$("#bkUp").onclick=async()=>{ $("#bkOut").textContent="Backing up…"; $("#bkOut").textContent=await api.backup_now(); };
+$("#bkDown").onclick=async()=>{ if(!confirmBox("Restore your ORION data from the cloud backup? (Your current data is saved first.)")) return; $("#bkOut").textContent="Restoring…"; $("#bkOut").textContent=await api.restore_now(); };
+$("#hcProf").onchange=async()=>{ await api.profile_set($("#hcProf").value); toast("Saved — restart ORION to apply."); };
+function confirmBox(t){ return window.confirm(t); }
+
+/* ---- study ---- */
+let ST=null, CARDS=[], CARD=null;
+async function loadStudy(){ ST=await api.study_get();
+  $("#stSub").textContent=`${ST.today} min today · ${ST.streak}-day streak · ${ST.decks.reduce((a,d)=>a+d.due,0)} cards due`;
+  $("#exList").innerHTML=ST.exams.length?ST.exams.map(e=>`<div class="exam"><div class="d">${e.days}<small>DAYS</small></div><b>${esc(e.subject)}</b><small style="color:var(--dim);font:11px var(--mono)">${esc(e.date)}</small><button class="x" data-exdel="${esc(e.subject)}">×</button></div>`).join(""):'<div class="empty">No exams yet — add your GCSE dates.</div>';
+  $("#dkList").innerHTML=ST.decks.length?ST.decks.map(d=>`<div class="deck"><b>${esc(d.name)}</b><small>${d.due} due · ${d.mastered}/${d.cards} mastered</small><button class="btn small" data-rev="${esc(d.name)}">REVISE</button><button class="x" data-dkdel="${esc(d.name)}">×</button></div>`).join(""):'<div class="empty">Make your first deck →</div>';
+  const days=["M","T","W","T","F","S","S"], dnow=new Date(); bars($("#stBars"),ST.week.map((v,i)=>{ const d=new Date(dnow-(6-i)*864e5); return {v,l:d.toLocaleDateString("en-GB",{weekday:"short"})}; }),{fmt:v=>v+"m"});
+  $("#stWeek").textContent=hm(ST.week.reduce((a,b)=>a+b,0))+" THIS WEEK";
+  $$("[data-exdel]").forEach(b=>b.onclick=async()=>{ await api.study_action({action:"exam_del",subject:b.dataset.exdel}); loadStudy(); });
+  $$("[data-dkdel]").forEach(b=>b.onclick=async()=>{ if(!confirmBox(`Delete the deck "${b.dataset.dkdel}"?`)) return; await api.study_action({action:"deck_del",deck:b.dataset.dkdel}); loadStudy(); });
+  $$("[data-rev]").forEach(b=>b.onclick=()=>startCards(b.dataset.rev));
+  paintFocus(ST.focus); if(!CARD) startCards(""); }
+async function startCards(deck){ CARDS=await api.study_cards(deck); nextCard(); }
+function nextCard(){ CARD=CARDS.shift()||null; $("#fcard").classList.remove("flip");
+  if(!CARD){ $("#fcDeck").textContent="ALL DONE"; $("#fcQ").textContent=ST&&ST.decks.length?"No cards due right now — nice work.":"Make a deck below, then revise here."; $("#fcA").textContent=""; $("#fcInfo").textContent=""; return; }
+  $("#fcDeck").textContent=CARD.deck.toUpperCase(); $("#fcQ").textContent=CARD.q; $("#fcA").textContent=CARD.a; $("#fcInfo").textContent=`${CARDS.length+1} LEFT`; }
+$("#fcard").onclick=$("#fcFlip").onclick=()=>$("#fcard").classList.toggle("flip");
+async function markCard(ok){ if(!CARD) return; await api.study_mark(CARD.deck,CARD.i,ok); if(!ok) CARDS.push({...CARD}); nextCard(); }
+$("#fcRight").onclick=()=>markCard(true); $("#fcWrong").onclick=()=>markCard(false);
+$("#mkGo").onclick=async()=>{ const t=$("#mkTopic").value.trim(); if(!t) return toast("Give the deck a topic first."); $("#mkGo").textContent="MAKING…"; $("#mkGo").disabled=true; await api.study_make(t,$("#mkNotes").value,12); };
+$("#exAdd").onclick=async()=>{ if(!$("#exSub").value||!$("#exDate").value) return; await api.study_action({action:"exam",subject:$("#exSub").value.trim(),date:$("#exDate").value}); $("#exSub").value=""; loadStudy(); };
+let FOC=null, focTick=null;
+function paintFocus(f){ FOC=f; clearInterval(focTick); const tick=()=>{ if(!FOC) return; const left=FOC.phase==="off"?FOC.work*60:Math.max(0,FOC.left-(Date.now()-FOC._t)/1000);
+    const tot=(FOC.phase==="break"?FOC.brk:FOC.work)*60; $("#fTime").textContent=`${String(Math.floor(left/60)).padStart(2,"0")}:${String(Math.floor(left%60)).padStart(2,"0")}`;
+    setRing($("#fRing"),FOC.phase==="off"?0:100-left/tot*100,$("#fTime").textContent); };
+  f._t=Date.now(); $("#fPhase").textContent=f.phase==="off"?"READY":f.phase==="work"?`FOCUS · ROUND ${f.cycles+1}${f.subject?" · "+f.subject.toUpperCase():""}`:"BREAK — STRETCH, WATER";
+  $("#fGo").textContent=f.phase==="off"?"▶ START FOCUS":"■ END SESSION"; $("#fGo").classList.toggle("deny",f.phase!=="off"); tick(); if(f.phase!=="off") focTick=setInterval(tick,1000); }
+$("#fGo").onclick=async()=>{ const o=FOC&&FOC.phase!=="off"; const m=+$("#fMin").value; ST=await api.study_action(o?{action:"unfocus"}:{action:"focus",minutes:m,brk:m>=45?10:m<=15?3:5,subject:$("#fSubj").value.trim(),total:$("#fTot").value?+$("#fTot").value:null}); paintFocus(ST.focus); };
+
+/* ---- gaming ---- */
+let GM=null;
+async function loadGaming(){ GM=await api.gaming_get(); $("#gmTot").textContent=hm(GM.total_mins);
+  $("#gmTotSub").textContent=`${GM.sessions} session${GM.sessions===1?"":"s"} · longest ${hm(GM.longest)} · ${GM.all_time_hours}h all time`;
+  $("#gmSub").textContent=GM.active?`playing ${GM.game} right now`:"not playing";
+  bars($("#gmDaily"),GM.daily.map(d=>({v:d.mins,l:d.day})),{fmt:hm}); hbars($("#gmBy"),GM.by_game,hm);
+  const S=GM.settings; $("#gsAuto").checked=S.auto; $("#gsBoost").checked=S.boost; $("#gsHP").checked=S.high_performance; $("#gsBuf").checked=S.clip_buffer; $("#gsBreak").value=String(S.break_every_min);
+  $("#gmToggle").classList.toggle("on",GM.active); if(!$("#ptDate").value) $("#ptDate").value=new Date().toISOString().slice(0,10); }
+["gsAuto","gsBoost","gsHP","gsBuf"].forEach(id=>$("#"+id).onchange=()=>api.gaming_set({auto:$("#gsAuto").checked,boost:$("#gsBoost").checked,high_performance:$("#gsHP").checked,clip_buffer:$("#gsBuf").checked}));
+$("#gsBreak").onchange=()=>api.gaming_set({break_every_min:+$("#gsBreak").value});
+$("#gmToggle").onclick=async()=>{ await api.gaming_toggle(); setTimeout(loadGaming,400); };
+$("#gmClip").onclick=()=>api.clip_now();
+$("#ptGo").onclick=()=>{ const g=$("#ptGame").value.trim(), w=$("#ptWho").value.trim(); if(!g||!w) return toast("Add the game and who's coming."); go("comms");
+  send(`Party planner: book ${g} on ${$("#ptDate").value} at ${$("#ptTime").value} with ${w} and invite them on Root.`); };
+
+/* ---- ventures ---- */
+async function loadVentures(){ const v=await api.ventures_get(), E=v.earn;
+  $("#vMonth").textContent=money(E.this_month); $("#vTotal").textContent=`All time ${money(E.total)}`;
+  if(!$("#vVen").options.length) $("#vVen").innerHTML=E.ventures.map(x=>`<option>${esc(x)}</option>`).join("");
+  bars($("#vMonths"),E.months.map(m=>({v:m.total,l:new Date(m.month+"-01").toLocaleDateString("en-GB",{month:"short"})})),{fmt:money});
+  hbars($("#vBy"),E.by_venture,money);
+  $("#vRecent").innerHTML=E.recent.length?E.recent.slice(0,10).map(r=>`<div class="li"><span class="t">${esc(r.date.slice(5))}</span><span class="g"><b>${money(r.amount)}</b> · ${esc(r.venture)} <small>${esc(r.note)}</small></span><button class="x" data-edel="${r.id}">×</button></div>`).join(""):'<div class="empty">Nothing logged. Say "I made £5 from Hatchlands" or use the box above.</div>';
+  $("#dvList").innerHTML=v.dev.length?v.dev.slice().reverse().slice(0,12).map(t=>`<div class="job"><div class="top"><b>${esc(t.project)}: ${esc(t.task)}</b><span class="st ${t.status==="queued"?"running":t.status==="done"?"done":""}">${t.status.toUpperCase()}</span>${t.status==="todo"?`<button class="mini" data-dvnow="${t.id}">BUILD NOW</button>`:""}<button class="x" data-dvdel="${t.id}">×</button></div>${t.result?`<small>${esc(t.result.slice(0,240))}</small>`:""}</div>`).join(""):$("#dvList").innerHTML;
+  $("#vContent").checked=!!v.content;
+  $$("[data-edel]").forEach(b=>b.onclick=async()=>{ await api.ventures_action({action:"earn_del",id:b.dataset.edel}); loadVentures(); });
+  $$("[data-dvdel]").forEach(b=>b.onclick=async()=>{ await api.ventures_action({action:"dev_del",id:b.dataset.dvdel}); loadVentures(); });
+  $$("[data-dvnow]").forEach(b=>b.onclick=async()=>{ await api.ventures_action({action:"dev_now",id:b.dataset.dvnow}); toast("Building it now — see Night Shift."); loadVentures(); }); }
+$("#vAdd").onclick=async()=>{ const a=+$("#vAmt").value; if(!a) return toast("How much?"); await api.ventures_action({action:"earn_add",venture:$("#vVen").value,amount:a,note:$("#vNote").value}); $("#vAmt").value=$("#vNote").value=""; toast(`Logged ${money(a)} — nice one.`); loadVentures(); };
+$("#dvAdd").onclick=async()=>{ const t=$("#dvTask").value.trim(); if(!t) return; await api.ventures_action({action:"dev_add",task:t,project:$("#dvProj").value.trim()||"Hatchlands"}); $("#dvTask").value=""; loadVentures(); };
+$("#ldGo").onclick=async()=>{ if(!$("#ldType").value.trim()) return toast("What kind of businesses?"); await api.ventures_action({action:"leads",type:$("#ldType").value.trim(),area:$("#ldArea").value.trim()||"Leicester",offer:$("#ldOffer").value.trim()}); toast("Lead finder is running in the background — I'll ring you when it's done."); };
+$("#vContent").onchange=()=>api.ventures_action({action:"content",on:$("#vContent").checked});
+
+/* ---- brain ---- */
+let BR=null, brCat="all";
+async function loadBrain(){ BR=await api.brain_get();
+  const counts={}; BR.facts.forEach(f=>counts[f.cat]=(counts[f.cat]||0)+1);
+  $("#brSub").textContent=`${BR.facts.length} memories · ${BR.shortcuts.length} shortcuts · local brain ${BR.local}`;
+  $("#brCats").innerHTML=["all","person","project","preference","goal","fact"].map(c=>`<button class="${c===brCat?"on":""}" data-cat="${c}">${c.toUpperCase()} ${c==="all"?BR.facts.length:(counts[c]||0)}</button>`).join("");
+  $$("[data-cat]").forEach(b=>b.onclick=()=>{ brCat=b.dataset.cat; loadBrain(); });
+  const fs=BR.facts.filter(f=>brCat==="all"||f.cat===brCat).reverse();
+  $("#brFacts").innerHTML=fs.length?fs.map(f=>`<div class="fact"><span class="cat ${f.cat}">${f.cat}</span><span>${esc(f.text)}</span><em>${f.src==="learned"?"learned ":""}${esc(f.t)}</em><button class="x" data-fdel="${f.i}">×</button></div>`).join(""):'<div class="empty">Nothing here yet.</div>';
+  $$("[data-fdel]").forEach(b=>b.onclick=async()=>{ BR=await api.brain_action({action:"fact_del",i:+b.dataset.fdel}); loadBrain(); });
+  $("#brShorts").innerHTML=BR.shortcuts.length?BR.shortcuts.map(x=>`<div class="li"><span class="g"><b>“${esc(x.phrase)}”</b> <small>→ ${esc(x.does)}</small></span><small>${x.uses||0}×</small><button class="x" data-sdel="${esc(x.phrase)}">×</button></div>`).join(""):'<div class="empty">None yet. Try: when I say "gaming setup", open Discord and Spotify and turn gaming mode on.</div>';
+  $$("[data-sdel]").forEach(b=>b.onclick=async()=>{ await api.brain_action({action:"short_del",phrase:b.dataset.sdel}); loadBrain(); });
+  $("#brSuggest").innerHTML=BR.suggest.length?BR.suggest.map(x=>`<div class="li"><span class="g">“${esc(x.phrase)}” <small>${x.count}× recently</small></span><button class="mini" data-mk="${esc(x.phrase)}">MAKE SHORTCUT</button></div>`).join(""):'<div class="empty">Nothing yet — I\'ll spot patterns as you use me.</div>';
+  $$("[data-mk]").forEach(b=>b.onclick=()=>{ $("#scPhrase").value=b.dataset.mk; $("#scDoes").value=b.dataset.mk; $("#scDoes").focus(); });
+  $("#brAuto").checked=!!BR.auto_learn;
+  $("#brHow").innerHTML=`Every message goes: <b>instant reflexes &amp; shortcuts</b> → <b>cloud brains</b> (${esc(cfg.cloud||"Groq, Cerebras, OpenRouter, Gemini")}, each with its own free allowance) → <b>local brain</b> on this PC (${esc(BR.local)}). If every brain is out of allowance, the request is queued and retried automatically. Web research happens in ORION's hidden browser — nothing pops up on your screen unless you ask to see it.`; }
+$("#brAdd").onclick=async()=>{ const t=$("#brNew").value.trim(); if(!t) return; await api.brain_action({action:"fact_add",text:t,cat:$("#brCat").value}); $("#brNew").value=""; loadBrain(); };
+$("#scAdd").onclick=async()=>{ const p=$("#scPhrase").value.trim(), d=$("#scDoes").value.trim(); if(!p||!d) return toast("Fill in both boxes."); await api.brain_action({action:"short_add",phrase:p,does:d}); $("#scPhrase").value=$("#scDoes").value=""; toast(`Say "${p}" any time.`); loadBrain(); };
+$("#brAuto").onchange=()=>api.brain_action({action:"auto_learn",on:$("#brAuto").checked});
+$("#brLearn").onclick=()=>{ api.brain_action({action:"learn_now"}); toast("Reading back through our chats…"); setTimeout(loadBrain,6000); };
+$("#brClear").onclick=async()=>{ await api.clear_chat(); $("#log").innerHTML=""; toast("Chat history cleared."); };
+
+/* ---- calls (devices page) ---- */
+async function loadCalls(){ try{ const c=await api.calls_get(); $("#clJobs").checked=c.jobs; $("#clRem").checked=c.reminders; $("#clMorn").checked=c.morning; $("#clGame").checked=c.not_while_gaming; $("#clQf").value=c.quiet_from; $("#clQt").value=c.quiet_to; }catch(e){} }
+["clJobs","clRem","clMorn","clGame","clQf","clQt"].forEach(id=>$("#"+id).onchange=()=>api.calls_save({jobs:$("#clJobs").checked,reminders:$("#clRem").checked,morning:$("#clMorn").checked,not_while_gaming:$("#clGame").checked,quiet_from:$("#clQf").value,quiet_to:$("#clQt").value}));
+$("#callMe").onclick=()=>{ api.call_me(""); toast("Ringing your phone…"); };
+$("#ringPhone").onclick=()=>{ api.ring_phone(); toast("📢 Making your phone ring loudly…"); };
+$("#bMini").onclick=()=>api.mini_toggle();
 $("#updBtn").onclick=()=>api.devices_action("update_check").then(loadDevices);
 function showUpdate(u){ $("#updtxt").textContent=`ORION ${u.version} is available`; $("#upd").classList.add("show"); }
 $("#updGo").onclick=()=>api.devices_action("update_install"); $("#updX").onclick=()=>$("#upd").classList.remove("show");
@@ -981,6 +1368,10 @@ const CMDS=[["Check my Root messages","check my messages","ROOT"],["Go AFK","I'm
   ["Lock PC","lock pc","SYSTEM"],["Open Autopilot",()=>go("auto"),"PAGE"],["Open Schedule",()=>go("sched"),"PAGE"],["Open Root",()=>go("root"),"PAGE"],["Open Studio",()=>go("studio"),"PAGE"],
   ["Open Devices",()=>go("devices"),"PAGE"],["Open Skills",()=>go("skills"),"PAGE"],["Open Night Shift",()=>go("shift"),"PAGE"],["Morning report now",()=>api.routines_action({action:"run",id:"report"}),"SHIFT"],
   ["Tidy Downloads now",()=>api.routines_action({action:"run",id:"tidy_downloads"}),"SHIFT"],["Back up ORION now",()=>api.routines_action({action:"run",id:"backup"}),"SHIFT"],["Settings",()=>$("#nSet").click(),"PAGE"]];
+CMDS.push(["Open Dashboard",()=>go("dash"),"PAGE"],["Open Study",()=>go("study"),"PAGE"],["Open Gaming",()=>go("gaming"),"PAGE"],["Open Ventures",()=>go("ventures"),"PAGE"],
+  ["Open Brain & Memory",()=>go("brain"),"PAGE"],["Health check",()=>go("health"),"PAGE"],["Mini mode",()=>api.mini_toggle(),"VIEW"],["Call my phone",()=>api.call_me(""),"PHONE"],
+  ["Find my phone",()=>api.ring_phone(),"PHONE"],["Clip that",()=>api.clip_now(),"GAMING"],["Quiz me",()=>send("quiz me on my flashcards"),"STUDY"],["Start a 25-minute focus session",()=>api.study_action({action:"focus",minutes:25,brk:5}),"STUDY"],
+  ["Back up to the cloud",async()=>toast(await api.backup_now()),"UPKEEP"],["Gaming stats",()=>send("how much have I played this week"),"GAMING"],["How much have I earned",()=>send("how much have I earned this month"),"VENTURES"]);
 let palSel=0, palList=[];
 function openPal(){ $("#palette").classList.add("show"); $("#palin").value=""; filterPal(); setTimeout(()=>$("#palin").focus(),10); }
 function closePal(){ $("#palette").classList.remove("show"); }
@@ -1010,7 +1401,7 @@ function tick(){ const d=new Date(); $("#clock").textContent=d.toLocaleTimeStrin
 setInterval(tick,1000); tick();
 const cpuHist=Array(50).fill(0); let lastNet=null; const C=2*Math.PI*196, ARC=C*(140/360);
 const fmtUp=s=>{ const d=Math.floor(s/86400),h=Math.floor(s%86400/3600),m=Math.floor(s%3600/60); return (d?d+"d ":"")+h+"h "+m+"m"; };
-async function pollStats(){ try{ const s=await api.stats(); if(!s||s.cpu===undefined) return;
+async function pollStats(){ try{ const s=await api.stats(); if(!s||s.cpu===undefined) return; pushLoad(s);
   $("#cpu").textContent=s.cpu.toFixed(0)+"%"; $("#cpub").style.width=s.cpu+"%"; $("#cpubar").classList.toggle("hot",s.cpu>85);
   $("#ram").textContent=s.ram.toFixed(0)+"%"; $("#ramb").style.width=s.ram+"%"; $("#rambar").classList.toggle("hot",s.ram>85);
   $("#gcpu").setAttribute("stroke-dasharray",`${ARC*s.cpu/100} ${C}`); $("#gram").setAttribute("stroke-dasharray",`${ARC*s.ram/100} ${C}`);
@@ -1097,6 +1488,22 @@ setTimeout(()=>{ if(api) return; const wait=ms=>new Promise(r=>setTimeout(r,ms))
       {id:"content",name:"Content: new videos → Shorts",desc:"New videos get auto-cut + 3 Shorts.",time:"03:00",on:false,builtin:true,result:""},
       {id:"c1",name:"Morning DM summary",desc:"check my Root messages and summarise them",time:"07:00",days:"weekdays",on:true,builtin:false,result:""}]}),
     routines_action:()=>A({enabled:true,idle_minutes:10,routines:[]}),voice_enroll:()=>A(true) };
+  Object.assign(api,{
+    study_get:()=>A({decks:[{name:"GCSE Biology — cells",cards:14,due:6,mastered:5},{name:"Macbeth themes",cards:12,due:2,mastered:9}],today:45,streak:4,week:[30,0,55,40,25,70,45],exams:[{subject:"Maths Paper 1",date:"2027-05-14",days:194},{subject:"English Lit — Macbeth",date:"2027-05-18",days:198}],focus:{phase:"work",subject:"Biology",left:1094,cycles:1,work:25,brk:5}}),
+    study_cards:()=>A([{deck:"GCSE Biology — cells",i:0,q:"What is the function of the mitochondria?",a:"Site of aerobic respiration — releases energy for the cell."},{deck:"GCSE Biology — cells",i:1,q:"Name the process cells use to divide for growth.",a:"Mitosis."}]),
+    study_mark:()=>A(true),study_make:()=>A(true),study_action:b=>api.study_get(),
+    gaming_get:()=>A({total_mins:742,sessions:11,longest:186,all_time_hours:212.5,active:false,game:null,by_game:[["Roblox",520],["Minecraft",160],["Fortnite",62]],daily:[{day:"10-26",mins:95},{day:"10-27",mins:40},{day:"10-28",mins:180},{day:"10-29",mins:0},{day:"10-30",mins:125},{day:"10-31",mins:210},{day:"11-01",mins:92}],settings:{auto:true,boost:true,clip_buffer:false,break_every_min:120,high_performance:true}}),
+    gaming_set:()=>api.gaming_get(),clip_now:()=>A("Clipped"),
+    ventures_get:()=>A({content:false,dev:[{id:"d1",project:"Hatchlands",task:"Pet hatching system with rarity tiers and an egg-crack animation",status:"done",result:"Saved 4 scripts + REVIEW.md in projects\\Hatchlands."},{id:"d2",project:"Hatchlands",task:"Rebirth system that doubles coin multiplier",status:"todo",result:""}],earn:{total:186.5,this_month:42,by_venture:[["Automation services",120],["Hatchlands",46.5],["Content / YouTube",20]],months:[{month:"2026-06",total:0},{month:"2026-07",total:15},{month:"2026-08",total:40},{month:"2026-09",total:24.5},{month:"2026-10",total:65},{month:"2026-11",total:42}],recent:[{id:"e1",date:"2026-11-01",venture:"Hatchlands",amount:12,note:"gamepass sales"},{id:"e2",date:"2026-10-29",venture:"Automation services",amount:30,note:"booking bot for barber"}],ventures:["Hatchlands","Content / YouTube","Automation services","Root bot","Dropshipping","Other"]}}),
+    ventures_action:()=>api.ventures_get(),
+    brain_get:()=>A({local:"qwen2.5:3b",auto_learn:true,facts:[{i:0,text:"Kiyan is in Year 11, doing GCSEs this summer",cat:"fact",t:"2026-10-23",src:"you"},{i:1,text:"Best mate on Root is Sam",cat:"person",t:"2026-10-29",src:"learned"},{i:2,text:"Building Hatchlands, a pet hatching idle game on Roblox",cat:"project",t:"2026-10-07",src:"you"},{i:3,text:"Prefers short replies while gaming",cat:"preference",t:"2026-10-30",src:"learned"},{i:4,text:"Wants to earn money with AI automation this winter",cat:"goal",t:"2026-10-30",src:"you"}],
+      shortcuts:[{phrase:"gaming setup",does:"open Discord and Spotify and turn on gaming mode",uses:6}],suggest:[{phrase:"check my messages",count:9},{phrase:"whats using my ram",count:4}],
+      habits:{total:820,this_week:96,busiest_hour:21,by_hour:[1,0,0,0,0,0,0,4,9,3,2,3,4,8,6,7,12,18,22,25,31,38,20,6]}}),
+    brain_action:()=>api.brain_get(),
+    health_get:()=>A([{id:"key_openrouter",name:"OpenRouter brain",state:"bad",detail:"Key was rejected — make a new one and paste it in Settings.",fix:"open:x",fix_label:"NEW KEY"},{id:"remote",name:"Phone link",state:"warn",detail:"On, but your phone hasn't connected recently. Check Tailscale and the firewall.",fix:"firewall",fix_label:"HOW"},{id:"extras",name:"Wake word + Voice ID",state:"warn",detail:"Not installed (optional).",fix:"extras",fix_label:"INSTALL"},{id:"key_groq",name:"Groq brain",state:"ok",detail:"Key works."},{id:"local",name:"Local brain",state:"ok",detail:"Ollama running · using qwen2.5:3b"},{id:"ffmpeg",name:"Video tools (ffmpeg)",state:"ok",detail:"Installed."},{id:"browser",name:"Hidden browser",state:"ok",detail:"Ready."},{id:"disk",name:"Disk space",state:"ok",detail:"493 GB free."},{id:"exe",name:"How ORION is running",state:"ok",detail:"From source on Python 3.14 — updates work."}]),
+    health_fix:()=>A(true),backup_now:()=>A("Backed up 84 KB to your private GitHub Gist."),restore_now:()=>A("Restored."),profile_set:()=>A(false),
+    calls_get:()=>A({jobs:true,reminders:true,morning:false,not_while_gaming:true,quiet_from:"23:00",quiet_to:"07:00"}),calls_save:()=>A({}),call_me:()=>A(true),ring_phone:()=>A(true),
+    mini_toggle:()=>A(true) });
   boot(); },1500);
 </script>
 </body>

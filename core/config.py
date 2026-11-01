@@ -5,7 +5,7 @@ import os
 
 from .paths import CONFIG_PATH
 
-VERSION = "2.2.2"
+VERSION = "3.0.0"
 
 # Any OpenAI-compatible service can be added here. Each has its OWN free allowance,
 # so ORION spreads work across all providers that have a key.
@@ -37,11 +37,11 @@ DEFAULTS = {
     "assistant_name": "ORION",
     "owner_name": "Kiyan",          # used when ORION speaks to your friends
     "user_title": "sir",
-    "brain": "auto",            # auto = cloud pool -> local -> Claude | cloud | local
+    "brain": "auto",            # auto = cloud pool -> local | cloud | local
     "theme": "standby",         # standby | serious | stealth | executive | hacker
     "providers": DEFAULT_PROVIDERS,
     "local": {"label": "Ollama", "base_url": "http://localhost:11434/v1",
-              "model": "qwen2.5:3b", "vision_model": "", "timeout": 180},
+              "model": "auto", "vision_model": "", "timeout": 180},
     "voice": {
         "speak_replies": True,
         "engine": "neural",                 # neural (natural, needs internet) | offline
@@ -78,7 +78,7 @@ DEFAULTS = {
         "close_apps": [],            # e.g. ["OneDrive.exe"] — closed when a game starts
         "high_performance": True,
     },
-    "claude_url": "https://claude.ai/new",
+    "retry_when_out": True,       # every brain out of allowance -> queue the request and retry later
     "tesseract_path": r"C:\Program Files\Tesseract-OCR\tesseract.exe",
 }
 
@@ -141,6 +141,10 @@ def _migrate(data):
         for p in DEFAULT_PROVIDERS:
             if p["id"] not in have:
                 data["providers"].append(copy.deepcopy(p))
+    loc = data.get("local", {})
+    if loc.get("model") in ("qwen2.5:3b", "", None) and not data.get("_v3"):
+        loc["model"] = "auto"                 # 3.0: pick the best installed model automatically
+    data["_v3"] = True
     v = data.get("voice", {})
     for old in ("rate", "prefer_voice", "stt_model"):
         v.pop(old, None)
