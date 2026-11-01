@@ -144,6 +144,10 @@ body.busy .horb s{animation-duration:.7s}body.busy .horb b{animation-duration:1.
 .gl em{font-style:normal;font-size:18px;display:block}
 .gl b{display:block;font:500 15px var(--mono);color:var(--a2);margin:4px 0 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .gl span{font:700 8.5px var(--ui);letter-spacing:.14em;color:var(--dim)}
+.wxline{font-size:14px;color:var(--dim);margin:-4px 2px 12px;display:none}.wxline b{color:var(--a2);font-weight:600}
+.hwr{display:flex;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line)}.hwr:last-child{border-bottom:0}
+.hwr input{accent-color:var(--a);width:20px;height:20px;flex:none}.hwr div{flex:1;min-width:0}.hwr b{font-weight:600}.hwr small{display:block;color:var(--dim);font-size:13px}
+.hwr .st.late{color:var(--red);border-color:rgba(255,79,123,.5)}.hwr .st.soon{color:var(--amber);border-color:rgba(255,179,71,.5)}
 .subnav{display:flex;gap:6px;overflow-x:auto;padding:4px 0 12px;scrollbar-width:none}.subnav::-webkit-scrollbar{display:none}
 .subnav button{flex:none;background:rgba(var(--ar),.06);border:1px solid var(--line);border-radius:999px;padding:8px 14px;font:600 13.5px var(--ui);color:var(--dim)}
 .subnav button.on{color:var(--a2);border-color:var(--a);background:rgba(var(--ar),.16)}
@@ -220,6 +224,7 @@ nav.tabs button{font-size:9.5px;letter-spacing:.1em}
         <div class="horb" id="horb"><i></i><b></b><u></u><s></s></div>
         <div class="hello" id="hello">Good day.<small id="helloSub">—</small></div>
       </div>
+      <div class="wxline" id="wxline"></div>
       <div class="glance" id="glance">
         <div class="gl" data-tab="more" data-sub="study"><em>📚</em><b id="glStudy">–</b><span>REVISION</span></div>
         <div class="gl" data-tab="more" data-sub="money"><em>💷</em><b id="glMoney">–</b><span>THIS MONTH</span></div>
@@ -333,6 +338,9 @@ nav.tabs button{font-size:9.5px;letter-spacing:.1em}
           <div class="mcard" id="mCard"><small id="mDeck">—</small><span id="mQ">Connect to your PC to revise.</span><em id="mA"></em></div>
           <div class="two" style="margin-top:10px"><button class="btn sm ghost" id="mWrong" style="color:#ff9fb6">✕ WRONG</button><button class="btn sm" id="mRight" style="color:var(--green)">✓ GOT IT</button></div>
           <p class="empty" style="font-size:12.5px;margin-top:8px">Tap the card to see the answer.</p></div>
+        <div class="card"><h3>HOMEWORK <i id="mHwN"></i></h3><div id="mHw"><p class="empty">—</p></div>
+          <div class="two" style="margin-top:8px;grid-template-columns:1fr 1.6fr"><input class="inp" id="mHwS" placeholder="Subject"><input class="inp" id="mHwT" placeholder="Task"></div>
+          <div class="two" style="margin-top:8px"><input class="inp" id="mHwD" placeholder="Due — friday"><button class="btn sm" id="mHwAdd">+ ADD</button></div></div>
         <div class="card"><h3>EXAMS</h3><div id="mExams"><p class="empty">—</p></div></div>
         <div class="card"><h3>NEW DECK</h3><input class="inp" id="mTopic" placeholder="Topic — e.g. GCSE Physics forces"><button class="btn" id="mMake">✦ MAKE FLASHCARDS</button></div>
       </div>
@@ -355,6 +363,8 @@ nav.tabs button{font-size:9.5px;letter-spacing:.1em}
         <div class="card"><h3>SHORTCUTS</h3><div id="mShorts"><p class="empty">—</p></div>
           <input class="inp" id="mScP" placeholder="When I say… e.g. bedtime" style="margin-top:8px"><input class="inp" id="mScD" placeholder="…do this: lock the PC and set a 7am alarm" style="margin-top:8px">
           <button class="btn" id="mScAdd">+ ADD SHORTCUT</button></div>
+        <div class="card"><h3>NOTES &amp; IDEAS</h3><div class="two" style="grid-template-columns:1fr auto"><input class="inp" id="mNote" placeholder="Jot something down"><button class="btn sm" id="mNoteAdd">ADD</button></div>
+          <div id="mNotes" style="margin-top:8px"><p class="empty">—</p></div></div>
         <div class="card"><h3>WHAT ORION KNOWS <i id="mFactN"></i></h3><div id="mFacts"><p class="empty">—</p></div></div>
       </div>
       <div class="msub" id="s-health">
@@ -581,6 +591,8 @@ function speak(t){ try{ if(store.get("mute")==="1") return; const u=new SpeechSy
 const TRAIL=new Set("and or but so because cause cuz the a an to of for with my your our his her their is are was were be been am i i'm im we you they it it's its that this these those which who what when where if then than as at in on by from into about also plus like um uh erm er hmm mm maybe can could should would will just gonna wanna gotta need want please".split(" "));
 const SHORTOK=new Set("yes yeah yep no nope nah ok okay thanks cheers stop cancel pause play next skip back louder quieter mute unmute hello hi hey morning evening goodbye bye sure done".split(" "));
 const SENDW=/[\s,.]*(send it|over and out|over|that's it|that is it|go ahead)[.!]*\s*$/i;
+const HALLU=new Set(["thank you","thanks for watching","thank you for watching","you","bye","music","please subscribe","so","uh","um",""]);
+function junkText(t){ t=t||""; if(/♪/.test(t)||/^[\W_]*$/.test(t)) return true; return HALLU.has(t.toLowerCase().replace(/[^a-z ]/g,"").trim()); }
 function unfinished(t){ t=(t||"").trim(); if(!t) return true; if(/(,|\.\.\.|…|-|—|:)\s*$/.test(t)) return true; const w=(t.toLowerCase().match(/[a-z']+/g)||[]); if(!w.length) return true;
   if(TRAIL.has(w[w.length-1])) return true; if(w.length===1&&!SHORTOK.has(w[0])) return true; return false; }
 const PATIENCE={quick:[600,1800],normal:[800,2600],relaxed:[1100,3600]};
@@ -589,19 +601,25 @@ function smartListen(stream,{isLive=()=>true,onPartial=()=>{},startTimeout=12000
   const ctx=new (window.AudioContext||window.webkitAudioContext)(); const an=ctx.createAnalyser(); an.fftSize=1024; ctx.createMediaStreamSource(stream).connect(an); const buf=new Uint8Array(an.fftSize);
   const lvl=()=>{ an.getByteTimeDomainData(buf); let s=0; for(const v of buf){ const x=(v-128)/128; s+=x*x; } return Math.sqrt(s/buf.length); };
   const rec=new MediaRecorder(stream); const chunks=[]; rec.ondataavailable=e=>{ if(e.data.size) chunks.push(e.data); }; rec.start(250);
-  let floor=null, hist=[], run=0, spoke=false, talked=0, quiet=0, checked=false, checking=null, done=false; const t0=Date.now();
-  const finish=(text)=>{ if(done) return; done=true; clearInterval(iv); rec.onstop=()=>{ try{ ctx.close(); }catch(e){} res({blob:spoke&&chunks.length?new Blob(chunks,{type:rec.mimeType}):null,text:text??null}); }; try{ rec.stop(); }catch(e){ rec.onstop(); } };
+  let floor=null, hist=[], cvs=[], recent=[], nonstop=0, spoke=false, talked=0, quiet=0, checked=false, checking=null, done=false; const t0=Date.now();
+  const finish=(text)=>{ if(done) return; done=true; clearInterval(iv); rec.onstop=()=>{ try{ ctx.close(); }catch(e){} res({blob:spoke&&chunks.length&&text!==""?new Blob(chunks,{type:rec.mimeType}):null,text:text||null}); }; try{ rec.stop(); }catch(e){ rec.onstop(); } };
   smartListen.finish=()=>finish(); smartListen.cancel=()=>{ spoke=false; finish(); };
   const iv=setInterval(()=>{ if(!isLive()){ spoke=false; return finish(); }
-    const l=lvl(); if(floor===null) floor=l; const thr=Math.max(.018,floor*3.2); const sp=l>thr;
-    if(!sp){ hist.push(l); if(hist.length>60) hist.shift(); const sorted=[...hist].sort((a,b)=>a-b); floor=sorted[Math.floor(sorted.length*.3)]||l; }
-    run=sp?run+1:0; if(!spoke&&run>=3) spoke=true;
+    // background level is learned from ALL recent sound, so music playing in the room becomes "background"
+    const l=lvl(); hist.push(l); if(hist.length>40) hist.shift(); const sorted=[...hist].sort((a,b)=>a-b); floor=hist.length>=6?sorted[Math.floor(sorted.length*.15)]:Math.min(floor??l,l);
+    const r=hist.slice(-6), mean=r.reduce((a,b)=>a+b,0)/r.length, cv=r.length>=4?Math.sqrt(r.reduce((a,b)=>a+(b-mean)**2,0)/r.length)/(mean||1e-6):1;
+    let sp; if(l>Math.max(.018,floor*2.8)) sp=cv>.15||l>floor*6; else { const calm=cvs.length>=15?[...cvs].sort((a,b)=>a-b)[Math.floor(cvs.length/2)]:.2; sp=floor>.03&&l>floor*1.2&&cv>Math.max(.16,calm*1.45); }
+    if(!sp){ cvs.push(cv); if(cvs.length>60) cvs.shift(); }
+    recent.push(sp?1:0); if(recent.length>5) recent.shift(); if(!spoke&&recent.reduce((a,b)=>a+b,0)>=3) spoke=true;   // 3 of the last 5 ticks (speech has syllable gaps)
     if(!spoke){ if(Date.now()-t0>startTimeout) finish(); return; }
-    if(sp){ talked+=100; quiet=0; checked=false; checking=null; } else quiet+=100;
+    if(sp){ talked+=100; quiet=0; nonstop+=100; checked=false; checking=null; } else { quiet+=100; if(quiet>250) nonstop=0; }
+    if(nonstop>14000&&!checking){ nonstop=0; const c=checking={done:false,guard:true}; transcribe(new Blob(chunks,{type:rec.mimeType})).then(t=>{ c.text=t; c.done=true; }).catch(()=>{ c.done=true; c.text="x"; }); }
     if(Date.now()-t0>maxMs) return finish();
     if(quiet>=shortMs&&talked>350&&!checked&&!checking){ checked=true; const c=checking={done:false};
       transcribe(new Blob(chunks,{type:rec.mimeType})).then(t=>{ c.text=t; c.done=true; }).catch(()=>{ c.done=true; c.text=""; }); }
-    if(checking&&checking.done){ const t=checking.text||""; checking=null; if(t) onPartial(t);
+    if(checking&&checking.done){ const t=checking.text||""; const g=checking.guard; checking=null;
+      if(junkText(t)){ if(g) return finish(""); } else if(t) onPartial(t);
+      if(g) return;
       if(t&&(SENDW.test(t)||!unfinished(t))) return finish(t.replace(SENDW,"").trim()); }
     if(quiet>=longMs) finish(); },100); }); }
 let listening=false;
@@ -770,7 +788,7 @@ function goSub(n){ store.set("sub",n); $$("#subnav button").forEach(b=>b.classLi
   if(!pcOnline){ return; } ({study:loadStudyM,money:loadMoneyM,games:loadGamesM,brain:loadBrainM,health:loadHealthM})[n]?.(); }
 $$("#subnav button").forEach(b=>b.onclick=()=>goSub(b.dataset.sub));
 let MC=[], MCUR=null, MF=null, mfTick=null;
-async function loadStudyM(){ try{ const o=await api("/api/study"); paintFocusM(o.focus);
+async function loadStudyM(){ loadLifeM(); try{ const o=await api("/api/study"); paintFocusM(o.focus);
     $("#mExams").innerHTML=o.exams.length?o.exams.slice(0,5).map(e=>`<div class="row"><span class="t">${e.days}d</span>${esc(e.subject)}<small style="margin-left:auto;color:var(--faint);font:11px var(--mono)">${esc(e.date)}</small></div>`).join(""):'<p class="empty">Add exams on your PC (Study page) or say "my Maths Paper 1 is on 14 May".</p>';
     MC=(await api("/api/study/cards")).cards||[]; nextM(); }catch(e){} }
 function nextM(){ MCUR=MC.shift()||null; $("#mCard").classList.remove("flip");
@@ -792,7 +810,7 @@ $("#mDevAdd").onclick=async()=>{ const t=$("#mDevT").value.trim(); if(!t) return
 async function loadGamesM(){ try{ const g=await api("/api/gaming"); $("#mGTot").textContent=hm(g.total_mins); $("#mGSub").textContent=`${g.sessions} sessions · ${g.all_time_hours}h all time${g.active?" · playing "+g.game+" now":""}`;
     const mx=Math.max(1,...g.daily.map(d=>d.mins)); $("#mGBars").innerHTML=g.daily.map(d=>`<div style="height:${Math.max(2,d.mins/mx*100)}%"><span>${d.day.slice(3)}</span></div>`).join(""); $("#mGBy").innerHTML=hb2(g.by_game,hm); }catch(e){} }
 $("#mClip").onclick=async()=>{ try{ const r=await api("/api/clipnow",{}); toast(r.result||"Clipped."); }catch(e){ toast(e.message); } };
-async function loadBrainM(){ try{ const b=await api("/api/brain"); $("#mFactN").textContent=b.facts.length;
+async function loadBrainM(){ loadLifeM(); try{ const b=await api("/api/brain"); $("#mFactN").textContent=b.facts.length;
     $("#mShorts").innerHTML=b.shortcuts.length?b.shortcuts.map(x=>`<div class="row"><b>“${esc(x.phrase)}”</b><small style="color:var(--dim)">→ ${esc(x.does.slice(0,60))}</small></div>`).join(""):'<p class="empty">None yet.</p>';
     $("#mFacts").innerHTML=b.facts.slice(-12).reverse().map(f=>`<div class="row" style="font-size:14px"><span class="st">${esc(f.cat)}</span>${esc(f.text)}</div>`).join("")||'<p class="empty">Nothing yet.</p>'; }catch(e){} }
 $("#mScAdd").onclick=async()=>{ const p=$("#mScP").value.trim(), d=$("#mScD").value.trim(); if(!p||!d) return toast("Fill in both."); try{ await api("/api/brain",{action:"short_add",phrase:p,does:d}); $("#mScP").value=$("#mScD").value=""; toast(`Say "${p}" any time.`); loadBrainM(); }catch(e){ toast(e.message); } };
@@ -801,7 +819,20 @@ async function loadHealthM(){ $("#mHealth").innerHTML='<p class="empty">Checking
     $("#mHealth").innerHTML=h.map(c=>`<div class="hc ${c.state}"><i>${{ok:"✓",warn:"!",bad:"✕"}[c.state]}</i><div><b>${esc(c.name)}</b><small>${esc(c.detail)}</small></div>${c.fix&&!c.fix.startsWith("open:")?`<button class="btn sm" data-hfix="${esc(c.fix)}">${esc(c.fix_label||"FIX")}</button>`:""}</div>`).join("");
     $$("[data-hfix]").forEach(b=>b.onclick=async()=>{ b.textContent="…"; try{ await api("/api/health/fix",{id:b.dataset.hfix}); toast("Fixing on your PC…"); }catch(e){ toast(e.message); } }); }catch(e){ $("#mHealth").innerHTML='<p class="empty">Couldn\'t reach your PC.</p>'; } }
 $("#mHRe").onclick=loadHealthM;
-async function glance(){ if(!pcOnline) return; try{ const [st,v,g]=await Promise.all([api("/api/study"),api("/api/ventures"),api("/api/gaming")]);
+
+let MLIFE=null;
+const WXI=c=>c===0?"☀️":c<=2?"🌤️":c===3?"☁️":c<=48?"🌫️":c<=67||(c>=80&&c<=82)?"🌧️":c<=77||c>=85&&c<=86?"🌨️":c>=95?"⛈️":"🌥️";
+function paintLifeM(){ const L=MLIFE; if(!L) return; const w=L.weather;
+  if(w){ $("#wxline").style.display="block"; $("#wxline").innerHTML=`${WXI(w.code)} <b>${w.temp}°</b> ${esc(w.sky)} in ${esc(w.place)}${w.rain_at?` · rain from ${w.rain_at}`:""}`; }
+  const open=L.homework.filter(h=>!h.done); $("#mHwN").textContent=open.length?open.length+" TO DO":"";
+  $("#mHw").innerHTML=open.length?open.map(h=>{ const c=h.days<0?"late":h.days<=1?"soon":""; const when=h.days<0?"LATE":h.days===0?"TODAY":h.days===1?"TMRW":h.due.slice(5);
+    return `<div class="hwr"><input type="checkbox" data-mhw="${h.id}"><div><b>${esc(h.subject)}</b><small>${esc(h.task)}</small></div><span class="st ${c}">${when}</span></div>`; }).join(""):'<p class="empty">No homework due 🎉</p>';
+  $$("[data-mhw]").forEach(c=>c.onchange=async()=>{ MLIFE=await api("/api/life",{action:"hw_done",id:c.dataset.mhw,done:true}); toast("Ticked off ✓"); paintLifeM(); });
+  $("#mNotes").innerHTML=L.notes.length?L.notes.slice(0,10).map(n=>`<div class="row" style="font-size:14px"><span class="st">${esc(n.tag||"note")}</span>${esc(n.text)}</div>`).join(""):'<p class="empty">No notes yet.</p>'; }
+async function loadLifeM(){ if(!pcOnline) return; try{ MLIFE=await api("/api/life"); paintLifeM(); }catch(e){} }
+$("#mHwAdd").onclick=async()=>{ if(!$("#mHwT").value.trim()) return; try{ MLIFE=await api("/api/life",{action:"hw_add",subject:$("#mHwS").value||"General",task:$("#mHwT").value,due:$("#mHwD").value}); $("#mHwT").value=$("#mHwD").value=""; paintLifeM(); toast("Added."); }catch(e){ toast(e.message); } };
+$("#mNoteAdd").onclick=async()=>{ const t=$("#mNote").value.trim(); if(!t) return; try{ MLIFE=await api("/api/life",{action:"note_add",text:t}); $("#mNote").value=""; paintLifeM(); }catch(e){ toast(e.message); } };
+async function glance(){ loadLifeM(); if(!pcOnline) return; try{ const [st,v,g]=await Promise.all([api("/api/study"),api("/api/ventures"),api("/api/gaming")]);
   $("#glStudy").textContent=st.today+"m"; $("#glMoney").textContent=money(v.earn.this_month); $("#glGame").textContent=hm(g.total_mins); }catch(e){} }
 
 /* ---------- tabs ---------- */

@@ -1,5 +1,18 @@
 # ORION 3.0 — Personal Intelligence System
 
+## New in 3.2
+- **Fixed:** listening didn't stop when music was playing. ORION now turns music, videos and games down while you talk and puts them back afterwards (Settings › Listening). Its voice detection now tells your voice apart from steady music, and it stops listening if all it's hearing is music.
+- **Dictation:** say "dictation mode" or press ✍ Dictate, and everything you say is typed into whatever window you're in. Say "new line" or "new paragraph" for line breaks, and "stop dictation" to finish.
+- **Voice memos:** say "take a voice memo" and talk for as long as you like. It's saved to your notes.
+- **Homework tracker:** "add maths homework due friday". It's on the Dashboard, the Study page and the phone, and it's in your morning report.
+- **Weather:** "do I need a coat?". Free, no key. Set your town in Settings.
+- **News:** BBC headlines for top stories, UK, tech, sport, football, Leicester and more.
+- **Notes & ideas:** "note: video idea — …". Shown on the Brain page and the phone.
+- **Clipboard history:** "what did I copy earlier?". Anything that looks like a password or key is never saved.
+- **Screen time:** how long you spent in each app or site today, shown on the Dashboard.
+- **File finder:** "find my Macbeth essay".
+- **Ready-made scenes:** "goodnight", "good morning", "study time", "gaming time" and "what did I miss" (edit them on the Brain page).
+
 ## New in 3.1: talking to ORION
 - **Talk for as long as you like** (up to 5 minutes). Tap the mic, Ctrl+Space or the hotkey once and just speak. No need to tap again.
 - **ORION knows when you've finished.** When you pause, it quietly checks what you've said so far. If you sound mid-sentence ("…and", "um", "because"), it waits. If you sound finished, it sends. Say **"send it"** to send straight away, tap the mic to send early, or press **Esc** to cancel.

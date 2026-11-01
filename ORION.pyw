@@ -26,13 +26,14 @@ from core import autopilot, coder, schedule, skills         # noqa: E402,F401  (
 from core import browser, root, video, vision               # noqa: E402,F401
 from core.jobs import Jobs                                  # noqa: E402
 from core import phone, calls                               # noqa: E402
-from core import health, learning, study, ventures          # noqa: E402
+from core import health, learning, life, study, ventures    # noqa: E402
 from core import gaming as gaming_mod                        # noqa: E402
 from core.routines import NightShift                        # noqa: E402
 from core.devices import Push, Remote, Sync, Updater        # noqa: E402
 from core.gaming import GamingMode, Hotkey                  # noqa: E402
 from core.listen import VoiceID, WakeListener, extras_status  # noqa: E402
 from core.ears import END_CONVO, Ears              # noqa: E402
+from core import ducking                                    # noqa: E402
 from core.brain import Brain                                # noqa: E402
 from core.memory import Memory                              # noqa: E402
 from core.paths import LOG_PATH, UI_PATH                    # noqa: E402
@@ -109,6 +110,13 @@ class Api:
         if self._cfg.get("wake", {}).get("enabled") and not self.lite_profile:
             self._wake.start()
         threading.Thread(target=self._health_bg, daemon=True).start()
+        life.ClipWatch()
+        life.ScreenTime()
+        life.install_scenes(self._cfg)
+        config_mod.save(self._cfg)
+        self._dictating = False
+        tools.CTX["dictate"] = self.dictate_set
+        tools.CTX["listen_memo"] = self._memo
 
     @property
     def lite_profile(self):
@@ -264,10 +272,15 @@ class Api:
         self._emit("state", state="listening")
         self._emit("listening", on=True, purpose=purpose)
         text = ""
+        v = self._cfg["voice"]
+        if v.setdefault("duck", True):            # turn music / videos / games down while you talk
+            ducking.duck(float(v.setdefault("duck_level", 0.12)))
         try:
             text = self._ears.listen(start_timeout=start_timeout, purpose=purpose)
         except Exception as e:
             self._emit("toast", level="warn", text=f"Couldn't hear that: {e}")
+        finally:
+            ducking.restore()
         self._emit("listening", on=False, purpose=purpose)
         self._emit("state", state="idle")
         if not text:
@@ -314,19 +327,138 @@ class Api:
         finally:
             self._barging = False
 
+    # ---------------------------------------------------------------- dictation + voice memos
+    def dictate_set(self, on=True):
+        """Dictation: everything you say gets typed into whatever window you're in. Say 'stop dictation' to end."""
+        on = bool(on)
+        if on == self._dictating:
+            return on
+        self._dictating = on
+        if on:
+            threading.Thread(target=self._dictate_loop, daemon=True).start()
+        else:
+            self._ears.finish()
+        self._emit("dictation", on=on)
+        return on
+
+    def _dictate_loop(self):
+        import pyautogui
+        import pyperclip
+        self._emit("toast", level="info", text="✍ Dictation on — click where you want the words to go. Say “stop dictation” to finish.")
+        time.sleep(2.5)
+        while self._dictating:
+            v = self._cfg["voice"]
+            if v.get("duck", True):
+                ducking.duck(float(v.get("duck_level", 0.12)))
+            try:
+                text = self._ears.listen(start_timeout=45, purpose="dictate")
+            except Exception as e:
+                self._emit("toast", level="warn", text=str(e))
+                break
+            finally:
+                ducking.restore()
+            if not self._dictating:
+                break
+            if not text:
+                continue
+            if re.search(r"\b(stop|end|finish) (dictation|dictating|typing)\b", text, re.I):
+                break
+            text = re.sub(r"\s*\b(new line|newline)\b\s*", "\n", text, flags=re.I)
+            text = re.sub(r"\s*\bnew paragraph\b\s*", "\n\n", text, flags=re.I)
+            try:
+                old = pyperclip.paste()
+            except Exception:
+                old = None
+            pyperclip.copy(text + ("" if text.endswith("\n") else " "))
+            pyautogui.hotkey("ctrl", "v")
+            time.sleep(0.25)
+            if old is not None:
+                try:
+                    pyperclip.copy(old)
+                except Exception:
+                    pass
+            self._emit("hearing", text="✍ " + text)
+        self._dictating = False
+        self._emit("dictation", on=False)
+        self._emit("toast", level="info", text="Dictation off.")
+
+    def _memo(self):
+        """Voice memo: record a long message (up to 5 min) and save it as a note."""
+        self._speaker.stop()
+        self._emit("toast", level="info", text="🎙 Recording your memo — talk as long as you like. Pause for a few seconds to finish.")
+        v = self._cfg["voice"]
+        old = v.get("patience", "normal")
+        v["patience"] = "relaxed"
+        if v.get("duck", True):
+            ducking.duck(float(v.get("duck_level", 0.12)))
+        self._emit("state", state="listening")
+        try:
+            text = self._ears.listen(start_timeout=10, purpose="memo")
+        finally:
+            v["patience"] = old
+            ducking.restore()
+            self._emit("state", state="thinking")
+        if not text:
+            return ""
+        life.note_add_raw(text, "memo")
+        return text
+
+    def dictate_toggle(self):
+        return self.dictate_set(not self._dictating)
+
+    # ---------------------------------------------------------------- life page data
+    _wx = (0, None)
+
+    def life_get(self):
+        if time.time() - self._wx[0] > 900 or not self._wx[1]:
+            try:
+                self._wx = (time.time(), life.forecast(self._cfg.get("home_place", "")))
+            except Exception:
+                pass
+        return {"weather": self._wx[1], "homework": life.homework(), "notes": list(reversed(life.notes()))[:40],
+                "clips": life.clip_history()[:20], "screen": life.screen_day(), "screen_week": life.screen_week(),
+                "home_place": self._cfg.get("home_place", "Leicester"), "dictating": self._dictating}
+
+    def life_action(self, b):
+        a = b.get("action")
+        if a == "hw_add":
+            life.hw_add(b.get("subject", ""), b.get("task", ""), b.get("due", ""))
+        elif a == "hw_done":
+            life.hw_set(b.get("id"), b.get("done", True))
+        elif a == "hw_del":
+            life.hw_remove(b.get("id"))
+        elif a == "note_add":
+            life.note_add_raw(b.get("text", ""), b.get("tag", ""))
+        elif a == "note_del":
+            life.note_remove(b.get("id"))
+        elif a == "clip_copy":
+            import pyperclip
+            pyperclip.copy(b.get("text", ""))
+        elif a == "place":
+            self._cfg["home_place"] = (b.get("place") or "Leicester").strip()[:60]
+            config_mod.save(self._cfg)
+            self._wx = (0, None)
+        elif a == "news":
+            try:
+                return {"news": life.headlines(b.get("topic", "top"), 8)}
+            except Exception as e:
+                return {"news": [], "error": str(e)}
+        return self.life_get()
+
     def voice_settings(self, b=None):
         v = self._cfg["voice"]
         self._ears.vc            # fills defaults
         if b:
             if b.get("patience") in ("quick", "normal", "relaxed"):
                 v["patience"] = b["patience"]
-            for k in ("conversation", "barge_in"):
+            for k in ("conversation", "barge_in", "duck"):
                 if k in b:
                     v[k] = bool(b[k])
             if "mic_sensitivity" in b:
                 v["mic_sensitivity"] = max(0.4, min(2.0, float(b["mic_sensitivity"])))
             config_mod.save(self._cfg)
-        return {k: v.get(k) for k in ("patience", "conversation", "barge_in", "mic_sensitivity", "max_talk_seconds")}
+        v.setdefault("duck", True)
+        return {k: v.get(k) for k in ("patience", "conversation", "barge_in", "mic_sensitivity", "max_talk_seconds", "duck")}
 
     def _set_theme(self, theme):
         self._cfg["theme"] = theme
@@ -493,6 +625,7 @@ class Api:
         return ""
 
     def mic_cancel(self):
+        self._dictating = False
         self._ears.cancel()
         self._followup = False
         return True
@@ -908,7 +1041,7 @@ class Api:
                 return {"text": ""}
         if path == "/api/calls":
             return calls.settings(self._cfg)
-        simple = {"/api/health": self.health_get, "/api/study": self.study_get, "/api/ventures": self.ventures_get,
+        simple = {"/api/life": self.life_get, "/api/health": self.health_get, "/api/study": self.study_get, "/api/ventures": self.ventures_get,
                   "/api/gaming": self.gaming_get, "/api/brain": self.brain_get}
         if path.split("?")[0] in simple:
             return simple[path.split("?")[0]]()
@@ -961,6 +1094,8 @@ class Api:
             return self.gaming_set(body)
         if path == "/api/clipnow":
             return {"result": self.clip_now()}
+        if path == "/api/life":
+            return self.life_action(body)
         if path == "/api/health/fix":
             return {"ok": self.health_fix(body.get("id", ""))}
         raise KeyError(path)

@@ -49,7 +49,7 @@ SMART = re.compile(r"\b(code|script|program|build|make|create|write|fix|debug|ex
                    r"plan|research|compare|analy[sz]e|essay|app|bot|website|summari[sz]e|learn|teach|story|"
                    r"translate|calculate|work out|figure|recommend|should i|ideas?|design|review)\b", re.I)
 
-CORE = {"queue_job", "mission_start", "get_time", "open_app", "open_website", "web_search", "remember",
+CORE = {"queue_job", "mission_start", "weather", "note_add", "homework_add", "get_time", "open_app", "open_website", "web_search", "remember",
         "request_more_tools", "set_theme", "schedule_add", "schedule_list", "check_availability"}
 GROUPS = {
     "computer": ({"type_text", "press_keys", "mouse_click", "scroll", "read_screen", "find_on_screen",
@@ -83,6 +83,11 @@ GROUPS = {
     "ventures": ({"dev_task_add", "dev_task_list", "leads_find", "earning_add", "earnings_summary", "mission_start"},
                  r"hatchlands|roblox|luau|dev queue|to-?do|leads?|prospect|businesses|pitch|client|earn|made £|"
                  r"money|income|profit|sold|sale|paid|£\d"),
+    "life": ({"homework_add", "homework_list", "homework_done", "weather", "news", "note_add", "notes_find",
+              "clipboard_history", "screen_time", "find_files", "dictation", "voice_memo"},
+             r"homework|assignment|due|weather|rain|coat|umbrella|cold|hot|forecast|news|headline|note|idea|jot|"
+             r"clipboard|copied|screen ?time|how long (was|have) i|find (my |a |the )?file|where'?s (my|the) file|"
+             r"dictat|type what i say|memo|voice note|brain ?dump"),
     "study": ({"study_make_flashcards", "study_quiz", "study_mark", "focus_start", "focus_stop", "exam_add",
                "study_stats"},
               r"revis|study|flashcard|quiz me|test me|exam|gcse|homework|focus|pomodoro|mock|paper \d|biology|"

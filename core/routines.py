@@ -358,6 +358,17 @@ class NightShift:
         for j in self.jobs.since(since):
             lines.append(f"• {'✅' if j['status'] == 'done' else '⚠️'} {j['title']}: {(j['result'] or '')[:140]}")
         try:
+            from .life import forecast, hw_summary
+            hw = hw_summary()
+            if hw:
+                lines.append("• 📝 " + hw)
+            w = forecast(self.cfg.get("home_place", ""))
+            d = w["days"][0]
+            lines.append(f"• 🌤 {w['place']}: {d['sky']}, {d['min']}–{d['max']}°C, {d['rain']}% chance of rain"
+                         + (f" (from about {w['rain_at']})" if w["rain_at"] else "") + ".")
+        except Exception:
+            pass
+        try:
             from .study import overview
             o = overview()
             if o["exams"]:

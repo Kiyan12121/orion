@@ -89,29 +89,67 @@ def clean(audio, speech_start=None):
 
 
 class VAD:
-    """Energy voice detector with a self-adjusting noise floor (works in a noisy bedroom or a quiet one)."""
+    """Voice detector that copes with music and background noise.
+
+    - Looks at the speech band (300-3400 Hz), so bass and drums matter much less.
+    - The 'background level' is learned from ALL recent sound (rolling 4 s), so a song playing in the
+      room quickly becomes the background instead of counting as you talking forever.
+    - Speech goes up and down (syllables); steady sound like music doesn't, which also helps.
+    """
 
     def __init__(self, sensitivity=1.0):
-        self.floor = None
-        self.history = []
         self.sens = max(0.4, min(2.0, sensitivity))
+        self.window = []          # recent speech-band levels (all frames)
+        self.floor = None
         self.run = 0
+        self.steady = 0           # frames of loud-but-steady sound (music / fan)
+        self.cvs = []             # how much the background normally wobbles
+
+    @staticmethod
+    def band(f):
+        x = f.astype("float32")
+        spec = np.abs(np.fft.rfft(x * np.hanning(len(x))))
+        freqs = np.fft.rfftfreq(len(x), 1 / RATE)
+        b = spec[(freqs >= 300) & (freqs <= 3400)]
+        return float(np.sqrt(np.mean(b ** 2)) / 8 + 1e-6)
 
     def level(self, f):
         return float(np.sqrt(np.mean(f.astype("float32") ** 2)) + 1e-6)
 
     def is_speech(self, f):
-        lv = self.level(f)
-        if self.floor is None:
+        lv = self.band(f)
+        self.window.append(lv)
+        self.window = self.window[-133:]                       # ~4 s
+        if len(self.window) >= 8:
+            self.floor = float(np.percentile(self.window, 15))
+        elif self.floor is None or lv < self.floor:
             self.floor = lv
-        thr = max(220.0 / self.sens, self.floor * (3.2 / self.sens))
-        speech = lv > thr
-        if not speech:                               # learn the room while nobody's talking
-            self.history.append(lv)
-            self.history = self.history[-100:]
-            self.floor = float(np.percentile(self.history, 30)) if len(self.history) > 5 else min(self.floor, lv)
+        base = max(160.0 / self.sens, self.floor)
+        recent = np.array(self.window[-20:])                    # ~0.6 s
+        cv = float(np.std(recent) / (np.mean(recent) + 1e-6)) if len(recent) >= 10 else 1.0
+        if lv > base * (2.8 / self.sens) and lv > 160.0 / self.sens:
+            speech = cv > 0.15 or lv > base * 6                 # loud and wobbly = voice; loud and steady = music
+        else:                                                   # quieter than that: voice over music wobbles more than the music does
+            calm = float(np.median(self.cvs)) if len(self.cvs) >= 20 else 0.2
+            speech = self.floor > 300 and lv > base * (1.2 / self.sens) and cv > max(0.16, calm * 1.45)
+        if not speech:
+            self.cvs.append(cv)
+            self.cvs = self.cvs[-150:]
+        self.steady = self.steady + 1 if (lv > base * 1.3 and cv <= 0.15) else 0
         self.run = self.run + 1 if speech else 0
-        return speech, lv
+        return speech, self.level(f)
+
+
+HALLUCINATIONS = {"thank you", "thanks for watching", "thank you for watching", "you", "bye", "music",
+                  "subtitles by the amara org community", "please subscribe", "so", "uh", "um", ""}
+
+
+def junk(text, seconds):
+    """Whisper sometimes 'hears' these in music or silence."""
+    t = re.sub(r"[^a-z ]", "", (text or "").lower()).strip()
+    if "♪" in (text or "") or re.fullmatch(r"[\W_]*", text or ""):
+        return True
+    return t in HALLUCINATIONS and seconds > 4
 
 
 class Ears:
@@ -188,6 +226,8 @@ class Ears:
         vad = VAD(float(self.vc.get("mic_sensitivity", 1.0)))
         frames, spoke_at, speech_frames, quiet, t0 = [], None, 0, 0.0, time.time()
         partial, partial_len, checking, checked_pause = "", 0, None, False
+        nonstop = 0.0           # seconds of sound with no pause at all (music?)
+        recent_sp = []
         result = {"text": None}
         try:
             with sd.InputStream(samplerate=RATE, channels=1, dtype="int16", blocksize=FRAME) as st:
@@ -203,7 +243,8 @@ class Ears:
                     speech, lv = vad.is_speech(f)
                     self.level = min(1.0, lv / 2500)
                     n = len(frames) * FRAME
-                    if speech and vad.run >= 3 and spoke_at is None:
+                    recent_sp = (recent_sp + [speech])[-10:]
+                    if speech and sum(recent_sp) >= 5 and spoke_at is None:      # 5 of the last 10 frames
                         spoke_at = max(0, n - FRAME * 6)
                     if spoke_at is None:
                         if self._force.is_set() or time.time() - t0 > start_timeout:
@@ -212,12 +253,26 @@ class Ears:
                     if speech:
                         speech_frames += 1
                         quiet = 0.0
+                        nonstop += FRAME / RATE
                         checked_pause = False
                         if checking:                       # they carried on talking — ignore that check
                             checking = None
                     else:
                         quiet += FRAME / RATE
+                        if quiet > 0.25:
+                            nonstop = 0.0
                     talked = speech_frames * FRAME / RATE
+                    # nobody talks for 14 s without a breath — check the last few seconds really are words
+                    if nonstop > 14 and checking is None:
+                        nonstop = 0.0
+                        tail = np.concatenate(frames[-int(RATE * 6 / FRAME):])
+                        try:
+                            heard = (self.transcriber(to_wav(clean(tail)), self.vocab()) or "").strip()
+                        except Exception:
+                            heard = "x"
+                        if junk(heard, 6):
+                            self.emit("toast", level="warn", text="That sounds like music, not you — stopping.")
+                            break
                     if self._force.is_set() or n / RATE > max_s:
                         break
                     # short pause: quietly check if it sounds finished (keeps recording meanwhile)
@@ -239,6 +294,8 @@ class Ears:
                     if checking and checking["done"]:
                         partial, partial_len, checking_full = checking["text"], checking["n"], checking["full"]
                         checking = None
+                        if partial and junk(partial, (partial_len - (spoke_at or 0)) / RATE):
+                            partial = ""
                         if partial:
                             self.emit("hearing", text=partial if checking_full else "…" + partial)
                         done_now = partial and (SEND_WORDS.search(partial) or not sounds_unfinished(partial))
@@ -251,6 +308,8 @@ class Ears:
             audio = np.concatenate(frames)
             if result["text"] is not None and partial_len >= len(audio) - int(RATE * (long_ + 0.5)):
                 text = result["text"]
+                if junk(text, partial_len / RATE):
+                    return ""
             elif speech_frames * FRAME / RATE < 0.3:
                 return ""
             else:
@@ -260,6 +319,8 @@ class Ears:
                 self.emit("state", state="thinking")
                 text = self._hear(audio, spoke_at)
                 text = SEND_WORDS.sub("", text).strip() if SEND_WORDS.search(text or "") else text
+                if junk(text, len(audio) / RATE):
+                    return ""
             return text or ""
         finally:
             self.active = False
@@ -278,8 +339,8 @@ class Ears:
                     vad.is_speech(st.read(FRAME)[0][:, 0].copy())
                 base = vad.floor or 300
                 while not stop():
-                    lv = vad.level(st.read(FRAME)[0][:, 0].copy())
-                    run = run + 1 if lv > max(900, base * threshold) else 0
+                    lv = vad.band(st.read(FRAME)[0][:, 0].copy())
+                    run = run + 1 if lv > max(600, base * threshold) else 0
                     if run * FRAME / RATE >= need:
                         return True
         except Exception:
