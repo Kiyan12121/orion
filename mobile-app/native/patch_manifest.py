@@ -47,3 +47,21 @@ s = s.replace('</activity>', '    <intent-filter><action android:name="android.i
               '<category android:name="android.intent.category.DEFAULT" /></intent-filter>\n        </activity>', 1)
 open(p, "w", encoding="utf-8").write(s)
 print("manifest patched")
+
+# assistant config files -> res/xml, and the offline "Hey ORION" engine (Vosk) -> app/build.gradle
+import os, shutil
+here = os.path.dirname(os.path.abspath(__file__))
+main = os.path.dirname(os.path.abspath(p))
+xml = os.path.join(main, "res", "xml")
+os.makedirs(xml, exist_ok=True)
+for f in os.listdir(here):
+    if f.endswith(".xml"):
+        shutil.copy(os.path.join(here, f), os.path.join(xml, f))
+gradle = os.path.join(main, "..", "..", "build.gradle")
+if os.path.exists(gradle):
+    g = open(gradle, encoding="utf-8").read()
+    if "vosk-android" not in g:
+        g = re.sub(r"dependencies\s*\{", "dependencies {\n    implementation 'net.java.dev.jna:jna:5.13.0@aar'\n"
+                   "    implementation 'com.alphacephei:vosk-android:0.3.47@aar'", g, count=1)
+        open(gradle, "w", encoding="utf-8").write(g)
+    print("gradle patched")

@@ -5,6 +5,7 @@ name: Build & release ORION
 
 on:
   push:
+    branches: [main]
     tags: ["v*"]
   workflow_dispatch:
     inputs:
@@ -18,10 +19,16 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      TAG: ${{ github.event.inputs.tag || github.ref_name }}
     steps:
       - uses: actions/checkout@v4
+
+      - name: Work out the version
+        run: |
+          if [ -n "${{ github.event.inputs.tag }}" ]; then T="${{ github.event.inputs.tag }}";
+          elif [ "${{ github.ref_type }}" = "tag" ]; then T="${{ github.ref_name }}";
+          else T="v$(grep -oP '^VERSION = "\K[^"]+' core/config.py)"; fi
+          echo "TAG=$T" >> "$GITHUB_ENV"
+          echo "Building $T"
 
       - uses: actions/setup-node@v4
         with:
@@ -40,8 +47,11 @@ jobs:
           cp ../ui/orion.png www/icon.png
           npm install --no-audit --no-fund
           npx cap add android
-          # microphone + talking to the PC over the private network
-          sed -i 's#<application#<uses-permission android:name="android.permission.RECORD_AUDIO" />\n    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />\n    <application android:usesCleartextTraffic="true"#' android/app/src/main/AndroidManifest.xml
+          # ORION's native code: alarms, timers, opening apps, torch, floating bubble
+          JAVA=android/app/src/main/java/dev/kiyan/orion
+          mkdir -p "$JAVA"
+          cp native/*.java "$JAVA/"
+          python3 native/patch_manifest.py android/app/src/main/AndroidManifest.xml
           # app icon
           for d in android/app/src/main/res/mipmap-*; do
             cp www/icon.png "$d/ic_launcher.png"; cp www/icon.png "$d/ic_launcher_round.png"; cp www/icon.png "$d/ic_launcher_foreground.png" || true
@@ -50,7 +60,8 @@ jobs:
           npx cap sync android
           cd android
           chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon
+          set -o pipefail
+          ./gradlew assembleDebug --no-daemon 2>&1 | tee ../../build.log
           cp app/build/outputs/apk/debug/app-debug.apk ../../ORION.apk
 
       - name: Package desktop update
@@ -60,6 +71,15 @@ jobs:
                 --exclude 'config.json' --exclude 'data' --exclude 'projects' --exclude 'skills' ./ dist/orion/
           sed -i "s/^VERSION = .*/VERSION = \"${TAG#v}\"/" dist/orion/core/config.py
           cd dist && zip -qr "../ORION-${TAG}.zip" orion
+
+      - name: Publish build log if the build failed
+        if: failure()
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: build-log
+          name: Last failed build log
+          prerelease: true
+          files: build.log
 
       - uses: softprops/action-gh-release@v2
         with:
