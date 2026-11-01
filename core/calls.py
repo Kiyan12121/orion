@@ -45,6 +45,13 @@ def maybe_call(cfg, kind, reason, gaming=None):
         return False
     if quiet_now(cfg):
         return False
+    try:
+        from .daily import at_school_now
+        if at_school_now(cfg):            # never ring during school — the phone app holds it for 3:10
+            phone.push("msg", text=reason[:300])
+            return False
+    except Exception:
+        pass
     if c.get("not_while_gaming") and gaming is not None and gaming.active:
         return False
     if time.time() - _last[0] < 180:          # don't machine-gun calls

@@ -13,6 +13,7 @@
 body[data-theme=serious]{--a:#ff3d4a;--a2:#ff9096;--ar:255,61,74}
 body[data-theme=stealth]{--a:#b9c4cc;--a2:#eef3f6;--ar:185,196,204}
 body[data-theme=executive]{--a:#e9b949;--a2:#ffe29a;--ar:233,185,73}
+body[data-theme=scholar]{--a:#b48cff;--a2:#dcc6ff;--ar:180,140,255}
 body[data-theme=hacker]{--a:#2bff88;--a2:#a6ffcf;--ar:43,255,136}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--ui);overflow:hidden;overscroll-behavior:none}
@@ -174,6 +175,18 @@ body.busy .horb s{animation-duration:.7s}body.busy .horb b{animation-duration:1.
 .hc div{flex:1;min-width:0}.hc b{font-size:14.5px;font-weight:600}.hc small{display:block;color:var(--dim);font-size:12.5px;line-height:1.35}
 nav.tabs button{font-size:9.5px;letter-spacing:.1em}
 
+
+.modes{display:flex;gap:6px;overflow-x:auto;margin:-2px 0 12px;scrollbar-width:none}.modes::-webkit-scrollbar{display:none}
+.modes button{flex:none;background:rgba(0,0,0,.25);border:1px solid var(--line);border-radius:999px;padding:7px 13px;font:600 13px var(--ui);color:var(--dim)}
+.modes button.on{color:#fff;border-color:var(--m);background:color-mix(in srgb,var(--m) 22%,transparent);box-shadow:0 0 14px color-mix(in srgb,var(--m) 50%,transparent)}
+.ride{display:flex;align-items:center;gap:12px;background:linear-gradient(120deg,rgba(var(--ar),.18),rgba(0,0,0,.25));border:1px solid var(--line2);border-radius:16px;padding:12px 14px;margin-bottom:12px}
+.ride div{flex:1}.ride b{display:block;font-size:16px}.ride small{display:block;color:var(--dim);font-size:12.5px;margin-top:2px}
+.ride.on{border-color:var(--green);box-shadow:0 0 18px rgba(93,255,176,.25)}
+.mc{align-self:flex-start;max-width:88%;border:1px solid rgba(var(--ar),.5);border-radius:14px;padding:10px 12px;background:linear-gradient(160deg,rgba(var(--ar),.18),rgba(3,12,22,.9));box-shadow:0 0 18px rgba(var(--ar),.2);animation:rise .4s}
+.mc>b{display:block;font:700 10.5px var(--ui);letter-spacing:.24em;color:var(--a2);margin-bottom:6px}.mc li{font-size:14px;margin-left:18px;line-height:1.4}
+.mc p{font-size:14px;white-space:pre-wrap;line-height:1.4}.mc pre{font:11.5px var(--mono);white-space:pre-wrap;max-height:200px;overflow:auto}
+.exq{margin-bottom:14px}.exq p{font-size:15px;line-height:1.45;margin-bottom:6px}.exq textarea{width:100%;min-height:64px}
+.exr{border-left:3px solid var(--green);padding:6px 9px;margin-top:6px;font-size:13px;background:rgba(93,255,176,.05)}.exr.lost{border-color:var(--amber)}
 /* ===== LANDSCAPE ===== */
 @media (orientation:landscape) and (max-height:620px){
   .app{display:grid;grid-template-columns:76px 1fr;grid-template-rows:auto 1fr;padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right)}
@@ -238,6 +251,12 @@ nav.tabs button{font-size:9.5px;letter-spacing:.1em}
           <div class="stat"><b id="sJobs">–</b><span>JOBS</span><div class="bar"><div id="bJobs" style="width:0"></div></div></div></div>
         <p class="empty" id="pcLine" style="margin-top:10px;font-size:13.5px"></p>
       </div>
+      <div class="modes" id="modes">
+        <button data-mode="standby" style="--m:#3fd8ff">Butler</button><button data-mode="serious" style="--m:#ff3d4a">Serious</button>
+        <button data-mode="executive" style="--m:#e9b949">CEO</button><button data-mode="scholar" style="--m:#b48cff">Scholar</button>
+        <button data-mode="hacker" style="--m:#2bff88">Hacker</button><button data-mode="stealth" style="--m:#b9c4cc">Stealth</button>
+      </div>
+      <div class="ride" id="rideCard"><div><b id="rideT">🚲 Ride mode</b><small id="rideS">Hands-free chat on the way · timing your ride</small></div><button class="btn sm" id="rideGo">START</button></div>
       <div class="card"><h3>QUICK</h3>
         <div class="grid">
           <button class="qa" data-q="check my messages"><em>✉️</em>DMs</button>
@@ -339,6 +358,11 @@ nav.tabs button{font-size:9.5px;letter-spacing:.1em}
           <div class="mcard" id="mCard"><small id="mDeck">—</small><span id="mQ">Connect to your PC to revise.</span><em id="mA"></em></div>
           <div class="two" style="margin-top:10px"><button class="btn sm ghost" id="mWrong" style="color:#ff9fb6">✕ WRONG</button><button class="btn sm" id="mRight" style="color:var(--green)">✓ GOT IT</button></div>
           <p class="empty" style="font-size:12.5px;margin-top:8px">Tap the card to see the answer.</p></div>
+        <div class="card"><h3>EXAM HALL</h3><div id="mPapers"><p class="empty">Connect to your PC to sit papers.</p></div>
+          <div class="two" style="margin-top:8px"><select class="inp" id="mExSub"></select><button class="btn sm" id="mExNew">✦ NEW PAPER</button></div></div>
+        <div class="card" id="mExam" style="display:none"><h3 id="mExTitle">PAPER</h3><div id="mExBody"></div>
+          <label class="btn ghost" style="display:flex;align-items:center;justify-content:center">📷 PHOTOGRAPH MY ANSWERS<input type="file" id="mExPh" accept="image/*" capture="environment" multiple style="display:none"></label>
+          <p class="empty" id="mExPhN" style="font-size:12.5px"></p><button class="btn" id="mExSubmit">SUBMIT FOR MARKING</button><button class="btn ghost" id="mExClose">CLOSE</button></div>
         <div class="card"><h3>HOMEWORK <i id="mHwN"></i></h3><div id="mHw"><p class="empty">—</p></div>
           <div class="two" style="margin-top:8px;grid-template-columns:1fr 1.6fr"><input class="inp" id="mHwS" placeholder="Subject"><input class="inp" id="mHwT" placeholder="Task"></div>
           <div class="two" style="margin-top:8px"><input class="inp" id="mHwD" placeholder="Due — friday"><button class="btn sm" id="mHwAdd">+ ADD</button></div></div>
@@ -351,7 +375,7 @@ nav.tabs button{font-size:9.5px;letter-spacing:.1em}
           <input class="inp" id="mNote" placeholder="What for?" style="margin-top:8px"><button class="btn" id="mLog">+ LOG IT</button></div>
         <div class="card"><h3>BY VENTURE</h3><div id="mBy"><p class="empty">—</p></div></div>
         <div class="card"><h3>DEV QUEUE <i>OVERNIGHT</i></h3><div id="mDev"><p class="empty">—</p></div>
-          <input class="inp" id="mDevT" placeholder="e.g. a daily login reward system" style="margin-top:8px"><button class="btn" id="mDevAdd">+ ADD TO HATCHLANDS QUEUE</button></div>
+          <input class="inp" id="mDevT" placeholder="e.g. a tool that renames my clips" style="margin-top:8px"><button class="btn" id="mDevAdd">+ ADD TO DEV QUEUE</button></div>
       </div>
       <div class="msub" id="s-games">
         <div class="card"><h3>THIS WEEK</h3><div class="bigm" id="mGTot">0h</div><p class="empty" id="mGSub">—</p>
@@ -415,6 +439,11 @@ nav.tabs button{font-size:9.5px;letter-spacing:.1em}
   <div style="display:flex;gap:8px"><input class="inp" type="time" id="cQf" value="23:00"><input class="inp" type="time" id="cQt" value="07:00"></div>
   <label>WHEN YOU PAUSE WHILE TALKING</label>
   <select class="inp" id="sPat"><option value="quick">Quick — send soon after I stop</option><option value="normal">Normal — let me pause to think</option><option value="relaxed">Relaxed — long messages</option></select>
+  <h4>HANDS-FREE</h4>
+  <label style="display:flex;gap:10px;align-items:center;letter-spacing:0;font-size:15px;color:var(--text)"><input type="checkbox" id="sHot" style="accent-color:var(--a)"> “Hey ORION” <small style="color:var(--dim)">— beta · offline · pauses at school &amp; low battery</small></label>
+  <button class="btn ghost" id="sAssist">🎧 USE ORION AS MY ASSISTANT (EARBUD HOLD)</button>
+  <label style="display:flex;gap:10px;align-items:center;letter-spacing:0;font-size:15px;color:var(--text);margin-top:10px"><input type="checkbox" id="sLoc" style="accent-color:var(--a)"> Use my location <small style="color:var(--dim)">— ride timing, ETAs, auto modes · stays on your devices</small></label>
+  <button class="btn ghost" id="sBatt">🔋 STOP SAMSUNG PUTTING ORION TO SLEEP</button>
   <h4>APP</h4>
   <label style="display:flex;gap:10px;align-items:center;letter-spacing:0;font-size:15px;color:var(--text)"><input type="checkbox" id="sMute" style="accent-color:var(--a)"> Mute spoken replies</label>
   <button class="btn" id="sSave">SAVE &amp; CONNECT</button>
@@ -505,7 +534,7 @@ async function api(path,body,timeout=20000){
 
 async function refresh(){
   if(!addr()){ setConn(false); paintHome(); return; }
-  try{ state=await api("/api/state",undefined,6000); setConn(true); paintHome(); if(!window._gl||Date.now()-window._gl>60000){ window._gl=Date.now(); glance(); } runPhoneActions(state.phone_actions); flushQueue(); pollPending(); if($("#v-jobs").classList.contains("on")) loadJobs(); }
+  try{ state=await api("/api/state",undefined,6000); setConn(true); paintHome(); paintModes(); if(!window._gl||Date.now()-window._gl>60000){ window._gl=Date.now(); glance(); shareSolo(); pullMorning(); syncRides(); learnPlaces(); } runPhoneActions(state.phone_actions); flushQueue(); pollPending(); if($("#v-jobs").classList.contains("on")) loadJobs(); }
   catch(e){ setConn(false); paintHome(); }
 }
 function setConn(on){ const was=pcOnline; pcOnline=on; $("#dot").className="dot "+(on?"ok":"solo");
@@ -546,7 +575,7 @@ async function send(text){
   } else {
     if(PC_WORDS.test(text) && addr()){ const q=J("queue",[]); q.push(text); SJ("queue",q); add("a",`Your PC is offline, ${title()}. I've queued that and will send it the moment it's back.`,"queued on phone"); paintHome(); return; }
     document.body.classList.add("busy"); const t=typing();
-    try{ const r=await solo(text); t.remove(); add("a",r,"phone brain"); speak(r); } catch(e){ t.remove(); add("s",e.message); }
+    try{ const r=await solo(text); t.remove(); add("a",r,"phone brain"); speak(r); logSolo("user",text); logSolo("assistant",r); } catch(e){ t.remove(); add("s",e.message); }
     document.body.classList.remove("busy");
   }
 }
@@ -560,6 +589,7 @@ async function pollPending(){
           $$(`[data-job="${it.id}"]`).forEach(e=>e.remove());
           const txt=j.status==="done"?j.result:(j.status==="failed"?"⚠️ "+j.result:"Stopped.");
           if(it.chat) add("a",txt,`${j.tier||"pc"} · ${j.status}`);
+          if(it.chat) (j.cards||[]).forEach(c=>mcard(c));
           if(document.hidden||!$("#v-chat").classList.contains("on")) notify(it.chat?"ORION replied":"ORION job finished",txt);
           if(it.chat && !document.hidden) speak(txt);
         } else { const t=$(`[data-job="${it.id}"]`); if(t && j.note && j.status!=="queued") t.innerHTML=`<span class="typing"><span></span><span></span><span></span></span> <small style="display:inline;color:var(--dim);font-size:12px">${esc(j.note)}</small>`; } }
@@ -631,11 +661,13 @@ function smartListen(stream,{isLive=()=>true,onPartial=()=>{},startTimeout=12000
     if(quiet>=longMs) finish(); },100); }); }
 let listening=false;
 $("#mic").onclick=async()=>{ if(listening){ smartListen.finish&&smartListen.finish(); return; }
+  try{ Native&&Native.hotword&&store.get("hot")==="1"&&await Native.hotword({action:"pause"}); }catch(e){}
   let s; try{ s=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}}); }
   catch(e){ add("s","Microphone blocked — allow mic access for ORION in Android settings."); return; }
   listening=true; $("#mic").classList.add("rec"); const ph=$("#in").placeholder; $("#in").placeholder="Listening… just talk — I'll send it when you finish";
   const r=await smartListen(s,{startTimeout:10000,onPartial:t=>{ $("#in").placeholder="“"+t+"”"; }});
   s.getTracks().forEach(t=>t.stop()); listening=false; $("#mic").classList.remove("rec"); $("#in").placeholder=ph;
+  try{ Native&&Native.hotword&&store.get("hot")==="1"&&Native.hotword({action:"resume"}); }catch(e){}
   if(!r.blob){ return; }
   try{ let text=r.text; if(text==null){ $("#in").placeholder="Transcribing…"; text=await transcribe(r.blob); text=(text||"").replace(SENDW,"").trim(); $("#in").placeholder=ph; }
     if(text) send(text); else add("s","Didn't catch that."); }catch(e){ $("#in").placeholder=ph; add("s","Couldn't hear that."); } };
@@ -704,7 +736,7 @@ function cSet(state,sub){ $("#cState").textContent=state; if(sub!==undefined) $(
 function incoming(reason){
   if(Call.on) return; Call.on=true; Call.reason=reason||""; go(store.get("tab","home"));
   $("#call").classList.add("show","ringing"); $("#cLabel").textContent="INCOMING CALL"; $("#cTime").textContent="mobile";
-  $("#cRingBtns").style.display=""; $("#cLiveBtns").style.display="none"; cSet("RINGING…",reason?`“${reason}”`:"");
+  $("#cRingBtns").style.display=""; $("#cLiveBtns").style.display="none"; cSet("RINGING…",reason==="__morning__"?"Your wake-up call":reason?`“${reason}”`:"");
   ringtone(true); Call.ringTimeout=setTimeout(()=>{ if(!Call.live) endCall("Missed call from ORION"); },35000);
 }
 async function acceptCall(){
@@ -821,7 +853,7 @@ async function loadMoneyM(){ try{ const v=await api("/api/ventures"), E=v.earn; 
     if(!$("#mVen").options.length) $("#mVen").innerHTML=E.ventures.map(x=>`<option>${esc(x)}</option>`).join(""); $("#mBy").innerHTML=hb2(E.by_venture,money);
     $("#mDev").innerHTML=v.dev.length?v.dev.slice(-6).reverse().map(t=>`<div class="row"><span class="st ${t.status==="done"?"done":t.status==="queued"?"running":""}">${t.status.toUpperCase()}</span>${esc(t.task.slice(0,70))}</div>`).join(""):'<p class="empty">Nothing queued.</p>'; }catch(e){} }
 $("#mLog").onclick=async()=>{ const a=+$("#mAmt").value; if(!a) return toast("How much?"); try{ await api("/api/ventures",{action:"earn_add",venture:$("#mVen").value,amount:a,note:$("#mNote").value}); $("#mAmt").value=$("#mNote").value=""; toast(`Logged ${money(a)} 💷`); loadMoneyM(); }catch(e){ toast(e.message); } };
-$("#mDevAdd").onclick=async()=>{ const t=$("#mDevT").value.trim(); if(!t) return; try{ await api("/api/ventures",{action:"dev_add",task:t,project:"Hatchlands"}); $("#mDevT").value=""; toast("Added — built tonight."); loadMoneyM(); }catch(e){ toast(e.message); } };
+$("#mDevAdd").onclick=async()=>{ const t=$("#mDevT").value.trim(); if(!t) return; try{ await api("/api/ventures",{action:"dev_add",task:t,project:"Projects"}); $("#mDevT").value=""; toast("Added — built tonight."); loadMoneyM(); }catch(e){ toast(e.message); } };
 async function loadGamesM(){ try{ const g=await api("/api/gaming"); $("#mGTot").textContent=hm(g.total_mins); $("#mGSub").textContent=`${g.sessions} sessions · ${g.all_time_hours}h all time${g.active?" · playing "+g.game+" now":""}`;
     const mx=Math.max(1,...g.daily.map(d=>d.mins)); $("#mGBars").innerHTML=g.daily.map(d=>`<div style="height:${Math.max(2,d.mins/mx*100)}%"><span>${d.day.slice(3)}</span></div>`).join(""); $("#mGBy").innerHTML=hb2(g.by_game,hm); }catch(e){} }
 $("#mClip").onclick=async()=>{ try{ const r=await api("/api/clipnow",{}); toast(r.result||"Clipped."); }catch(e){ toast(e.message); } };
@@ -850,13 +882,136 @@ $("#mNoteAdd").onclick=async()=>{ const t=$("#mNote").value.trim(); if(!t) retur
 async function glance(){ loadLifeM(); if(!pcOnline) return; try{ const [st,v,g]=await Promise.all([api("/api/study"),api("/api/ventures"),api("/api/gaming")]);
   $("#glStudy").textContent=st.today+"m"; $("#glMoney").textContent=money(v.earn.this_month); $("#glGame").textContent=hm(g.total_mins); }catch(e){} }
 
+
+/* ================= ORION 4.0 phone ================= */
+function mcard(c){ if(!c) return; const d=document.createElement("div"); d.className="mc"; let h=`<b>${esc(c.title||"")}</b>`;
+  if(c.kind==="weather"&&c.weather) h+=`<p>${WXI(c.weather.code)} ${c.weather.temp}° · ${esc(c.weather.sky)}${c.weather.rain_at?" · rain from "+c.weather.rain_at:""}</p>`;
+  else if(c.kind==="code") h+=`<pre>${esc(c.text||"")}</pre>`; else if(c.kind==="text") h+=`<p>${esc(c.text||"")}</p>`;
+  else if(c.kind==="chart") h+=(c.points||[]).map(p=>`<div class="hb2"><b>${esc(p[0])}</b><div><i style="width:${p[1]/Math.max(...c.points.map(x=>x[1]),1)*100}%"></i></div><span>${p[1]}</span></div>`).join("");
+  else h+=`<${c.kind==="steps"?"ol":"ul"}>${(c.items||[]).map(x=>`<li>${esc(x)}</li>`).join("")}</${c.kind==="steps"?"ol":"ul"}>`;
+  d.innerHTML=h; $("#log").appendChild(d); $("#log").scrollTop=1e9; }
+
+/* modes */
+function paintModes(){ $$("#modes button").forEach(b=>b.classList.toggle("on",b.dataset.mode===(state.theme||"standby"))); }
+$$("#modes button").forEach(b=>b.onclick=async()=>{ if(!pcOnline) return toast("Modes switch on your PC — it's offline."); state.theme=b.dataset.mode; document.body.dataset.theme=b.dataset.mode; paintModes(); try{ await api("/api/action",{action:"theme",value:b.dataset.mode}); }catch(e){} });
+
+function setHist(turns){ const a=turns.slice(-12).map(t=>({role:t.role,content:t.content})); history.splice(0,history.length,...a); SJ("hist",a); }
+/* one brain: share phone-only chats with the PC when it comes back */
+function logSolo(role,content){ const s=J("soloTurns",[]); s.push({id:Math.random().toString(36).slice(2,12),t:Date.now()/1000,role,content,dev:"phone"}); SJ("soloTurns",s.slice(-60)); }
+async function shareSolo(){ const s=J("soloTurns",[]); if(!s.length||!pcOnline) return; try{ const r=await api("/api/history",{turns:s}); SJ("soloTurns",[]);
+    if(r.turns) setHist(r.turns); }catch(e){} }
+async function pullHistory(){ try{ const r=await api("/api/history"); if(r.turns) setHist(r.turns); }catch(e){} }
+
+/* school mode: silent from start to end of school */
+let DAY=J("day",{wake:"08:00",school_start:"08:40",school_end:"15:10",holiday:false});
+function atSchool(){ const d=new Date(), wd=d.getDay(); if(DAY.holiday||wd===0||wd===6) return false; const n=d.toTimeString().slice(0,5); return n>=DAY.school_start&&n<DAY.school_end; }
+const _speak=speak; speak=async(t)=>{ if(atSchool()) return; return _speak(t); };
+
+/* messages ORION sends by itself */
+const _phoneDo=phoneDo; phoneDo=async(a)=>{ if(a.kind==="msg"){ add("a","💬 "+a.text,"ORION on its own"); notify("ORION",a.text); if(!document.hidden&&!atSchool()) speak(a.text); return ""; } return _phoneDo(a); };
+
+/* music control + ride + school questions, handled on the phone */
+const _reflex=phoneReflex; phoneReflex=t=>{ const x=t.toLowerCase().trim().replace(/^(hey |ok )?orion[, ]*/,"").replace(/[.!?]+$/,"");
+  if(/^(skip|next)( (song|track|this))?$|^skip this song$/.test(x)) return {kind:"media",action:"next"};
+  if(/^(previous|go back|last)( (song|track))?$|^play the last song$/.test(x)) return {kind:"media",action:"previous"};
+  if(/^(pause|stop)( (the )?(music|song))?$/.test(x)) return {kind:"media",action:"pause"};
+  if(/^(play|resume)( (the )?(music|song))?$/.test(x)) return {kind:"media",action:"play"};
+  if(/^(louder|turn it up|volume up)$/.test(x)) return {kind:"media",action:"louder"};
+  if(/^(quieter|turn it down|volume down)$/.test(x)) return {kind:"media",action:"quieter"};
+  if(/^(ride mode|i'?m leaving|start (my )?ride|ride)$/.test(x)) return {kind:"ride"};
+  if(/(when|what time) will i (get|be) (to|at) school|will i make it|am i (going to be )?late|how long (till|until|to) (school|home)|when will i get home/.test(x)) return {kind:"eta",to:/home/.test(x)?"home":"school"};
+  return _reflex(t); };
+const _phoneDo2=phoneDo; phoneDo=async(a)=>{
+  if(a.kind==="media"){ if(!Native) throw new Error("Music control works in the installed app."); await Native.media({action:a.action}); return {next:"Skipped.",previous:"Back one.",pause:"Paused.",play:"Playing.",louder:"Louder.",quieter:"Quieter."}[a.action]; }
+  if(a.kind==="ride"){ startRide(); return ""; }
+  if(a.kind==="eta") return await eta(a.to);
+  return _phoneDo2(a); };
+
+/* places: learns home and school from where the phone is (only stored on this phone) */
+const distM=(a,b)=>{ const R=6371e3, r=x=>x*Math.PI/180, dl=r(b.lat-a.lat), dn=r(b.lon-a.lon); const h=Math.sin(dl/2)**2+Math.cos(r(a.lat))*Math.cos(r(b.lat))*Math.sin(dn/2)**2; return 2*R*Math.asin(Math.sqrt(h)); };
+async function here(){ if(!Native||!Native.getLocation||store.get("loc","0")!=="1") return null; try{ const l=await Native.getLocation(); return l.ok?{lat:l.lat,lon:l.lon}:null; }catch(e){ return null; } }
+async function learnPlaces(){ const p=await here(); if(!p) return; const d=new Date(), h=d.getHours(), wd=d.getDay(); const P=J("places",{});
+  const add=(k)=>{ const o=P[k]; P[k]=o?{lat:(o.lat*o.n+p.lat)/(o.n+1),lon:(o.lon*o.n+p.lon)/(o.n+1),n:Math.min(o.n+1,50)}:{...p,n:1}; };
+  if(h>=21||h<7) add("home"); else if(atSchool()&&wd>0&&wd<6) add("school"); SJ("places",P); }
+function rideStats(to){ return (J("rideLog",[])).filter(r=>r.to===to).map(r=>r.secs); }
+function avgRide(to){ const r=rideStats(to); if(!r.length) return null; const s=[...r].sort((a,b)=>a-b); return s[Math.floor(s.length/2)]; }
+async function syncRides(){ if(!Native||!Native.rides) return; try{ const r=await Native.rides(); const log=(r.rides||"").split(";").filter(Boolean).map(x=>{ const [to,t,secs]=x.split(","); return {to,t:+t,secs:+secs}; });
+  if(log.length) SJ("rideLog",log); state.riding=r.riding; paintRide(); }catch(e){} }
+async function eta(to){ const P=J("places",{}); const dest=P[to]; const avg=avgRide(to); const p=await here();
+  const pace=avg||420; let left=pace;
+  if(p&&dest&&P.home&&P.school){ const total=distM(P.home,P.school)||1; left=Math.max(30,pace*Math.min(1.2,distM(p,dest)/total)); }
+  else if(!avg) return `I haven't timed a ride to ${to} yet, ${title()} — start Ride mode on the way and I'll learn it.`;
+  const at=new Date(Date.now()+left*1000); const atS=at.toTimeString().slice(0,5); let msg=`About ${Math.max(1,Math.round(left/60))} minutes, ${title()}. You'll be there by ${atS}`;
+  if(to==="school"&&atS<=DAY.school_start) msg+=`, with ${Math.round((new Date(at.toDateString()+" "+DAY.school_start)-at)/60000)} minutes to spare.`;
+  else if(to==="school") msg+=` — that's after ${DAY.school_start}. Pedal on, sir.`; else msg+=".";
+  return msg; }
+async function startRide(){ const to=new Date().getHours()<12?"school":"home"; const P=J("places",{});
+  if(Native&&Native.startRide&&P[to]) await Native.startRide({lat:P[to].lat,lon:P[to].lon,radius:to==="school"?150:80,to});
+  state.riding=true; paintRide();
+  try{ if(Native&&Native.media) await Native.media({action:"pause"}); }catch(e){}
+  Call.ride=true; incoming(""); setTimeout(()=>{ acceptCall(); },200); }
+function paintRide(){ $("#rideCard").classList.toggle("on",!!state.riding); $("#rideGo").textContent=state.riding?"END":"START";
+  const a=avgRide("school"); $("#rideS").textContent=state.riding?"Riding — I'll log the time when you arrive":(a?`Usual ride to school: ${Math.round(a/60)} min · fastest ${Math.round(Math.min(...rideStats("school"))/60)} min`:"Hands-free chat on the way · times your ride"); }
+$("#rideGo").onclick=async()=>{ if(state.riding){ state.riding=false; if(Native&&Native.stopRide) await Native.stopRide(); endCall(); paintRide(); } else startRide(); };
+
+/* morning: the PC packs tomorrow's briefing before it goes off; the phone does the wake-up call */
+async function pullMorning(){ try{ const m=await api("/api/morning"); SJ("morning",m); if(m.day){ DAY=m.day; SJ("day",DAY); if(Native&&Native.setSchool) Native.setSchool({start:DAY.school_start,end:DAY.school_end,holiday:!!DAY.holiday}); } scheduleMorning(); }catch(e){} }
+async function scheduleMorning(){ if(!LN) return; const m=J("morning",null); if(!m||!m.school_day||store.get("wakecall","1")!=="1") return;
+  const [h,mi]=(DAY.wake||"08:00").split(":").map(Number); const at=new Date(m.date+"T00:00"); at.setHours(h,mi,0,0); if(at<new Date()) return;
+  const avg=avgRide("school")||480; const [sh,sm]=DAY.school_start.split(":").map(Number); const leave=new Date(at); leave.setHours(sh,sm,0,0); leave.setSeconds(leave.getSeconds()-avg-300);
+  const ready=new Date(leave.getTime()-15*60000);
+  try{ await LN.cancel({notifications:[{id:7101},{id:7102},{id:7103}]}); }catch(e){}
+  const nots=[{id:7101,title:"📞 ORION — good morning",body:"Tap to answer your wake-up call",schedule:{at,allowWhileIdle:true},extra:{action:"call",reason:"__morning__"}},
+    {id:7102,title:"⏰ 15 minutes till you should leave",body:"Homework packed? Shoes on soon, sir.",schedule:{at:ready,allowWhileIdle:true}},
+    {id:7103,title:"🚲 Time to go",body:`Leave now to be at the bike shed by ${DAY.school_start}.`,schedule:{at:leave,allowWhileIdle:true}}];
+  try{ await LN.schedule({notifications:nots.filter(n=>n.schedule.at>new Date())}); }catch(e){} }
+async function morningBriefing(){ const m=J("morning",{}); const h=new Date().getHours(); let w="";
+  const P=J("places",{}); try{ if(P.home){ const r=await (await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${P.home.lat}&longitude=${P.home.lon}&current=temperature_2m,weather_code&daily=precipitation_probability_max&timezone=auto&forecast_days=1`)).json();
+      w=` It's ${Math.round(r.current.temperature_2m)} degrees, with a ${r.daily.precipitation_probability_max[0]}% chance of rain.`; } }catch(e){}
+  const lines=(m.lines||[]).map(l=>l.replace(/^•\s*\S+\s*/,"")).filter(l=>!/School day tomorrow/.test(l)).slice(0,3).join(" ");
+  const hw=(m.homework||[]).length?` Homework due soon: ${(m.homework||[]).slice(0,2).map(x=>x.subject+" — "+x.task).join("; ")}.`:"";
+  return `Good morning, ${title()}.${w} ${lines}${hw} Bike shed by ${DAY.school_start}.`.replace(/\s+/g," "); }
+const _callReply=callReply; callReply=async(text,first)=>{ if(first&&text==="__morning__") return {reply:await morningBriefing()};
+  if(first&&Call.ride){ const e=await eta(new Date().getHours()<12?"school":"home"); return {reply:`Ride mode on, ${title()}. ${e} I'm listening — say "that's all" when you're done.`}; }
+  return _callReply(text,first); };
+const _endCall=endCall; endCall=(msg)=>{ if(Call.ride){ Call.ride=false; try{ Native&&Native.media&&Native.media({action:"play"}); }catch(e){} } _endCall(msg); try{ Native&&Native.hotword&&store.get("hot")==="1"&&Native.hotword({action:"resume"}); }catch(e){} };
+
+/* phone Exam Hall */
+let MEX=null, MEXPH=[];
+async function loadPapersM(){ try{ const o=await api("/api/scholar"); $("#mExSub").innerHTML=o.subjects.map(x=>`<option>${esc(x.name)}</option>`).join("")||"<option value=''>Add subjects on your PC</option>";
+    $("#mPapers").innerHTML=o.papers.length?o.papers.slice(0,5).map(p=>`<div class="row"><span class="t">${p.marked?"G"+p.grade:"—"}</span><span style="flex:1">${esc(p.title)}</span><button class="btn sm ghost" data-mp="${p.id}" style="border:0;padding:0">${p.marked?"REVIEW":"SIT"}</button></div>`).join(""):'<p class="empty">No papers yet.</p>';
+    $$("[data-mp]").forEach(b=>b.onclick=()=>openPaperM(b.dataset.mp)); }catch(e){} }
+async function openPaperM(id){ MEX=await api("/api/scholar/paper/"+id); MEXPH=[]; $("#mExPhN").textContent=""; $("#mExam").style.display=""; $("#mExTitle").textContent=MEX.title.toUpperCase(); const res={}; (MEX.results||[]).forEach(r=>res[String(r.n)]=r);
+  $("#mExBody").innerHTML=(MEX.marked?`<p class="empty" style="color:var(--text)"><b>${MEX.got}/${MEX.of} · ${MEX.pct}% · grade ${MEX.grade}</b><br>${esc(MEX.summary||"")}</p>`:"")+MEX.questions.map(q=>{ const r=res[String(q.n)];
+    return `<div class="exq"><p><b>${esc(String(q.n))}.</b> ${esc(q.q)} <b>[${q.marks}]</b></p>${MEX.marked?(r?`<div class="exr ${r.got<r.of?"lost":""}"><b>${r.got}/${r.of}</b> ${esc(r.why||"")}<br><i>${esc(r.ideal||"")}</i></div>`:""):`<textarea class="inp" data-mq="${esc(String(q.n))}" placeholder="Answer (or photograph your written work below)"></textarea>`}</div>`; }).join("");
+  $("#mExSubmit").style.display=MEX.marked?"none":""; $("#mExPh").parentElement.style.display=MEX.marked?"none":""; $("#mExam").scrollIntoView({behavior:"smooth"}); }
+$("#mExNew").onclick=async()=>{ if(!$("#mExSub").value) return; $("#mExNew").textContent="WRITING…"; try{ const r=await api("/api/scholar",{action:"paper",subject:$("#mExSub").value},180000); openPaperM(r.result.id); loadPapersM(); }catch(e){ toast(e.message); } $("#mExNew").textContent="✦ NEW PAPER"; };
+$("#mExPh").onchange=async e=>{ for(const f of e.target.files){ const img=await new Promise(r=>{ const fr=new FileReader(); fr.onload=()=>r(fr.result); fr.readAsDataURL(f); });
+    const c=document.createElement("canvas"), im=new Image(); await new Promise(r=>{ im.onload=r; im.src=img; }); const sc=Math.min(1,1600/Math.max(im.width,im.height)); c.width=im.width*sc; c.height=im.height*sc; c.getContext("2d").drawImage(im,0,0,c.width,c.height); MEXPH.push(c.toDataURL("image/jpeg",.8)); }
+  $("#mExPhN").textContent=`${MEXPH.length} page(s) added`; };
+$("#mExSubmit").onclick=async()=>{ const ans={}; $$("[data-mq]").forEach(t=>{ if(t.value.trim()) ans[t.dataset.mq]=t.value.trim(); }); $("#mExSubmit").textContent="MARKING… (about a minute)";
+  try{ const r=await api("/api/scholar",{action:"mark",id:MEX.id,answers:ans,photos:MEXPH},240000); openPaperM(r.result.id); loadPapersM(); }catch(e){ toast(e.message); } $("#mExSubmit").textContent="SUBMIT FOR MARKING"; };
+$("#mExClose").onclick=()=>$("#mExam").style.display="none";
+const _lsm=loadStudyM; loadStudyM=async()=>{ await _lsm(); loadPapersM(); };
+
+/* hands-free settings */
+$("#sHot").onchange=async()=>{ store.set("hot",$("#sHot").checked?"1":"0"); if(!Native||!Native.hotword) return toast("Works in the installed app.");
+  if($("#sHot").checked){ await Native.requestMic(); const r=await Native.hotword({action:"on"}); toast(r.ok?"“Hey ORION” on — first time it downloads a small offline model (~40 MB).":"Couldn't start “Hey ORION”: "+(r.error||"not available in this build")); } else Native.hotword({action:"off"}); };
+$("#sAssist").onclick=()=>{ if(Native&&Native.openAssistantSettings){ Native.openAssistantSettings(); toast("Pick ORION as the Digital assistant app — then hold your earbud or side key."); } };
+$("#sLoc").onchange=async()=>{ store.set("loc",$("#sLoc").checked?"1":"0"); if($("#sLoc").checked&&Native&&Native.requestLocation){ await Native.requestLocation(); setTimeout(learnPlaces,4000); } };
+$("#sBatt").onclick=()=>{ if(Native&&Native.openBatterySettings) Native.openBatterySettings(); };
+
+/* launched by "Hey ORION" / earbud hold: just listen */
+const _checkLaunch=checkLaunch; checkLaunch=async()=>{ try{ if(Native){ const r=await Native.consumeLaunchAction(); if(r.action==="listen"){ go("chat"); setTimeout(()=>$("#mic").click(),250); return; }
+      if(r.action==="call"){ incoming(r.reason||""); setTimeout(acceptCall,350); return; } if(r.action==="ring"){ Native.stopRing&&Native.stopRing(); toast("📢 Found it!"); return; } } }catch(e){} };
+
 /* ---------- tabs ---------- */
 function go(t){ $$("nav.tabs button").forEach(b=>b.classList.toggle("on",b.dataset.tab===t)); $$(".view").forEach(v=>v.classList.toggle("on",v.id==="v-"+t));
   store.set("tab",t); if(t==="more") goSub(store.get("sub","study")); if(t==="jobs") loadJobs(); if(t==="sched") loadSched(); if(t==="pc"&&pcOnline&&!$("#screen").src) snap(); if(t==="chat") $("#log").scrollTop=1e9; }
 $$("nav.tabs button").forEach(b=>b.onclick=()=>go(b.dataset.tab));
 
 /* ---------- settings ---------- */
-$("#setBtn").onclick=()=>{ $("#sAddr").value=store.get("addr"); $("#sPin").value=store.get("pin"); $("#sKey").value=store.get("key"); $("#sTitle").value=title(); $("#sMute").checked=store.get("mute")==="1"; $("#sLink").checked=store.get("link","1")==="1"; $("#sPat").value=store.get("patience","normal"); loadCalls(); $("#vSet").classList.add("show"); };
+$("#setBtn").onclick=()=>{ $("#sAddr").value=store.get("addr"); $("#sPin").value=store.get("pin"); $("#sKey").value=store.get("key"); $("#sTitle").value=title(); $("#sMute").checked=store.get("mute")==="1"; $("#sLink").checked=store.get("link","1")==="1"; $("#sPat").value=store.get("patience","normal"); $("#sHot").checked=store.get("hot")==="1"; $("#sLoc").checked=store.get("loc")==="1"; loadCalls(); $("#vSet").classList.add("show"); };
 $("#sClose").onclick=()=>$("#vSet").classList.remove("show");
 $("#sSave").onclick=()=>{ let a=$("#sAddr").value.trim(); if(a&&!/^https?:\/\//.test(a)) a="http://"+a; if(a&&!/:\d+\/?$/.test(a)) a=a.replace(/\/$/,"")+":7777";
   store.set("addr",a); store.set("pin",$("#sPin").value.trim()); store.set("key",$("#sKey").value.trim()); store.set("title",$("#sTitle").value.trim()||"sir"); store.set("mute",$("#sMute").checked?"1":"0");

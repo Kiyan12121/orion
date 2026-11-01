@@ -27,10 +27,16 @@ from core import browser, root, video, vision               # noqa: E402,F401
 from core.jobs import Jobs                                  # noqa: E402
 from core import phone, calls                               # noqa: E402
 from core import health, learning, life, study, ventures    # noqa: E402
+from core.link import Link                                  # noqa: E402
+from core import daily                                      # noqa: E402,F401
+from core import scholar                                    # noqa: E402
+from core import money                                      # noqa: E402
+from core import holo                                       # noqa: E402,F401
+from core.autonomy import Autonomy                          # noqa: E402
 from core import gaming as gaming_mod                        # noqa: E402
 from core.routines import NightShift                        # noqa: E402
 from core.devices import Push, Remote, Sync, Updater        # noqa: E402
-from core.gaming import GamingMode, Hotkey                  # noqa: E402
+from core.gaming import Controller, GamingMode, Hotkey      # noqa: E402
 from core.listen import VoiceID, WakeListener, extras_status  # noqa: E402
 from core.ears import END_CONVO, Ears              # noqa: E402
 from core import ducking                                    # noqa: E402
@@ -74,6 +80,7 @@ class Api:
         self._speaker = Speaker(self._cfg, self._emit)
         self._recorder = Recorder()
         self._gaming = GamingMode(self._cfg, self._emit, self._notify, self._brain)
+        tools.CTX["toolbox_run"] = lambda name, args: self._toolbox.run(name, args)
         self._scheduler = schedule.Scheduler(self._cfg, self._sched_notify)
         self._hotkey = Hotkey(self._cfg.get("hotkey", "ctrl+alt+space"), self._hk_start, self._hk_stop)
         tools.CTX["brain"] = self._brain
@@ -93,9 +100,12 @@ class Api:
         self._updater.start()
         self._jobs = Jobs(self._cfg, self._run_job, lambda t, title=None: self._push.send(t, title), self._emit)
         self._jobs.on_finish = self._job_finished
+        self._autonomy = Autonomy(self._cfg, self._jobs, self._emit)
+        tools.CTX["sync"] = self._sync
         self._shift = NightShift(self._cfg, self._jobs, self._shift_notify, self._emit, self._updater)
         tools.CTX["push_phone"] = lambda t: self._push.send(t, "ORION", 5, "iphone")
         self._voice_id = VoiceID(self._cfg)
+        self._link = Link(self._cfg, self._memory, self._emit)
         self._ears = Ears(self._cfg, self._emit, self._transcribe, self._voice_id)
         self._followup = False          # conversation mode: listen again after ORION answers you by voice
         self._voice_turn = False
@@ -110,6 +120,7 @@ class Api:
         if self._cfg.get("wake", {}).get("enabled") and not self.lite_profile:
             self._wake.start()
         threading.Thread(target=self._health_bg, daemon=True).start()
+        Controller(self._cfg, self.mic_start)
         life.ClipWatch()
         life.ScreenTime()
         life.install_scenes(self._cfg)
@@ -167,6 +178,10 @@ class Api:
 
     # ---------------------------------------------------------------- plumbing
     def _emit(self, kind, **data):
+        if kind == "card":
+            self._cards = (getattr(self, "_cards", []) + [(time.time(), data.get("card"))])[-12:]
+        elif kind == "live":
+            self._live = {**data, "t": time.time()}
         mini = getattr(self, "_mini", None)
         if mini and kind in ("state", "speaking", "theme", "toast", "stream_end", "hearing"):
             try:
@@ -216,9 +231,12 @@ class Api:
         return " ".join(bits)
 
     def _run_job(self, j):
-        src = {"phone": "📱", "routine": "⏰", "voice": "🗂"}.get(j["source"], "🗂")
+        src = {"phone": "📱", "routine": "⏰", "voice": "🗂", "auto": "🤖", "mission": "🚀"}.get(j["source"], "🗂")
         self._emit("message", id=uuid.uuid4().hex[:8], role="user", text=f"{src} JOB: {j['title']}")
-        return self._process(j["text"], j.get("autopilot", True), speak=False)
+        t0 = time.time()
+        out = self._process(j["text"], j.get("autopilot", True), speak=False)
+        j["cards"] = [c for t, c in getattr(self, "_cards", []) if t >= t0 and c][:4]
+        return out
 
     def _sched_notify(self, text, important=True):
         self._notify(text, important)
@@ -470,7 +488,7 @@ class Api:
         c = self._cfg
         vis = c.get("visuals", "auto")
         lite = vis == "lite" or (vis == "auto" and self.lite_profile)
-        return {"name": c["assistant_name"], "title": c["user_title"], "version": config_mod.VERSION,
+        return {"custom_modes": c.get("custom_modes", {}), "name": c["assistant_name"], "title": c["user_title"], "version": config_mod.VERSION,
                 "theme": c["theme"], "brain": c["brain"], "speak": c["voice"]["speak_replies"],
                 "safe_mode": c["safe_mode"], "lite": lite, "skip_boot": c.get("skip_boot", False),
                 "has_key": bool(self._brain.cloud), "mic": self._recorder.available,
@@ -545,9 +563,11 @@ class Api:
         if text.lower().strip(" .!") in STOP_WORDS:
             self.stop()
             return {"reply": "Stopped.", "tier": "reflex"}
-        self._emit("message", id=uuid.uuid4().hex[:8], role="user", text=f"📱 {text}")
+        self._emit("message", id=uuid.uuid4().hex[:8], role="user", text=("💻 " if source == "laptop" else "📱 ") + text)
+        t0 = time.time()
         reply, tier, model = self._process(text, False, speak=False)
-        return {"reply": reply, "tier": tier, "model": model}
+        cards = [c for t, c in getattr(self, "_cards", []) if t >= t0 and c]
+        return {"reply": reply, "tier": tier, "model": model, "cards": cards}
 
     def _process(self, text, autopilot=False, speak=True):
         with self._busy:
@@ -571,7 +591,16 @@ class Api:
                     flush()
 
             try:
-                reply, tier, model = self._brain.handle(text, on_delta, self._cancel, autopilot)
+                if self._link.enabled and self._link.online and not autopilot:
+                    try:                       # laptop: hand it to the gaming PC — one brain, one conversation
+                        self._emit("status", text="asking your gaming PC…")
+                        reply, tier, model = self._link.ask(text)
+                        on_delta(reply)
+                        threading.Thread(target=self._link.sync_history, daemon=True).start()
+                    except Exception:
+                        reply, tier, model = self._brain.handle(text, on_delta, self._cancel, autopilot)
+                else:
+                    reply, tier, model = self._brain.handle(text, on_delta, self._cancel, autopilot)
                 flush()
                 self._emit("stream_end", id=mid, text=reply, tier=tier, model=model)
                 if speak and not speech.flush():
@@ -641,6 +670,17 @@ class Api:
         tools.set_theme(theme)
         return theme
 
+    def mode_custom(self, b):
+        """Make your own mode: name, colour, personality/job."""
+        key = re.sub(r"[^a-z0-9]", "", (b.get("name") or "").lower())[:20]
+        if key:
+            self._cfg.setdefault("custom_modes", {})[key] = {"label": b.get("name", key).strip()[:24],
+                                                            "colour": b.get("colour") or "#ff8bd1",
+                                                            "persona": (b.get("persona") or "").strip()[:600],
+                                                            "groups": ["life", "web", "browser", "memory"]}
+            config_mod.save(self._cfg)
+        return self._cfg.get("custom_modes", {})
+
     def toggle_speak(self):
         v = self._cfg["voice"]
         v["speak_replies"] = not v.get("speak_replies", True)
@@ -670,7 +710,9 @@ class Api:
                 "local_model": c["local"]["model"], "speak": c["voice"]["speak_replies"],
                 "engine": c["voice"]["engine"], "voice": c["voice"]["neural_voice"],
                 "voices": config_mod.NEURAL_VOICES, "safe_mode": c["safe_mode"],
-                "fullscreen": c["fullscreen"], "visuals": c["visuals"], "skip_boot": c.get("skip_boot", False)}
+                "fullscreen": c["fullscreen"], "visuals": c["visuals"], "skip_boot": c.get("skip_boot", False),
+                "auto_mode": c.get("auto_mode", True), "per_mode": c["voice"].get("per_mode", True),
+                "custom_modes": c.get("custom_modes", {})}
 
     def save_settings(self, s):
         c = self._cfg
@@ -692,6 +734,10 @@ class Api:
         c["safe_mode"] = bool(s.get("safe_mode"))
         c["fullscreen"] = bool(s.get("fullscreen"))
         c["skip_boot"] = bool(s.get("skip_boot"))
+        if "auto_mode" in s:
+            c["auto_mode"] = bool(s["auto_mode"])
+        if "per_mode" in s:
+            v["per_mode"] = bool(s["per_mode"])
         c["visuals"] = s.get("visuals") if s.get("visuals") in ("auto", "full", "lite") else "auto"
         config_mod.save(c)
         self._brain.reload_providers()
@@ -707,6 +753,16 @@ class Api:
                         "busy": o.get("busy", False), "with": o.get("with", "")})
         b = schedule.busy_now()
         return {"items": out, "busy": b["title"] if b else None}
+
+    def schedule_week(self, start=None, days=7):
+        import datetime as _dt
+        d = _dt.date.fromisoformat(start) if start else _dt.date.today()
+        from core import daily as _daily
+        return {"events": schedule.week(d, int(days)), "start": d.isoformat(), "day": _daily.day_cfg(self._cfg),
+                "timetable": scholar._load().get("timetable", {})}
+
+    def schedule_move(self, eid, start, duration=None):
+        return bool(schedule.move_event(eid, start, duration))
 
     def schedule_add(self, e):
         try:
@@ -1025,12 +1081,16 @@ class Api:
             return {"jobs": self._jobs.list(40)}
         if path == "/api/schedule":
             return self.schedule_get(14)
+        if path.startswith("/api/week"):
+            return self.schedule_week()
         if path == "/api/routines":
             return self._shift.listing()
         if path == "/api/root":
             return {"afk": self._root.afk, "note": self._root.afk_note, "log": root.recent_log(30)}
         if path == "/api/stats":
             return {**self.stats(), "meters": self._brain.meters()}
+        if path == "/api/history":
+            return {"turns": self._memory.recent_full(60), "device": "pc"}
         if path == "/api/wake":
             return {"actions": phone.wake(), "title": self._cfg.get("user_title", "sir")}
         if path == "/api/clip":
@@ -1041,6 +1101,20 @@ class Api:
                 return {"text": ""}
         if path == "/api/calls":
             return calls.settings(self._cfg)
+        if path == "/api/scholar":
+            return self.scholar_get()
+        if path.startswith("/api/scholar/paper/"):
+            return self.scholar_paper(path.rsplit("/", 1)[1])
+        if path == "/api/live":
+            lv = getattr(self, "_live", None)
+            return lv if lv and time.time() - lv["t"] < 120 else {"img": None}
+        if path == "/api/morning":
+            pk = daily.load_pack() or {}
+            if pk.get("date", "") <= time.strftime("%Y-%m-%d"):
+                pk = daily.morning_pack(self._cfg)
+            return pk
+        if path == "/api/autonomy":
+            return self.autonomy_get()
         simple = {"/api/life": self.life_get, "/api/health": self.health_get, "/api/study": self.study_get, "/api/ventures": self.ventures_get,
                   "/api/gaming": self.gaming_get, "/api/brain": self.brain_get}
         if path.split("?")[0] in simple:
@@ -1096,6 +1170,22 @@ class Api:
             return {"result": self.clip_now()}
         if path == "/api/life":
             return self.life_action(body)
+        if path == "/api/autonomy":
+            return self.autonomy_set(body)
+        if path == "/api/scholar":
+            if body.get("action") in ("paper", "mark", "plan", "topics"):     # phone: wait for the result
+                fn = {"paper": lambda: scholar.make_paper(body.get("subject", ""), body.get("topics", ""), body.get("marks", 30)),
+                      "mark": lambda: scholar.mark_paper(body.get("id"), body.get("answers") or {}, body.get("photos") or [],
+                                                         body.get("minutes")),
+                      "plan": lambda: scholar.revision_plan(14, 60, 120),
+                      "topics": lambda: scholar.gen_topics(body.get("name", ""))}[body["action"]]
+                return {"result": fn()}
+            return self.scholar_action(body)
+        if path == "/api/history":
+            n = self._memory.merge_turns(body.get("turns", []))
+            if n:
+                self._emit("history_merged", count=n)
+            return {"turns": self._memory.recent_full(60), "merged": n}
         if path == "/api/health/fix":
             return {"ok": self.health_fix(body.get("id", ""))}
         raise KeyError(path)
@@ -1115,6 +1205,45 @@ class Api:
             f.write(raw)
         self._emit("toast", level="info", text=f"📁 {os.path.basename(fp)} arrived from your phone.")
         return {"ok": True, "path": fp}
+
+    def link_get(self):
+        return {**{k: v for k, v in self._link.lc.items() if k != "pin"}, "has_pin": bool(self._link.lc.get("pin")),
+                "online": self._link.online, "device": __import__("core.memory", fromlist=["DEVICE"]).DEVICE}
+
+    def link_set(self, b):
+        lc = self._link.lc
+        if "addr" in b:
+            lc["addr"] = (b.get("addr") or "").strip()
+        if b.get("pin"):
+            lc["pin"] = str(b["pin"]).strip()
+        if "enabled" in b:
+            lc["enabled"] = bool(b["enabled"])
+        config_mod.save(self._cfg)
+        return self.link_get()
+
+    def autonomy_get(self):
+        from core import autonomy as amod
+        a = self._autonomy.ac
+        return {**a, "log": amod.recent(40), "day": daily.day_cfg(self._cfg)}
+
+    def autonomy_set(self, b):
+        a = self._autonomy.ac
+        for k in ("enabled",):
+            if k in b:
+                a[k] = bool(b[k])
+        for k in ("idle_minutes", "every_minutes", "tasks_per_run"):
+            if k in b:
+                a[k] = max(1, int(b[k]))
+        if b.get("run_now"):
+            self._autonomy.run(0, "you asked")
+        d = daily.day_cfg(self._cfg)
+        for k in ("wake", "school_start", "school_end", "pc_off"):
+            if b.get(k):
+                d[k] = b[k]
+        if "holiday" in b:
+            d["holiday"] = bool(b["holiday"])
+        config_mod.save(self._cfg)
+        return self.autonomy_get()
 
     def calls_get(self):
         return calls.settings(self._cfg)
@@ -1146,9 +1275,9 @@ class Api:
         try:
             import asyncio
             import base64
-            v = self._cfg["voice"]
-            audio = asyncio.run(self._speaker._neural(text[:900], v.get("neural_voice", "en-GB-SoniaNeural"),
-                                                      v.get("neural_rate", "+6%")))
+            from core.modes import voice as mode_voice
+            mv, rate, pitch = mode_voice(self._cfg.get("theme", "standby"), self._cfg)
+            audio = asyncio.run(self._speaker._neural(text[:900], mv, rate, pitch))
             return base64.b64encode(audio).decode() if audio else None
         except Exception:
             return None
@@ -1269,13 +1398,18 @@ class Api:
 
     # ---------------------------------------------------------------- ventures + gaming pages
     def ventures_get(self):
-        return {"dev": ventures.dev_sync(self._jobs), "earn": ventures.earn_summary(),
+        return {"dev": ventures.dev_sync(self._jobs), "earn": ventures.earn_summary(), "goals": money.goals(),
+                "crm": money.crm(), "followups": [x["id"] for x in money.crm_followups()], "stages": money.STAGES,
+                "ideas": list(reversed(money.ideas()))[:20], "per_hour": money.per_hour(),
                 "content": self._shift.ns["builtin"].get("content", {}).get("on", False)}
 
     def ventures_action(self, b):
         a = b.get("action")
         if a == "dev_add":
-            ventures.dev_add(b.get("task", ""), b.get("project") or "Hatchlands")
+            try:
+                ventures.dev_add(b.get("task", ""), b.get("project") or "Projects")
+            except ValueError as e:
+                self._emit("toast", level="warn", text=str(e))
         elif a == "dev_del":
             ventures.dev_remove(b.get("id"))
         elif a == "dev_now":
@@ -1289,19 +1423,55 @@ class Api:
                                              "offer": b.get("offer", "")})
         elif a == "content":
             self._shift.set_builtin("content", on=bool(b.get("on")))
+        elif a == "goal":
+            money.add_goal(b.get("name", "Goal"), float(b.get("target") or 0), b.get("by") or "2027-07-31", b.get("venture", ""))
+        elif a == "goal_del":
+            money._save(money.GOALS, [g for g in money._load(money.GOALS, []) if g["id"] != b.get("id")])
+        elif a == "crm":
+            money.crm_upsert(b.get("name", ""), b.get("stage", "lead"), note=b.get("note", ""), value=b.get("value"),
+                             next=b.get("next", ""), next_date=b.get("next_date", ""))
+        elif a == "crm_del":
+            money._save(money.CRM, [x for x in money.crm() if x["id"] != b.get("id")])
+        elif a == "idea":
+            return self._bg(money.score_idea, "idea_scored", b.get("idea", ""))
+        elif a == "hours":
+            money.log_hours(b.get("venture", "Other"), int(b.get("minutes") or 0))
+        elif a == "invoice":
+            path, total, num = money.make_invoice(b.get("client", ""), b.get("items", []), int(b.get("due_days", 14)))
+            try:
+                os.startfile(path)
+            except Exception:
+                pass
+            self._emit("toast", level="info", text=f"🧾 Invoice {num} — £{total:.2f}")
+        elif a == "meeting":
+            self._emit("message", id=uuid.uuid4().hex[:8], role="assistant", text=money.money_meeting_text(), tier="reflex")
         return self.ventures_get()
 
     def gaming_get(self):
         g = self._cfg.setdefault("gaming", {})
-        return {**gaming_mod.game_stats(int(7)), "active": self._gaming.active,
+        live = {}
+        if self._gaming.active:
+            st = self.stats()
+            live = {"cpu": st.get("cpu"), "ram": st.get("ram"), "mins": int((time.time() - self._gaming.started) // 60),
+                    "clips": getattr(self._gaming, "session_clips", 0), "held": len(self._gaming.held),
+                    "held_items": self._gaming.held[-5:], "doctor": getattr(self._gaming, "doctor_notes", [])[-3:]}
+        return {**gaming_mod.game_stats(int(7)), "active": self._gaming.active, "live": live,
+                "profiles": g.get("profiles", {}),
                 "game": gaming_mod.nice_name(self._gaming.game) if self._gaming.active else None,
                 "settings": {"auto": g.get("auto", True), "boost": g.get("boost", True),
                              "clip_buffer": g.get("clip_buffer", False), "break_every_min": g.get("break_every_min", 120),
-                             "high_performance": g.get("high_performance", True)}}
+                             "high_performance": g.get("high_performance", True),
+                             "controller_talk": g.get("controller_talk", True),
+                             "stealth_while_gaming": g.get("stealth_while_gaming", True)}}
 
     def gaming_set(self, b):
         g = self._cfg.setdefault("gaming", {})
-        for k in ("auto", "boost", "clip_buffer", "high_performance"):
+        if "profile" in b:
+            pr = b["profile"]
+            g.setdefault("profiles", {})[pr["game"]] = {"open": pr.get("open", []), "close": pr.get("close", [])}
+        if "profile_del" in b:
+            g.setdefault("profiles", {}).pop(b["profile_del"], None)
+        for k in ("auto", "boost", "clip_buffer", "high_performance", "controller_talk", "stealth_while_gaming"):
             if k in b:
                 g[k] = bool(b[k])
         if "break_every_min" in b:
@@ -1313,6 +1483,54 @@ class Api:
         r = self._gaming.clip(30)
         self._emit("toast", level="info", text="🎬 " + r)
         return r
+
+    # ---------------------------------------------------------------- scholar (Study 2.0)
+    def scholar_get(self):
+        o = scholar.overview()
+        o["mistakes"] = scholar.mistakes_due(10)
+        return o
+
+    def scholar_paper(self, pid):
+        return scholar.get_paper(pid)
+
+    def _bg(self, fn, event, *a):
+        def run():
+            try:
+                self._emit(event, ok=True, data=fn(*a))
+            except Exception as e:
+                self._emit(event, ok=False, error=str(e))
+        threading.Thread(target=run, daemon=True).start()
+        return True
+
+    def scholar_action(self, b):
+        a = b.get("action")
+        if a == "subject":
+            scholar.add_subject(b.get("name", ""), b.get("board", ""), b.get("target", ""))
+            threading.Thread(target=scholar.gen_topics, args=(b.get("name", ""),), daemon=True).start()
+        elif a == "subject_del":
+            with scholar._lock:
+                d = scholar._load()
+                d["subjects"] = [x for x in d["subjects"] if x["name"] != b.get("name")]
+                scholar._save(d)
+        elif a == "topics":
+            return self._bg(scholar.gen_topics, "scholar_topics", b.get("name", ""))
+        elif a == "rate":
+            scholar.rate_topic(b.get("subject", ""), b.get("topic", ""), b.get("rating", "amber"))
+        elif a == "paper":
+            return self._bg(scholar.make_paper, "exam_paper", b.get("subject", ""), b.get("topics", ""), b.get("marks", 30))
+        elif a == "mark":
+            return self._bg(scholar.mark_paper, "exam_marked", b.get("id"), b.get("answers") or {},
+                            b.get("photos") or [], b.get("minutes"))
+        elif a == "mistake":
+            scholar.mistake_done(b.get("id"), bool(b.get("correct")))
+        elif a == "timetable":
+            scholar.set_timetable(b.get("day", ""), b.get("lessons", []))
+        elif a == "plan":
+            return self._bg(scholar.revision_plan, "revision_planned", int(b.get("days", 14)),
+                            int(b.get("weekday", 60)), int(b.get("weekend", 120)))
+        elif a == "tutor":
+            self.send(f"Teach me {b.get('topic', '')}" + (f" ({b.get('subject')})" if b.get("subject") else ""))
+        return self.scholar_get()
 
     # ---------------------------------------------------------------- study page
     def study_get(self):
@@ -1398,6 +1616,11 @@ class Api:
 
     def quit(self):
         self._speaker.stop()
+        try:
+            if self._sync.enabled:
+                self._sync.sync_now()          # so the laptop/phone carry on from exactly here
+        except Exception:
+            pass
         if self._window:
             self._window.destroy()
         os._exit(0)

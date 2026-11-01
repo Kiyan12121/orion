@@ -14,7 +14,26 @@ from .paths import DATA_DIR
 
 MEM_PATH = os.path.join(DATA_DIR, "memory.json")
 MAX_FACTS = 600
-MAX_HISTORY = 40
+MAX_HISTORY = 60
+
+
+def _device():
+    import platform
+    import socket
+    try:
+        name = socket.gethostname()
+    except Exception:
+        name = "pc"
+    try:
+        import psutil
+        ram = psutil.virtual_memory().total / 2**30
+        kind = "laptop" if (psutil.sensors_battery() is not None) else "pc"
+    except Exception:
+        kind = "pc"
+    return f"{kind}:{name}"[:40]
+
+
+DEVICE = _device()
 CATS = ("person", "project", "preference", "goal", "fact")
 STOP = set("the a an and or but to of in on at for with is are was were be been it this that my me i you "
            "your our we they them he she his her do does did can could would should will just so very "
@@ -109,16 +128,34 @@ class Memory:
         return "\n".join(f"- [{x.get('cat', 'fact')}] {x['text']}" for x in self.relevant(query))
 
     # ------------------------------------------------------------------ conversation
-    def add_turn(self, role, content):
+    def add_turn(self, role, content, device=None):
+        import socket
+        import uuid as _u
         with self._lock:
-            self.history.append({"role": role, "content": content})
+            self.history.append({"role": role, "content": content, "id": _u.uuid4().hex[:10], "t": time.time(),
+                                 "dev": device or DEVICE})
             self.history = self.history[-MAX_HISTORY:]
             if role == "user":
                 self._turns_since_learn += 1
             self._save()
 
     def recent(self, n=12):
+        """Plain role/content turns for the AI (device tags stripped)."""
+        return [{"role": h["role"], "content": h["content"]} for h in self.history[-n:]]
+
+    def recent_full(self, n=40):
         return list(self.history[-n:])
+
+    def merge_turns(self, turns):
+        """Turns from another device (laptop/phone/PC) join this conversation in time order."""
+        with self._lock:
+            have = {h.get("id") for h in self.history if h.get("id")}
+            new = [t for t in turns if t.get("id") and t["id"] not in have and t.get("role") in ("user", "assistant")]
+            if not new:
+                return 0
+            self.history = sorted(self.history + new, key=lambda h: h.get("t", 0))[-MAX_HISTORY:]
+            self._save()
+            return len(new)
 
     def clear_history(self):
         with self._lock:

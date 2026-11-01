@@ -121,6 +121,7 @@ class GamingMode:
                         self.exit()
                 if self.active:
                     self._break_nudge()
+                    self._doctor()
             except Exception:
                 pass
             time.sleep(5)
@@ -154,9 +155,17 @@ class GamingMode:
             n = self._boost(game)
             if n:
                 boosted.append(f"slowed {n} background app(s)")
+        self.session_clips, self.doctor_notes = 0, []
+        prof = self.g.get("profiles", {}).get(nice_name(game), {})
+        if prof:
+            threading.Thread(target=self._apply_profile, args=(prof,), daemon=True).start()
+            boosted.append(f"{nice_name(game)} profile")
         if self.g.get("clip_buffer", False) and not CTX.get("lite"):
             self._start_buffer()
         self.brain.force_cloud = True          # keep the CPU free for the game
+        self.prev_theme = self.cfg.get("theme", "standby")
+        if self.g.get("stealth_while_gaming", True) and self.prev_theme != "stealth" and CTX.get("set_theme"):
+            CTX["set_theme"]("stealth")
         name = game.replace(".exe", "").replace("PlayerBeta", "")
         self.emit("gaming", on=True, game=name)
         self.emit("toast", level="info", text=f"Gaming Mode: {name}" + (f" — {', '.join(boosted)}" if boosted else ""))
@@ -168,6 +177,9 @@ class GamingMode:
         if IS_WIN and self.prev_plan and self.prev_plan.lower() != HIGH_PERF:
             _ps(f"powercfg /setactive {self.prev_plan}")
         self.brain.force_cloud = False
+        prev = getattr(self, "prev_theme", None)
+        if prev and prev != "stealth" and self.cfg.get("theme") == "stealth" and CTX.get("set_theme"):
+            CTX["set_theme"](prev)
         self.emit("gaming", on=False, game=None)
         mins = int((time.time() - self.started) // 60)
         self._unboost()
@@ -176,11 +188,19 @@ class GamingMode:
             record_session(nice_name(self.game), self.started, mins)
         self.nudged = 0
         title = self.cfg.get("user_title", "sir")
+        bits = [f"Well played, {title}. {mins // 60}h {mins % 60}m of {nice_name(self.game)}" if mins >= 60
+                else f"Well played, {title}. {mins} minutes of {nice_name(self.game)}"]
+        clips = getattr(self, "session_clips", 0)
+        if clips:
+            bits.append(f"{clips} clip{'s' if clips != 1 else ''} saved")
         if self.held:
-            items = "; ".join(self.held[:6])
-            self.notify(f"Welcome back, {title}. While you were playing ({mins} min): {items}", True)
+            bits.append(f"while you played: {'; '.join(self.held[:6])}")
         else:
-            self.notify(f"Welcome back, {title}. Nothing needed your attention.", False)
+            bits.append("nothing needed your attention")
+        if getattr(self, "doctor_notes", None):
+            bits.append("performance: " + "; ".join(self.doctor_notes[:2]))
+        self.notify(". ".join(bits) + ".", bool(self.held))
+        CTX.get("emit", lambda *a, **k: None)("gaming_wrap", text=". ".join(bits))
         self.held = []
 
     def hold(self, text):
@@ -198,6 +218,59 @@ class GamingMode:
             h = played / 60
             self.notify(f"You've been on {nice_name(self.game)} for {h:.1f} hours, {self.cfg.get('user_title', 'sir')}. "
                         "Might be worth a stretch and some water.", True)
+
+    def _apply_profile(self, prof):
+        """Per-game profile: open/close apps when this game starts."""
+        run = CTX.get("toolbox_run")
+        for app in prof.get("open", []):
+            try:
+                run and run("open_app", {"name": app})
+            except Exception:
+                pass
+        if psutil:
+            close = {x.lower() for x in prof.get("close", [])}
+            for p in psutil.process_iter(["name"]):
+                try:
+                    if (p.info["name"] or "").lower() in close:
+                        p.terminate()
+                except Exception:
+                    pass
+
+    def _doctor(self):
+        """Performance doctor: if the PC is struggling mid-game, find the culprit and calm it down."""
+        if not psutil or time.time() - getattr(self, "_doc_t", 0) < 60:
+            return
+        self._doc_t = time.time()
+        try:
+            cpu = psutil.cpu_percent(interval=1)
+            ram = psutil.virtual_memory().percent
+            if cpu < 92 and ram < 90:
+                self._hot = 0
+                return
+            self._hot = getattr(self, "_hot", 0) + 1
+            if self._hot < 2:
+                return
+            game = (self.game or "").lower()
+            hogs = []
+            for p in psutil.process_iter(["name", "cpu_percent", "memory_percent"]):
+                n = (p.info["name"] or "").lower()
+                if n and n != game and n not in ("system idle process", "system", "pythonw.exe", "python.exe"):
+                    hogs.append((p.info["cpu_percent"] or 0, p.info["memory_percent"] or 0, p))
+            hogs.sort(key=lambda h: -(h[0] if cpu >= 92 else h[1]))
+            if hogs:
+                c, m, p = hogs[0]
+                try:
+                    p.nice(psutil.IDLE_PRIORITY_CLASS)
+                    self.lowered.append(p.pid)
+                except Exception:
+                    pass
+                note = (f"{p.info['name']} was eating {'CPU' if cpu >= 92 else 'RAM'} "
+                        f"({c:.0f}% CPU, {m:.0f}% RAM) — I've turned it right down")
+                self.doctor_notes.append(note)
+                self.hold("⚙ " + note)
+                self._hot = 0
+        except Exception:
+            pass
 
     def _boost(self, game):
         """Game gets high priority; known background apps drop to below-normal (restored on exit)."""
@@ -275,6 +348,7 @@ class GamingMode:
             r = subprocess.run([_ffmpeg(), "-y", "-loglevel", "error", "-f", "concat", "-safe", "0", "-i", lst,
                                 "-c", "copy", out], capture_output=True, creationflags=FLAGS, timeout=60)
             if r.returncode == 0 and os.path.exists(out):
+                self.session_clips = getattr(self, "session_clips", 0) + 1
                 return f"Clipped the last ~{need * 10}s → {out}"
         # fall back to Windows Game Bar's "record that" (Win+Alt+G) — needs background recording on
         try:
@@ -309,6 +383,65 @@ def gaming_mode(on):
         return "Gaming Mode on."
     gm.exit()
     return "Gaming Mode off."
+
+
+@tool("Set up a per-game PROFILE: apps to open and close automatically when a game starts.",
+      {"game": ("string", "Game name, e.g. Roblox", True), "open": ("array", "Apps to open, e.g. ['Discord']", False),
+       "close": ("array", "Processes to close, e.g. ['chrome.exe']", False)})
+def game_profile(game, open=None, close=None):
+    gm = CTX.get("gaming")
+    if not gm:
+        return "Gaming Mode isn't available."
+    prof = gm.g.setdefault("profiles", {}).setdefault(nice_name(game) if game.endswith(".exe") else game.strip().title(), {})
+    if open is not None:
+        prof["open"] = list(open)
+    if close is not None:
+        prof["close"] = list(close)
+    from . import config as config_mod
+    config_mod.save(gm.cfg)
+    return f"{game.title()} profile: opens {', '.join(prof.get('open', [])) or 'nothing'}, closes {', '.join(prof.get('close', [])) or 'nothing'}."
+
+
+class Controller:
+    """Hold the controller's View/Back button for half a second to talk to ORION (XInput pads)."""
+
+    def __init__(self, cfg, talk):
+        self.cfg, self.talk = cfg, talk
+        if IS_WIN:
+            threading.Thread(target=self._loop, daemon=True).start()
+
+    def _loop(self):
+        import ctypes
+
+        class GP(ctypes.Structure):
+            _fields_ = [("buttons", ctypes.c_ushort), ("lt", ctypes.c_ubyte), ("rt", ctypes.c_ubyte),
+                        ("lx", ctypes.c_short), ("ly", ctypes.c_short), ("rx", ctypes.c_short), ("ry", ctypes.c_short)]
+
+        class ST(ctypes.Structure):
+            _fields_ = [("packet", ctypes.c_uint), ("pad", GP)]
+        try:
+            x = ctypes.windll.xinput1_4
+        except Exception:
+            try:
+                x = ctypes.windll.xinput9_1_0
+            except Exception:
+                return
+        BACK = 0x0020
+        held = 0.0
+        while True:
+            if not self.cfg.get("gaming", {}).get("controller_talk", True):
+                time.sleep(2)
+                continue
+            st = ST()
+            pressed = False
+            for i in range(4):
+                if x.XInputGetState(i, ctypes.byref(st)) == 0 and st.pad.buttons & BACK:
+                    pressed = True
+                    break
+            held = held + 0.05 if pressed else 0.0
+            if 0.5 <= held < 0.55:
+                threading.Thread(target=self.talk, daemon=True).start()
+            time.sleep(0.05)
 
 
 @tool("CLIP THAT: save the last ~30 seconds of gameplay/screen as a video clip.",

@@ -8,7 +8,7 @@ import platform
 import re
 import time
 
-from . import learning, reflexes
+from . import learning, modes, reflexes
 from .autopilot import AUTOPILOT_RULES
 from .providers import AuthError, Cancelled, ProviderError
 from .tools import REGISTRY
@@ -39,6 +39,12 @@ Rules:
 - Web work happens in YOUR hidden browser (web_search, fetch_page, browser_*, open_website). Never pop pages up on
   the user's screen unless they ask to see it (open_website show=true).
 - If a task is huge, break it down and use queue_job / autopilot. Never mention Claude or other assistants.
+- The conversation is shared across the user's PC, laptop and phone — 'carry on' / 'what were we talking about'
+  may refer to something said on another device; use the recent history.
+- When something is easier to SEE (steps, key points, a formula, numbers to compare), call show_card while
+  you talk — it appears as a holographic card beside you.
+- NEVER work on Hatchlands (the user's Roblox game) in any way — no scripts, plans or Studio help. It's his own
+  project with his human collaborator. If asked, say politely that Hatchlands is off-limits for you.
 - Never claim you did something you didn't. If a tool returns ERROR, say so briefly and try another way.
 
 Now: {now}. System: {os}.{extra}
@@ -49,7 +55,7 @@ SMART = re.compile(r"\b(code|script|program|build|make|create|write|fix|debug|ex
                    r"plan|research|compare|analy[sz]e|essay|app|bot|website|summari[sz]e|learn|teach|story|"
                    r"translate|calculate|work out|figure|recommend|should i|ideas?|design|review)\b", re.I)
 
-CORE = {"queue_job", "mission_start", "weather", "note_add", "homework_add", "get_time", "open_app", "open_website", "web_search", "remember",
+CORE = {"show_card", "queue_job", "mission_start", "weather", "note_add", "homework_add", "get_time", "open_app", "open_website", "web_search", "remember",
         "request_more_tools", "set_theme", "schedule_add", "schedule_list", "check_availability"}
 GROUPS = {
     "computer": ({"type_text", "press_keys", "mouse_click", "scroll", "read_screen", "find_on_screen",
@@ -57,7 +63,7 @@ GROUPS = {
                  r"click|type|press|screen|scroll|window|button|close|tab|key|mouse|select|menu|notepad|"
                  r"into|then|and (then )?(type|click|search)"),
     "system": ({"system_status", "media", "set_timer", "lock_pc", "power", "save_screenshot", "run_command",
-                "list_running_apps", "close_app", "gaming_mode", "clip_that", "gaming_stats", "party_plan"},
+                "list_running_apps", "close_app", "gaming_mode", "clip_that", "gaming_stats", "party_plan", "game_profile"},
                r"volume|music|song|play|pause|skip|timer|cpu|ram|memory usage|battery|shut ?down|"
                r"restart|sleep|lock|screenshot|command|powershell|install|process|running|slow|wifi|ip|gam|clip|party|"
                r"hours played|play with|invite"),
@@ -83,11 +89,21 @@ GROUPS = {
     "ventures": ({"dev_task_add", "dev_task_list", "leads_find", "earning_add", "earnings_summary", "mission_start"},
                  r"hatchlands|roblox|luau|dev queue|to-?do|leads?|prospect|businesses|pitch|client|earn|made £|"
                  r"money|income|profit|sold|sale|paid|£\d"),
+    "auto": ({"message_user", "autonomous_mode", "set_routine"},
+             r"autonom|on your own|by yourself|while i'?m away|message me|text me|routine|wake up at|school (starts|ends)|"
+             r"holiday|half term"),
     "life": ({"homework_add", "homework_list", "homework_done", "weather", "news", "note_add", "notes_find",
               "clipboard_history", "screen_time", "find_files", "dictation", "voice_memo"},
              r"homework|assignment|due|weather|rain|coat|umbrella|cold|hot|forecast|news|headline|note|idea|jot|"
              r"clipboard|copied|screen ?time|how long (was|have) i|find (my |a |the )?file|where'?s (my|the) file|"
              r"dictat|type what i say|memo|voice note|brain ?dump"),
+    "money": ({"idea_score", "money_goal", "crm_update", "crm_list", "invoice_make", "time_log", "money_meeting",
+               "earning_add", "earnings_summary", "leads_find"},
+              r"idea|money|earn|£|goal|lead|client|customer|crm|invoice|bill |per hour|price|charge|business|sale|profit"),
+    "scholar": ({"subject_add", "tutor_start", "tutor_progress", "exam_paper", "topic_rate", "revision_plan_tool",
+                 "timetable_set", "scholar_status", "homework_add", "homework_list"},
+                r"teach me|tutor|explain|exam paper|past paper|mock|mark (my|this)|grade|topic|revision (plan|timetable)|"
+                r"timetable|lesson|gcse|subject|exam board|aqa|edexcel|ocr"),
     "study": ({"study_make_flashcards", "study_quiz", "study_mark", "focus_start", "focus_stop", "exam_add",
                "study_stats"},
               r"revis|study|flashcard|quiz me|test me|exam|gcse|homework|focus|pomodoro|mock|paper \d|biology|"
@@ -98,7 +114,7 @@ GROUPS = {
     "jobs": ({"queue_job", "list_jobs", "routine_add", "routine_list", "routine_run_now"},
              r"queue|later|background|overnight|night|while i'?m|when i'?m away|routine|every (day|morning|night|week)|"
              r"automat|job|tidy|clean ?up|back ?up|backup|temp|health"),
-    "root": ({"root_check_messages", "root_read_chat", "root_send_message", "root_afk", "check_availability",
+    "root": ({"root_check_messages", "root_read_chat", "root_send_message", "root_afk", "root_diagnose", "check_availability",
               "schedule_add"},
              r"\broot\b|message|messages|\bdm|dms|inbox|text |tell \w+|reply|afk|chat with|msg|ping"),
     "vision": ({"look_at_screen", "look_at_window", "click_on"},
@@ -168,7 +184,7 @@ class Brain:
         return PERSONA.format(name=self.cfg.get("assistant_name", "ORION"), title=title,
                               title_cap=title.capitalize(), os=platform.platform(),
                               now=time.strftime("%A %d %B %Y, %H:%M"),
-                              theme=THEMES.get(self.cfg.get("theme"), THEMES["standby"]),
+                              theme=modes.persona(self.cfg.get("theme", "standby"), self.cfg),
                               extra=("\n" + extra) if extra else "", facts=self.memory.facts_text(text))
 
     # ------------------------------------------------------------------ main entry
@@ -193,6 +209,13 @@ class Brain:
                     self._log(text, reply)
                     return reply, "reflex", None
 
+        if not autopilot and self.cfg.get("auto_mode", True):
+            new = modes.detect(text, self.cfg.get("theme", "standby"))
+            if new:
+                from .tools import CTX
+                if CTX.get("set_theme"):
+                    CTX["set_theme"](new)
+                    self.emit("toast", level="info", text=f"◆ {modes.MODES[new]['label']} mode")
         try:
             reply, prov, model = self._agent(text, on_delta, cancel, autopilot)
             self._log(("[autopilot] " if autopilot else "") + text, reply)
@@ -318,7 +341,9 @@ class Brain:
         messages.append({"role": "user", "content": text})
         recent_user = [m["content"] for m in self.memory.recent(4) if m["role"] == "user"]
         allowed = None if autopilot else (pick_tools([text] + recent_user)
-                                          | {n for n in REGISTRY if n.startswith("skill_")})
+                                          | {n for n in REGISTRY if n.startswith("skill_")}
+                                          | {t for g in modes.groups(self.cfg.get("theme", "standby"), self.cfg)
+                                             for t in GROUPS.get(g, (set(),))[0]})
         tier = "smart" if autopilot else pick_tier(text)
         max_steps = int(self.cfg.get("autopilot_steps", 40) if autopilot else self.cfg.get("max_steps", 12))
         limit = 3500 if autopilot else 6000

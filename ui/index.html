@@ -12,6 +12,7 @@
 body[data-theme=serious]{--a:#ff3d4a;--a2:#ff9096;--ar:255,61,74;--think:#ff9a3c;--thinkr:255,154,60;--listen:#ffffff;--listenr:255,255,255;--tint:110,15,20}
 body[data-theme=stealth]{--a:#b9c4cc;--a2:#eef3f6;--ar:185,196,204;--think:#7fa7c4;--thinkr:127,167,196;--listen:#ffffff;--listenr:255,255,255;--tint:40,45,50}
 body[data-theme=executive]{--a:#e9b949;--a2:#ffe29a;--ar:233,185,73;--think:#ffffff;--thinkr:255,255,255;--listen:#ff6b6b;--listenr:255,107,107;--tint:90,65,15}
+body[data-theme=scholar]{--a:#b48cff;--a2:#dcc6ff;--ar:180,140,255;--think:#ffd36b;--thinkr:255,211,107;--listen:#ff6fb5;--listenr:255,111,181;--tint:60,30,110}
 body[data-theme=hacker]{--a:#2bff88;--a2:#a6ffcf;--ar:43,255,136;--think:#d4ff3b;--thinkr:212,255,59;--listen:#ff3bd4;--listenr:255,59,212;--tint:10,70,35}
 body{--bg:#02050a;--text:#d9f2ff;--dim:#6f93a8;--faint:#2a4556;--green:#5dffb0;--amber:#ffb347;--red:#ff4f7b;--violet:#c58bff;
   --line:rgba(var(--ar),.13);--line2:rgba(var(--ar),.3);--glass:rgba(7,18,30,.62);--glass2:rgba(10,26,42,.78);
@@ -376,6 +377,95 @@ body.lite .reactor .rseg{animation:none}
 .hw.done{opacity:.45}.hw.done .g b{text-decoration:line-through}
 .cb{padding:7px 9px;border:1px solid var(--line);border-radius:5px;margin-bottom:6px;font:12px/1.4 var(--mono);color:var(--text);cursor:pointer;white-space:pre-wrap;word-break:break-word;max-height:62px;overflow:hidden}
 .cb:hover{border-color:var(--a);background:rgba(var(--ar),.08)}.cb small{float:right;color:var(--faint);margin-left:8px}
+
+/* ======================= v4: HOLOGRAPHIC CARDS + LIVE VIEW ======================= */
+#holo{position:absolute;inset:0;pointer-events:none;z-index:4}
+.hcard{position:absolute;width:min(300px,38%);pointer-events:auto;background:linear-gradient(160deg,rgba(var(--ar),.16),rgba(3,12,22,.88) 60%);
+  border:1px solid rgba(var(--ar),.55);border-radius:10px;padding:12px 14px 13px;box-shadow:0 0 30px rgba(var(--ar),.25),inset 0 0 22px rgba(var(--ar),.08);
+  backdrop-filter:blur(6px);transform-origin:center left;animation:holoin .55s cubic-bezier(.2,.9,.2,1) both;overflow:hidden}
+.hcard::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(var(--ar),.06) 0 1px,transparent 1px 4px);pointer-events:none;mix-blend-mode:screen}
+.hcard::after{content:"";position:absolute;left:-40%;top:0;width:40%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.12),transparent);animation:shine 2.2s .3s ease-out}
+.hcard.out{animation:holoout .45s ease-in forwards}
+.hcard h6{font:700 10px var(--ui);letter-spacing:.28em;color:var(--a2);margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.hcard h6 span{display:flex;gap:4px}.hcard h6 button{background:none;border:0;color:var(--dim);cursor:pointer;font-size:12px;padding:0 2px}
+.hcard h6 button:hover{color:var(--a2)}.hcard.pinned{border-color:var(--a2)}
+.hcard ul{list-style:none;font-size:13.5px;line-height:1.4}.hcard li{padding:3px 0 3px 16px;position:relative;animation:rise .4s both}
+.hcard li::before{content:"▸";position:absolute;left:0;color:var(--a)}
+.hcard ol{font-size:13.5px;line-height:1.4;padding-left:20px}.hcard ol li{padding-left:2px}.hcard ol li::before{display:none}
+.hcard pre{font:11.5px/1.45 var(--mono);color:#cfe7f5;max-height:200px;overflow:auto;white-space:pre-wrap;margin:0}
+.hcard p{font-size:13px;line-height:1.45;color:var(--text);white-space:pre-wrap;max-height:220px;overflow:auto}
+.hcard .hbar{margin:5px 0}.hcard .hbar b{width:90px;font-size:12px}
+.hwx{display:flex;align-items:center;gap:12px}.hwx .i{font-size:40px;filter:drop-shadow(0 0 10px rgba(var(--ar),.6))}.hwx b{font:500 28px var(--mono)}
+.hwx small{display:block;color:var(--dim);font-size:12px}
+@keyframes holoin{0%{opacity:0;transform:perspective(600px) rotateY(-35deg) translateX(-30px) scale(.85);filter:blur(6px) brightness(2)}
+  60%{opacity:1;filter:blur(0) brightness(1.4)}100%{opacity:1;transform:none;filter:none}}
+@keyframes holoout{to{opacity:0;transform:perspective(600px) rotateY(25deg) translateX(30px) scale(.9);filter:blur(4px)}}
+@keyframes shine{to{left:120%}}
+#liveview{position:absolute;inset:0 0 30px;display:none;flex-direction:column;z-index:5}
+#liveview.show{display:flex;animation:fadein .25s}
+#liveview .ph b{color:var(--a2);font-family:var(--mono);letter-spacing:0;font-weight:500;max-width:46vw;overflow:hidden;text-overflow:ellipsis;display:inline-block;vertical-align:bottom}
+.ldot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#ff4f7b;box-shadow:0 0 10px #ff4f7b;animation:blink2 1s infinite;margin-right:4px}
+.lvbody{flex:1;position:relative;min-height:0;display:grid;place-items:center;padding:10px;overflow:hidden}
+.lvbody img{max-width:100%;max-height:100%;border-radius:6px;border:1px solid var(--line2);box-shadow:0 0 40px rgba(var(--ar),.2);transition:opacity .25s}
+.lvcap{position:absolute;left:50%;bottom:22px;transform:translateX(-50%);background:rgba(3,10,18,.88);border:1px solid var(--a);color:var(--a2);
+  font:600 12px var(--mono);padding:6px 14px;border-radius:999px;white-space:nowrap;max-width:90%;overflow:hidden;text-overflow:ellipsis;box-shadow:0 0 20px rgba(var(--ar),.35)}
+.lvurl{font:11px var(--mono);color:var(--faint);padding:0 14px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* ---- v4 pages ---- */
+.tile.s9{grid-column:span 9}
+.cal{display:grid;grid-template-columns:44px repeat(7,minmax(0,1fr));position:relative;user-select:none}
+.cal .ch{font:700 10px var(--ui);letter-spacing:.2em;color:var(--dim);text-align:center;padding:4px 0 8px}
+.cal .ch.today{color:var(--a2);text-shadow:0 0 10px rgba(var(--ar),.7)}
+.cal .hrs{position:relative}.cal .hr{height:34px;font:10px var(--mono);color:var(--faint);text-align:right;padding-right:6px;transform:translateY(-6px)}
+.cal .col{position:relative;border-left:1px solid var(--line);background:repeating-linear-gradient(180deg,transparent 0 33px,rgba(var(--ar),.07) 33px 34px)}
+.cal .col.today{background-color:rgba(var(--ar),.04)}.cal .col.drop{background-color:rgba(var(--ar),.12)}
+.cal .school{position:absolute;left:0;right:0;background:repeating-linear-gradient(135deg,rgba(255,255,255,.025) 0 6px,transparent 6px 12px);border-top:1px dashed var(--line2);border-bottom:1px dashed var(--line2)}
+.cal .school span{position:absolute;top:2px;left:4px;font:9px var(--mono);color:var(--faint);letter-spacing:.1em}
+.cal .ev{position:absolute;left:3px;right:3px;border-radius:5px;padding:3px 6px;font-size:11.5px;line-height:1.2;overflow:hidden;cursor:grab;
+  background:linear-gradient(160deg,rgba(var(--ar),.35),rgba(var(--ar),.15));border:1px solid rgba(var(--ar),.6);color:#eaf8ff;box-shadow:0 0 12px rgba(var(--ar),.2)}
+.cal .ev small{display:block;font:9.5px var(--mono);opacity:.75;white-space:nowrap;overflow:hidden}
+.cal .ev.revision{background:linear-gradient(160deg,rgba(180,140,255,.4),rgba(180,140,255,.15));border-color:rgba(180,140,255,.7)}
+.cal .ev.party{background:linear-gradient(160deg,rgba(197,139,255,.35),rgba(255,111,181,.2));border-color:rgba(255,111,181,.6)}
+.cal .ev.clash{border-color:var(--red);box-shadow:0 0 12px rgba(255,79,123,.45)}
+.cal .now{position:absolute;left:0;right:0;height:2px;background:var(--red);box-shadow:0 0 8px var(--red);z-index:3}
+.subjects{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px}
+.subj{border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:rgba(0,0,0,.18)}
+.subj h4{font-size:14px;display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px}
+.subj h4 small{font:10px var(--mono);color:var(--dim)}.subj .grade{font:600 18px var(--mono);color:var(--a2)}
+.tpc{display:inline-block;font-size:11.5px;padding:3px 8px;margin:2px;border-radius:999px;border:1px solid var(--line2);cursor:pointer;color:var(--dim)}
+.tpc.red{color:#ff9fb6;border-color:rgba(255,79,123,.55);background:rgba(255,79,123,.1)}.tpc.amber{color:var(--amber);border-color:rgba(255,179,71,.5);background:rgba(255,179,71,.08)}
+.tpc.green{color:var(--green);border-color:rgba(93,255,176,.45);background:rgba(93,255,176,.08)}
+.trend{display:flex;align-items:flex-end;gap:3px;height:34px;margin-top:6px}.trend i{flex:1;background:var(--a);border-radius:2px 2px 0 0;opacity:.8;min-height:2px}
+.paper{display:flex;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}.paper b{flex:1;font-weight:600}.paper .g{font:600 16px var(--mono);color:var(--a2);width:38px;text-align:center}
+.ttgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}.ttgrid div b{display:block;font:700 10px var(--ui);letter-spacing:.2em;color:var(--a2);margin-bottom:4px}
+.kanban{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}.kcol{background:rgba(0,0,0,.2);border:1px solid var(--line);border-radius:6px;padding:6px;min-height:80px}
+.kcol>b{display:block;font:700 9.5px var(--ui);letter-spacing:.2em;color:var(--dim);margin-bottom:6px}.kcol.drop{border-color:var(--a)}
+.kcard{background:rgba(var(--ar),.1);border:1px solid var(--line2);border-radius:5px;padding:6px 8px;margin-bottom:6px;font-size:12.5px;cursor:grab}
+.kcard small{display:block;color:var(--dim);font-size:11px}.kcard.due{border-color:var(--amber)}
+.goalbar{height:10px;border-radius:5px;background:rgba(var(--ar),.1);overflow:hidden;margin:4px 0 2px}.goalbar i{display:block;height:100%;background:linear-gradient(90deg,var(--a),var(--green));box-shadow:0 0 10px rgba(var(--ar),.6)}
+.idea{border-left:3px solid var(--line2);padding:5px 9px;margin-bottom:7px;font-size:12.5px;background:rgba(0,0,0,.15)}.idea.go{border-color:var(--green)}.idea.drop{border-color:var(--red)}.idea.maybe{border-color:var(--amber)}
+.idea b{font-size:13px}.idea small{display:block;color:var(--dim)}
+.modal.exam{width:min(980px,96vw);max-height:94vh;display:flex;flex-direction:column;padding:0}
+.examtop{display:flex;align-items:center;gap:14px;padding:16px 22px;border-bottom:1px solid var(--line)}.examtop h2{flex:1;margin:0}
+.extimer{font:500 26px var(--mono);color:var(--a2);text-shadow:0 0 14px rgba(var(--ar),.6)}.extimer.low{color:var(--red)}
+#exBody{flex:1;overflow:auto;padding:16px 22px}.exq{margin-bottom:18px}.exq p{font-size:15px;line-height:1.5;margin-bottom:6px}.exq p b{color:var(--a2)}
+.exq textarea{width:100%;min-height:70px;background:rgba(0,0,0,.35);border:1px solid var(--line2);color:var(--text);font:14px var(--ui);padding:8px 10px;border-radius:4px;user-select:text}
+.exres{border-left:3px solid var(--green);padding:6px 10px;margin-top:6px;background:rgba(93,255,176,.05);font-size:13px;line-height:1.45}.exres.lost{border-color:var(--amber);background:rgba(255,179,71,.05)}
+.exres em{display:block;font-style:normal;color:var(--dim);margin-top:4px}
+.exfoot{display:flex;align-items:center;gap:10px;padding:12px 22px;border-top:1px solid var(--line)}
+.autofeed .li{font-size:12.5px}.autofeed .li .t{width:70px}
+.hero{display:grid;grid-template-columns:auto 1fr auto;gap:22px;align-items:center;margin-bottom:14px;padding:16px 20px;border-radius:10px;position:relative;overflow:hidden;
+  border:1px solid var(--line2);background:radial-gradient(ellipse 60% 140% at 0% 50%,rgba(var(--ar),.22),transparent 70%),linear-gradient(90deg,rgba(0,0,0,.3),rgba(var(--ar),.05))}
+.hero::after{content:"";position:absolute;inset:-2px;border-radius:12px;padding:1px;background:conic-gradient(from var(--ang,0deg),transparent 0 70%,var(--a) 85%,transparent 100%);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:spinang 6s linear infinite;pointer-events:none}
+@property --ang{syntax:"<angle>";initial-value:0deg;inherits:false}@keyframes spinang{to{--ang:360deg}}
+.hero .clk{font:200 52px var(--mono);letter-spacing:-.02em;color:var(--text);text-shadow:0 0 30px rgba(var(--ar),.5);line-height:1}
+.hero .clk small{display:block;font:600 11px var(--ui);letter-spacing:.3em;color:var(--dim);margin-top:6px}
+.hero .hl{font-size:20px;font-weight:600}.hero .hl small{display:block;font-size:13.5px;color:var(--dim);font-weight:500;margin-top:4px}
+.hero .chips2{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.hero .chips2 span{font:600 11px var(--ui);letter-spacing:.14em;padding:6px 11px;border-radius:999px;border:1px solid var(--line2);background:rgba(0,0,0,.25)}
+.tile:hover{border-color:var(--line2);box-shadow:0 0 24px rgba(var(--ar),.08)}
+.cup{display:inline-block}
 /* ======================= v3: WIDE PAGES + DASHBOARD ======================= */
 .dock{gap:4px;overflow-y:auto;overflow-x:hidden}.dock::-webkit-scrollbar{width:0}
 .nav{width:44px;height:42px;flex:none}
@@ -517,11 +607,12 @@ body.lite .r1,body.lite .r4,body.lite .r6{animation:none}
       <div class="brand"><h1 id="name">ORION</h1><small>PERSONAL INTELLIGENCE SYSTEM</small></div>
       <div class="seg" id="brains" title="Which brain to use"><button data-m="auto">AUTO</button><button data-m="cloud">CLOUD</button><button data-m="local">LOCAL</button></div>
       <div class="themes" id="themes">
-        <button data-t="standby" style="background:#3fd8ff;color:#3fd8ff" title="Standby"></button>
-        <button data-t="serious" style="background:#ff3d4a;color:#ff3d4a" title="Serious"></button>
-        <button data-t="stealth" style="background:#b9c4cc;color:#b9c4cc" title="Stealth"></button>
-        <button data-t="executive" style="background:#e9b949;color:#e9b949" title="Executive"></button>
-        <button data-t="hacker" style="background:#2bff88;color:#2bff88" title="Hacker"></button>
+        <button data-t="standby" style="background:#3fd8ff;color:#3fd8ff" title="Standby — butler"></button>
+        <button data-t="serious" style="background:#ff3d4a;color:#ff3d4a" title="Serious — get it done"></button>
+        <button data-t="stealth" style="background:#b9c4cc;color:#b9c4cc" title="Stealth — gaming &amp; night"></button>
+        <button data-t="executive" style="background:#e9b949;color:#e9b949" title="CEO — money"></button>
+        <button data-t="scholar" style="background:#b48cff;color:#b48cff" title="Scholar — school"></button>
+        <button data-t="hacker" style="background:#2bff88;color:#2bff88" title="Hacker — coding"></button>
       </div>
       <div class="spacer"></div>
       <div class="chip" id="apchip"><i></i>AUTOPILOT</div>
@@ -600,6 +691,12 @@ body.lite .r1,body.lite .r4,body.lite .r6{animation:none}
           </svg>
         </div>
         <div class="substatus"><b id="statusline">ALL SYSTEMS NOMINAL</b><span id="statusdetail">awaiting instruction</span></div>
+        <div id="holo"></div>
+        <div class="panel" id="liveview">
+          <div class="ph"><span><i class="ldot"></i> LIVE · <b id="lvTitle">—</b></span><span><button id="lvPin">PIN</button> <button id="lvClose">◉ CORE</button></span></div>
+          <div class="lvbody"><img id="lvImg" alt=""><div class="lvcap" id="lvCap">—</div></div>
+          <div class="lvurl" id="lvUrl"></div>
+        </div>
         <div class="panel" id="codeview">
           <div class="ph">CODE · <b id="cvpath">—</b><span><button id="cvcopy">COPY</button> <button id="cvclose">◉ CORE</button></span></div>
           <pre id="cvcode"></pre>
@@ -659,17 +756,25 @@ body.lite .r1,body.lite .r4,body.lite .r6{animation:none}
           </div>
         </div>
         <!-- SCHEDULE -->
-        <div class="page" id="page-sched">
-          <div class="ph">SCHEDULE <i>NEXT 14 DAYS</i></div>
-          <div class="scroll"><div class="busyban" id="busyban"></div><div id="evlist"></div></div>
-          <div class="addev">
-            <input class="inp full" id="evTitle" placeholder="Title — e.g. Gaming with Sam">
-            <input class="inp" type="date" id="evDate"><input class="inp" type="time" id="evTime" value="19:00">
-            <select class="inp" id="evDur"><option value="30">30 min</option><option value="60" selected>1 hour</option><option value="90">1.5 hours</option><option value="120">2 hours</option><option value="180">3 hours</option></select>
-            <select class="inp" id="evRep"><option value="none">One-off</option><option value="daily">Daily</option><option value="weekdays">Weekdays</option><option value="weekly">Weekly</option></select>
-            <input class="inp" id="evWith" placeholder="With (optional)">
-            <label><input type="checkbox" id="evBusy"> Busy / DND</label>
-            <button class="btn small full" id="evAdd">+ ADD TO SCHEDULE</button>
+        <div class="page" id="page-sched" data-wide="1">
+          <div class="scroll">
+            <div class="wtitle"><h2>SCHEDULE</h2><span id="calSub">drag events to move them</span>
+              <span style="margin-left:auto;display:flex;gap:6px"><button class="mini" id="calPrev">‹ PREV</button><button class="mini" id="calToday">THIS WEEK</button><button class="mini" id="calNext">NEXT ›</button></span></div>
+            <div class="busyban" id="busyban"></div>
+            <div class="dgrid">
+              <div class="tile s9" style="padding:10px 10px 6px"><div class="cal" id="cal"></div></div>
+              <div class="tile s3"><h5>ADD</h5>
+                <div class="addev" style="border:0;padding:0;grid-template-columns:1fr 1fr">
+                  <input class="inp full" id="evTitle" placeholder="Title — e.g. Gaming with Sam">
+                  <input class="inp" type="date" id="evDate"><input class="inp" type="time" id="evTime" value="19:00">
+                  <select class="inp" id="evDur"><option value="30">30 min</option><option value="60" selected>1 hour</option><option value="90">1.5 hours</option><option value="120">2 hours</option><option value="180">3 hours</option></select>
+                  <select class="inp" id="evRep"><option value="none">One-off</option><option value="daily">Daily</option><option value="weekdays">Weekdays</option><option value="weekly">Weekly</option></select>
+                  <input class="inp full" id="evWith" placeholder="With (optional)">
+                  <label class="full"><input type="checkbox" id="evBusy"> Busy / Do not disturb</label>
+                  <button class="btn small full" id="evAdd">+ ADD TO SCHEDULE</button>
+                </div>
+                <h5 style="margin-top:14px">UPCOMING</h5><div id="evlist" style="max-height:34vh;overflow:auto"></div></div>
+            </div>
           </div>
         </div>
         <!-- ROOT -->
@@ -721,6 +826,18 @@ body.lite .r1,body.lite .r4,body.lite .r6{animation:none}
           <div class="scroll" id="devscroll">
             <div class="card"><h4>PHONE &amp; LAPTOP ACCESS <button class="btn small" id="remBtn">TURN ON</button></h4>
               <p id="remInfo">Control this PC's ORION from your phone or laptop — anywhere, using Tailscale (free, private).</p></div>
+            <div class="card"><h4>ONE BRAIN · LINK TO GAMING PC <span class="pill" id="lkPill">OFF</span></h4>
+              <p>On your <b>laptop</b>: link it to the gaming PC and both share one conversation. Close the PC, open the laptop, say “carry on”.</p>
+              <div class="voicerow" style="margin-top:8px"><input class="inp" id="lkAddr" placeholder="PC address — e.g. 100.84.12.7"><input class="inp" id="lkPin" placeholder="PIN" style="width:100px;flex:none"><button class="btn small" id="lkSave">LINK</button></div>
+              <p style="margin-top:6px;font-size:12px" id="lkInfo"></p></div>
+            <div class="card"><h4>AUTONOMOUS MODE <button class="btn small" id="auNow">RUN NOW</button></h4>
+              <p>When you've been away, ORION gets on with useful things by itself and messages or rings your phone if something matters.</p>
+              <label class="tog"><input type="checkbox" id="auOn"> Autonomous mode on</label>
+              <div class="voicerow" style="align-items:center;font-size:13.5px;color:var(--dim)">Start after <input class="inp" type="number" id="auIdle" min="5" style="width:70px"> min away, then every <input class="inp" type="number" id="auEvery" min="15" style="width:70px"> min</div></div>
+            <div class="card"><h4>MY DAY</h4>
+              <div class="two"><div class="field"><label>WAKE UP</label><input type="time" id="dyWake"></div><div class="field"><label>PC USUALLY OFF</label><input type="time" id="dyOff"></div>
+                <div class="field"><label>SCHOOL STARTS</label><input type="time" id="dyStart"></div><div class="field"><label>SCHOOL ENDS</label><input type="time" id="dyEnd"></div></div>
+              <label class="tog"><input type="checkbox" id="dyHol"> School holidays (no school-day routines)</label></div>
             <div class="card"><h4>CALLS FROM ORION <span><button class="btn small" id="callMe">📞 CALL ME</button> <button class="btn small" id="ringPhone">📢 FIND PHONE</button></span></h4>
               <p>ORION rings your phone (full-screen call, even with the app closed) when…</p>
               <label class="tog"><input type="checkbox" id="clJobs"> A job finishes</label>
@@ -746,8 +863,13 @@ body.lite .r1,body.lite .r4,body.lite .r6{animation:none}
         <!-- DASHBOARD -->
         <div class="page" id="page-dash" data-wide="1">
           <div class="scroll">
-            <div class="wtitle"><h2>DASHBOARD</h2><span id="dashSub">—</span></div>
+            <div class="hero"><div class="clk" id="hClock">--:--<small id="hDate">—</small></div>
+              <div class="hl" id="dashSub">—<small id="hLine">—</small></div>
+              <div class="chips2" id="hChips"></div></div>
             <div class="dgrid">
+              <div class="tile s4"><h5>MONEY GOAL <button class="mini" data-go="ventures">CEO ›</button></h5><div id="dGoal"><div class="empty">Set a goal on the Ventures page.</div></div></div>
+              <div class="tile s4"><h5>GRADES <button class="mini" data-go="study">SCHOLAR ›</button></h5><div id="dGrades"><div class="empty">Sit a paper in the Exam Hall.</div></div></div>
+              <div class="tile s4 autofeed"><h5>ORION ON ITS OWN <i id="dAuto">—</i></h5><div id="dAutoList"><div class="empty">Nothing yet — I get to work after you've been away a while.</div></div></div>
               <div class="tile s5"><h5>SYSTEM <i id="dUp">—</i></h5>
                 <div class="rings"><div><div class="ring" id="rCpu"><b>0%</b></div>CPU</div><div><div class="ring" id="rRam"><b>0%</b></div>RAM</div><div><div class="ring" id="rDisk"><b>0%</b></div>DISK</div></div></div>
               <div class="tile s7"><h5>LIVE LOAD <i>LAST 2 MIN</i></h5><canvas id="dLoad" style="height:110px"></canvas></div>
@@ -768,8 +890,20 @@ body.lite .r1,body.lite .r4,body.lite .r6{animation:none}
         <!-- STUDY -->
         <div class="page" id="page-study" data-wide="1">
           <div class="scroll">
-            <div class="wtitle"><h2>STUDY</h2><span id="stSub">—</span></div>
+            <div class="wtitle"><h2>SCHOLAR</h2><span id="stSub">—</span></div>
             <div class="dgrid">
+              <div class="tile s8"><h5>EXAM HALL <i id="ehInfo">—</i></h5>
+                <div class="voicerow" style="margin-bottom:8px"><select class="inp" id="ehSub" style="flex:none;width:190px"></select><input class="inp" id="ehTopics" placeholder="Topics (blank = your weakest)"><select class="inp" id="ehMarks" style="flex:none;width:110px"><option value="20">20 marks</option><option value="30" selected>30 marks</option><option value="50">50 marks</option><option value="80">80 marks</option></select><button class="btn small" id="ehGo" style="height:36px">✦ NEW PAPER</button></div>
+                <div id="ehPapers"><div class="empty">Add your subjects, then sit your first paper. Every result is remembered and feeds your revision plan.</div></div></div>
+              <div class="tile s4"><h5>TUTOR</h5>
+                <input class="inp" id="tuTopic" placeholder="Teach me… e.g. covalent bonding" style="margin-bottom:8px">
+                <button class="btn wide" id="tuGo">🎓 START LESSON</button>
+                <div class="sub2" style="margin-top:8px">Explains step by step, checks you've got it, and remembers what you struggled with. Works by voice too: “teach me photosynthesis”.</div>
+                <h5 style="margin-top:14px">RETRY THESE <i id="msN"></i></h5><div id="msList"><div class="empty">Questions you drop marks on come back here a week later.</div></div></div>
+              <div class="tile s12"><h5>SUBJECTS &amp; TOPICS <i>CLICK A TOPIC TO CHANGE RED → AMBER → GREEN</i></h5>
+                <div class="voicerow" style="margin-bottom:10px"><input class="inp" id="sbName" placeholder="Subject — e.g. Biology"><input class="inp" id="sbBoard" placeholder="Exam board (if you know)" style="flex:none;width:200px"><input class="inp" id="sbTarget" placeholder="Target" style="flex:none;width:90px"><button class="btn small" id="sbAdd" style="height:36px">+ ADD</button><button class="btn small" id="rpGo" style="height:36px">📅 BUILD REVISION TIMETABLE</button></div>
+                <div id="sbList" class="subjects"><div class="empty">No subjects yet.</div></div></div>
+              <div class="tile s12"><h5>SCHOOL TIMETABLE</h5><div class="ttgrid" id="ttGrid"></div></div>
               <div class="tile s4"><h5>FOCUS</h5>
                 <div class="timer"><div class="ring" id="fRing"><b id="fTime">25:00</b></div><div class="ph2" id="fPhase">READY</div>
                   <input class="inp" id="fSubj" placeholder="What are you revising?">
@@ -824,7 +958,7 @@ body.lite .r1,body.lite .r4,body.lite .r6{animation:none}
         <!-- VENTURES -->
         <div class="page" id="page-ventures" data-wide="1">
           <div class="scroll">
-            <div class="wtitle"><h2>VENTURES</h2><span>money, projects and leads</span></div>
+            <div class="wtitle"><h2>CEO · VENTURES</h2><span>everything here is about one thing: making you money</span></div>
             <div class="dgrid">
               <div class="tile s4"><h5>THIS MONTH</h5><div class="big" id="vMonth">£0</div><div class="sub2" id="vTotal">All time £0</div>
                 <div class="voicerow" style="margin-top:10px"><select class="inp" id="vVen"></select><input class="inp" id="vAmt" type="number" step="0.01" placeholder="£" style="width:90px"></div>
@@ -832,7 +966,7 @@ body.lite .r1,body.lite .r4,body.lite .r6{animation:none}
               <div class="tile s4"><h5>LAST 6 MONTHS</h5><div class="bars withlbl" id="vMonths" style="height:110px"></div></div>
               <div class="tile s4"><h5>BY VENTURE</h5><div id="vBy"><div class="empty">Log your first £ to see this.</div></div></div>
               <div class="tile s7"><h5>DEV QUEUE <i>BUILT OVERNIGHT</i></h5>
-                <div class="voicerow" style="margin-bottom:8px"><input class="inp" id="dvTask" placeholder="e.g. a pet hatching system with rarity tiers and a hatch animation"><input class="inp" id="dvProj" value="Hatchlands" style="width:130px"><button class="btn small" id="dvAdd" style="height:36px">ADD</button></div>
+                <div class="voicerow" style="margin-bottom:8px"><input class="inp" id="dvTask" placeholder="e.g. a Discord bot that posts my new videos"><input class="inp" id="dvProj" value="Projects" style="width:130px"><button class="btn small" id="dvAdd" style="height:36px">ADD</button></div>
                 <div id="dvList"><div class="empty">Nothing queued. Night Shift builds these while you sleep and saves the scripts for you to check.</div></div></div>
               <div class="tile s5"><h5>LEAD FINDER <i>AUTOMATION SERVICES</i></h5>
                 <div class="voicerow" style="margin-bottom:6px"><input class="inp" id="ldType" placeholder="Business type — e.g. barbers"><input class="inp" id="ldArea" placeholder="Area" value="Leicester" style="width:130px"></div>
@@ -840,6 +974,18 @@ body.lite .r1,body.lite .r4,body.lite .r6{animation:none}
                 <button class="btn wide" id="ldGo">🔎 FIND LEADS &amp; DRAFT EMAILS</button>
                 <div class="sub2">Runs in the background. Saves a spreadsheet + personalised email drafts to Documents › ORION Leads. Nothing is sent.</div>
                 <label class="tog" style="margin-top:12px"><input type="checkbox" id="vContent"> Content pipeline <small>— new videos become captioned Shorts + titles overnight</small></label></div>
+              <div class="tile s4"><h5>MONEY GOALS</h5><div id="gGoals"><div class="empty">No goals yet.</div></div>
+                <div class="voicerow" style="margin-top:8px"><input class="inp" id="gName" placeholder="e.g. Summer fund"><input class="inp" id="gAmt" type="number" placeholder="£" style="flex:none;width:80px"><input class="inp" id="gBy" type="date" style="flex:none;width:140px"><button class="btn small" id="gAdd" style="height:36px">+</button></div></div>
+              <div class="tile s4"><h5>IDEA SCORER <i>HONEST VERDICTS</i></h5>
+                <textarea class="goal" id="iText" style="min-height:58px;font-size:13px" placeholder="Describe a money idea — ORION scores it on demand, competition, cost, £/week and time to first £"></textarea>
+                <button class="btn wide" id="iGo" style="margin-top:6px">⚖ SCORE IT</button><div id="iList" style="margin-top:8px;max-height:26vh;overflow:auto"></div></div>
+              <div class="tile s4"><h5>£ PER HOUR <button class="mini" id="mmGo">MONEY MEETING</button></h5><div id="phList"><div class="empty">Log time on a venture to see what really pays.</div></div>
+                <div class="voicerow" style="margin-top:8px"><select class="inp" id="phVen" style="min-width:0"></select><input class="inp" id="phMin" type="number" placeholder="mins" style="flex:none;width:80px"><button class="btn small" id="phAdd" style="height:36px">LOG</button></div>
+                <h5 style="margin-top:14px">QUICK INVOICE</h5>
+                <div class="voicerow"><input class="inp" id="invC" placeholder="Client"><input class="inp" id="invD" placeholder="What for"><input class="inp" id="invP" type="number" placeholder="£" style="flex:none;width:70px"><button class="btn small" id="invGo" style="height:36px">🧾</button></div></div>
+              <div class="tile s12"><h5>CLIENTS &amp; LEADS <i id="crmInfo">—</i></h5>
+                <div class="voicerow" style="margin-bottom:10px"><input class="inp" id="crmName" placeholder="Name / business"><input class="inp" id="crmNote" placeholder="Note — e.g. emailed about a booking bot"><input class="inp" id="crmVal" type="number" placeholder="£ value" style="flex:none;width:100px"><button class="btn small" id="crmAdd" style="height:36px">+ ADD LEAD</button></div>
+                <div class="kanban" id="crmBoard"></div></div>
               <div class="tile s12"><h5>RECENT</h5><div id="vRecent"><div class="empty">—</div></div></div>
             </div>
           </div>
@@ -946,10 +1092,24 @@ body.lite .r1,body.lite .r4,body.lite .r6{animation:none}
   <div class="field" style="margin-top:6px"><label>MIC SENSITIVITY <a id="sSensV">1.0×</a></label><input type="range" id="sSens" min="0.5" max="2" step="0.1" style="padding:0;accent-color:var(--a)"></div>
   <h3>BEHAVIOUR</h3>
   <label class="tog"><input type="checkbox" id="sSafe"> Safe mode <small>— ask before risky actions (blocklist + backups are always on)</small></label>
+  <label class="tog"><input type="checkbox" id="sAutoMode"> Switch modes automatically <small>— CEO for money, Scholar for school, Hacker for code…</small></label>
+  <label class="tog"><input type="checkbox" id="sModeVoice"> Each mode has its own voice</label>
+  <label class="tog"><input type="checkbox" id="sSfx"> Interface sounds</label>
   <label class="tog"><input type="checkbox" id="sFs"> Start in fullscreen</label>
   <label class="tog"><input type="checkbox" id="sBoot"> Skip boot animation</label>
   <div class="field" style="margin-top:8px"><label>VISUALS</label><select id="sVis"><option value="auto">Auto — lighter on low-RAM machines</option><option value="full">Full effects</option><option value="lite">Lite — best for old laptops</option></select></div>
+  <h3>MAKE YOUR OWN MODE</h3>
+  <div class="two"><div class="field"><label>NAME</label><input type="text" id="cmName" placeholder="e.g. Content Creator"></div><div class="field"><label>COLOUR</label><input type="color" id="cmCol" value="#ff8bd1" style="height:38px;padding:2px"></div></div>
+  <div class="field"><label>PERSONALITY &amp; JOB</label><input type="text" id="cmPersona" placeholder="e.g. A hype YouTube strategist: scripts, titles, thumbnails, posting plans"></div>
+  <button class="btn small" id="cmAdd">+ ADD MODE</button> <span id="cmList" class="sub2"></span>
   <div class="row2"><button class="btn deny" id="sCancel">CANCEL</button><button class="btn" id="sSave">SAVE</button></div>
+</div></div>
+
+<div class="veil" id="vExam"><div class="modal exam">
+  <div class="examtop"><h2 id="exTitle">EXAM</h2><div class="extimer" id="exTimer">00:00</div><button class="btn small deny" id="exClose">✕ LEAVE</button></div>
+  <div id="exBody"></div>
+  <div class="exfoot"><label class="btn small" style="display:inline-flex;align-items:center;gap:6px">📷 ADD PHOTOS OF HANDWRITTEN WORK<input type="file" id="exPhotos" accept="image/*" multiple style="display:none"></label><span id="exPhN" class="sub2"></span>
+    <span style="flex:1"></span><button class="btn" id="exSubmit">SUBMIT FOR MARKING</button></div>
 </div></div>
 
 <div class="veil" id="vMem"><div class="modal">
@@ -962,7 +1122,7 @@ body.lite .r1,body.lite .r4,body.lite .r6{animation:none}
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 let api=null, cfg={name:"ORION",title:"sir"}, state="idle", busy=false, micOn=false, micLevel=0, audioLevel=0, lite=false, speaking=false;
 let pendingConfirm=null, actN=0, current=null, notes=[], unread=0;
-const THEMES={standby:"STANDBY",serious:"SERIOUS",stealth:"STEALTH",executive:"EXECUTIVE",hacker:"HACKER"};
+const THEMES={standby:"STANDBY",serious:"SERIOUS",stealth:"STEALTH",executive:"CEO",scholar:"SCHOLAR",hacker:"HACKER"};
 const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const hhmm=()=>new Date().toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"});
 
@@ -1004,6 +1164,18 @@ window.ui={event(e){ switch(e.kind){
   case "routines_changed": if($("#page-shift").classList.contains("on")) loadRoutines(); break;
   case "devices_changed": if($("#page-devices").classList.contains("on")) loadDevices(); break;
   case "focus": e._t=Date.now(); paintFocus(e); break;
+  case "card": holoCard(e.card); break;
+  case "exam_paper": $("#ehGo").textContent="✦ NEW PAPER"; $("#ehGo").disabled=false; if(e.ok){ toast("📝 Paper ready — good luck."); loadScholar(); openExam(e.data.id); } else toast(e.error,"warn"); break;
+  case "exam_ready": if(on("study")) loadScholar(); break;
+  case "exam_marked": $("#exSubmit").textContent="SUBMIT FOR MARKING"; $("#exSubmit").disabled=false; if(e.ok){ sfx("ok"); openExam(e.data.id); loadScholar(); } else toast(e.error,"warn"); break;
+  case "revision_planned": if(e.ok) toast(`📅 Added ${e.data.length} revision sessions to your schedule.`); break;
+  case "scholar_topics": if(on("study")) loadScholar(); break;
+  case "idea_scored": $("#iGo").textContent="⚖ SCORE IT"; if(e.ok){ $("#iText").value=""; loadVentures(); } else toast(e.error,"warn"); break;
+  case "autonomy": if(on("dash")) loadDash4(); break;
+  case "gaming_wrap": toast("🎮 "+e.text); break;
+  case "link": toast(e.online?"🔗 Linked to your gaming PC.":"🔗 Gaming PC went offline — carrying on here."); break;
+  case "history_merged": toast(`🧠 Caught up on ${e.count} message(s) from your other device.`); break;
+  case "live": liveFrame(e); break;
   case "study": toast(e.text,e.ok?"":"warn"); $("#mkGo").textContent="✦ MAKE FLASHCARDS"; $("#mkGo").disabled=false; if(e.ok){ $("#mkTopic").value=$("#mkNotes").value=""; CARD=null; } if(on("study")) loadStudy(); break;
   case "health_badge": $("#b-health").classList.add("show"); break;
   case "health_fixed": toast(e.text); HC=null; if(on("health")) setTimeout(loadHealth,800); break;
@@ -1018,14 +1190,15 @@ function setState(s){ state=s; document.body.classList.remove("state-idle","stat
   if(s==="idle"){ if(!speaking) setStatus("ALL SYSTEMS NOMINAL","awaiting instruction"); apRunning(false); } }
 function setSpeaking(on){ if(!!on!==!!speaking&&api&&api.voice_state) api.voice_state(!!on); speaking=on; document.body.classList.toggle("speaking",!!on); if(state==="idle") setStatus(on?"TRANSMITTING":"ALL SYSTEMS NOMINAL",on?"speaking":"awaiting instruction"); }
 function setStatus(a,b){ if(a!==null) $("#statusline").textContent=a; if(b!==undefined) $("#statusdetail").textContent=b; }
-function applyTheme(t){ if(!THEMES[t]) t="standby"; document.body.dataset.theme=t; $$("#themes button").forEach(b=>b.classList.toggle("on",b.dataset.t===t)); $("#modeword").textContent=THEMES[t]; }
+function applyTheme(t){ if(!THEMES[t]) t="standby"; document.body.dataset.theme=t;
+  const cc=getComputedStyle(document.documentElement).getPropertyValue("--c-"+t).trim(); if(cc){ const h=cc.replace("#",""); const rgb=[0,2,4].map(i=>parseInt(h.substr(i,2),16)).join(","); document.body.style.setProperty("--a",cc); document.body.style.setProperty("--a2",cc); document.body.style.setProperty("--ar",rgb); } else ["--a","--a2","--ar"].forEach(v=>document.body.style.removeProperty(v)); $$("#themes button").forEach(b=>b.classList.toggle("on",b.dataset.t===t)); $("#modeword").textContent=THEMES[t]; }
 $$("#themes button").forEach(b=>b.onclick=()=>{ applyTheme(b.dataset.t); api.set_theme(b.dataset.t); });
 
 /* ================= navigation ================= */
 function go(p){ $$(".nav[data-page]").forEach(n=>n.classList.toggle("on",n.dataset.page===p)); $$(".page").forEach(x=>x.classList.toggle("on",x.id==="page-"+p));
   const b=$("#b-"+p); if(b) b.classList.remove("show");
   const pg=$("#page-"+p); $(".stage").classList.toggle("wide",!!(pg&&pg.dataset.wide));
-  ({sched:loadSched,skills:loadSkills,root:loadRoot,devices:loadDevices,shift:loadShift,dash:loadDash,study:loadStudy,gaming:loadGaming,ventures:loadVentures,brain:loadBrain,health:loadHealth})[p]?.(); }
+  ({sched:()=>{ loadSched(); loadCal(); },skills:loadSkills,root:loadRoot,devices:loadDevices,shift:loadShift,dash:loadDash,study:loadStudy,gaming:loadGaming,ventures:loadVentures,brain:loadBrain,health:loadHealth})[p]?.(); }
 document.addEventListener("click",e=>{ const g=e.target.closest("[data-go]"); if(g) go(g.dataset.go); });
 $$(".nav[data-page]").forEach(n=>n.onclick=()=>go(n.dataset.page));
 function badge(p){ const pg=$("#page-"+p); if(pg && !pg.classList.contains("on")) $("#b-"+p)?.classList.add("show"); }
@@ -1045,7 +1218,7 @@ function msgEl(role,tier,model){ const d=document.createElement("div"); d.classN
 function setTags(d,tier,model){ let h=""; if(tier&&tier!=="none") h+=`<span class="tier ${tier}">${tier.toUpperCase()}</span>`; if(model) h+=`<span class="model">${esc(model)}</span>`; d.querySelector(".tags").innerHTML=h; }
 function addMsg(role,text,tier){ const d=msgEl(role,tier); d.querySelector(".body").innerHTML=render(text); scrollChat(); if(role!=="user"&&!$("#page-comms").classList.contains("on")) {} }
 function scrollChat(force){ const l=$("#log"); if(force||l.scrollHeight-l.scrollTop-l.clientHeight<220) l.scrollTop=l.scrollHeight; }
-function startStream(id){ const d=msgEl("assistant"); d.querySelector(".body").innerHTML='<span class="typing"><span></span><span></span><span></span></span>'; current={id,el:d,text:""}; $("#log").scrollTop=1e9; }
+function startStream(id){ holoClear(); const d=msgEl("assistant"); d.querySelector(".body").innerHTML='<span class="typing"><span></span><span></span><span></span></span>'; current={id,el:d,text:""}; $("#log").scrollTop=1e9; }
 function appendStream(id,t){ if(!current||current.id!==id) return; current.text+=t; current.el.querySelector(".body").innerHTML=render(current.text,true)+'<span class="cursor"></span>'; scrollChat(); }
 function endStream(e){ if(!current||current.id!==e.id) return; const d=current.el;
   if(e.stopped){ d.classList.add("stopped"); d.querySelector(".body").innerHTML=current.text?render(current.text)+" <i style='color:var(--dim)'>[stopped]</i>":"<i>Stopped.</i>"; }
@@ -1106,7 +1279,7 @@ document.addEventListener("pointerdown",()=>Voice.unlock(),{once:true});
 /* ================= mic ================= */
 /* tap once and just talk — ORION works out when you've finished. Tap again to send early, Esc to cancel. */
 async function toggleMic(){ Voice.unlock(); if(!micOn){ const ok=await api.mic_start(); if(ok) setMic(true); } else api.mic_stop(); }
-function setMic(on,purpose){ if(on===micOn) return; micOn=on; $("#mic").title=on?"Listening — tap to send now":"Talk (Ctrl+Space)";
+function setMic(on,purpose){ if(on===micOn) return; sfx(on?"listen":"done"); micOn=on; $("#mic").title=on?"Listening — tap to send now":"Talk (Ctrl+Space)";
   if(on){ pollMic(); $("#input").placeholder=purpose==="followup"?"Listening for your reply… (say “thanks” to finish)":"Listening… just talk, I'll send it when you finish"; setStatus("LISTENING",purpose==="followup"?"go ahead, "+cfg.title:"take your time"); }
   else $("#input").placeholder="Give an instruction…  (try “autopilot: …”)"; }
 async function pollMic(){ while(micOn){ micLevel=await api.mic_level(); await new Promise(r=>setTimeout(r,70)); } micLevel=0; }
@@ -1127,18 +1300,23 @@ function paintAfk(on,note){ $("#afkchip").classList.toggle("show",!!on); $("#afk
 $("#afkchip").onclick=()=>go("root");
 
 /* ================= settings / memory ================= */
-$("#nSet").onclick=async()=>{ const s=await api.get_settings(); try{ $("#sPlace").value=(await api.life_get()).home_place||""; }catch(e){} try{ const v=await api.voice_settings(); $("#sPatience").value=v.patience; $("#sConvo").checked=!!v.conversation; $("#sBarge").checked=!!v.barge_in; $("#sDuck").checked=v.duck!==false; $("#sSens").value=v.mic_sensitivity; $("#sSensV").textContent=(+v.mic_sensitivity).toFixed(1)+"×"; }catch(e){} $("#sName").value=s.name; $("#sTitle").value=s.title; $("#sOwner").value=s.owner||""; $("#sLocal").value=s.local_model; $("#sLocalV").value=s.local_vision||"";
+$("#nSet").onclick=async()=>{ const s=await api.get_settings(); $("#sAutoMode").checked=s.auto_mode!==false; $("#sModeVoice").checked=s.per_mode!==false; $("#sSfx").checked=localStorage.getItem("orion_sfx")!=="0";
+  $("#cmList").textContent=Object.keys(s.custom_modes||{}).length?"Your modes: "+Object.values(s.custom_modes).map(m=>m.label).join(", "):""; try{ $("#sPlace").value=(await api.life_get()).home_place||""; }catch(e){} try{ const v=await api.voice_settings(); $("#sPatience").value=v.patience; $("#sConvo").checked=!!v.conversation; $("#sBarge").checked=!!v.barge_in; $("#sDuck").checked=v.duck!==false; $("#sSens").value=v.mic_sensitivity; $("#sSensV").textContent=(+v.mic_sensitivity).toFixed(1)+"×"; }catch(e){} $("#sName").value=s.name; $("#sTitle").value=s.title; $("#sOwner").value=s.owner||""; $("#sLocal").value=s.local_model; $("#sLocalV").value=s.local_vision||"";
   $("#sKeys").innerHTML=s.providers.map(p=>`<div class="field"><label>${esc(p.label.toUpperCase())} KEY ${p.key_url?`<a data-url="${esc(p.key_url)}">get a free key ↗</a>`:""}</label>
     <input type="password" data-pid="${esc(p.id)}" value="${esc(p.key)}" placeholder="${p.id==="groq"?"gsk_…  (needed for voice + captions)":p.id==="gemini"?"best free vision brain":"optional — extra free allowance"}"></div>`).join("");
   $("#sVoice").innerHTML=s.voices.map(([id,l])=>`<option value="${id}" ${id===s.voice?"selected":""}>${esc(l)}</option>`).join("");
   $("#sEngine").value=s.engine; $("#sSpeak").checked=s.speak; $("#sSafe").checked=s.safe_mode; $("#sFs").checked=s.fullscreen; $("#sBoot").checked=s.skip_boot; $("#sVis").value=s.visuals; $("#vSet").classList.add("show"); };
 $("#sPreview").onclick=()=>{ Voice.unlock(); api.preview_voice($("#sVoice").value); }; $("#sCancel").onclick=()=>$("#vSet").classList.remove("show");
+$("#sSfx").onchange=()=>{ try{ localStorage.setItem("orion_sfx",$("#sSfx").checked?"1":"0"); }catch(e){} };
+$("#cmAdd").onclick=async()=>{ const n=$("#cmName").value.trim(); if(!n) return; const r=await api.mode_custom({name:n,colour:$("#cmCol").value,persona:$("#cmPersona").value}); toast(`${n} mode added — say “${n.toLowerCase()} mode”.`); $("#cmName").value=$("#cmPersona").value=""; addCustomDots(r); };
+function addCustomDots(cm){ $$("#themes button[data-custom]").forEach(b=>b.remove()); for(const [k,m] of Object.entries(cm||{})){ const b=document.createElement("button"); b.dataset.t=k; b.dataset.custom="1"; b.title=m.label; b.style.background=b.style.color=m.colour;
+    b.onclick=()=>api.set_theme(k); $("#themes").appendChild(b); THEMES[k]=m.label.toUpperCase(); document.documentElement.style.setProperty("--c-"+k,m.colour); } }
 $("#sSens").oninput=()=>$("#sSensV").textContent=(+$("#sSens").value).toFixed(1)+"×";
 $("#sSave").onclick=async()=>{ const keys={}; $$("#sKeys input").forEach(i=>keys[i.dataset.pid]=i.value);
   if($("#sPlace").value.trim()) api.life_action({action:"place",place:$("#sPlace").value.trim()});
   api.voice_settings({patience:$("#sPatience").value,conversation:$("#sConvo").checked,barge_in:$("#sBarge").checked,duck:$("#sDuck").checked,mic_sensitivity:+$("#sSens").value});
   const r=await api.save_settings({name:$("#sName").value,title:$("#sTitle").value,owner:$("#sOwner").value,keys,local_model:$("#sLocal").value,local_vision:$("#sLocalV").value,voice:$("#sVoice").value,engine:$("#sEngine").value,
-    speak:$("#sSpeak").checked,safe_mode:$("#sSafe").checked,fullscreen:$("#sFs").checked,skip_boot:$("#sBoot").checked,visuals:$("#sVis").value});
+    speak:$("#sSpeak").checked,safe_mode:$("#sSafe").checked,auto_mode:$("#sAutoMode").checked,per_mode:$("#sModeVoice").checked,fullscreen:$("#sFs").checked,skip_boot:$("#sBoot").checked,visuals:$("#sVis").value});
   applyCfg(r); $("#vSet").classList.remove("show"); toast("Configuration saved."); paintLinks(await api.status()); pollMeters(); };
 $("#mClose").onclick=()=>$("#vMem").classList.remove("show");
 $("#clearChat").onclick=async()=>{ await api.clear_chat(); $("#log").innerHTML=""; $("#vMem").classList.remove("show"); toast("Chat history cleared."); };
@@ -1228,7 +1406,7 @@ $("#drop").onclick=async()=>{ const p=await api.studio_pick(); if(p){ vidPath=p;
 $$(".tool[data-v]").forEach(t=>t.onclick=()=>{ $$(".tool").forEach(x=>x.disabled=true); $("#studioOut").textContent="Working… progress shows under the core. STOP cancels."; api.studio_run(t.dataset.v,vidPath); });
 
 /* ================= devices ================= */
-async function loadDevices(){ loadCalls(); const d=await api.devices_info(); $("#verlbl").textContent="v"+d.version;
+async function loadDevices(){ loadCalls(); loadV4Devices(); const d=await api.devices_info(); $("#verlbl").textContent="v"+d.version;
   const r=d.remote; $("#remBtn").textContent=d.remote_enabled?"TURN OFF":"TURN ON"; $("#remBtn").classList.toggle("on",d.remote_enabled);
   $("#remInfo").innerHTML=d.remote_enabled?`<b>PIN:</b> <span class="code">${esc(r.pin)}</span> <button class="mini" id="newPin">NEW PIN</button><br>
     ${r.tailscale.length?`<b>Anywhere (Tailscale):</b><br>${r.tailscale.map(u=>`<span class="code">${esc(u)}</span>`).join(" ")}<br>`:`<b>Anywhere:</b> install <a class="ex" style="display:inline" data-url="https://tailscale.com/download">Tailscale ↗</a> on this PC and your phone (same account), then reopen this page.<br>`}
@@ -1278,7 +1456,7 @@ function drawLoad(){ const c=$("#dLoad"); if(!c) return; const x=c.getContext("2
     if(fill){ x.lineTo((arr.length-1)/59*w,h); x.lineTo(0,h); x.closePath(); const g=x.createLinearGradient(0,0,0,h); g.addColorStop(0,col+"55"); g.addColorStop(1,col+"00"); x.fillStyle=g; x.fill(); } };
   line(LOAD.ram,A2,false); line(LOAD.cpu,A1,true); }
 async function loadDash(){
-  const h=new Date().getHours(); $("#dashSub").textContent=`${h<12?"Good morning":h<18?"Good afternoon":"Good evening"}, ${cfg.title}. Here's everything at a glance.`;
+  const h=new Date().getHours(); $("#dashSub").firstChild.textContent=`${h<12?"Good morning":h<18?"Good afternoon":"Good evening"}, ${cfg.title}. Here's everything at a glance.`;
   try{ const sc=await api.schedule_get(1); const today=(sc.items||[]).slice(0,4);
     $("#dToday").innerHTML=today.length?today.map(e=>`<div class="li"><span class="t">${esc(e.time)}</span><span class="g">${esc(e.title)}</span></div>`).join(""):'<div class="empty">Nothing planned.</div>'; }catch(e){}
   try{ const j=(await api.jobs_get()).jobs||[]; const act=j.filter(x=>["running","waiting","queued"].includes(x.status)); $("#dJobs").textContent=act.length;
@@ -1290,7 +1468,7 @@ async function loadDash(){
   try{ const b=await api.brain_get(); const hb=b.habits||{}; if(hb.by_hour){ bars($("#dHours"),hb.by_hour.map((v,i)=>({v,l:i%6===0?String(i).padStart(2,"0"):null})),{fmt:v=>v+" asks",vals:false}); $("#dHabit").textContent=`BUSIEST ${String(hb.busiest_hour).padStart(2,"0")}:00 · ${hb.this_week} THIS WEEK`; } else $("#dHours").innerHTML='<div class="empty">Not enough data yet.</div>'; }catch(e){}
   try{ const ms=await api.meters(); $("#dAllow").innerHTML=ms.length?ms.map(m=>{ const pct=m.tok_limit?100-m.tok_left/m.tok_limit*100:Math.min(100,m.requests/10);
       return `<div class="hbar"><b>${esc(m.label)}</b><div><i style="width:${100-pct}%"></i></div><span>${m.resting?"resting":(m.req_left!=null?m.req_left+" left":m.requests+" used")}</span></div>`; }).join(""):'<div class="empty">No cloud keys yet.</div>'; }catch(e){}
-  drawLoad(); loadHealthMini(); loadLife();
+  drawLoad(); loadHealthMini(); await loadLife(); loadDash4();
 }
 let HC=null;
 async function loadHealthMini(){ try{ if(!HC) HC=await api.health_get(); const bad=HC.filter(c=>c.state!=="ok");
@@ -1323,7 +1501,7 @@ async function loadStudy(){ ST=await api.study_get();
   $$("[data-exdel]").forEach(b=>b.onclick=async()=>{ await api.study_action({action:"exam_del",subject:b.dataset.exdel}); loadStudy(); });
   $$("[data-dkdel]").forEach(b=>b.onclick=async()=>{ if(!confirmBox(`Delete the deck "${b.dataset.dkdel}"?`)) return; await api.study_action({action:"deck_del",deck:b.dataset.dkdel}); loadStudy(); });
   $$("[data-rev]").forEach(b=>b.onclick=()=>startCards(b.dataset.rev));
-  paintFocus(ST.focus); if(!CARD) startCards(""); loadLife(); }
+  paintFocus(ST.focus); if(!CARD) startCards(""); loadLife(); loadScholar(); }
 async function startCards(deck){ CARDS=await api.study_cards(deck); nextCard(); }
 function nextCard(){ CARD=CARDS.shift()||null; $("#fcard").classList.remove("flip");
   if(!CARD){ $("#fcDeck").textContent="ALL DONE"; $("#fcQ").textContent=ST&&ST.decks.length?"No cards due right now — nice work.":"Make a deck below, then revise here."; $("#fcA").textContent=""; $("#fcInfo").textContent=""; return; }
@@ -1357,7 +1535,7 @@ $("#ptGo").onclick=()=>{ const g=$("#ptGame").value.trim(), w=$("#ptWho").value.
   send(`Party planner: book ${g} on ${$("#ptDate").value} at ${$("#ptTime").value} with ${w} and invite them on Root.`); };
 
 /* ---- ventures ---- */
-async function loadVentures(){ const v=await api.ventures_get(), E=v.earn;
+async function loadVentures(){ const v=await api.ventures_get(), E=v.earn; paintCEO(v);
   $("#vMonth").textContent=money(E.this_month); $("#vTotal").textContent=`All time ${money(E.total)}`;
   if(!$("#vVen").options.length) $("#vVen").innerHTML=E.ventures.map(x=>`<option>${esc(x)}</option>`).join("");
   bars($("#vMonths"),E.months.map(m=>({v:m.total,l:new Date(m.month+"-01").toLocaleDateString("en-GB",{month:"short"})})),{fmt:money});
@@ -1369,7 +1547,7 @@ async function loadVentures(){ const v=await api.ventures_get(), E=v.earn;
   $$("[data-dvdel]").forEach(b=>b.onclick=async()=>{ await api.ventures_action({action:"dev_del",id:b.dataset.dvdel}); loadVentures(); });
   $$("[data-dvnow]").forEach(b=>b.onclick=async()=>{ await api.ventures_action({action:"dev_now",id:b.dataset.dvnow}); toast("Building it now — see Night Shift."); loadVentures(); }); }
 $("#vAdd").onclick=async()=>{ const a=+$("#vAmt").value; if(!a) return toast("How much?"); await api.ventures_action({action:"earn_add",venture:$("#vVen").value,amount:a,note:$("#vNote").value}); $("#vAmt").value=$("#vNote").value=""; toast(`Logged ${money(a)} — nice one.`); loadVentures(); };
-$("#dvAdd").onclick=async()=>{ const t=$("#dvTask").value.trim(); if(!t) return; await api.ventures_action({action:"dev_add",task:t,project:$("#dvProj").value.trim()||"Hatchlands"}); $("#dvTask").value=""; loadVentures(); };
+$("#dvAdd").onclick=async()=>{ const t=$("#dvTask").value.trim(); if(!t) return; await api.ventures_action({action:"dev_add",task:t,project:$("#dvProj").value.trim()||"Projects"}); $("#dvTask").value=""; loadVentures(); };
 $("#ldGo").onclick=async()=>{ if(!$("#ldType").value.trim()) return toast("What kind of businesses?"); await api.ventures_action({action:"leads",type:$("#ldType").value.trim(),area:$("#ldArea").value.trim()||"Leicester",offer:$("#ldOffer").value.trim()}); toast("Lead finder is running in the background — I'll ring you when it's done."); };
 $("#vContent").onchange=()=>api.ventures_action({action:"content",on:$("#vContent").checked});
 
@@ -1425,6 +1603,141 @@ async function loadLife(){ try{ LIFE=await api.life_get(); paintLife(); }catch(e
 $("#hwAdd").onclick=async()=>{ if(!$("#hwTask").value.trim()) return; LIFE=await api.life_action({action:"hw_add",subject:$("#hwSub").value||"General",task:$("#hwTask").value,due:$("#hwDue").value}); $("#hwTask").value=$("#hwDue").value=""; paintLife(); };
 $("#ntAdd").onclick=async()=>{ const t=$("#ntText").value.trim(); if(!t) return; LIFE=await api.life_action({action:"note_add",text:t}); $("#ntText").value=""; paintLife(); };
 $("#ntText").addEventListener("keydown",e=>{ if(e.key==="Enter") $("#ntAdd").click(); });
+
+/* ================= v4: holographic cards ================= */
+const HOLO={list:[],slots:[[58,8],[58,36],[58,64],[2,10],[2,40],[2,68]]};
+function holoCard(c){ const el=document.createElement("div"); el.className="hcard"; let body="";
+  if(c.kind==="weather"&&c.weather){ const w=c.weather; body=`<div class="hwx"><div class="i">${WXI(w.code)}</div><div><b>${w.temp}°</b><small>${esc(w.sky)} · feels ${w.feels}°</small><small>${w.rain_at?"rain from "+w.rain_at:"no rain soon"} · sunset ${w.sunset}</small></div></div>`; }
+  else if(c.kind==="steps") body=`<ol>${(c.items||[]).map((x,i)=>`<li style="animation-delay:${i*.12}s">${esc(x)}</li>`).join("")}</ol>`;
+  else if(c.kind==="chart"){ const pts=c.points||[]; const mx=Math.max(1,...pts.map(p=>p[1])); body=pts.map(p=>`<div class="hbar"><b>${esc(p[0])}</b><div><i style="width:${p[1]/mx*100}%"></i></div><span>${p[1]}</span></div>`).join(""); }
+  else if(c.kind==="code") body=`<pre>${esc(c.text||"")}</pre>`;
+  else if(c.kind==="image") body=`<img src="${c.src}" style="width:100%;border-radius:6px">`;
+  else if(c.kind==="text") body=`<p>${esc(c.text||"")}</p>`;
+  else body=`<ul>${(c.items||[]).map((x,i)=>`<li style="animation-delay:${i*.1}s">${esc(x)}</li>`).join("")}</ul>`;
+  el.innerHTML=`<h6>${esc(c.title||"")}<span><button title="Pin">📌</button><button title="Close">✕</button></span></h6>${body}`;
+  const used=HOLO.list.map(h=>h.slot); const slot=HOLO.slots.findIndex((_,i)=>!used.includes(i)); const si=slot<0?0:slot;
+  if(slot<0){ const old=HOLO.list.find(h=>!h.pinned); if(old) holoKill(old); }
+  const [x,y]=HOLO.slots[si]; el.style.left=x+"%"; el.style.top=y+"%"; if(x<20) el.style.transformOrigin="center right";
+  const h={el,slot:si,pinned:false}; HOLO.list.push(h); $("#holo").appendChild(el); sfx("card");
+  el.querySelectorAll("h6 button")[0].onclick=()=>{ h.pinned=!h.pinned; el.classList.toggle("pinned",h.pinned); };
+  el.querySelectorAll("h6 button")[1].onclick=()=>holoKill(h);
+  h.timer=setTimeout(()=>{ if(!h.pinned) holoKill(h); },32000); }
+function holoKill(h){ clearTimeout(h.timer); h.el.classList.add("out"); setTimeout(()=>h.el.remove(),450); HOLO.list=HOLO.list.filter(x=>x!==h); }
+function holoClear(){ HOLO.list.filter(h=>!h.pinned).forEach(holoKill); }
+
+/* ================= v4: live view ================= */
+let LV={pinned:false,t:null};
+function liveFrame(e){ if(!$("#page-dash")||document.querySelector(".stage.wide")) { /* still update so it's ready */ }
+  $("#lvImg").src="data:image/jpeg;base64,"+e.img; $("#lvTitle").textContent=(e.kind==="browser"?"ORION'S BROWSER · ":"YOUR PC · ")+(e.title||"");
+  $("#lvCap").textContent=e.caption||""; $("#lvUrl").textContent=e.url||""; $("#liveview").classList.add("show");
+  clearTimeout(LV.t); if(!LV.pinned) LV.t=setTimeout(()=>$("#liveview").classList.remove("show"),9000); }
+$("#lvClose").onclick=()=>{ LV.pinned=false; $("#lvPin").textContent="PIN"; $("#liveview").classList.remove("show"); };
+$("#lvPin").onclick=()=>{ LV.pinned=!LV.pinned; $("#lvPin").textContent=LV.pinned?"UNPIN":"PIN"; if(!LV.pinned) LV.t=setTimeout(()=>$("#liveview").classList.remove("show"),5000); else clearTimeout(LV.t); };
+
+/* ================= v4: tiny UI sounds (synthesised, no files) ================= */
+let SFX=null;
+function sfx(kind){ try{ if(localStorage.getItem("orion_sfx")==="0") return; SFX=SFX||new (window.AudioContext||window.webkitAudioContext)(); const c=SFX, t=c.currentTime;
+  const o=c.createOscillator(), g=c.createGain(); o.connect(g); g.connect(c.destination); o.type="sine";
+  const f={card:[880,1320],open:[520,780],close:[700,420],ok:[660,990],listen:[600,900],done:[900,600]}[kind]||[700,900];
+  o.frequency.setValueAtTime(f[0],t); o.frequency.exponentialRampToValueAtTime(f[1],t+.09);
+  g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(.035,t+.015); g.gain.exponentialRampToValueAtTime(.0001,t+.16); o.start(t); o.stop(t+.18); }catch(e){} }
+
+/* ================= v4: calendar ================= */
+let CALSTART=null; const H0=7, H1=23, HP=34;
+function isoDay(d){ return d.toISOString().slice(0,10); }
+async function loadCal(){ const r=await api.schedule_week(CALSTART); const st=new Date(r.start+"T00:00"); const days=[...Array(7)].map((_,i)=>new Date(st.getTime()+i*864e5));
+  const today=isoDay(new Date()); let h=`<div></div>`+days.map(d=>`<div class="ch ${isoDay(d)===today?"today":""}">${d.toLocaleDateString("en-GB",{weekday:"short",day:"numeric"}).toUpperCase()}</div>`).join("");
+  h+=`<div class="hrs">${[...Array(H1-H0)].map((_,i)=>`<div class="hr">${String(H0+i).padStart(2,"0")}:00</div>`).join("")}</div>`;
+  const toY=t=>{ const [hh,mm]=t.split(":").map(Number); return Math.max(0,(hh+mm/60-H0)*HP); };
+  const D=r.day||{}; const tt=r.timetable||{}; const DN=["monday","tuesday","wednesday","thursday","friday","saturday","sunday"];
+  h+=days.map(d=>{ const ds=isoDay(d); const wd=(d.getDay()+6)%7; let col=`<div class="col ${ds===today?"today":""}" data-day="${ds}" style="height:${(H1-H0)*HP}px">`;
+    if(wd<5&&!D.holiday) col+=`<div class="school" style="top:${toY(D.school_start||"08:40")}px;height:${toY(D.school_end||"15:10")-toY(D.school_start||"08:40")}px"><span>SCHOOL${tt[DN[wd]]?" · "+esc(tt[DN[wd]].slice(0,3).join(", ")):""}</span></div>`;
+    const dayEv=r.events.filter(e=>e.date===ds); let lane=0;
+    for(const e of dayEv){ const top=toY(e.start), ht=Math.max(16,e.mins/60*HP-2); const half=e.clash.length?(lane++%2?"left:51%;right:3px":"left:3px;right:51%"):"";
+      col+=`<div class="ev ${e.kind} ${e.clash.length?"clash":""}" draggable="true" data-id="${e.id}" data-mins="${e.mins}" style="top:${top}px;height:${ht}px;${half}" title="${esc(e.title)}${e.clash.length?" — clashes with "+esc(e.clash.join(", ")):""}">${esc(e.title)}<small>${e.start}–${e.end}${e.with?" · "+esc(e.with):""}</small></div>`; }
+    if(ds===today){ const n=new Date(); col+=`<div class="now" style="top:${(n.getHours()+n.getMinutes()/60-H0)*HP}px"></div>`; }
+    return col+"</div>"; }).join("");
+  $("#cal").innerHTML=h; $("#calSub").textContent=`${days[0].toLocaleDateString("en-GB",{day:"numeric",month:"short"})} – ${days[6].toLocaleDateString("en-GB",{day:"numeric",month:"short"})} · drag events to move them`;
+  $$("#cal .ev").forEach(ev=>ev.addEventListener("dragstart",e=>{ e.dataTransfer.setData("text",ev.dataset.id+"|"+ev.dataset.mins); }));
+  $$("#cal .col").forEach(col=>{ col.addEventListener("dragover",e=>{ e.preventDefault(); col.classList.add("drop"); }); col.addEventListener("dragleave",()=>col.classList.remove("drop"));
+    col.addEventListener("drop",async e=>{ e.preventDefault(); col.classList.remove("drop"); const [id]=e.dataTransfer.getData("text").split("|"); const y=e.clientY-col.getBoundingClientRect().top;
+      let mins=Math.round((H0*60+y/HP*60)/15)*15; const t=`${String(Math.floor(mins/60)).padStart(2,"0")}:${String(mins%60).padStart(2,"0")}`;
+      if(await api.schedule_move(id,`${col.dataset.day} ${t}`)){ sfx("ok"); toast(`Moved to ${col.dataset.day.slice(5)} ${t}.`); loadCal(); } }); }); }
+$("#calPrev").onclick=()=>{ const d=new Date((CALSTART||isoDay(new Date()))+"T00:00"); d.setDate(d.getDate()-7); CALSTART=isoDay(d); loadCal(); };
+$("#calNext").onclick=()=>{ const d=new Date((CALSTART||isoDay(new Date()))+"T00:00"); d.setDate(d.getDate()+7); CALSTART=isoDay(d); loadCal(); };
+$("#calToday").onclick=()=>{ CALSTART=null; loadCal(); };
+
+/* ================= v4: Scholar ================= */
+let SC=null, EXAM=null, EXT=null, EXPHOTOS=[];
+async function loadScholar(){ SC=await api.scholar_get(); const subs=SC.subjects;
+  $("#ehSub").innerHTML=subs.length?subs.map(x=>`<option>${esc(x.name)}</option>`).join(""):'<option value="">Add a subject first</option>';
+  $("#ehInfo").textContent=`${SC.papers.filter(p=>p.marked).length} MARKED`;
+  $("#ehPapers").innerHTML=SC.papers.length?SC.papers.slice(0,8).map(p=>`<div class="paper"><span class="g">${p.marked?p.grade:"—"}</span><b>${esc(p.title)}<small style="display:block;color:var(--dim);font-weight:400">${esc(p.subject)} · ${p.total} marks · ${p.date}${p.marked?` · ${p.pct}%`:""}</small></b><button class="mini" data-paper="${p.id}">${p.marked?"REVIEW":"SIT IT"}</button></div>`).join(""):$("#ehPapers").innerHTML;
+  $$("[data-paper]").forEach(b=>b.onclick=()=>openExam(b.dataset.paper));
+  $("#sbList").innerHTML=subs.length?subs.map(x=>{ const tps=Object.entries(x.topics||{});
+    return `<div class="subj"><h4>${esc(x.name)} <small>${esc(x.board||"board?")}${x.target?" · target "+esc(x.target):""}</small><span class="grade">${x.latest??"—"}</span></h4>
+      <div class="trend">${x.trend.map(t=>`<i style="height:${Math.max(6,t.pct)}%" title="${t.date}: ${t.pct}% (grade ${t.grade})"></i>`).join("")||'<small style="color:var(--faint)">no papers yet</small>'}</div>
+      <div style="margin-top:6px">${tps.length?tps.map(([n,t])=>`<span class="tpc ${t.r}" data-sub="${esc(x.name)}" data-tp="${esc(n)}" title="${t.score!=null?t.score+"%":"not tested"}">${esc(n)}</span>`).join(""):'<span class="sub2">Building topic list…</span>'}</div></div>`; }).join(""):'<div class="empty">No subjects yet — add them above (exam board optional).</div>';
+  $$(".tpc").forEach(t=>t.onclick=async()=>{ const nx={grey:"red",red:"amber",amber:"green",green:"red"}[t.className.split(" ")[1]]||"amber"; await api.scholar_action({action:"rate",subject:t.dataset.sub,topic:t.dataset.tp,rating:nx}); loadScholar(); });
+  $("#msN").textContent=SC.mistakes.length||""; $("#msList").innerHTML=SC.mistakes.length?SC.mistakes.map(m=>`<div class="li"><span class="g">${esc(m.q.slice(0,90))} <small>${esc(m.subject)} · ${m.marks}m</small></span><button class="mini" data-ms="${m.id}" data-ok="1">✓</button><button class="mini" data-ms="${m.id}" data-ok="0">✕</button></div>`).join(""):$("#msList").innerHTML;
+  $$("[data-ms]").forEach(b=>b.onclick=async()=>{ await api.scholar_action({action:"mistake",id:b.dataset.ms,correct:b.dataset.ok==="1"}); loadScholar(); });
+  const DN=["monday","tuesday","wednesday","thursday","friday"]; $("#ttGrid").innerHTML=DN.map(d=>`<div><b>${d.slice(0,3).toUpperCase()}</b><input class="inp" data-tt="${d}" value="${esc((SC.timetable[d]||[]).join(", "))}" placeholder="Maths, English…"></div>`).join("");
+  $$("[data-tt]").forEach(i=>i.onchange=()=>api.scholar_action({action:"timetable",day:i.dataset.tt,lessons:i.value.split(",").map(x=>x.trim()).filter(Boolean)})); }
+$("#sbAdd").onclick=async()=>{ if(!$("#sbName").value.trim()) return; await api.scholar_action({action:"subject",name:$("#sbName").value.trim(),board:$("#sbBoard").value.trim(),target:$("#sbTarget").value.trim()}); $("#sbName").value=$("#sbBoard").value=$("#sbTarget").value=""; toast("Added — building its topic list."); loadScholar(); setTimeout(loadScholar,9000); };
+$("#ehGo").onclick=()=>{ if(!$("#ehSub").value) return toast("Add a subject first."); $("#ehGo").textContent="WRITING…"; $("#ehGo").disabled=true; api.scholar_action({action:"paper",subject:$("#ehSub").value,topics:$("#ehTopics").value,marks:+$("#ehMarks").value}); };
+$("#rpGo").onclick=()=>{ toast("Building your revision timetable…"); api.scholar_action({action:"plan"}); };
+$("#tuGo").onclick=()=>{ const t=$("#tuTopic").value.trim(); if(!t) return; go("comms"); send("Teach me "+t); $("#tuTopic").value=""; };
+async function openExam(id){ EXAM=await api.scholar_paper(id); if(!EXAM) return; EXPHOTOS=[]; $("#exPhN").textContent=""; $("#exTitle").textContent=EXAM.title.toUpperCase();
+  const marked=EXAM.marked; const res={}; (EXAM.results||[]).forEach(r=>res[String(r.n)]=r);
+  $("#exBody").innerHTML=(marked?`<div class="card"><h4>RESULT · ${EXAM.got}/${EXAM.of} · ${EXAM.pct}% · GRADE ${EXAM.grade}</h4><p>${esc(EXAM.summary||"")}</p></div>`:"")+
+    EXAM.questions.map(q=>{ const r=res[String(q.n)]; return `<div class="exq"><p><b>${esc(String(q.n))}.</b> ${esc(q.q)} <b>[${q.marks}]</b></p>${marked?`<div class="sub2">Your answer: ${esc((EXAM.answers||{})[String(q.n)]||"—")}</div>${r?`<div class="exres ${r.got<r.of?"lost":""}"><b>${r.got}/${r.of}</b> — ${esc(r.why||"")}<em>Ideal: ${esc(r.ideal||"")}</em></div>`:""}`:`<textarea data-q="${esc(String(q.n))}" placeholder="Your answer…"></textarea>`}</div>`; }).join("");
+  $("#exSubmit").style.display=marked?"none":""; $("#exPhotos").parentElement.style.display=marked?"none":"";
+  $("#vExam").classList.add("show"); clearInterval(EXT);
+  if(!marked){ const end=Date.now()+EXAM.minutes*60000; const tick=()=>{ const l=Math.max(0,end-Date.now()); $("#exTimer").textContent=`${String(Math.floor(l/60000)).padStart(2,"0")}:${String(Math.floor(l/1000)%60).padStart(2,"0")}`; $("#exTimer").classList.toggle("low",l<300000); if(!l){ clearInterval(EXT); toast("Time's up — pens down."); } }; tick(); EXT=setInterval(tick,1000); EXAM._t0=Date.now(); }
+  else $("#exTimer").textContent=`${EXAM.pct}%`; }
+$("#exClose").onclick=()=>{ clearInterval(EXT); $("#vExam").classList.remove("show"); };
+$("#exPhotos").onchange=async e=>{ for(const f of e.target.files){ const b=await new Promise(r=>{ const fr=new FileReader(); fr.onload=()=>r(fr.result); fr.readAsDataURL(f); }); EXPHOTOS.push(b); } $("#exPhN").textContent=`${EXPHOTOS.length} photo(s) added`; };
+$("#exSubmit").onclick=()=>{ const ans={}; $$("#exBody textarea").forEach(t=>{ if(t.value.trim()) ans[t.dataset.q]=t.value.trim(); }); clearInterval(EXT);
+  $("#exSubmit").textContent="MARKING…"; $("#exSubmit").disabled=true; api.scholar_action({action:"mark",id:EXAM.id,answers:ans,photos:EXPHOTOS,minutes:Math.round((Date.now()-EXAM._t0)/60000)}); };
+
+/* ================= v4: CEO ================= */
+function paintCEO(v){ const G=v.goals||[];
+  $("#gGoals").innerHTML=G.length?G.map(g=>`<div style="margin-bottom:10px"><div class="li" style="border:0;padding:0"><span class="g"><b>${esc(g.name)}</b> <small>by ${g.by}</small></span><span style="font:12px var(--mono)">£${g.got.toFixed(0)}/£${g.target.toFixed(0)}</span><button class="x" data-gdel="${g.id}">×</button></div><div class="goalbar"><i style="width:${g.pct}%"></i></div><small style="color:var(--dim)">${g.pct>=100?"🎉 Smashed it":`£${g.per_week.toFixed(2)}/week needed · ${g.days_left} days left`}</small></div>`).join(""):'<div class="empty">No goals yet — e.g. £500 by summer.</div>';
+  $$("[data-gdel]").forEach(b=>b.onclick=async()=>{ paintCEO(await api.ventures_action({action:"goal_del",id:b.dataset.gdel})); });
+  $("#iList").innerHTML=(v.ideas||[]).slice(0,6).map(i=>`<div class="idea ${i.verdict||""}"><b>${esc(i.name||"Idea")}</b> · ${i.score??"?"}/100 · ${String(i.verdict||"").toUpperCase()}<small>~£${i.realistic_gbp_per_week??"?"}/wk · first £ in ${i.weeks_to_first_pound??"?"} wks · ${esc(i.why||"")}</small></div>`).join("");
+  const PH=v.per_hour||[]; $("#phList").innerHTML=PH.length?PH.map(r=>`<div class="hbar"><b>${esc(r[0])}</b><div><i style="width:${Math.min(100,r[1]/Math.max(...PH.map(x=>x[1]),1)*100)}%"></i></div><span>£${r[1].toFixed(2)}/h</span></div>`).join(""):$("#phList").innerHTML;
+  if(!$("#phVen").options.length) $("#phVen").innerHTML=v.earn.ventures.map(x=>`<option>${esc(x)}</option>`).join("");
+  const C=v.crm||[], due=new Set(v.followups||[]); $("#crmInfo").textContent=`${C.filter(c=>c.stage==="won").length} WON · ${due.size} TO FOLLOW UP`;
+  $("#crmBoard").innerHTML=["lead","contacted","replied","call","proposal","won"].map(st=>`<div class="kcol" data-st="${st}"><b>${st.toUpperCase()}</b>${C.filter(c=>c.stage===st).map(c=>`<div class="kcard ${due.has(c.id)?"due":""}" draggable="true" data-cid="${esc(c.name)}">${esc(c.name)}<small>${c.value?"£"+c.value+" · ":""}${esc((c.notes||[]).slice(-1)[0]||"")}</small></div>`).join("")}</div>`).join("");
+  $$(".kcard").forEach(k=>k.addEventListener("dragstart",e=>e.dataTransfer.setData("text",k.dataset.cid)));
+  $$(".kcol").forEach(col=>{ col.addEventListener("dragover",e=>{ e.preventDefault(); col.classList.add("drop"); }); col.addEventListener("dragleave",()=>col.classList.remove("drop"));
+    col.addEventListener("drop",async e=>{ e.preventDefault(); col.classList.remove("drop"); paintCEO(await api.ventures_action({action:"crm",name:e.dataTransfer.getData("text"),stage:col.dataset.st})); if(col.dataset.st==="won"){ sfx("ok"); toast("💰 Deal won — log the money when it lands."); } }); }); }
+$("#gAdd").onclick=async()=>{ if(!+$("#gAmt").value) return; paintCEO(await api.ventures_action({action:"goal",name:$("#gName").value||"Goal",target:+$("#gAmt").value,by:$("#gBy").value})); $("#gName").value=$("#gAmt").value=""; };
+$("#iGo").onclick=()=>{ const t=$("#iText").value.trim(); if(!t) return; $("#iGo").textContent="SCORING…"; api.ventures_action({action:"idea",idea:t}); };
+$("#phAdd").onclick=async()=>{ if(!+$("#phMin").value) return; paintCEO(await api.ventures_action({action:"hours",venture:$("#phVen").value,minutes:+$("#phMin").value})); $("#phMin").value=""; };
+$("#invGo").onclick=async()=>{ if(!$("#invC").value||!+$("#invP").value) return toast("Client and price, please."); await api.ventures_action({action:"invoice",client:$("#invC").value,items:[{desc:$("#invD").value||"Services",qty:1,price:+$("#invP").value}]}); $("#invC").value=$("#invD").value=$("#invP").value=""; };
+$("#crmAdd").onclick=async()=>{ if(!$("#crmName").value.trim()) return; paintCEO(await api.ventures_action({action:"crm",name:$("#crmName").value.trim(),stage:"lead",note:$("#crmNote").value,value:+$("#crmVal").value||null})); $("#crmName").value=$("#crmNote").value=$("#crmVal").value=""; };
+$("#mmGo").onclick=()=>{ api.ventures_action({action:"meeting"}); go("comms"); };
+
+/* ================= v4: link, autonomy, my day (Devices) ================= */
+async function loadV4Devices(){ try{ const l=await api.link_get(); $("#lkAddr").value=l.addr||""; $("#lkPill").textContent=!l.enabled?"OFF":l.online?"LINKED":"PC OFFLINE"; $("#lkPill").className="pill "+(l.online?"ok":l.enabled?"warn":"");
+    $("#lkInfo").textContent=`This device: ${l.device}.`+(l.enabled?(l.online?" Talking straight to the gaming PC.":" PC is off — carrying on here, will catch up when it's back."):""); }catch(e){}
+  try{ const a=await api.autonomy_get(); $("#auOn").checked=a.enabled; $("#auIdle").value=a.idle_minutes; $("#auEvery").value=a.every_minutes;
+    const d=a.day; $("#dyWake").value=d.wake; $("#dyOff").value=d.pc_off; $("#dyStart").value=d.school_start; $("#dyEnd").value=d.school_end; $("#dyHol").checked=!!d.holiday; }catch(e){} }
+$("#lkSave").onclick=async()=>{ await api.link_set({addr:$("#lkAddr").value,pin:$("#lkPin").value,enabled:!!$("#lkAddr").value.trim()}); $("#lkPin").value=""; toast("Linking…"); setTimeout(loadV4Devices,2500); };
+["auOn","auIdle","auEvery","dyWake","dyOff","dyStart","dyEnd","dyHol"].forEach(id=>$("#"+id).onchange=()=>api.autonomy_set({enabled:$("#auOn").checked,idle_minutes:+$("#auIdle").value,every_minutes:+$("#auEvery").value,wake:$("#dyWake").value,pc_off:$("#dyOff").value,school_start:$("#dyStart").value,school_end:$("#dyEnd").value,holiday:$("#dyHol").checked}));
+$("#auNow").onclick=()=>{ api.autonomy_set({run_now:true}); toast("🤖 Starting an autonomous check-in."); };
+
+/* ================= v4: dashboard extras ================= */
+async function loadDash4(){
+  try{ const v=await api.ventures_get(); const g=(v.goals||[])[0]; $("#dGoal").innerHTML=g?`<div class="big">£${g.got.toFixed(0)}<small>of £${g.target.toFixed(0)}</small></div><div class="goalbar"><i style="width:${g.pct}%"></i></div><div class="sub2">${esc(g.name)} · £${g.per_week.toFixed(2)}/week to hit it by ${g.by}</div>`:$("#dGoal").innerHTML; }catch(e){}
+  try{ const sc=await api.scholar_get(); $("#dGrades").innerHTML=sc.subjects.length?sc.subjects.slice(0,5).map(x=>`<div class="hbar"><b>${esc(x.name)}</b><div><i style="width:${(x.trend.slice(-1)[0]||{}).pct||0}%"></i></div><span>${x.latest??"—"}${x.target?" → "+esc(x.target):""}</span></div>`).join(""):$("#dGrades").innerHTML; }catch(e){}
+  try{ const a=await api.autonomy_get(); $("#dAuto").textContent=a.enabled?`ON · AFTER ${a.idle_minutes} MIN AWAY`:"OFF"; if(a.log.length) $("#dAutoList").innerHTML=a.log.slice(0,5).map(x=>`<div class="li"><span class="t">${esc(x.when)}</span><span class="g">${esc(x.text.slice(0,110))}</span></div>`).join(""); }catch(e){}
+  try{ const st=await api.status(); const chips=[`◆ ${THEMES[document.body.dataset.theme]||"STANDBY"} MODE`]; const g=await api.gaming_get(); if(g.active) chips.push("🎮 "+g.game);
+    const L=LIFE||{}; if(L.weather) chips.push(`${WXI(L.weather.code)} ${L.weather.temp}°`); chips.push(st.cloud.ok?"☁ BRAINS ONLINE":"☁ OFFLINE"); $("#hChips").innerHTML=chips.map(c=>`<span>${esc(c)}</span>`).join(""); }catch(e){}
+  const due=(LIFE&&LIFE.homework||[]).filter(h=>!h.done&&h.days<=1).length; const ev=($("#dToday .li .g")||{}).textContent;
+  $("#hLine").textContent=[due?`${due} homework due by tomorrow`:"no homework due",ev?`next: ${ev}`:""].filter(Boolean).join(" · "); }
+setInterval(()=>{ const d=new Date(); if($("#hClock")){ $("#hClock").firstChild.textContent=d.toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"}); $("#hDate").textContent=d.toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long"}).toUpperCase(); } },1000);
 $("#bMini").onclick=()=>api.mini_toggle();
 $("#qDict").onclick=e=>{ e.stopPropagation(); api.dictate_toggle(); };
 $("#updBtn").onclick=()=>api.devices_action("update_check").then(loadDevices);
@@ -1511,7 +1824,7 @@ function frame(t){ requestAnimationFrame(frame); if(lite&&t-lastFrame<33) return
     for(const p of parts){ p.y-=p.v*(state==="thinking"?2.4:1); p.x+=Math.sin(phase*.3+p.d)*.15; if(p.y<-5){p.y=bg.height+5;p.x=Math.random()*bg.width;} bx.globalAlpha=p.o*.6; bx.beginPath(); bx.arc(p.x,p.y,p.r,0,7); bx.fill(); } bx.globalAlpha=1; } }
 
 /* ================= boot ================= */
-function applyCfg(c){ cfg=c; lite=!!c.lite; document.body.classList.toggle("lite",lite); initBg();
+function applyCfg(c){ cfg=c; lite=!!c.lite; try{ addCustomDots(c.custom_modes); }catch(e){} document.body.classList.toggle("lite",lite); initBg();
   $("#name").textContent=c.name.toUpperCase(); $("#bootname").textContent=c.name.toUpperCase(); $("#bootver").textContent="v"+(c.version||"2.0"); document.title=c.name;
   $("#ringtext").textContent=`${c.name.toUpperCase()} · PERSONAL INTELLIGENCE SYSTEM · ALL SYSTEMS ONLINE · ${c.name.toUpperCase()} · AT YOUR SERVICE ·`; applyTheme(c.theme||"standby"); paintSpeak(c.speak); }
 async function boot(){ const c=await api.init(); applyCfg(c); const st=api.status();
@@ -1565,7 +1878,7 @@ setTimeout(()=>{ if(api) return; const wait=ms=>new Promise(r=>setTimeout(r,ms))
     study_mark:()=>A(true),study_make:()=>A(true),study_action:b=>api.study_get(),
     gaming_get:()=>A({total_mins:742,sessions:11,longest:186,all_time_hours:212.5,active:false,game:null,by_game:[["Roblox",520],["Minecraft",160],["Fortnite",62]],daily:[{day:"10-26",mins:95},{day:"10-27",mins:40},{day:"10-28",mins:180},{day:"10-29",mins:0},{day:"10-30",mins:125},{day:"10-31",mins:210},{day:"11-01",mins:92}],settings:{auto:true,boost:true,clip_buffer:false,break_every_min:120,high_performance:true}}),
     gaming_set:()=>api.gaming_get(),clip_now:()=>A("Clipped"),
-    ventures_get:()=>A({content:false,dev:[{id:"d1",project:"Hatchlands",task:"Pet hatching system with rarity tiers and an egg-crack animation",status:"done",result:"Saved 4 scripts + REVIEW.md in projects\\Hatchlands."},{id:"d2",project:"Hatchlands",task:"Rebirth system that doubles coin multiplier",status:"todo",result:""}],earn:{total:186.5,this_month:42,by_venture:[["Automation services",120],["Hatchlands",46.5],["Content / YouTube",20]],months:[{month:"2026-06",total:0},{month:"2026-07",total:15},{month:"2026-08",total:40},{month:"2026-09",total:24.5},{month:"2026-10",total:65},{month:"2026-11",total:42}],recent:[{id:"e1",date:"2026-11-01",venture:"Hatchlands",amount:12,note:"gamepass sales"},{id:"e2",date:"2026-10-29",venture:"Automation services",amount:30,note:"booking bot for barber"}],ventures:["Hatchlands","Content / YouTube","Automation services","Root bot","Dropshipping","Other"]}}),
+    ventures_get:()=>A({content:false,dev:[{id:"d1",project:"Projects",task:"Discord bot that posts my new YouTube uploads",status:"done",result:"Built and tested — saved in projects\\Projects."},{id:"d2",project:"Projects",task:"Booking-bot demo for the barber pitch",status:"todo",result:""}],earn:{total:186.5,this_month:42,by_venture:[["Automation services",120],["Hatchlands",46.5],["Content / YouTube",20]],months:[{month:"2026-06",total:0},{month:"2026-07",total:15},{month:"2026-08",total:40},{month:"2026-09",total:24.5},{month:"2026-10",total:65},{month:"2026-11",total:42}],recent:[{id:"e1",date:"2026-11-01",venture:"Hatchlands",amount:12,note:"gamepass sales"},{id:"e2",date:"2026-10-29",venture:"Automation services",amount:30,note:"booking bot for barber"}],ventures:["Hatchlands","Content / YouTube","Automation services","Root bot","Dropshipping","Other"]}}),
     ventures_action:()=>api.ventures_get(),
     brain_get:()=>A({local:"qwen2.5:3b",auto_learn:true,facts:[{i:0,text:"Kiyan is in Year 11, doing GCSEs this summer",cat:"fact",t:"2026-10-23",src:"you"},{i:1,text:"Best mate on Root is Sam",cat:"person",t:"2026-10-29",src:"learned"},{i:2,text:"Building Hatchlands, a pet hatching idle game on Roblox",cat:"project",t:"2026-10-07",src:"you"},{i:3,text:"Prefers short replies while gaming",cat:"preference",t:"2026-10-30",src:"learned"},{i:4,text:"Wants to earn money with AI automation this winter",cat:"goal",t:"2026-10-30",src:"you"}],
       shortcuts:[{phrase:"gaming setup",does:"open Discord and Spotify and turn on gaming mode",uses:6}],suggest:[{phrase:"check my messages",count:9},{phrase:"whats using my ram",count:4}],
@@ -1581,6 +1894,31 @@ setTimeout(()=>{ if(api) return; const wait=ms=>new Promise(r=>setTimeout(r,ms))
       clips:[{text:"https://github.com/Kiyan12121/orion/releases",t:"2026-11-01 12:30"},{text:"local Players = game:GetService(\"Players\")",t:"2026-11-01 12:11"}],
       screen:[["Roblox",142],["YouTube",64],["Discord",41],["VS Code",33],["Root",18]],screen_week:[]}),
     life_action:()=>api.life_get() });
+  Object.assign(api,{
+    schedule_week:()=>{ const t=new Date(); const d=k=>{ const x=new Date(t.getTime()+k*864e5); return x.toISOString().slice(0,10); };
+      return A({start:d(0),day:{wake:"08:00",school_start:"08:40",school_end:"15:10",pc_off:"20:30",holiday:false},timetable:{monday:["Maths","English","Biology"]},
+      events:[{id:"a",title:"📚 Revise: Biology — Transport",date:d(0),start:"17:00",end:"17:45",mins:45,busy:true,with:"",clash:[],kind:"revision"},
+        {id:"b",title:"🎮 Roblox party",date:d(1),start:"19:00",end:"21:00",mins:120,with:"Sam, Alex",clash:["Revise: Maths"],kind:"party"},
+        {id:"c",title:"📚 Revise: Maths — Circle theorems",date:d(1),start:"19:30",end:"20:15",mins:45,with:"",clash:["Roblox party"],kind:"revision"},
+        {id:"d",title:"Dentist",date:d(3),start:"16:00",end:"16:30",mins:30,with:"",clash:[],kind:"event"},
+        {id:"e",title:"📚 Revise: English — Macbeth",date:d(5),start:"11:00",end:"12:00",mins:60,with:"",clash:[],kind:"revision"}]}); },
+    schedule_move:()=>A(true),
+    scholar_get:()=>A({weak:["Biology — Transport","Maths — Circle theorems"],mistakes_due:2,timetable:{monday:["Maths","English","Biology"],tuesday:["PE","History"]},lessons:[],
+      mistakes:[{id:"m1",subject:"Biology",q:"Explain how the structure of the alveoli is adapted for gas exchange.",marks:4},{id:"m2",subject:"Maths",q:"Prove that the angle in a semicircle is 90°.",marks:3}],
+      papers:[{id:"p1",title:"Biology Paper 1 — Cells & Transport",subject:"Biology",total:30,date:"2026-11-01",marked:true,pct:63,grade:6},{id:"p2",title:"Maths — Geometry practice",subject:"Maths",total:40,date:"2026-11-02",marked:false}],
+      subjects:[{name:"Biology",board:"AQA",target:"7",latest:6,trend:[{date:"x",pct:48,grade:4},{date:"y",pct:55,grade:5},{date:"z",pct:63,grade:6}],topics:{"Cell biology":{r:"green",score:82},"Organisation":{r:"amber",score:55},"Transport":{r:"red",score:33},"Infection & response":{r:"grey",score:null},"Bioenergetics":{r:"amber",score:60}},counts:{}},
+        {name:"Maths",board:"Edexcel",target:"8",latest:7,trend:[{date:"x",pct:66,grade:6},{date:"y",pct:72,grade:7}],topics:{"Algebra":{r:"green",score:85},"Circle theorems":{r:"red",score:30},"Probability":{r:"amber",score:58},"Vectors":{r:"grey",score:null}},counts:{}},
+        {name:"English Literature",board:"",target:"6",latest:null,trend:[],topics:{"Macbeth":{r:"amber",score:50},"An Inspector Calls":{r:"grey",score:null},"Poetry":{r:"red",score:35}},counts:{}}]}),
+    scholar_paper:()=>A({id:"p2",title:"Maths — Geometry practice",minutes:45,marked:false,questions:[{n:1,q:"Work out the size of angle x. Give reasons for your answer.",marks:3},{n:2,q:"Prove that the angle in a semicircle is 90°.",marks:4}]}),
+    scholar_action:()=>api.scholar_get(),
+    link_get:()=>A({enabled:true,addr:"100.84.12.7",online:true,device:"laptop:KIYAN-LAPTOP"}),link_set:()=>A({}),
+    autonomy_get:()=>A({enabled:true,idle_minutes:30,every_minutes:45,day:{wake:"08:00",school_start:"08:40",school_end:"15:10",pc_off:"20:30",holiday:false},
+      log:[{when:"Sun 17:42",text:"Researched 6 barbers in Hinckley with no online booking — saved to notes as leads"},{when:"Sun 17:40",text:"💬 Messaged you: Maths homework is due tomorrow and isn't ticked off yet"},{when:"Sun 16:55",text:"Made 3 Shorts from yesterday's stream"}]}),
+    autonomy_set:()=>api.autonomy_get() });
+  { const vg=api.ventures_get; api.ventures_get=async()=>({...(await vg()),goals:[{id:"g1",name:"Summer fund",target:500,by:"2027-07-20",got:186.5,pct:37,per_week:6.9,days_left:261}],
+      crm:[{id:"c1",name:"Desford Barbers",stage:"contacted",value:30,notes:["01 Nov: emailed about a booking bot"]},{id:"c2",name:"Ace Driving School",stage:"call",value:45,notes:["call Thursday"]},{id:"c3",name:"Village Café",stage:"lead",notes:[]},{id:"c4",name:"Mr Patel (tutor)",stage:"won",value:30,notes:["paid"]}],
+      followups:["c1"],ideas:[{name:"Booking bots for barbers",score:78,verdict:"go",realistic_gbp_per_week:40,weeks_to_first_pound:2,why:"Real pain, low competition locally, you can build it in a weekend."},{name:"Reselling trainers",score:34,verdict:"drop",realistic_gbp_per_week:10,weeks_to_first_pound:6,why:"Needs stock money you don't have."}],
+      per_hour:[["Automation services",15],["Content / YouTube",2.5]]}); }
   boot(); },1500);
 </script>
 </body>

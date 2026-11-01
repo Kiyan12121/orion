@@ -72,9 +72,79 @@ public class LinkService extends Service {
         @Override
         public void run() {
             try { check(); } catch (Exception ignored) { }
-            handler.postDelayed(this, 20000);
+            try { rideTick(); } catch (Exception ignored) { }
+            handler.postDelayed(this, interval());
         }
     };
+
+    /** Battery-friendly: check often while you're using the phone, rarely when it's asleep or low on battery. */
+    private long interval() {
+        try {
+            if (getSharedPreferences(PREFS, MODE_PRIVATE).getBoolean("riding", false)) return 15000;
+            android.os.PowerManager pm = (android.os.PowerManager) getSystemService(POWER_SERVICE);
+            android.os.BatteryManager bm = (android.os.BatteryManager) getSystemService(BATTERY_SERVICE);
+            int pct = bm.getIntProperty(android.os.BatteryManager.BATTERY_PROPERTY_CAPACITY);
+            if (pct > 0 && pct < 10) return 300000;
+            if (pct > 0 && pct < 25) return 120000;
+            return pm.isInteractive() ? 20000 : 60000;
+        } catch (Exception e) { return 30000; }
+    }
+
+    /** School mode: silent between school start and end on school days (times sent by the app). */
+    static boolean atSchool(Context c) {
+        SharedPreferences sp = c.getSharedPreferences(PREFS, MODE_PRIVATE);
+        if (sp.getBoolean("holiday", false)) return false;
+        java.util.Calendar cal = java.util.Calendar.getInstance();
+        int dow = cal.get(java.util.Calendar.DAY_OF_WEEK);
+        if (dow == java.util.Calendar.SATURDAY || dow == java.util.Calendar.SUNDAY) return false;
+        String now = String.format(java.util.Locale.UK, "%02d:%02d", cal.get(java.util.Calendar.HOUR_OF_DAY), cal.get(java.util.Calendar.MINUTE));
+        return now.compareTo(sp.getString("school_start", "08:40")) >= 0 && now.compareTo(sp.getString("school_end", "15:10")) < 0;
+    }
+
+    // ---------------------------------------------------------------- ride timing (learns your school run)
+    private void rideTick() {
+        SharedPreferences sp = getSharedPreferences(PREFS, MODE_PRIVATE);
+        if (!sp.getBoolean("riding", false)) return;
+        android.location.Location loc = lastLocation(this);
+        long started = sp.getLong("ride_start", 0);
+        if (System.currentTimeMillis() - started > 90 * 60000L) { sp.edit().putBoolean("riding", false).apply(); return; }
+        if (loc == null) return;
+        float dLat = sp.getFloat("dest_lat", 0), dLon = sp.getFloat("dest_lon", 0);
+        if (dLat == 0 && dLon == 0) return;
+        float[] d = new float[1];
+        android.location.Location.distanceBetween(loc.getLatitude(), loc.getLongitude(), dLat, dLon, d);
+        if (d[0] < sp.getFloat("dest_radius", 120)) {
+            long secs = (System.currentTimeMillis() - started) / 1000;
+            String rides = sp.getString("rides", "");
+            rides += (rides.isEmpty() ? "" : ";") + sp.getString("ride_to", "school") + "," + (started / 1000) + "," + secs;
+            if (rides.length() > 4000) rides = rides.substring(rides.indexOf(';') + 1);
+            sp.edit().putBoolean("riding", false).putString("rides", rides).apply();
+            Notification n = builder(CH_LINK).setSmallIcon(android.R.drawable.ic_menu_mylocation)
+                    .setContentTitle("Arrived — " + (secs / 60) + "m " + (secs % 60) + "s")
+                    .setContentText("Ride to " + sp.getString("ride_to", "school") + " logged.").setAutoCancel(true).build();
+            ((NotificationManager) getSystemService(NOTIFICATION_SERVICE)).notify(31, n);
+        }
+    }
+
+    @SuppressWarnings("MissingPermission")
+    static android.location.Location lastLocation(Context c) {
+        try {
+            android.location.LocationManager lm = (android.location.LocationManager) c.getSystemService(LOCATION_SERVICE);
+            android.location.Location best = null;
+            for (String p : lm.getProviders(true)) {
+                android.location.Location l = lm.getLastKnownLocation(p);
+                if (l != null && (best == null || l.getTime() > best.getTime())) best = l;
+            }
+            if (c.getSharedPreferences(PREFS, MODE_PRIVATE).getBoolean("riding", false)) {
+                for (String p : new String[]{"gps", "network"}) {
+                    if (lm.isProviderEnabled(p)) lm.requestSingleUpdate(p, new android.location.LocationListener() {
+                        @Override public void onLocationChanged(android.location.Location l) { }
+                    }, android.os.Looper.getMainLooper());
+                }
+            }
+            return best;
+        } catch (Exception e) { return null; }
+    }
 
     private void check() throws Exception {
         SharedPreferences sp = getSharedPreferences(PREFS, MODE_PRIVATE);
@@ -97,8 +167,9 @@ public class LinkService extends Service {
         for (int k = 0; k < acts.length(); k++) {
             JSONObject a = acts.getJSONObject(k);
             String kind = a.optString("kind");
-            if ("call".equals(kind)) incomingCall(a.optString("reason", ""));
-            else if ("ring".equals(kind)) ring();
+            boolean school = atSchool(this);
+            if ("call".equals(kind) && !school) incomingCall(a.optString("reason", ""));
+            else if ("ring".equals(kind)) ring();          // find-my-phone always rings (you asked for it)
         }
     }
 
@@ -211,8 +282,13 @@ public class LinkService extends Service {
                 .setContentText("Calls and find-my-phone work even with the app closed")
                 .setSmallIcon(android.R.drawable.stat_notify_sync_noanim).setOngoing(true)
                 .setContentIntent(openApp("", "", 10)).build();
-        if (Build.VERSION.SDK_INT >= 34) startForeground(8, n, ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE);
-        else startForeground(8, n);
+        if (Build.VERSION.SDK_INT >= 34) {
+            int type = ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE;
+            if (checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) == android.content.pm.PackageManager.PERMISSION_GRANTED
+                    || checkSelfPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION) == android.content.pm.PackageManager.PERMISSION_GRANTED)
+                type |= ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION;
+            try { startForeground(8, n, type); } catch (Exception e) { startForeground(8, n, ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE); }
+        } else startForeground(8, n);
     }
 
     @Override

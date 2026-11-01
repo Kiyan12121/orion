@@ -23,7 +23,7 @@ RULES = [
      lambda m: {"on": not re.search(r"off|disable|stop", m.group(0))}, None),
     (r"^(what('s| is) )?(on )?(my )?(schedule|plans?|agenda)( today| for today)?$|^what('s| is) on today$",
      "schedule_list", lambda m: {"days": 1}, lambda r, m: re.sub(r" \[id \w+\]", "", r) if r != "Nothing scheduled." else "Your schedule is clear today."),
-    (r"^(switch to |activate |engage |enable |go )?(standby|serious|stealth|executive|hacker)( mode)?$",
+    (r"^(switch to |activate |engage |enable |go )?(standby|serious|stealth|executive|hacker|scholar|ceo)( mode)?$",
      "set_theme", lambda m: {"mode": m.group(2)}, None),
     (r"^(clip that|clip it|save that|record that)$", "clip_that", lambda m: {}, None),
     (r"^(note|jot down|remember this idea)[:,]? (.{3,})$", "note_add", lambda m: {"text": m.group(2)}, lambda r, m: "Noted."),

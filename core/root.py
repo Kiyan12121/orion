@@ -252,10 +252,35 @@ def _panel(img):
     return img.crop((int(w * 0.66), int(h * 0.04), w, h))
 
 
+def _uia_snapshot(hwnd):
+    """Accessibility read (preferred): real text, no guessing, only the DM panel."""
+    try:
+        from . import root_uia
+        p = root_uia.read_panel(hwnd)
+    except Exception:
+        return None
+    if not p:
+        return None
+    if p["view"] == "list" and p["conversations"]:
+        convs = [{k: c[k] for k in ("name", "preview", "time", "from_me")} for c in p["conversations"]]
+        data = {"view": "list", "conversations": convs, "source": "uia"}
+    elif p["view"] == "conversation" and p.get("lines"):
+        data = {"view": "conversation", "with": p.get("with"), "source": "uia",
+                "messages": [{"from": "", "text": l} for l in p["lines"]]}
+    else:
+        return None
+    data["_hash"] = hashlib.md5(json.dumps(data, sort_keys=True).encode()).hexdigest()
+    CTX.get("emit", lambda *a, **k: None)("root_snapshot", data=data)
+    return data
+
+
 def snapshot(force_vision=True):
     w = root_window(launch=True)
     if not w:
         raise RuntimeError("Root isn't running and I couldn't start it.")
+    d = _uia_snapshot(w[0])
+    if d:
+        return d
     v = _vision()
     img, _ = v.capture_window(w[0])
     panel = _panel(img)
@@ -320,6 +345,12 @@ def open_conversation(name):
         raise RuntimeError("Root isn't running.")
     hwnd = w[0]
     _focus(hwnd)
+    try:
+        from . import root_uia
+        if root_uia.open_dm(hwnd, name, back_fn=lambda: _back_to_list(hwnd)):
+            return hwnd
+    except Exception:
+        pass
     d = snapshot()
     view = d.get("view")
     if view == "text":                                  # read by OCR: is the DM list showing?
@@ -360,6 +391,16 @@ def send_message(name, text):
         prev = _foreground()
         try:
             hwnd = open_conversation(name)
+            try:
+                from . import root_uia
+                ok, how = root_uia.send(hwnd, text, _paste)
+                if ok or how.startswith("sent"):
+                    _log("sent" if ok else "error", name, text if ok else f"{how}: {text}")
+                    return (f"Sent to {name} (checked — it's in the chat): {text}" if ok else
+                            f"I pressed send to {name}, but I couldn't see the message in the chat afterwards — "
+                            "worth a quick look in Root.")
+            except Exception:
+                pass
             pos = _find(hwnd, "msgbox", f"Message @", "EditControl",
                         "the message input box at the bottom of the right-hand panel (placeholder 'Message @…')",
                         ocr="Message @")
@@ -467,14 +508,20 @@ class RootWatcher:
             time.sleep(max(10, int(self.rc.get("poll_seconds", 25))))
 
     def check(self):
-        v = _vision()
         w = root_window(launch=False)
-        img, _ = v.capture_window(w[0])
-        h = _hash(_panel(img))
-        if h == self.last_hash:
-            return
-        self.last_hash = h
-        d = snapshot()
+        d = _uia_snapshot(w[0])
+        if d:
+            if d["_hash"] == self.last_hash:
+                return
+            self.last_hash = d["_hash"]
+        else:
+            v = _vision()
+            img, _ = v.capture_window(w[0])
+            h = _hash(_panel(img))
+            if h == self.last_hash:
+                return
+            self.last_hash = h
+            d = snapshot()
         self.status = f"checked {time.strftime('%H:%M')}"
         if d.get("view") != "list":
             return
@@ -592,3 +639,17 @@ def root_afk(on, note=""):
     CTX.get("emit", lambda *a, **k: None)("root_afk", on=w.afk, note=w.afk_note)
     return ("AFK mode on — I'll handle your Root DMs" + (f" ({note})" if note else "") + ".") if on else \
         "AFK mode off. Welcome back."
+
+
+@tool("Root diagnostics: saves what ORION can see in Root's window (accessibility tree) to a file, to fix Root control.")
+def root_diagnose():
+    w = root_window(launch=False)
+    if not w:
+        return "Open Root first, then ask again."
+    from . import root_uia
+    path, n, named = root_uia.dump(w[0])
+    p = root_uia.read_panel(w[0]) or {}
+    seen = (f"I can read {len(p.get('conversations', []))} conversation(s) in the DM panel." if p.get("view") == "list"
+            else f"An open chat with {p.get('with')} ({len(p.get('lines', []))} lines)." if p.get("view") == "conversation"
+            else "I couldn't make sense of the DM panel yet.")
+    return f"Saved Root's layout ({n} elements, {named} with text) to {path}. {seen}"

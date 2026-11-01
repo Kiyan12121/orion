@@ -149,8 +149,9 @@ class Speaker:
             v = self.cfg["voice"]
             if v.get("engine", "neural") == "neural" and self.neural_ok:
                 try:
-                    audio = asyncio.run(self._neural(text, voice or v.get("neural_voice", "en-GB-SoniaNeural"),
-                                                     v.get("neural_rate", "+6%")))
+                    from .modes import voice as mode_voice
+                    mv, rate, pitch = mode_voice(self.cfg.get("theme", "standby"), self.cfg)
+                    audio = asyncio.run(self._neural(text, voice or mv, rate, pitch))
                     if gen == self.gen and audio:
                         self.emit("audio", id=uuid.uuid4().hex[:8], text=text,
                                   data=base64.b64encode(audio).decode())
@@ -161,9 +162,9 @@ class Speaker:
                 self.offline_say(text)
 
     @staticmethod
-    async def _neural(text, voice, rate):
+    async def _neural(text, voice, rate, pitch="+0Hz"):
         buf = bytearray()
-        async for chunk in edge_tts.Communicate(text, voice, rate=rate).stream():
+        async for chunk in edge_tts.Communicate(text, voice, rate=rate, pitch=pitch).stream():
             if chunk["type"] == "audio":
                 buf += chunk["data"]
         return bytes(buf)

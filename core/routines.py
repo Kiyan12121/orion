@@ -34,26 +34,28 @@ TYPES = {"Images": (".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp", ".svg", ".
          "Code": (".py", ".js", ".lua", ".json", ".html", ".css", ".bat", ".ps1", ".jar")}
 
 BUILTIN = {
-    "tidy_downloads": {"name": "Tidy Downloads", "time": "02:00", "days": "daily", "heavy": False,
+    "tidy_downloads": {"name": "Tidy Downloads", "time": "16:05", "days": "daily", "heavy": False,
                        "desc": "Sorts files older than 7 days into Downloads\\Sorted\\<type>. Moves, never deletes."},
-    "clear_temp":     {"name": "Clear temp junk", "time": "02:05", "days": "daily", "heavy": False,
+    "clear_temp":     {"name": "Clear temp junk", "time": "16:06", "days": "daily", "heavy": False,
                        "desc": "Removes Windows temp files older than 3 days to free space."},
-    "backup":         {"name": "Back up ORION", "time": "02:10", "days": "daily", "heavy": False,
+    "backup":         {"name": "Back up ORION", "time": "16:10", "days": "daily", "heavy": False,
                        "desc": "Zips your projects, skills and memory into Documents\\ORION Backups (keeps 7)."},
-    "health":         {"name": "PC health check", "time": "02:15", "days": "daily", "heavy": False,
+    "health":         {"name": "PC health check", "time": "16:15", "days": "daily", "heavy": False,
                        "desc": "Disk space, RAM, uptime and the biggest space-wasters."},
-    "updates":        {"name": "Check for updates", "time": "02:20", "days": "daily", "heavy": False,
+    "updates":        {"name": "Check for updates", "time": "16:20", "days": "daily", "heavy": False,
                        "desc": "Looks for a new ORION version on GitHub."},
-    "content":        {"name": "Content: new videos → Shorts", "time": "03:00", "days": "daily", "heavy": True,
+    "content":        {"name": "Content: new videos → Shorts", "time": "17:00", "days": "daily", "heavy": True,
                        "desc": "Any new video in your Videos folder gets auto-cut, plus 3 captioned Shorts and titles."},
-    "learn":          {"name": "Learn from the day", "time": "02:30", "days": "daily", "heavy": False,
+    "learn":          {"name": "Learn from the day", "time": "19:50", "days": "daily", "heavy": False,
                        "desc": "Pulls new facts about you from today's chats and spots things you ask a lot (→ shortcuts)."},
-    "devqueue":       {"name": "Dev queue (Hatchlands etc.)", "time": "01:00", "days": "daily", "heavy": True,
+    "devqueue":       {"name": "Dev queue", "time": "16:30", "days": "daily", "heavy": True,
                        "desc": "Works through your coding to-do list overnight and saves the scripts for review."},
-    "report":         {"name": "Morning report", "time": "07:30", "days": "daily", "heavy": False,
-                       "desc": "Sends your phone a summary of everything ORION did overnight."},
+    "money":          {"name": "Monday money meeting", "time": "17:00", "days": "daily", "heavy": False,
+                       "desc": "Mondays: last week's money, best earner, £/hour, goals and follow-ups — sent to your phone."},
+    "report":         {"name": "Evening wind-down", "time": "20:00", "days": "daily", "heavy": False,
+                       "desc": "Before the PC goes off: today's recap, tomorrow's plan, homework, weather — synced to your phone for the morning."},
 }
-DEFAULT_ON = {"tidy_downloads", "clear_temp", "backup", "health", "updates", "report", "learn", "devqueue"}
+DEFAULT_ON = {"money", "tidy_downloads", "clear_temp", "backup", "health", "updates", "report", "learn", "devqueue"}
 DAYS = {"daily": [0, 1, 2, 3, 4, 5, 6], "weekdays": [0, 1, 2, 3, 4], "weekends": [5, 6]}
 
 
@@ -231,6 +233,11 @@ class NightShift:
         for k, v in BUILTIN.items():
             n["builtin"].setdefault(k, {"on": k in DEFAULT_ON, "time": v["time"]})
         n.setdefault("custom", [])
+        if not n.get("_v4"):                     # 4.0: the PC is off overnight, so upkeep moves to after school
+            for k, v in BUILTIN.items():
+                n["builtin"][k]["time"] = v["time"]
+            n["builtin"]["report"]["on"] = True
+            n["_v4"] = True
         return n
 
     def listing(self):
@@ -267,7 +274,8 @@ class NightShift:
         due = now.replace(hour=h, minute=m, second=0, microsecond=0)
         last = st["last_run"].get(rid, 0)
         # run if we're past today's time and haven't run since (catches up if the PC was off/asleep at that time)
-        return now >= due and last < due.timestamp() and now - due < dt.timedelta(hours=10)
+        # catch-up shift: the PC is usually off overnight, so anything missed runs when it's next on (same day)
+        return now >= due and last < due.timestamp() and now - due < dt.timedelta(hours=20)
 
     def tick(self):
         st = _state()
@@ -310,6 +318,16 @@ class NightShift:
             except Exception as e:
                 self._record(k, f"Failed: {e}")
             return
+        if k == "money":
+            if dt.date.today().weekday() == 0:
+                try:
+                    from .money import money_meeting_text
+                    t = money_meeting_text()
+                    self.notify(t, "ORION Monday money meeting")
+                    self._record(k, t.split("\n")[0])
+                except Exception as e:
+                    self._record(k, f"Failed: {e}")
+            return
         if k == "learn":
             def learn():
                 res = []
@@ -349,6 +367,10 @@ class NightShift:
         self.emit("routines_changed")
 
     def morning_report(self):
+        return self.wind_down()
+
+    def wind_down(self):
+        """Evening wind-down: today's recap + tomorrow's plan, pushed to the phone before the PC goes off."""
         st = _state()
         since = st.get("last_report", 0) or (time.time() - 86400)
         lines = []
@@ -381,11 +403,23 @@ class NightShift:
             lines.append(briefing_text(self.cfg.get("user_title", "sir")))
         except Exception:
             pass
+        try:
+            from .daily import recap_today, tomorrow_plan, morning_pack
+            lines = recap_today() + lines + tomorrow_plan()
+            morning_pack(self.cfg)                          # the phone does tomorrow's wake-up from this
+        except Exception:
+            pass
         st["last_report"] = time.time()
         _save_state(st)
-        text = "Overnight:\n" + "\n".join(lines) if len(lines) > 1 else (lines[0] if lines else "Quiet night, nothing to report.")
+        text = "Evening wind-down:\n" + "\n".join(lines) if lines else "Quiet day, nothing to report."
         self._record("report", "Sent.")
-        self.notify(text, "ORION morning report")
+        self.notify(text, "ORION evening wind-down")
+        try:
+            sync = CTX.get("sync")
+            if sync and sync.enabled:
+                sync.sync_now()
+        except Exception:
+            pass
         return text
 
     # -------------------------------------------------- editing

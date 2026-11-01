@@ -94,6 +94,39 @@ def add_event(title, start, duration=60, repeat="none", remind=10, busy=False, w
     return e
 
 
+def move_event(eid, new_start, duration=None):
+    """Drag-to-move from the calendar (moves the whole event; repeats keep their pattern)."""
+    t = _parse(new_start)
+    with _lock:
+        d = _load()
+        for e in d["events"]:
+            if e["id"] == eid:
+                e["start"] = t.strftime(FMT)
+                if duration:
+                    e["duration"] = int(duration)
+                _save(d)
+                CTX.get("emit", lambda *a, **k: None)("schedule_changed")
+                return e
+    return None
+
+
+def week(start=None, days=7):
+    """Calendar data: each day's events with clash flags."""
+    start = start or dt.date.today()
+    d0 = dt.datetime.combine(start, dt.time(0, 0))
+    occ = occurrences(d0, d0 + dt.timedelta(days=days))
+    out = []
+    for o in occ:
+        clash = [p["title"] for p in occ if p is not o and p["at"] < o["until"] and o["at"] < p["until"]]
+        out.append({"id": o["id"], "title": o["title"], "date": o["at"].strftime("%Y-%m-%d"),
+                    "start": o["at"].strftime("%H:%M"), "end": o["until"].strftime("%H:%M"),
+                    "mins": int((o["until"] - o["at"]).total_seconds() // 60), "busy": o.get("busy", False),
+                    "repeat": o.get("repeat", "none"), "with": o.get("with", ""), "clash": clash[:3],
+                    "kind": "revision" if str(o.get("notes", "")).startswith("REVISION") else
+                            "party" if str(o.get("notes", "")).startswith("PARTY") else "event"})
+    return out
+
+
 def remove_event(key):
     key = str(key).lower().strip()
     with _lock:

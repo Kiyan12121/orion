@@ -51,9 +51,11 @@ def dev_list():
     return _load(DEV, [])
 
 
-def dev_add(task, project="Hatchlands"):
+def dev_add(task, project="Projects"):
+    if re.search(r"hatchland", f"{task} {project}", re.I):
+        raise ValueError("Hatchlands is off-limits for ORION — that one's just you and your collaborator.")
     d = dev_list()
-    t = {"id": uuid.uuid4().hex[:6], "task": task.strip()[:600], "project": (project or "Hatchlands").strip()[:40],
+    t = {"id": uuid.uuid4().hex[:6], "task": task.strip()[:600], "project": (project or "Projects").strip()[:40],
          "status": "todo", "added": time.time(), "job": None, "result": ""}
     d.append(t)
     _save(DEV, d)
@@ -71,7 +73,7 @@ def queue_dev_tasks(jobs, ids=None):
     for t in d:
         if t["status"] != "todo" or (ids and t["id"] not in ids):
             continue
-        folder = os.path.join(PROJECTS_DIR, re.sub(r"[^\w\- ]", "", t["project"]) or "Hatchlands",
+        folder = os.path.join(PROJECTS_DIR, re.sub(r"[^\w\- ]", "", t["project"]) or "Projects",
                               time.strftime("%Y-%m-%d ") + re.sub(r"[^\w]+", "-", t["task"].lower())[:36].strip("-"))
         lua = re.search(r"hatchlands|roblox|luau|lua\b|studio|obby|pet|rebirth", t["project"] + " " + t["task"], re.I)
         rules = LUAU_RULES.format(project=t["project"], folder=folder) if lua else (
@@ -140,13 +142,16 @@ def earn_summary():
 
 
 # ------------------------------------------------------------------ AI tools
-@tool("Add a coding task to the DEV QUEUE (worked on overnight by Night Shift). Use for Hatchlands / Roblox "
-      "scripts, bots and tools the user wants built later.",
+@tool("Add a coding task to the DEV QUEUE (built in the background). For bots, tools and scripts the user wants built "
+      "later. NEVER for Hatchlands.",
       {"task": ("string", "What to build, in detail", True),
-       "project": ("string", "Project name, e.g. Hatchlands", False),
+       "project": ("string", "Project name", False),
        "now": ("boolean", "Start it now instead of overnight", False)})
-def dev_task_add(task, project="Hatchlands", now=False):
-    t = dev_add(task, project or "Hatchlands")
+def dev_task_add(task, project="Projects", now=False):
+    try:
+        t = dev_add(task, project or "Projects")
+    except ValueError as e:
+        return str(e)
     if now and CTX.get("jobs"):
         queue_dev_tasks(CTX["jobs"], [t["id"]])
         return f"Started on it now (task {t['id']}). Scripts will be saved under projects\\{t['project']}."

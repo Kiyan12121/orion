@@ -1,4 +1,41 @@
-# ORION 3.0 — Personal Intelligence System
+# ORION 4.0 — Personal Intelligence System
+
+## New in 4.0
+**One brain, everywhere**
+- Your PC, laptop and phone share one conversation. Start on the phone, carry on at the PC. Link the laptop in Devices › Link to gaming PC; it uses the PC's brain when the PC is on and its own when it's off.
+
+**Seeing what ORION does**
+- **Holographic cards** pop up around the core while ORION talks: weather, steps, key points, charts, code. They show on the phone too.
+- **Live view:** watch ORION's hidden browser, or your PC, while it works.
+
+**Modes that do their job**
+- **Butler** (everyday), **Serious** (getting real things done), **CEO** (money: goals, idea scorer, client CRM, £/hour, invoices, Monday money meeting), **Scholar** (school), **Hacker**, **Stealth**. Each mode has its own voice and tools. ORION switches mode by itself (Settings › Auto mode), and you can make your own modes.
+- **Scholar: Exam Hall** writes practice papers, marks them (type your answers or photograph them), and remembers your weak topics. Mistakes come back a week later. It also has a **Tutor** and builds a **revision timetable** in your free time.
+
+**Root, fixed properly**
+- Root is now read through Windows accessibility (the system screen readers use), so ORION reads the real names and messages and presses the real buttons. It only reads Direct Messages: @everyone and @here pings in servers are ignored. A sent message is only reported as sent once ORION can see it in the chat. If anything's off, Health › Root diagnostic saves a report for fixing it.
+
+**ORION on its own** (Devices › Autonomous mode)
+- If you've been away for 30 minutes and aren't gaming, ORION gets on with useful jobs by itself (within hard safety limits) and messages or calls your phone if something matters.
+
+**Gaming & schedule**
+- Per-game profiles (apps to open and close), auto Stealth while gaming, a game doctor that calms CPU/RAM hogs, a wrap-up when you finish, and hold the controller's Back button to talk.
+- A full week calendar: drag events to move them, see clashes and your school day.
+
+**Your day**
+- Built around your routine: wake 8:00, school 8:40–15:10, PC off about 20:30. Jobs run after school. At 20:00 the evening wind-down recaps your day, plans tomorrow and hands the **morning briefing to your phone**.
+
+**Phone 4.0**
+- Modes, the shared brain and cards on the phone.
+- **Wake-up call** at 8:00 on school days, with weather, homework and the plan, plus "15 minutes" and "leave now" reminders based on how long your ride takes.
+- **Ride mode:** hands-free chat on the bike. It pauses your music, times your ride and learns how long it usually takes. Ask "when will I get to school?".
+- **Music control:** "skip", "pause", "louder" work with Amazon Music or any app.
+- **School mode:** silent from 8:40 to 15:10.
+- **Hands-free (beta):** "Hey ORION" offline wake word, and set ORION as your digital assistant to use it by holding your earbud.
+- Exam Hall on the phone: sit papers and photograph your answers.
+- Battery care: it checks in less often when the screen's off or the battery's low.
+
+**Setup on the phone:** Settings › Hands-free: allow location, tap "Stop Samsung putting ORION to sleep" (choose Unrestricted), allow full-screen notifications, then optionally turn on "Hey ORION" and choose ORION as your assistant.
 
 ## New in 3.2
 - **Fixed:** listening didn't stop when music was playing. ORION now turns music, videos and games down while you talk and puts them back afterwards (Settings › Listening). Its voice detection now tells your voice apart from steady music, and it stops listening if all it's hearing is music.

@@ -200,7 +200,7 @@ class Remote:
                 except json.JSONDecodeError:
                     body = {}
                 if self.path == "/api/send":
-                    self._json(200, remote.api.ask(body.get("text", ""), source="phone"))
+                    self._json(200, remote.api.ask(body.get("text", ""), source=body.get("source", "phone")))
                 elif self.path == "/api/action":
                     self._json(200, {"result": remote.api.remote_action(body.get("action", ""), body.get("value"))})
                 else:
@@ -231,18 +231,48 @@ class Remote:
 
 
 # ====================================================================== sync (private GitHub Gist)
-SYNC_FILES = {"memory.json": os.path.join(DATA_DIR, "memory.json"),
-              "schedule.json": os.path.join(DATA_DIR, "schedule.json")}
+SYNC_FILES = {n: os.path.join(DATA_DIR, n) for n in (
+    "memory.json", "schedule.json", "notes.json", "homework.json", "study.json", "shortcuts.json", "earnings.json",
+    "crm.json", "goals.json", "scholar.json", "rides.json", "ideas.json", "hours.json")}
 STATE_PATH = os.path.join(DATA_DIR, "sync_state.json")
+
+
+def _by_id(local, remote, key="id", limit=2000):
+    """Lists of records: keep everything from both devices; the local copy wins for the same record."""
+    out = {}
+    for x in (remote or []) + (local or []):
+        k = x.get(key) if isinstance(x, dict) else None
+        out[k or json.dumps(x, sort_keys=True)] = x
+    return list(out.values())[-limit:]
 
 
 def _merge(name, local, remote):
     """Combine two devices' copies instead of one overwriting the other."""
     if name == "memory.json":
         facts = {f["text"].lower(): f for f in remote.get("facts", []) + local.get("facts", [])}
-        hist = local.get("history", []) if len(local.get("history", [])) >= len(remote.get("history", [])) \
-            else remote.get("history", [])
-        return {"facts": list(facts.values())[-200:], "history": hist}
+        hist = {}
+        for h in remote.get("history", []) + local.get("history", []):
+            hist[h.get("id") or (h.get("role", "") + str(h.get("content", ""))[:80])] = h
+        hist = sorted(hist.values(), key=lambda h: h.get("t", 0))[-60:]
+        return {"facts": list(facts.values())[-600:], "history": hist}
+    if isinstance(local, list) or isinstance(remote, list):
+        key = "phrase" if name == "shortcuts.json" else "id"
+        return _by_id(local if isinstance(local, list) else [], remote if isinstance(remote, list) else [], key)
+    if name == "study.json":
+        decks = dict(remote.get("decks", {}))
+        decks.update(local.get("decks", {}))
+        log = {k: max(local.get("log", {}).get(k, 0), remote.get("log", {}).get(k, 0))
+               for k in set(local.get("log", {})) | set(remote.get("log", {}))}
+        ex = {e["subject"]: e for e in remote.get("exams", []) + local.get("exams", [])}
+        return {"decks": decks, "log": log, "exams": list(ex.values())}
+    if isinstance(local, dict) and isinstance(remote, dict) and name not in ("schedule.json",):
+        out = dict(remote)
+        for k, v in local.items():
+            if isinstance(v, list) and isinstance(out.get(k), list):
+                out[k] = _by_id(v, out[k])
+            else:
+                out[k] = v
+        return out
     if name == "schedule.json":
         ev = {e["id"]: e for e in remote.get("events", []) + local.get("events", [])}
         removed = set(local.get("removed", [])) | set(remote.get("removed", []))
@@ -304,7 +334,8 @@ class Sync:
     def sync_now(self):
         with self._lock:
             if not self.sc.get("gist_id"):
-                files = {k: {"content": self._read(p)} for k, p in SYNC_FILES.items()}
+                files = {k: {"content": self._read(p)} for k, p in SYNC_FILES.items() if os.path.exists(p)} or \
+                        {"memory.json": {"content": "{}"}}
                 r = requests.post(self.API, headers=self._h(), timeout=20,
                                   json={"description": "ORION sync (private)", "public": False, "files": files})
                 r.raise_for_status()
@@ -315,6 +346,8 @@ class Sync:
             remote_files = r.json().get("files", {})
             state, changed_remote, push = self._state(), False, {}
             for name, path in SYNC_FILES.items():
+                if not os.path.exists(path) and name not in remote_files:
+                    continue
                 local_txt = self._read(path)
                 remote_txt = (remote_files.get(name) or {}).get("content", "{}")
                 if local_txt == remote_txt:

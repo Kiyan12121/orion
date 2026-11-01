@@ -230,6 +230,138 @@ public class OrionNativePlugin extends Plugin {
         call.resolve();
     }
 
+    // ---------------------------------------------------------------- music, battery, location, rides, school
+    /** Control whatever's playing (Amazon Music, Spotify, YouTube…): next, previous, play, pause, playpause. */
+    @PluginMethod
+    public void media(PluginCall call) {
+        String a = call.getString("action", "playpause");
+        int code = "next".equals(a) ? android.view.KeyEvent.KEYCODE_MEDIA_NEXT
+                : "previous".equals(a) ? android.view.KeyEvent.KEYCODE_MEDIA_PREVIOUS
+                : "play".equals(a) ? android.view.KeyEvent.KEYCODE_MEDIA_PLAY
+                : "pause".equals(a) ? android.view.KeyEvent.KEYCODE_MEDIA_PAUSE
+                : android.view.KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE;
+        android.media.AudioManager am = (android.media.AudioManager) getContext().getSystemService(Context.AUDIO_SERVICE);
+        if ("louder".equals(a) || "quieter".equals(a)) {
+            am.adjustStreamVolume(android.media.AudioManager.STREAM_MUSIC,
+                    "louder".equals(a) ? android.media.AudioManager.ADJUST_RAISE : android.media.AudioManager.ADJUST_LOWER, 0);
+        } else {
+            am.dispatchMediaKeyEvent(new android.view.KeyEvent(android.view.KeyEvent.ACTION_DOWN, code));
+            am.dispatchMediaKeyEvent(new android.view.KeyEvent(android.view.KeyEvent.ACTION_UP, code));
+        }
+        JSObject r = new JSObject();
+        r.put("music", am.isMusicActive());
+        call.resolve(r);
+    }
+
+    @PluginMethod
+    public void battery(PluginCall call) {
+        android.os.BatteryManager bm = (android.os.BatteryManager) getContext().getSystemService(Context.BATTERY_SERVICE);
+        JSObject r = new JSObject();
+        r.put("level", bm.getIntProperty(android.os.BatteryManager.BATTERY_PROPERTY_CAPACITY));
+        r.put("charging", bm.isCharging());
+        call.resolve(r);
+    }
+
+    @PluginMethod
+    public void requestLocation(PluginCall call) {
+        try {
+            if (getActivity() != null) androidx.core.app.ActivityCompat.requestPermissions(getActivity(), new String[]{
+                    android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_COARSE_LOCATION}, 7001);
+        } catch (Exception ignored) { }
+        call.resolve();
+    }
+
+    @PluginMethod
+    public void getLocation(PluginCall call) {
+        android.location.Location l = LinkService.lastLocation(getContext());
+        JSObject r = new JSObject();
+        if (l != null) {
+            r.put("lat", l.getLatitude()); r.put("lon", l.getLongitude()); r.put("acc", l.getAccuracy());
+            r.put("age", (System.currentTimeMillis() - l.getTime()) / 1000);
+        }
+        r.put("ok", l != null);
+        call.resolve(r);
+    }
+
+    /** Start timing a ride: the background link watches for you arriving (works with the screen off). */
+    @PluginMethod
+    public void startRide(PluginCall call) {
+        getContext().getSharedPreferences(LinkService.PREFS, Context.MODE_PRIVATE).edit()
+                .putBoolean("riding", true).putLong("ride_start", System.currentTimeMillis())
+                .putFloat("dest_lat", call.getDouble("lat", 0.0).floatValue()).putFloat("dest_lon", call.getDouble("lon", 0.0).floatValue())
+                .putFloat("dest_radius", call.getDouble("radius", 120.0).floatValue()).putString("ride_to", call.getString("to", "school")).apply();
+        try { LinkService.start(getContext()); } catch (Exception ignored) { }
+        call.resolve();
+    }
+
+    @PluginMethod
+    public void stopRide(PluginCall call) {
+        getContext().getSharedPreferences(LinkService.PREFS, Context.MODE_PRIVATE).edit().putBoolean("riding", false).apply();
+        call.resolve();
+    }
+
+    @PluginMethod
+    public void rides(PluginCall call) {
+        android.content.SharedPreferences sp = getContext().getSharedPreferences(LinkService.PREFS, Context.MODE_PRIVATE);
+        JSObject r = new JSObject();
+        r.put("rides", sp.getString("rides", ""));
+        r.put("riding", sp.getBoolean("riding", false));
+        call.resolve(r);
+    }
+
+    @PluginMethod
+    public void setSchool(PluginCall call) {
+        getContext().getSharedPreferences(LinkService.PREFS, Context.MODE_PRIVATE).edit()
+                .putString("school_start", call.getString("start", "08:40")).putString("school_end", call.getString("end", "15:10"))
+                .putBoolean("holiday", Boolean.TRUE.equals(call.getBoolean("holiday", false))).apply();
+        call.resolve();
+    }
+
+    @PluginMethod
+    public void openBatterySettings(PluginCall call) {
+        try {
+            Intent i = new Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS, Uri.parse("package:" + getContext().getPackageName()));
+            launch(i);
+        } catch (Exception e) {
+            try { launch(new Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)); } catch (Exception ignored) { }
+        }
+        call.resolve();
+    }
+
+    /** "Hey ORION" (beta): start/stop/pause the offline wake-word listener (started by name so the app still
+     *  builds even if the wake-word engine isn't included). */
+    @PluginMethod
+    public void hotword(PluginCall call) {
+        String a = call.getString("action", "on");
+        Intent i = new Intent().setClassName(getContext(), "dev.kiyan.orion.HotwordService");
+        try {
+            if ("off".equals(a)) { getContext().stopService(i); call.resolve(); return; }
+            if ("pause".equals(a)) i.setAction("dev.kiyan.orion.HOTWORD_PAUSE");
+            if ("resume".equals(a)) i.setAction("dev.kiyan.orion.HOTWORD_RESUME");
+            if (Build.VERSION.SDK_INT >= 26) getContext().startForegroundService(i); else getContext().startService(i);
+            JSObject r = new JSObject(); r.put("ok", true); call.resolve(r);
+        } catch (Exception e) {
+            JSObject r = new JSObject(); r.put("ok", false); r.put("error", String.valueOf(e.getMessage())); call.resolve(r);
+        }
+    }
+
+    /** Opens Android's "Digital assistant app" picker so ORION can be chosen (earbud press-and-hold). */
+    @PluginMethod
+    public void openAssistantSettings(PluginCall call) {
+        try { launch(new Intent(Settings.ACTION_VOICE_INPUT_SETTINGS)); }
+        catch (Exception e) { try { launch(new Intent(Settings.ACTION_MANAGE_DEFAULT_APPS_SETTINGS)); } catch (Exception ignored) { } }
+        call.resolve();
+    }
+
+    @PluginMethod
+    public void requestMic(PluginCall call) {
+        try {
+            if (getActivity() != null) androidx.core.app.ActivityCompat.requestPermissions(getActivity(),
+                    new String[]{android.Manifest.permission.RECORD_AUDIO}, 7002);
+        } catch (Exception ignored) { }
+        call.resolve();
+    }
+
     /** Call audio on the loudspeaker (Android puts it on the quiet earpiece while the mic is on). */
     @PluginMethod
     public void setSpeaker(PluginCall call) {

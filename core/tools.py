@@ -699,11 +699,15 @@ def forget(keyword):
     return f"Forgot {n} item(s)."
 
 
-@tool("Switch ORION's mode (colours + personality): standby, serious, stealth, executive or hacker.",
-      {"mode": ("string", "standby | serious | stealth | executive | hacker", True)})
+@tool("Switch ORION's mode: standby (butler), serious (get things done), executive/CEO (money), scholar (school), "
+      "hacker (coding) or stealth (gaming/night), or a custom mode.",
+      {"mode": ("string", "standby | serious | executive | scholar | hacker | stealth | custom name", True)})
 def set_theme(mode):
+    from . import modes
     mode = mode.lower().strip().replace(" mode", "")
-    if mode not in ("standby", "serious", "stealth", "executive", "hacker"):
+    mode = {"ceo": "executive", "business": "executive", "school": "scholar", "study": "scholar", "coder": "hacker",
+            "coding": "hacker", "gaming": "stealth", "night": "stealth", "butler": "standby"}.get(mode, mode)
+    if not modes.valid(mode, CTX.get("config")):
         return "Unknown mode."
     CTX["set_theme"](mode)
     return f"{mode.title()} mode engaged."
@@ -755,4 +759,9 @@ class Toolbox:
             result, status = f"ERROR: {type(e).__name__}: {e}", "error"
         self.emit("tool", name=name, args=pretty, status=status)
         _activity(f"{status.upper():7} {name}({pretty}) -> {result[:200]}")
+        try:
+            from .holo import after_tool
+            after_tool(name, args, result)
+        except Exception:
+            pass
         return result

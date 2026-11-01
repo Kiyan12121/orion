@@ -123,6 +123,22 @@ def run_checks(api):
             out.append(_warn("extras", "Wake word + Voice ID", "Not installed (optional).", "extras", "INSTALL"))
     except Exception:
         pass
+    # --- Root
+    try:
+        from .root import root_window
+        w = root_window(launch=False)
+        if w:
+            from . import root_uia
+            p = root_uia.read_panel(w[0]) or {}
+            if p.get("view") == "list" and p.get("conversations"):
+                out.append(_ok("root", "Root reading", f"Reads {len(p['conversations'])} DMs directly (accessibility)."))
+            elif p.get("view") == "conversation":
+                out.append(_ok("root", "Root reading", f"Reading an open chat with {p.get('with')}."))
+            else:
+                out.append(_warn("root", "Root reading", "Can't read Root's DM panel properly yet — run the diagnostic "
+                                 "and send the file to get it fixed.", "root_diag", "DIAGNOSE"))
+    except Exception:
+        pass
     # --- phone
     rc = cfg.get("remote", {})
     from . import phone
@@ -231,6 +247,9 @@ def fix(api, fid):
         return "Installing the update — ORION will restart."
     if fid == "backup":
         return backup_cloud(api._cfg)
+    if fid == "root_diag":
+        from .root import root_diagnose
+        return root_diagnose()
     if fid == "settings":
         return "Open Settings (gear, bottom-left) and paste a free key."
     return "Nothing to do."
