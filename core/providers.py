@@ -324,7 +324,7 @@ class Provider:
         return {"content": "".join(content), "tool_calls": tool_calls, "_tokens": tokens}
 
     # ------------------------------------------------------------------ speech to text
-    def transcribe(self, wav_bytes, filename="speech.wav", mime="audio/wav"):
+    def transcribe(self, wav_bytes, filename="speech.wav", mime="audio/wav", prompt=None):
         last = None
         for model in [self.stt, "whisper-large-v3"]:
             if not model:
@@ -332,7 +332,8 @@ class Provider:
             r = requests.post(f"{self.base_url}/audio/transcriptions",
                               headers={"Authorization": f"Bearer {self.api_key}"},
                               files={"file": (filename, wav_bytes, mime)},
-                              data={"model": model, "language": "en"}, timeout=60)
+                              data={"model": model, "language": "en", "temperature": "0",
+                                    **({"prompt": prompt[:400]} if prompt else {})}, timeout=60)
             if r.status_code == 200:
                 return r.json().get("text", "").strip()
             last = f"HTTP {r.status_code} {r.text[:150]}"

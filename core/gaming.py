@@ -372,5 +372,4 @@ class Hotkey:
         self.start, self.stop = start, stop
 
     def _toggle(self):
-        self.on = not self.on
-        threading.Thread(target=self.start if self.on else self.stop, daemon=True).start()
+        threading.Thread(target=self.start, daemon=True).start()     # start() toggles: listen / send now

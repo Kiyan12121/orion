@@ -402,6 +402,8 @@ nav.tabs button{font-size:9.5px;letter-spacing:.1em}
   <label style="display:flex;gap:10px;align-items:center;letter-spacing:0;font-size:15px;color:var(--text)"><input type="checkbox" id="cMorn" style="accent-color:var(--a)"> Morning report</label>
   <label>QUIET HOURS (no calls)</label>
   <div style="display:flex;gap:8px"><input class="inp" type="time" id="cQf" value="23:00"><input class="inp" type="time" id="cQt" value="07:00"></div>
+  <label>WHEN YOU PAUSE WHILE TALKING</label>
+  <select class="inp" id="sPat"><option value="quick">Quick — send soon after I stop</option><option value="normal">Normal — let me pause to think</option><option value="relaxed">Relaxed — long messages</option></select>
   <h4>APP</h4>
   <label style="display:flex;gap:10px;align-items:center;letter-spacing:0;font-size:15px;color:var(--text)"><input type="checkbox" id="sMute" style="accent-color:var(--a)"> Mute spoken replies</label>
   <button class="btn" id="sSave">SAVE &amp; CONNECT</button>
@@ -572,15 +574,46 @@ async function flushQueue(){ const q=J("queue",[]); if(!q.length) return; SJ("qu
 let voices=[]; const loadV=()=>{ try{ voices=speechSynthesis.getVoices(); }catch(e){} }; loadV(); try{ speechSynthesis.onvoiceschanged=loadV; }catch(e){}
 function speak(t){ try{ if(store.get("mute")==="1") return; const u=new SpeechSynthesisUtterance(String(t).replace(/```[\s\S]*?```/g," code on screen ").replace(/[*_#`]/g,"").slice(0,600));
   u.voice=voices.find(v=>/en-GB/i.test(v.lang)&&/female|sonia|libby|google uk english female/i.test(v.name))||voices.find(v=>/en-GB/i.test(v.lang))||null; u.rate=1.02; speechSynthesis.cancel(); speechSynthesis.speak(u); }catch(e){} }
-let rec=null,chunks=[];
-$("#mic").onclick=async()=>{ if(rec){ rec.stop(); return; }
-  try{ const s=await navigator.mediaDevices.getUserMedia({audio:true}); chunks=[]; rec=new MediaRecorder(s); rec.ondataavailable=e=>chunks.push(e.data);
-    rec.onstop=async()=>{ s.getTracks().forEach(t=>t.stop()); $("#mic").classList.remove("rec"); const blob=new Blob(chunks,{type:rec.mimeType}); rec=null;
-      try{ let text=""; if(pcOnline) text=(await api("/api/transcribe",blob,40000)).text;
-        else if(store.get("key")){ const fd=new FormData(); fd.append("file",blob,"speech.webm"); fd.append("model","whisper-large-v3-turbo");
-          const r=await fetch("https://api.groq.com/openai/v1/audio/transcriptions",{method:"POST",headers:{"Authorization":"Bearer "+store.get("key")},body:fd}); text=(await r.json()).text||""; }
-        if(text) send(text); else add("s","Didn't catch that."); }catch(e){ add("s","Couldn't hear that."); } };
-    rec.start(); $("#mic").classList.add("rec"); }catch(e){ add("s","Microphone blocked — allow mic access for ORION in Android settings."); } };
+
+/* ---------- smart listening: talk as long as you like; ORION works out when you've finished ----------
+   Pause briefly -> it checks what you've said so far. Sounds finished -> sends. Sounds mid-thought
+   ("…and", "um", "because") -> waits for a longer pause. "send it" at the end sends straight away. */
+const TRAIL=new Set("and or but so because cause cuz the a an to of for with my your our his her their is are was were be been am i i'm im we you they it it's its that this these those which who what when where if then than as at in on by from into about also plus like um uh erm er hmm mm maybe can could should would will just gonna wanna gotta need want please".split(" "));
+const SHORTOK=new Set("yes yeah yep no nope nah ok okay thanks cheers stop cancel pause play next skip back louder quieter mute unmute hello hi hey morning evening goodbye bye sure done".split(" "));
+const SENDW=/[\s,.]*(send it|over and out|over|that's it|that is it|go ahead)[.!]*\s*$/i;
+function unfinished(t){ t=(t||"").trim(); if(!t) return true; if(/(,|\.\.\.|…|-|—|:)\s*$/.test(t)) return true; const w=(t.toLowerCase().match(/[a-z']+/g)||[]); if(!w.length) return true;
+  if(TRAIL.has(w[w.length-1])) return true; if(w.length===1&&!SHORTOK.has(w[0])) return true; return false; }
+const PATIENCE={quick:[600,1800],normal:[800,2600],relaxed:[1100,3600]};
+function smartListen(stream,{isLive=()=>true,onPartial=()=>{},startTimeout=12000,maxMs=300000}={}){ return new Promise(res=>{
+  const [shortMs,longMs]=PATIENCE[store.get("patience","normal")]||PATIENCE.normal;
+  const ctx=new (window.AudioContext||window.webkitAudioContext)(); const an=ctx.createAnalyser(); an.fftSize=1024; ctx.createMediaStreamSource(stream).connect(an); const buf=new Uint8Array(an.fftSize);
+  const lvl=()=>{ an.getByteTimeDomainData(buf); let s=0; for(const v of buf){ const x=(v-128)/128; s+=x*x; } return Math.sqrt(s/buf.length); };
+  const rec=new MediaRecorder(stream); const chunks=[]; rec.ondataavailable=e=>{ if(e.data.size) chunks.push(e.data); }; rec.start(250);
+  let floor=null, hist=[], run=0, spoke=false, talked=0, quiet=0, checked=false, checking=null, done=false; const t0=Date.now();
+  const finish=(text)=>{ if(done) return; done=true; clearInterval(iv); rec.onstop=()=>{ try{ ctx.close(); }catch(e){} res({blob:spoke&&chunks.length?new Blob(chunks,{type:rec.mimeType}):null,text:text??null}); }; try{ rec.stop(); }catch(e){ rec.onstop(); } };
+  smartListen.finish=()=>finish(); smartListen.cancel=()=>{ spoke=false; finish(); };
+  const iv=setInterval(()=>{ if(!isLive()){ spoke=false; return finish(); }
+    const l=lvl(); if(floor===null) floor=l; const thr=Math.max(.018,floor*3.2); const sp=l>thr;
+    if(!sp){ hist.push(l); if(hist.length>60) hist.shift(); const sorted=[...hist].sort((a,b)=>a-b); floor=sorted[Math.floor(sorted.length*.3)]||l; }
+    run=sp?run+1:0; if(!spoke&&run>=3) spoke=true;
+    if(!spoke){ if(Date.now()-t0>startTimeout) finish(); return; }
+    if(sp){ talked+=100; quiet=0; checked=false; checking=null; } else quiet+=100;
+    if(Date.now()-t0>maxMs) return finish();
+    if(quiet>=shortMs&&talked>350&&!checked&&!checking){ checked=true; const c=checking={done:false};
+      transcribe(new Blob(chunks,{type:rec.mimeType})).then(t=>{ c.text=t; c.done=true; }).catch(()=>{ c.done=true; c.text=""; }); }
+    if(checking&&checking.done){ const t=checking.text||""; checking=null; if(t) onPartial(t);
+      if(t&&(SENDW.test(t)||!unfinished(t))) return finish(t.replace(SENDW,"").trim()); }
+    if(quiet>=longMs) finish(); },100); }); }
+let listening=false;
+$("#mic").onclick=async()=>{ if(listening){ smartListen.finish&&smartListen.finish(); return; }
+  let s; try{ s=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}}); }
+  catch(e){ add("s","Microphone blocked — allow mic access for ORION in Android settings."); return; }
+  listening=true; $("#mic").classList.add("rec"); const ph=$("#in").placeholder; $("#in").placeholder="Listening… just talk — I'll send it when you finish";
+  const r=await smartListen(s,{startTimeout:10000,onPartial:t=>{ $("#in").placeholder="“"+t+"”"; }});
+  s.getTracks().forEach(t=>t.stop()); listening=false; $("#mic").classList.remove("rec"); $("#in").placeholder=ph;
+  if(!r.blob){ return; }
+  try{ let text=r.text; if(text==null){ $("#in").placeholder="Transcribing…"; text=await transcribe(r.blob); text=(text||"").replace(SENDW,"").trim(); $("#in").placeholder=ph; }
+    if(text) send(text); else add("s","Didn't catch that."); }catch(e){ $("#in").placeholder=ph; add("s","Couldn't hear that."); } };
 function autoGrow(){ const t=$("#in"); t.style.height="auto"; t.style.height=Math.min(120,t.scrollHeight)+"px"; }
 $("#in").addEventListener("input",autoGrow);
 $("#in").addEventListener("keydown",e=>{ if(e.key==="Enter"&&!e.shiftKey){ e.preventDefault(); send($("#in").value); } });
@@ -667,9 +700,10 @@ async function listenLoop(){
   while(Call.live){
     if(Call.paused||Call.muted){ cSet(Call.muted?"MUTED":"PAUSED","Tap again to carry on."); await new Promise(r=>setTimeout(r,300)); continue; }
     cSet("LISTENING…","Go ahead — I'm listening.");
-    const blob=await recordTurn(); if(!Call.live) return; if(!blob){ continue; }
-    cSet("THINKING…",""); let text="";
-    try{ text=await transcribe(blob); }catch(e){ cSet("ERROR","Couldn't hear that."); await new Promise(r=>setTimeout(r,1200)); continue; }
+    const got=await smartListen(Call.stream,{isLive:()=>Call.live&&!Call.muted&&!Call.paused,startTimeout:15000,onPartial:t=>$("#cSub").textContent=`“${t}”`});
+    if(!Call.live) return; if(!got.blob){ continue; }
+    cSet("THINKING…",""); let text=got.text;
+    if(text==null){ try{ text=(await transcribe(got.blob)||"").replace(SENDW,"").trim(); }catch(e){ cSet("ERROR","Couldn't hear that."); await new Promise(r=>setTimeout(r,1200)); continue; } }
     if(!text||text.replace(/[^a-z]/gi,"").length<2) continue;
     $("#cSub").textContent=`“${text}”`;
     if(/^(bye|goodbye|good bye|hang up|end (the )?call|that'?s all|cheers,? bye|see ya|later)\b/i.test(text.trim())){ await say(`Goodbye, ${title()}.`); endCall(); return; }
@@ -679,15 +713,6 @@ async function listenLoop(){
     if(!Call.live) return; await say(r.reply,r.audio);
   }
 }
-function recordTurn(){ return new Promise(res=>{
-  const rec=new MediaRecorder(Call.stream); const chunks=[]; let spoke=false, quiet=0, start=Date.now(), floor=null, samples=[];
-  rec.ondataavailable=e=>chunks.push(e.data); rec.onstop=()=>res(spoke&&chunks.length?new Blob(chunks,{type:rec.mimeType}):null); rec.start(200);
-  const iv=setInterval(()=>{ if(!Call.live||Call.muted||Call.paused){ clearInterval(iv); spoke=false; rec.stop(); return; }
-    const l=level(); if(samples.length<5){ samples.push(l); floor=Math.min(...samples); return; }
-    const loud=l>Math.max(.02,floor*3);
-    if(loud){ spoke=true; quiet=0; } else if(spoke){ quiet+=100; if(quiet>=1100){ clearInterval(iv); rec.stop(); } }
-    if(!spoke&&Date.now()-start>12000){ clearInterval(iv); rec.stop(); }      // nobody spoke — listen again
-    if(Date.now()-start>25000){ clearInterval(iv); rec.stop(); } },100); }); }
 async function transcribe(blob){
   if(pcOnline) return (await api("/api/transcribe",blob,40000)).text||"";
   if(!store.get("key")) throw new Error("no key");
@@ -785,11 +810,11 @@ function go(t){ $$("nav.tabs button").forEach(b=>b.classList.toggle("on",b.datas
 $$("nav.tabs button").forEach(b=>b.onclick=()=>go(b.dataset.tab));
 
 /* ---------- settings ---------- */
-$("#setBtn").onclick=()=>{ $("#sAddr").value=store.get("addr"); $("#sPin").value=store.get("pin"); $("#sKey").value=store.get("key"); $("#sTitle").value=title(); $("#sMute").checked=store.get("mute")==="1"; $("#sLink").checked=store.get("link","1")==="1"; loadCalls(); $("#vSet").classList.add("show"); };
+$("#setBtn").onclick=()=>{ $("#sAddr").value=store.get("addr"); $("#sPin").value=store.get("pin"); $("#sKey").value=store.get("key"); $("#sTitle").value=title(); $("#sMute").checked=store.get("mute")==="1"; $("#sLink").checked=store.get("link","1")==="1"; $("#sPat").value=store.get("patience","normal"); loadCalls(); $("#vSet").classList.add("show"); };
 $("#sClose").onclick=()=>$("#vSet").classList.remove("show");
 $("#sSave").onclick=()=>{ let a=$("#sAddr").value.trim(); if(a&&!/^https?:\/\//.test(a)) a="http://"+a; if(a&&!/:\d+\/?$/.test(a)) a=a.replace(/\/$/,"")+":7777";
   store.set("addr",a); store.set("pin",$("#sPin").value.trim()); store.set("key",$("#sKey").value.trim()); store.set("title",$("#sTitle").value.trim()||"sir"); store.set("mute",$("#sMute").checked?"1":"0");
-  store.set("link",$("#sLink").checked?"1":"0"); syncLink(); saveCalls();
+  store.set("link",$("#sLink").checked?"1":"0"); store.set("patience",$("#sPat").value); syncLink(); saveCalls();
   $("#vSet").classList.remove("show"); toast("Saved."); refresh(); };
 $("#clipUp").onclick=async()=>{ try{ const t=await readClip(); if(!t) return toast("Your clipboard is empty."); await api("/api/clip",{text:t}); toast("Sent to your PC's clipboard."); }catch(e){ toast(e.message); } };
 $("#clipDown").onclick=async()=>{ try{ const r=await api("/api/clip"); if(!r.text) return toast("PC clipboard is empty."); await copyText(r.text); toast("Copied from your PC."); }catch(e){ toast(e.message); } };

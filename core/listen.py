@@ -129,7 +129,8 @@ class VoiceID:
 
 
 class WakeListener:
-    def __init__(self, cfg, on_command, emit, voice_id, busy=lambda: False):
+    def __init__(self, cfg, on_command, emit, voice_id, busy=lambda: False, listen_fn=None):
+        self.listen_fn = listen_fn        # smart listening (core/ears.py) — talk as long as you like
         self.cfg = cfg
         self.on_command = on_command      # on_command(wav_bytes)
         self.emit = emit
@@ -191,6 +192,10 @@ class WakeListener:
                     model.reset()
                     cool = 25
                     self.emit("wake")
+                    if self.listen_fn:
+                        self.listen_fn()            # blocks until you've finished talking
+                        model.reset()
+                        continue
                     self.emit("state", state="listening")
                     audio = record_until_silence(read)
                     self.emit("state", state="idle")

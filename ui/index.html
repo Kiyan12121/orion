@@ -909,6 +909,14 @@ body.lite .r1,body.lite .r4,body.lite .r6{animation:none}
   <div class="field"><label>VOICE</label><div class="voicerow"><select id="sVoice"></select><button class="btn small" id="sPreview">▶ PREVIEW</button></div></div>
   <div class="field"><label>ENGINE</label><select id="sEngine"><option value="neural">Neural — natural (needs internet)</option><option value="offline">Offline — Windows voice</option></select></div>
   <label class="tog"><input type="checkbox" id="sSpeak"> Speak replies out loud</label>
+  <h3>LISTENING</h3>
+  <div class="field"><label>HOW LONG TO WAIT WHEN YOU PAUSE</label><select id="sPatience">
+    <option value="quick">Quick — sends soon after you stop</option>
+    <option value="normal">Normal — lets you pause to think</option>
+    <option value="relaxed">Relaxed — for long, thoughtful messages</option></select></div>
+  <label class="tog"><input type="checkbox" id="sConvo"> Conversation mode <small>— after answering you by voice, listen for your reply (say "thanks" to finish)</small></label>
+  <label class="tog"><input type="checkbox" id="sBarge"> Interrupt by talking <small>— start speaking while ORION talks to cut in (best with headphones)</small></label>
+  <div class="field" style="margin-top:6px"><label>MIC SENSITIVITY <a id="sSensV">1.0×</a></label><input type="range" id="sSens" min="0.5" max="2" step="0.1" style="padding:0;accent-color:var(--a)"></div>
   <h3>BEHAVIOUR</h3>
   <label class="tog"><input type="checkbox" id="sSafe"> Safe mode <small>— ask before risky actions (blocklist + backups are always on)</small></label>
   <label class="tog"><input type="checkbox" id="sFs"> Start in fullscreen</label>
@@ -960,6 +968,9 @@ window.ui={event(e){ switch(e.kind){
   case "update": showUpdate(e); badge("dev"); break;
   case "enroll": enrollStep(e); break;
   case "wake": toast("Listening…"); break;
+  case "listening": setMic(!!e.on,e.purpose); break;
+  case "hearing": $("#input").placeholder="“"+e.text+"”"; setStatus("LISTENING",e.text.length>60?"…"+e.text.slice(-60):e.text); break;
+  case "heard": setMic(false); send(e.text); break;
   case "synced": loadSched(); break;
   case "jobs_changed": if($("#page-shift").classList.contains("on")) loadJobs(); else if(e.job&&e.job.status==="done") badge("shift"); break;
   case "routines_changed": if($("#page-shift").classList.contains("on")) loadRoutines(); break;
@@ -977,7 +988,7 @@ function setState(s){ state=s; document.body.classList.remove("state-idle","stat
   if(s==="thinking") setStatus("PROCESSING","working on it…");
   if(s==="listening") setStatus("LISTENING","speak now — Ctrl+Space or click to finish");
   if(s==="idle"){ if(!speaking) setStatus("ALL SYSTEMS NOMINAL","awaiting instruction"); apRunning(false); } }
-function setSpeaking(on){ speaking=on; document.body.classList.toggle("speaking",!!on); if(state==="idle") setStatus(on?"TRANSMITTING":"ALL SYSTEMS NOMINAL",on?"speaking":"awaiting instruction"); }
+function setSpeaking(on){ if(!!on!==!!speaking&&api&&api.voice_state) api.voice_state(!!on); speaking=on; document.body.classList.toggle("speaking",!!on); if(state==="idle") setStatus(on?"TRANSMITTING":"ALL SYSTEMS NOMINAL",on?"speaking":"awaiting instruction"); }
 function setStatus(a,b){ if(a!==null) $("#statusline").textContent=a; if(b!==undefined) $("#statusdetail").textContent=b; }
 function applyTheme(t){ if(!THEMES[t]) t="standby"; document.body.dataset.theme=t; $$("#themes button").forEach(b=>b.classList.toggle("on",b.dataset.t===t)); $("#modeword").textContent=THEMES[t]; }
 $$("#themes button").forEach(b=>b.onclick=()=>{ applyTheme(b.dataset.t); api.set_theme(b.dataset.t); });
@@ -1065,8 +1076,11 @@ const Voice={ q:[],playing:false,ctx:null,an:null,data:null,el:null,
 document.addEventListener("pointerdown",()=>Voice.unlock(),{once:true});
 
 /* ================= mic ================= */
-async function toggleMic(){ Voice.unlock(); if(!micOn){ const ok=await api.mic_start(); if(!ok) return; micOn=true; pollMic(); }
-  else { micOn=false; const text=await api.mic_stop(); if(text){ send(text); } } }
+/* tap once and just talk — ORION works out when you've finished. Tap again to send early, Esc to cancel. */
+async function toggleMic(){ Voice.unlock(); if(!micOn){ const ok=await api.mic_start(); if(ok) setMic(true); } else api.mic_stop(); }
+function setMic(on,purpose){ if(on===micOn) return; micOn=on; $("#mic").title=on?"Listening — tap to send now":"Talk (Ctrl+Space)";
+  if(on){ pollMic(); $("#input").placeholder=purpose==="followup"?"Listening for your reply… (say “thanks” to finish)":"Listening… just talk, I'll send it when you finish"; setStatus("LISTENING",purpose==="followup"?"go ahead, "+cfg.title:"take your time"); }
+  else $("#input").placeholder="Give an instruction…  (try “autopilot: …”)"; }
 async function pollMic(){ while(micOn){ micLevel=await api.mic_level(); await new Promise(r=>setTimeout(r,70)); } micLevel=0; }
 $("#mic").onclick=toggleMic;
 
@@ -1085,13 +1099,15 @@ function paintAfk(on,note){ $("#afkchip").classList.toggle("show",!!on); $("#afk
 $("#afkchip").onclick=()=>go("root");
 
 /* ================= settings / memory ================= */
-$("#nSet").onclick=async()=>{ const s=await api.get_settings(); $("#sName").value=s.name; $("#sTitle").value=s.title; $("#sOwner").value=s.owner||""; $("#sLocal").value=s.local_model; $("#sLocalV").value=s.local_vision||"";
+$("#nSet").onclick=async()=>{ const s=await api.get_settings(); try{ const v=await api.voice_settings(); $("#sPatience").value=v.patience; $("#sConvo").checked=!!v.conversation; $("#sBarge").checked=!!v.barge_in; $("#sSens").value=v.mic_sensitivity; $("#sSensV").textContent=(+v.mic_sensitivity).toFixed(1)+"×"; }catch(e){} $("#sName").value=s.name; $("#sTitle").value=s.title; $("#sOwner").value=s.owner||""; $("#sLocal").value=s.local_model; $("#sLocalV").value=s.local_vision||"";
   $("#sKeys").innerHTML=s.providers.map(p=>`<div class="field"><label>${esc(p.label.toUpperCase())} KEY ${p.key_url?`<a data-url="${esc(p.key_url)}">get a free key ↗</a>`:""}</label>
     <input type="password" data-pid="${esc(p.id)}" value="${esc(p.key)}" placeholder="${p.id==="groq"?"gsk_…  (needed for voice + captions)":p.id==="gemini"?"best free vision brain":"optional — extra free allowance"}"></div>`).join("");
   $("#sVoice").innerHTML=s.voices.map(([id,l])=>`<option value="${id}" ${id===s.voice?"selected":""}>${esc(l)}</option>`).join("");
   $("#sEngine").value=s.engine; $("#sSpeak").checked=s.speak; $("#sSafe").checked=s.safe_mode; $("#sFs").checked=s.fullscreen; $("#sBoot").checked=s.skip_boot; $("#sVis").value=s.visuals; $("#vSet").classList.add("show"); };
 $("#sPreview").onclick=()=>{ Voice.unlock(); api.preview_voice($("#sVoice").value); }; $("#sCancel").onclick=()=>$("#vSet").classList.remove("show");
+$("#sSens").oninput=()=>$("#sSensV").textContent=(+$("#sSens").value).toFixed(1)+"×";
 $("#sSave").onclick=async()=>{ const keys={}; $$("#sKeys input").forEach(i=>keys[i.dataset.pid]=i.value);
+  api.voice_settings({patience:$("#sPatience").value,conversation:$("#sConvo").checked,barge_in:$("#sBarge").checked,mic_sensitivity:+$("#sSens").value});
   const r=await api.save_settings({name:$("#sName").value,title:$("#sTitle").value,owner:$("#sOwner").value,keys,local_model:$("#sLocal").value,local_vision:$("#sLocalV").value,voice:$("#sVoice").value,engine:$("#sEngine").value,
     speak:$("#sSpeak").checked,safe_mode:$("#sSafe").checked,fullscreen:$("#sFs").checked,skip_boot:$("#sBoot").checked,visuals:$("#sVis").value});
   applyCfg(r); $("#vSet").classList.remove("show"); toast("Configuration saved."); paintLinks(await api.status()); pollMeters(); };
@@ -1391,7 +1407,7 @@ document.addEventListener("keydown",e=>{
   else if(e.ctrlKey&&e.key.toLowerCase()==="k"){ e.preventDefault(); openPal(); }
   else if(e.key==="F11"){ e.preventDefault(); api.toggle_fullscreen(); }
   else if(e.key==="Escape"){ if(pendingConfirm){ answer(false); return; } if($("#palette").classList.contains("show")){ closePal(); return; }
-    const open=$$(".veil.show"); if(open.length) open.forEach(v=>v.classList.remove("show")); else if($("#drawer").classList.contains("show")) $("#drawer").classList.remove("show"); else if(busy||speaking) api.stop(); }
+    const open=$$(".veil.show"); if(open.length) open.forEach(v=>v.classList.remove("show")); else if($("#drawer").classList.contains("show")) $("#drawer").classList.remove("show"); else if(micOn){ api.mic_cancel(); setMic(false); } else if(busy||speaking) api.stop(); }
   else if(pendingConfirm&&e.key==="Enter"){ e.preventDefault(); answer(true); }
   else if(!e.ctrlKey&&!e.altKey&&e.key.length===1&&!["INPUT","SELECT","TEXTAREA"].includes(document.activeElement.tagName)&&!$(".veil.show")&&!$("#palette.show")) $("#input").focus();
 });
@@ -1503,7 +1519,7 @@ setTimeout(()=>{ if(api) return; const wait=ms=>new Promise(r=>setTimeout(r,ms))
     health_get:()=>A([{id:"key_openrouter",name:"OpenRouter brain",state:"bad",detail:"Key was rejected — make a new one and paste it in Settings.",fix:"open:x",fix_label:"NEW KEY"},{id:"remote",name:"Phone link",state:"warn",detail:"On, but your phone hasn't connected recently. Check Tailscale and the firewall.",fix:"firewall",fix_label:"HOW"},{id:"extras",name:"Wake word + Voice ID",state:"warn",detail:"Not installed (optional).",fix:"extras",fix_label:"INSTALL"},{id:"key_groq",name:"Groq brain",state:"ok",detail:"Key works."},{id:"local",name:"Local brain",state:"ok",detail:"Ollama running · using qwen2.5:3b"},{id:"ffmpeg",name:"Video tools (ffmpeg)",state:"ok",detail:"Installed."},{id:"browser",name:"Hidden browser",state:"ok",detail:"Ready."},{id:"disk",name:"Disk space",state:"ok",detail:"493 GB free."},{id:"exe",name:"How ORION is running",state:"ok",detail:"From source on Python 3.14 — updates work."}]),
     health_fix:()=>A(true),backup_now:()=>A("Backed up 84 KB to your private GitHub Gist."),restore_now:()=>A("Restored."),profile_set:()=>A(false),
     calls_get:()=>A({jobs:true,reminders:true,morning:false,not_while_gaming:true,quiet_from:"23:00",quiet_to:"07:00"}),calls_save:()=>A({}),call_me:()=>A(true),ring_phone:()=>A(true),
-    mini_toggle:()=>A(true) });
+    mini_toggle:()=>A(true),voice_settings:()=>A({patience:"normal",conversation:true,barge_in:false,mic_sensitivity:1}),voice_state:()=>A(true),mic_cancel:()=>A(true) });
   boot(); },1500);
 </script>
 </body>

@@ -1,5 +1,14 @@
 # ORION 3.0 — Personal Intelligence System
 
+## New in 3.1: talking to ORION
+- **Talk for as long as you like** (up to 5 minutes). Tap the mic, Ctrl+Space or the hotkey once and just speak. No need to tap again.
+- **ORION knows when you've finished.** When you pause, it quietly checks what you've said so far. If you sound mid-sentence ("…and", "um", "because"), it waits. If you sound finished, it sends. Say **"send it"** to send straight away, tap the mic to send early, or press **Esc** to cancel.
+- **Live captions** show your words in the command bar as you talk.
+- **Conversation mode:** after answering you by voice, ORION listens for your reply without needing the wake word. Say "thanks" or "that's all" to finish.
+- **Interrupt by talking** (optional, best with headphones): start speaking while ORION talks and it stops to listen.
+- **Better accuracy:** silence is trimmed, quiet mics are boosted, and Whisper is told the names you use (Root, Hatchlands, your mates).
+- Settings › Listening has **Quick / Normal / Relaxed** pause handling and mic sensitivity. The phone app (chat mic and calls) works the same way.
+
 ## New in 3.0
 - **Dashboard:** your PC, today's plan, jobs, revision, money, gaming and health on one screen.
 - **Study:** flashcards with spaced repetition, "quiz me" out loud, focus sessions that block games and distractions, and exam countdowns.

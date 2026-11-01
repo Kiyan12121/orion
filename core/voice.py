@@ -109,7 +109,12 @@ class Speaker:
         self.gen = 0                     # bumps on stop() so queued speech is dropped
         self._offline = None
         self.neural_ok = edge_tts is not None
+        self.making = False              # True while a sentence is being turned into audio
         threading.Thread(target=self._loop, daemon=True).start()
+
+    @property
+    def idle(self):
+        return self.q.empty() and not self.making
 
     @property
     def enabled(self):
@@ -133,6 +138,14 @@ class Speaker:
             gen, text, voice = self.q.get()
             if gen != self.gen:
                 continue
+            self.making = True
+            try:
+                self._speak_one(gen, text, voice)
+            finally:
+                self.making = False
+
+    def _speak_one(self, gen, text, voice):
+        if True:
             v = self.cfg["voice"]
             if v.get("engine", "neural") == "neural" and self.neural_ok:
                 try:
@@ -141,7 +154,7 @@ class Speaker:
                     if gen == self.gen and audio:
                         self.emit("audio", id=uuid.uuid4().hex[:8], text=text,
                                   data=base64.b64encode(audio).decode())
-                    continue
+                    return
                 except Exception:
                     pass          # offline or service hiccup -> fall through to Windows voice
             if gen == self.gen:

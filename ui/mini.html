@@ -42,11 +42,10 @@ window.ui={event(e){
   if(e.kind==="speaking") document.body.classList.toggle("speaking",!!e.on);
   if(e.kind==="theme") document.body.dataset.theme=e.theme;
   if(e.kind==="toast") tip(e.text);
+  if(e.kind==="hearing") tip("“"+e.text+"”");
   if(e.kind==="stream_end"&&e.text) tip(e.text);
 }};
-$("#orb").addEventListener("click",()=>{ clearTimeout(clickT); clickT=setTimeout(async()=>{ if(!api) return;
-  if(!mic){ if(await api.mic_start()){ mic=true; ui.event({kind:"state",state:"listening"}); } }
-  else { mic=false; ui.event({kind:"state",state:"thinking"}); const t=await api.mic_stop(); if(t){ tip("“"+t+"”"); api.send(t); } else ui.event({kind:"state",state:"idle"}); } },230); });
+$("#orb").addEventListener("click",()=>{ clearTimeout(clickT); clickT=setTimeout(()=>{ if(api) api.mic_start(); },230); });
 $("#orb").addEventListener("dblclick",()=>{ clearTimeout(clickT); api&&api.mini_toggle(); });
 window.addEventListener("pywebviewready",()=>{ api=window.pywebview.api; api.init().then(c=>document.body.dataset.theme=c.theme); });
 </script>

@@ -32,6 +32,7 @@ from core.routines import NightShift                        # noqa: E402
 from core.devices import Push, Remote, Sync, Updater        # noqa: E402
 from core.gaming import GamingMode, Hotkey                  # noqa: E402
 from core.listen import VoiceID, WakeListener, extras_status  # noqa: E402
+from core.ears import END_CONVO, Ears              # noqa: E402
 from core.brain import Brain                                # noqa: E402
 from core.memory import Memory                              # noqa: E402
 from core.paths import LOG_PATH, UI_PATH                    # noqa: E402
@@ -94,8 +95,12 @@ class Api:
         self._shift = NightShift(self._cfg, self._jobs, self._shift_notify, self._emit, self._updater)
         tools.CTX["push_phone"] = lambda t: self._push.send(t, "ORION", 5, "iphone")
         self._voice_id = VoiceID(self._cfg)
+        self._ears = Ears(self._cfg, self._emit, self._transcribe, self._voice_id)
+        self._followup = False          # conversation mode: listen again after ORION answers you by voice
+        self._voice_turn = False
         self._wake = WakeListener(self._cfg, self._wake_command, self._emit, self._voice_id,
-                                  busy=lambda: self._recorder.recording or self._busy.locked())
+                                  busy=lambda: self._ears.active or self._busy.locked() or self._speaking,
+                                  listen_fn=lambda: self._listen_session("wake"))
         if self._cfg.get("remote", {}).get("enabled"):
             try:
                 self._remote.start()
@@ -155,7 +160,7 @@ class Api:
     # ---------------------------------------------------------------- plumbing
     def _emit(self, kind, **data):
         mini = getattr(self, "_mini", None)
-        if mini and kind in ("state", "speaking", "theme", "toast", "stream_end"):
+        if mini and kind in ("state", "speaking", "theme", "toast", "stream_end", "hearing"):
             try:
                 mini.evaluate_js(f"window.ui && window.ui.event({json.dumps({'kind': kind, **data})})")
             except Exception:
@@ -235,14 +240,93 @@ class Api:
             self.send(text)
 
     def _hk_start(self):
+        if self._ears.active:
+            self._ears.finish()
+            return
         self.mic_start()
-        self._emit("toast", level="info", text="Listening… press the hotkey again to send.")
+        self._emit("toast", level="info", text="Listening — just talk. I'll send it when you finish.")
 
     def _hk_stop(self):
-        text = self.mic_stop()
-        if text:
+        self._ears.finish()
+
+    # ---------------------------------------------------------------- listening (core/ears.py)
+    _speaking = False
+
+    def _transcribe(self, wav, prompt=None):
+        prov = self._brain.groq_like
+        if not prov:
+            raise RuntimeError("Voice input needs a Groq key (free) — add it in Settings.")
+        return prov.transcribe(wav, prompt=prompt)
+
+    def _listen_session(self, purpose="command", start_timeout=8.0):
+        """Listen until the user has finished, then hand the text to the interface to send."""
+        self._speaker.stop()
+        self._emit("state", state="listening")
+        self._emit("listening", on=True, purpose=purpose)
+        text = ""
+        try:
+            text = self._ears.listen(start_timeout=start_timeout, purpose=purpose)
+        except Exception as e:
+            self._emit("toast", level="warn", text=f"Couldn't hear that: {e}")
+        self._emit("listening", on=False, purpose=purpose)
+        self._emit("state", state="idle")
+        if not text:
+            if purpose == "followup":
+                self._followup = False
+            return ""
+        if purpose == "followup" and END_CONVO.match(text):
+            self._followup = False
             self._emit("message", id=uuid.uuid4().hex[:8], role="user", text=text)
-            self.send(text)
+            self._speaker.say(f"Very good, {self._cfg.get('user_title', 'sir')}.")
+            return ""
+        self._voice_turn = True
+        self._emit("heard", text=text)
+        return text
+
+    def _maybe_followup(self):
+        """Conversation mode: after a spoken answer, listen for the follow-up (no wake word needed)."""
+        if not (self._followup and self._cfg["voice"].get("conversation", True)):
+            return
+        if self._ears.active or self._busy.locked() or not self._speaker.idle or self._speaking:
+            return
+        self._followup = False
+        threading.Thread(target=self._listen_session, args=("followup", 7.0), daemon=True).start()
+
+    def voice_state(self, speaking):
+        """Called by the interface when ORION's voice starts/stops playing."""
+        self._speaking = bool(speaking)
+        if speaking and self._cfg["voice"].get("barge_in") and not self._ears.active:
+            threading.Thread(target=self._barge_watch, daemon=True).start()
+        if not speaking:
+            threading.Timer(0.35, self._maybe_followup).start()
+        return True
+
+    def _barge_watch(self):
+        """Barge-in: start talking while ORION is speaking and it stops to listen."""
+        if getattr(self, "_barging", False):
+            return
+        self._barging = True
+        try:
+            if self._ears.wait_for_voice(lambda: not self._speaking):
+                self._speaker.stop()
+                self._followup = False
+                self._listen_session("command")
+        finally:
+            self._barging = False
+
+    def voice_settings(self, b=None):
+        v = self._cfg["voice"]
+        self._ears.vc            # fills defaults
+        if b:
+            if b.get("patience") in ("quick", "normal", "relaxed"):
+                v["patience"] = b["patience"]
+            for k in ("conversation", "barge_in"):
+                if k in b:
+                    v[k] = bool(b[k])
+            if "mic_sensitivity" in b:
+                v["mic_sensitivity"] = max(0.4, min(2.0, float(b["mic_sensitivity"])))
+            config_mod.save(self._cfg)
+        return {k: v.get(k) for k in ("patience", "conversation", "barge_in", "mic_sensitivity", "max_talk_seconds")}
 
     def _set_theme(self, theme):
         self._cfg["theme"] = theme
@@ -295,8 +379,20 @@ class Api:
         if text.lower().strip(" .!") in STOP_WORDS:
             self.stop()
             return True
-        threading.Thread(target=self._process, args=(text, autopilot), daemon=True).start()
+        voice, self._voice_turn = self._voice_turn, False
+        threading.Thread(target=self._process_voice if voice else self._process, args=(text, autopilot),
+                         daemon=True).start()
         return True
+
+    def _process_voice(self, text, autopilot=False):
+        out = self._process(text, autopilot)
+        if out[1] != "none" and not autopilot:
+            self._followup = True
+            if not self._speaker.enabled:
+                threading.Timer(0.3, self._maybe_followup).start()
+            else:
+                threading.Timer(1.5, self._maybe_followup).start()   # in case nothing was spoken
+        return out
 
     def autopilot(self, goal):
         tools.CTX["plan"] = {"steps": [], "current": 0, "done": False, "note": ""}
@@ -375,36 +471,31 @@ class Api:
 
     # ---------------------------------------------------------------- voice in
     def mic_start(self):
-        try:
-            self._speaker.stop()
-            self._recorder.start()
-            self._emit("state", state="listening")
+        """Tap the mic: ORION listens until you've finished talking (tap again to send early)."""
+        if self._ears.active:
+            self._ears.finish()
             return True
-        except Exception as e:
-            self._emit("toast", level="warn", text=str(e))
+        if not self._ears.available:
+            self._emit("toast", level="warn", text="Microphone support isn't installed (sounddevice) — run 1_SETUP.bat.")
             return False
+        if not self._brain.groq_like:
+            self._emit("toast", level="warn", text="Voice input needs a Groq key (free) — add it in Settings.")
+            return False
+        self._followup = False
+        threading.Thread(target=self._listen_session, daemon=True).start()
+        return True
 
     def mic_level(self):
-        return self._recorder.level() if self._recorder.recording else 0
+        return self._ears.level if self._ears.active else 0
 
     def mic_stop(self):
-        wav = self._recorder.stop()
-        self._emit("state", state="idle")
-        if not wav:
-            return ""
-        prov = self._brain.groq_like
-        if not prov:
-            self._emit("toast", level="warn", text="Voice input needs a Groq key (free) — add it in Settings.")
-            return ""
-        self._emit("state", state="thinking")
-        try:
-            text = prov.transcribe(wav)
-        except Exception as e:
-            self._emit("state", state="idle")
-            self._emit("toast", level="warn", text=f"Couldn't hear that: {e}")
-            return ""
-        self._emit("state", state="idle")
-        return text
+        self._ears.finish()
+        return ""
+
+    def mic_cancel(self):
+        self._ears.cancel()
+        self._followup = False
+        return True
 
     # ---------------------------------------------------------------- controls
     def set_brain(self, mode):
@@ -1005,7 +1096,7 @@ class Api:
         elif head[:4] == b"RIFF":
             name, mime = "speech.wav", "audio/wav"
         try:
-            return prov.transcribe(raw, name, mime)
+            return prov.transcribe(raw, name, mime, prompt=self._ears.vocab())
         except Exception:
             return ""
 
