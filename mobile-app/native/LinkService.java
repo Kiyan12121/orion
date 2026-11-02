@@ -168,14 +168,29 @@ public class LinkService extends Service {
 
     private void check() throws Exception {
         SharedPreferences sp = getSharedPreferences(PREFS, MODE_PRIVATE);
-        String addr = sp.getString("addr", ""), pin = sp.getString("pin", "");
-        if (addr.isEmpty()) return;
-        if (addr.endsWith("/")) addr = addr.substring(0, addr.length() - 1);
-        HttpURLConnection c = (HttpURLConnection) new URL(addr + "/api/wake").openConnection();
-        c.setConnectTimeout(6000);
-        c.setReadTimeout(8000);
-        c.setRequestProperty("X-PIN", pin);
-        if (c.getResponseCode() != 200) { c.disconnect(); return; }
+        String pin = sp.getString("pin", "");
+        // both addresses (home Wi-Fi + Tailscale): try the one that worked last, then the others
+        java.util.List<String> list = new java.util.ArrayList<>();
+        String last = sp.getString("addr_ok", "");
+        if (!last.isEmpty()) list.add(last);
+        for (String a : (sp.getString("addrs", "") + "," + sp.getString("addr", "")).split(",")) {
+            a = a.trim();
+            if (a.endsWith("/")) a = a.substring(0, a.length() - 1);
+            if (!a.isEmpty() && !list.contains(a)) list.add(a);
+        }
+        if (list.isEmpty()) return;
+        HttpURLConnection c = null;
+        for (String a : list) {
+            try {
+                HttpURLConnection t = (HttpURLConnection) new URL(a + "/api/wake").openConnection();
+                t.setConnectTimeout(a.equals(last) ? 6000 : 4000);
+                t.setReadTimeout(8000);
+                t.setRequestProperty("X-PIN", pin);
+                if (t.getResponseCode() == 200) { c = t; if (!a.equals(last)) sp.edit().putString("addr_ok", a).apply(); break; }
+                t.disconnect();
+            } catch (Exception ignored) { }
+        }
+        if (c == null) return;
         StringBuilder sb = new StringBuilder();
         BufferedReader r = new BufferedReader(new InputStreamReader(c.getInputStream(), "UTF-8"));
         String line;

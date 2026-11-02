@@ -568,7 +568,9 @@ body.busy .horb u{animation-duration:.9s}body.busy .horb i{animation-duration:1.
 <div class="veil" id="vSet"><div class="sheet">
   <h2>CONNECTION</h2>
   <p>On your PC: ORION → Devices → Phone &amp; Laptop Access. Copy the 100.x.x.x address and PIN here. When the PC is off, ORION still chats using its own brain and queues PC jobs.</p>
-  <label>PC ADDRESS</label><input class="inp" id="sAddr" placeholder="http://100.x.x.x:7777" inputmode="url">
+  <label>PC ADDRESS — ANYWHERE (Tailscale, 100.x.x.x)</label><input class="inp" id="sAddr" placeholder="http://100.x.x.x:7777" inputmode="url">
+  <label>PC ADDRESS — HOME WI-FI (192.168.x.x) <small style="color:var(--dim)">optional · faster at home</small></label><input class="inp" id="sAddr2" placeholder="http://192.168.x.x:7777" inputmode="url">
+  <p style="font-size:12.5px;margin-top:6px">ORION uses whichever one works: home Wi-Fi when you're in, Tailscale when you're out. It switches by itself. <span id="sAddrNow"></span></p>
   <label>PIN</label><input class="inp" id="sPin" inputmode="numeric" placeholder="6 digits">
   <h4>WHEN THE PC IS OFF</h4>
   <label>GROQ KEY (free — console.groq.com/keys)</label><input class="inp" id="sKey" type="password" placeholder="gsk_…">
@@ -608,6 +610,19 @@ let pcOnline=false, state={}, history=J("hist",[]), screenTimer=null;
 const sameOrigin=location.protocol.startsWith("http") && location.port && location.hostname!=="localhost";
 if(sameOrigin && !store.get("addr")) store.set("addr",location.origin);
 const addr=()=>store.get("addr").replace(/\/$/,""), pin=()=>store.get("pin"), title=()=>store.get("title","sir");
+/* two addresses: home Wi-Fi + Tailscale — use whichever answers, prefer Wi-Fi (faster) */
+const normAddr=a=>{ a=(a||"").trim(); if(!a) return ""; if(!/^https?:\/\//.test(a)) a="http://"+a; if(!/:\d+\/?$/.test(a)) a=a.replace(/\/$/,"")+":7777"; return a.replace(/\/$/,""); };
+const addrs=()=>{ const l=J("addrs",[]).map(normAddr).filter(Boolean); const cur=addr(); if(cur&&!l.includes(cur)) l.push(cur); return [...new Set(l)]; };
+const isLan=a=>/\/\/(192\.168\.|10\.|172\.(1[6-9]|2\d|3[01])\.|[a-z0-9-]+\.local)/i.test(a);
+let SWITCHING=null;
+async function pingAddr(a,ms){ const ctl=new AbortController(); const t=setTimeout(()=>ctl.abort(),ms);
+  try{ const r=await fetch(a+"/api/state",{headers:{"X-PIN":pin()},signal:ctl.signal}); return r.ok||r.status===401; }catch(e){ return false; } finally{ clearTimeout(t); } }
+async function switchAddr(prefer){ if(SWITCHING) return SWITCHING;
+  SWITCHING=(async()=>{ const all=addrs(); if(all.length<2) return false; const order=prefer?all:all.filter(a=>a!==addr());
+    const lans=order.filter(isLan), rest=order.filter(a=>!isLan(a));
+    const hits=await Promise.all([...lans,...rest].map(a=>pingAddr(a,3500).then(ok=>ok?a:null)));
+    const win=hits.find(Boolean); if(win&&win!==addr()){ store.set("addr",win); try{ syncLink(); }catch(e){} return true; } return !!win&&win===addr(); })();
+  try{ return await SWITCHING; } finally{ SWITCHING=null; } }
 const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const ago=t=>{ if(!t) return ""; const s=Date.now()/1000-t; return s<60?"just now":s<3600?Math.floor(s/60)+"m ago":s<86400?Math.floor(s/3600)+"h ago":Math.floor(s/86400)+"d ago"; };
 function render(t){ return String(t).split("```").map((p,i)=>i%2?`<pre>${esc(p.replace(/^\w*\n/,""))}</pre>`:esc(p).replace(/\*\*([^*]+)\*\*/g,"<b>$1</b>").replace(/(^|\s)\*([^*\n]+)\*(?=\s|[.,!?]|$)/g,"$1<i>$2</i>").replace(/\n/g,"<br>")).join(""); }
@@ -646,7 +661,7 @@ let ringing=false;
 function foundRing(on){ ringing=on; let o=$("#found"); if(on){ if(!o){ o=document.createElement("div"); o.id="found"; o.innerHTML=`<div class="fo"><i></i><b></b></div><h2>FOUND IT</h2><p>Tap anywhere to stop</p>`; o.onclick=()=>foundRing(false); document.body.appendChild(o); }
     ringtone(true); if(navigator.vibrate) navigator.vibrate([1000,400,1000,400,1000,400,1000]); }
   else { ringtone(false); if(o) o.remove(); if(Native&&Native.stopRing) Native.stopRing(); } }
-async function syncLink(){ if(!Native||!Native.startLink) return; try{ if(store.get("link","1")==="1"&&addr()&&pin()){ const r=await Native.startLink({addr:addr(),pin:pin()});
+async function syncLink(){ if(!Native||!Native.startLink) return; try{ if(store.get("link","1")==="1"&&addr()&&pin()){ const r=await Native.startLink({addr:addr(),addrs:addrs().join(","),pin:pin()});
       if(r&&r.fullScreen===false&&store.get("fsAsked")!=="1"){ store.set("fsAsked","1"); shareCard("📞 Let ORION ring you properly","Allow full-screen notifications so ORION's calls look like a real incoming call, even when your phone is locked.","ALLOW",()=>Native.openFullScreenSettings()); } }
     else await Native.stopLink(); }catch(e){} }
 async function loadCalls(){ try{ const c=await api("/api/calls"); $("#cJobs").checked=!!c.jobs; $("#cRem").checked=!!c.reminders; $("#cMorn").checked=!!c.morning; $("#cQf").value=c.quiet_from; $("#cQt").value=c.quiet_to; }catch(e){} }
@@ -675,6 +690,10 @@ let nid=Date.now()%100000; async function notify(title,body){ try{ if(LN){ await
 
 /* ---------- network ---------- */
 async function api(path,body,timeout=20000){
+  try{ return await api1(path,body,timeout); }
+  catch(e){ if(/PIN|Locked out/.test(e.message||"")||addrs().length<2) throw e;     // other address might work (home ↔ out)
+    if(await switchAddr(false)) return await api1(path,body,timeout); throw e; } }
+async function api1(path,body,timeout=20000){
   const ctl=new AbortController(); const t=setTimeout(()=>ctl.abort(),timeout);
   try{ const r=await fetch(addr()+path,{method:body===undefined?"GET":"POST",signal:ctl.signal,
       headers:{"X-PIN":pin(),"Content-Type":body instanceof Blob?"application/octet-stream":"application/json"},
@@ -682,6 +701,7 @@ async function api(path,body,timeout=20000){
     if(r.status===401) throw new Error("Wrong PIN — check ⚙ settings."); if(r.status===429) throw new Error("Locked out after wrong PINs — wait 10 min.");
     return await r.json(); } finally{ clearTimeout(t); } }
 
+setInterval(()=>{ const a=addr(); if(a&&!isLan(a)&&addrs().some(isLan)) switchAddr(true); },60000);
 async function refresh(){
   if(!addr()){ setConn(false); paintHome(); return; }
   try{ state=await api("/api/state",undefined,6000); setConn(true); paintHome(); paintModes(); if(!window._gl||Date.now()-window._gl>60000){ window._gl=Date.now(); glance(); shareSolo(); pullMorning(); syncRides(); learnPlaces(); } runPhoneActions(state.phone_actions); flushQueue(); pollPending(); if($("#v-jobs").classList.contains("on")) loadJobs(); }
@@ -1338,10 +1358,10 @@ function go(t){ $$("nav.tabs button").forEach(b=>b.classList.toggle("on",b.datas
 $$("nav.tabs button").forEach(b=>b.onclick=()=>go(b.dataset.tab));
 
 /* ---------- settings ---------- */
-$("#setBtn").onclick=()=>{ $("#sAddr").value=store.get("addr"); $("#sPin").value=store.get("pin"); $("#sKey").value=store.get("key"); $("#sTitle").value=title(); $("#sMute").checked=store.get("mute")==="1"; $("#sLink").checked=store.get("link","1")==="1"; $("#sPat").value=store.get("patience","normal"); $("#sHot").checked=store.get("hot")==="1"; $("#sName").checked=store.get("needName","1")==="1"; $("#sLoc").checked=store.get("loc")==="1"; loadCalls(); $("#vSet").classList.add("show"); };
+$("#setBtn").onclick=()=>{ const L=addrs(); $("#sAddr").value=L.find(a=>!isLan(a))||""; $("#sAddr2").value=L.find(isLan)||""; $("#sAddrNow").textContent=addr()?`Using: ${addr().replace(/^https?:\/\//,"")}${isLan(addr())?" (home Wi-Fi)":" (anywhere)"}`:""; $("#sPin").value=store.get("pin"); $("#sKey").value=store.get("key"); $("#sTitle").value=title(); $("#sMute").checked=store.get("mute")==="1"; $("#sLink").checked=store.get("link","1")==="1"; $("#sPat").value=store.get("patience","normal"); $("#sHot").checked=store.get("hot")==="1"; $("#sName").checked=store.get("needName","1")==="1"; $("#sLoc").checked=store.get("loc")==="1"; loadCalls(); $("#vSet").classList.add("show"); };
 $("#sClose").onclick=()=>$("#vSet").classList.remove("show");
-$("#sSave").onclick=()=>{ let a=$("#sAddr").value.trim(); if(a&&!/^https?:\/\//.test(a)) a="http://"+a; if(a&&!/:\d+\/?$/.test(a)) a=a.replace(/\/$/,"")+":7777";
-  store.set("addr",a); store.set("pin",$("#sPin").value.trim()); store.set("key",$("#sKey").value.trim()); store.set("title",$("#sTitle").value.trim()||"sir"); store.set("mute",$("#sMute").checked?"1":"0");
+$("#sSave").onclick=()=>{ const both=[$("#sAddr").value,$("#sAddr2").value].join(",").split(/[,\s]+/).map(normAddr).filter(Boolean); SJ("addrs",[...new Set(both)]);
+  let a=both.find(isLan)||both[0]||""; store.set("addr",a); store.set("pin",$("#sPin").value.trim()); store.set("key",$("#sKey").value.trim()); store.set("title",$("#sTitle").value.trim()||"sir"); store.set("mute",$("#sMute").checked?"1":"0");
   store.set("link",$("#sLink").checked?"1":"0"); store.set("patience",$("#sPat").value); syncLink(); saveCalls();
   $("#vSet").classList.remove("show"); toast("Saved."); refresh(); };
 $("#clipUp").onclick=async()=>{ try{ const t=await readClip(); if(!t) return toast("Your clipboard is empty."); await api("/api/clip",{text:t}); toast("Sent to your PC's clipboard."); }catch(e){ toast(e.message); } };

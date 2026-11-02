@@ -475,7 +475,8 @@ public class OrionNativePlugin extends Plugin {
     @PluginMethod
     public void startLink(PluginCall call) {
         SharedPreferences.Editor e = getContext().getSharedPreferences(LinkService.PREFS, Context.MODE_PRIVATE).edit();
-        e.putString("addr", call.getString("addr", "")).putString("pin", call.getString("pin", "")).putBoolean("on", true).apply();
+        e.putString("addr", call.getString("addr", "")).putString("addrs", call.getString("addrs", call.getString("addr", "")))
+                .putString("pin", call.getString("pin", "")).putBoolean("on", true).apply();
         try {
             LinkService.start(getContext());
             JSObject ret = new JSObject();
