@@ -507,7 +507,7 @@ async function runPhoneActions(list){ for(const a of list||[]){ try{ const r=awa
 
 // quick phone commands handled on the phone itself (instant, work even when the PC is off)
 function phoneReflex(t){
-  t=t.toLowerCase().trim().replace(/^(hey |ok )?orion[, ]*/,"").replace(/[.!?]+$/,"");
+  t=t.toLowerCase().trim().replace(/^(hey |ok |okay |yo )?(orion|jarvis|jervis|javis)[,.! ]*/,"").replace(/[.!?]+$/,"");
   let m=t.match(/^(?:set (?:an |my )?alarm|wake me(?: up)?)(?: for| at)? (\d{1,2})(?:[:.](\d{2}))?\s*(am|pm)?(?: .*)?$/);
   if(m){ let h=+m[1],mi=+(m[2]||0); if(m[3]==="pm"&&h<12) h+=12; if(m[3]==="am"&&h===12) h=0; return {kind:"alarm",hour:h,minute:mi,message:"ORION"}; }
   m=t.match(/^(?:set (?:a )?|start (?:a )?)?timer (?:for )?(\d+(?:\.\d+)?)\s*(s|sec|secs|seconds|m|min|mins|minutes|h|hour|hours)?$/);
@@ -779,7 +779,7 @@ async function listenLoop(){
     Call.followUntil=/\?\s*$/.test(r.reply||"")?Date.now()+8000:0;    // answer a question of mine without saying my name
   }
 }
-const NAMED=/\b(hey |ok |okay |yo )?(orion|o'?ryan|orian|orien|oreon|jarvis)\b[,.!]?/i;
+const NAMED=/\b(hey |ok |okay |yo )?(orion|o'?ryan|orian|orien|oreon|jarvis|jarvas|jervis|javis|jarvi|travis)\b[,.!]?/i;
 function needName(){ return Call.ride||store.get("needName","1")==="1"&&Call.reason!=="__morning__"&&Call.started&&Date.now()-Call.started>20000; }
 function chime(){ try{ const c=new (window.AudioContext||window.webkitAudioContext)(), o=c.createOscillator(), g=c.createGain(); o.frequency.value=880; o.frequency.setValueAtTime(1320,c.currentTime+.08);
   g.gain.setValueAtTime(.12,c.currentTime); g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.22); o.connect(g); g.connect(c.destination); o.start(); o.stop(c.currentTime+.24); }catch(e){} }
@@ -922,7 +922,7 @@ const _speak=speak; speak=async(t)=>{ if(atSchool()) return; return _speak(t); }
 const _phoneDo=phoneDo; phoneDo=async(a)=>{ if(a.kind==="msg"){ add("a","💬 "+a.text,"ORION on its own"); notify("ORION",a.text); if(!document.hidden&&!atSchool()) speak(a.text); return ""; } return _phoneDo(a); };
 
 /* music control + ride + school questions, handled on the phone */
-const _reflex=phoneReflex; phoneReflex=t=>{ const x=t.toLowerCase().trim().replace(/^(hey |ok )?orion[, ]*/,"").replace(/[.!?]+$/,"");
+const _reflex=phoneReflex; phoneReflex=t=>{ const x=t.toLowerCase().trim().replace(/^(hey |ok |okay |yo )?(orion|jarvis|jervis|javis)[,.! ]*/,"").replace(/[.!?]+$/,"");
   if(/^(skip|next)( (song|track|this))?$|^skip this song$/.test(x)) return {kind:"media",action:"next"};
   if(/^(previous|go back|last)( (song|track))?$|^play the last song$/.test(x)) return {kind:"media",action:"previous"};
   if(/^(pause|stop)( (the )?(music|song))?$/.test(x)) return {kind:"media",action:"pause"};
