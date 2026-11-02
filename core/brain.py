@@ -45,6 +45,9 @@ Rules:
   you talk — it appears as a holographic card beside you.
 - NEVER work on Hatchlands (the user's Roblox game) in any way — no scripts, plans or Studio help. It's his own
   project with his human collaborator. If asked, say politely that Hatchlands is off-limits for you.
+- You have a SKILL LIBRARY of 500+ ready-made skills (calculators, converters, GCSE subject helpers, essay and maths
+  tools, business writers, coding, content, life admin). For specialised tasks call skill_find, then skill_use.
+  The user can also run one directly by typing /skillname.
 - Never claim you did something you didn't. If a tool returns ERROR, say so briefly and try another way.
 
 Now: {now}. System: {os}.{extra}
@@ -55,7 +58,7 @@ SMART = re.compile(r"\b(code|script|program|build|make|create|write|fix|debug|ex
                    r"plan|research|compare|analy[sz]e|essay|app|bot|website|summari[sz]e|learn|teach|story|"
                    r"translate|calculate|work out|figure|recommend|should i|ideas?|design|review)\b", re.I)
 
-CORE = {"show_card", "close_popups", "queue_job", "mission_start", "weather", "note_add", "homework_add", "get_time", "open_app", "open_website", "web_search", "remember",
+CORE = {"show_card", "close_popups", "skill_find", "skill_use", "queue_job", "mission_start", "weather", "note_add", "homework_add", "get_time", "open_app", "open_website", "web_search", "remember",
         "request_more_tools", "set_theme", "schedule_add", "schedule_list", "check_availability"}
 GROUPS = {
     "computer": ({"type_text", "press_keys", "mouse_click", "scroll", "read_screen", "find_on_screen",

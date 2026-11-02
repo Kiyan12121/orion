@@ -712,6 +712,21 @@ body.lite #hud .scanl{display:none}
 .wrapbig{font:800 38px var(--ui);color:var(--a2);text-shadow:0 0 18px rgba(var(--ar),.45)}.wrapbig small{font:600 13px var(--ui);color:var(--dim);margin-left:8px}
 .up{color:var(--green)}.down{color:var(--red)}
 
+/* skill library */
+.slbar{display:flex;gap:12px;align-items:center;margin-bottom:10px}.slbar .inp{flex:1;font-size:14px}
+.slcats{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.slcats button{background:rgba(var(--ar),.06);border:1px solid var(--line);color:var(--dim);font:700 10px var(--ui);letter-spacing:.16em;padding:5px 10px;cursor:pointer;border-radius:3px}
+.slcats button.on{color:#fff;border-color:var(--a);background:rgba(var(--ar),.2)}.slcats button i{font-style:normal;color:var(--a2);margin-left:5px;font-family:var(--mono);letter-spacing:0}
+.slgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px;margin-bottom:22px}
+.slc{border:1px solid var(--line);background:linear-gradient(160deg,rgba(var(--ar),.06),rgba(0,0,0,.25));border-radius:6px;padding:11px 12px;cursor:pointer;transition:.15s;position:relative}
+.slc:hover{border-color:var(--a);transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,0,0,.35),0 0 14px rgba(var(--ar),.2)}
+.slc b{display:block;font-size:13.5px;margin-bottom:4px}.slc small{display:block;color:var(--dim);font-size:12px;line-height:1.35}
+.slc code{position:absolute;top:10px;right:10px;font:10px var(--mono);color:var(--a2);opacity:.75}.slc .k{display:inline-block;margin-top:6px;font:700 9px var(--ui);letter-spacing:.14em;color:var(--green)}
+.slrun{border:1px solid var(--a);border-radius:8px;padding:14px;margin-bottom:14px;background:linear-gradient(160deg,rgba(var(--ar),.12),rgba(0,0,0,.35));animation:revU .35s}
+.slrh{display:flex;gap:10px;align-items:baseline;margin-bottom:8px}.slrh b{font-size:16px}.slrh span{flex:1}
+#slOut .res{white-space:pre-wrap;font-size:13.5px;line-height:1.5;user-select:text}
+.sltitle{font:700 11px var(--ui);letter-spacing:.3em;color:var(--dim);margin:6px 0 8px}.sltitle i{font-style:normal;color:var(--a2)}
+
 </style>
 </head>
 <body class="state-idle" data-theme="standby">
@@ -958,9 +973,18 @@ body.lite #hud .scanl{display:none}
           </div>
         </div>
         <!-- SKILLS -->
-        <div class="page" id="page-skills">
-          <div class="ph">SKILLS <i id="skcount">0</i></div>
+        <div class="page" id="page-skills" data-wide="1">
           <div class="scroll">
+            <div class="wtitle"><h2>SKILL LIBRARY</h2><span id="slSub">—</span></div>
+            <div class="slbar"><input class="inp" id="slQ" placeholder="Search 500+ skills — e.g. quadratic, essay plan, cold email, low fps…"><span class="sub2">Tip: type <b>/name</b> in chat to run one</span></div>
+            <div class="slcats" id="slCats"></div>
+            <div class="slrun" id="slRun" style="display:none">
+              <div class="slrh"><b id="slT">—</b><span id="slD" class="sub2"></span><button class="btn small" id="slClose">✕</button></div>
+              <textarea class="goal" id="slIn" style="min-height:84px;font-size:14px"></textarea>
+              <div class="voicerow" style="margin-top:8px"><span class="sub2" id="slEx" style="flex:1"></span><button class="btn" id="slGo">▶ RUN SKILL</button></div>
+              <div id="slOut"></div></div>
+            <div class="slgrid" id="slGrid"></div>
+            <h5 class="sltitle">LEARNED SKILLS <i id="skcount">0</i></h5>
             <div class="empty" style="margin-bottom:6px">Say <b>"learn how to …"</b> and ORION writes a new ability, safety-checks it, tests it, and only keeps it if it works.</div>
             <div id="sklist"></div>
           </div>
@@ -1516,7 +1540,7 @@ $("#evAdd").onclick=async()=>{ const t=$("#evTitle").value.trim(); if(!t){ $("#e
   if(await api.schedule_add({title:t,date:$("#evDate").value,time:$("#evTime").value,duration:$("#evDur").value,repeat:$("#evRep").value,busy:$("#evBusy").checked,with:$("#evWith").value})){ $("#evTitle").value=""; $("#evWith").value=""; $("#evBusy").checked=false; toast("Added to schedule."); loadSched(); } };
 
 /* ================= skills ================= */
-async function loadSkills(){ const s=await api.skills_get(); $("#skcount").textContent=s.length;
+async function loadSkills(){ loadSkillLib(); const s=await api.skills_get(); $("#skcount").textContent=s.length;
   $("#sklist").innerHTML=s.length?s.map(k=>`<div class="sk ${k.enabled===false?"off":""}"><div class="ctl"><button class="btn small" data-t="${esc(k.name)}" data-on="${k.enabled!==false}">${k.enabled===false?"ENABLE":"DISABLE"}</button><button class="x" data-d="${esc(k.name)}">×</button></div><b>${esc(k.name)}</b><p>${esc(k.description)}</p><small>learned ${esc(k.created||"")}</small></div>`).join(""):'<div class="empty">No skills yet. Try: "learn how to check the weather in Leicester".</div>';
   $$("#sklist [data-t]").forEach(b=>b.onclick=async()=>{ await api.skill_toggle(b.dataset.t,b.dataset.on!=="true"); loadSkills(); });
   $$("#sklist [data-d]").forEach(b=>b.onclick=async()=>{ await api.skill_remove(b.dataset.d); loadSkills(); }); }
@@ -2005,6 +2029,26 @@ async function boot(){ const c=await api.init(); applyCfg(c); const st=api.statu
 
 
 
+
+/* ================= skill library ================= */
+let SL=null, SLC="", SLS=null;
+async function loadSkillLib(){ if(!SL){ try{ SL=await api.skilllib_get(); }catch(e){ return; } }
+  $("#slSub").textContent=`${SL.count} skills · ${Object.keys(SL.cats).length} categories`;
+  $("#slCats").innerHTML=[`<button data-c="" class="${SLC?"":"on"}">ALL<i>${SL.count}</i></button>`,...Object.entries(SL.cats).map(([c,n])=>`<button data-c="${esc(c)}" class="${SLC===c?"on":""}">${esc(c.toUpperCase())}<i>${n}</i></button>`)].join("");
+  $$("#slCats button").forEach(b=>b.onclick=()=>{ SLC=b.dataset.c; loadSkillLib(); });
+  const q=$("#slQ").value.trim().toLowerCase(); const words=q.split(/\s+/).filter(Boolean);
+  let list=SL.skills.filter(s=>(!SLC||s.cat===SLC)&&(!words.length||words.every(w=>(s.name+" "+s.title+" "+s.desc+" "+s.cat).toLowerCase().includes(w))));
+  $("#slGrid").innerHTML=list.slice(0,240).map(s=>`<div class="slc" data-n="${s.name}"><code>/${esc(s.name)}</code><b>${esc(s.title)}</b><small>${esc(s.desc)}</small>${s.kind==="local"?'<span class="k">⚡ INSTANT · NO AI</span>':""}</div>`).join("")+(list.length>240?`<div class="empty">…and ${list.length-240} more — search to narrow down.</div>`:"")+(list.length?"":'<div class="empty">No skills match.</div>');
+  $$("#slGrid .slc").forEach(c=>c.onclick=()=>openSkill(c.dataset.n)); }
+function openSkill(n){ SLS=SL.skills.find(s=>s.name===n); if(!SLS) return; $("#slRun").style.display=""; $("#slT").textContent=SLS.title; $("#slD").textContent=SLS.desc;
+  $("#slIn").value=""; $("#slIn").placeholder=SLS.example?("e.g. "+SLS.example):"Paste or type the input…"; $("#slEx").textContent=`/${SLS.name}${SLS.kind==="local"?" · instant":""}`; $("#slOut").innerHTML=""; $("#slIn").focus(); sfx("open");
+  $("#slRun").scrollIntoView({behavior:"smooth",block:"nearest"}); }
+$("#slQ").oninput=()=>loadSkillLib();
+$("#slClose").onclick=()=>{ $("#slRun").style.display="none"; };
+$("#slIn").addEventListener("keydown",e=>{ if(e.key==="Enter"&&(e.ctrlKey||e.metaKey)) $("#slGo").click(); });
+$("#slGo").onclick=async()=>{ if(!SLS) return; $("#slGo").textContent="RUNNING…"; const r=await api.skilllib_run(SLS.name,$("#slIn").value); $("#slGo").textContent="▶ RUN SKILL";
+  $("#slOut").innerHTML=`<div class="res">${r.ok?render(r.result):esc(r.error||"failed")}</div>`; sfx("done"); };
+
 /* ================= 4.2: grades, marking, quotes, wrapped ================= */
 let MWM="essay", MWPH=[];
 async function imgB64(f){ const img=await new Promise(r=>{ const fr=new FileReader(); fr.onload=()=>r(fr.result); fr.readAsDataURL(f); });
@@ -2155,6 +2199,8 @@ setTimeout(()=>{ if(api) return; const wait=ms=>new Promise(r=>setTimeout(r,ms))
       for(const w of "You have 2 messages waiting, sir. **Adrian** asked for help and **Responeded** said “Now?”.".split(" ")){ ui.event({kind:"delta",id:"p",text:w+" "}); await wait(50); }
       ui.event({kind:"stream_end",id:"p",text:"You have 2 messages waiting, sir. **Adrian** asked for help and **Responeded** said “Now?”.",tier:"cloud",model:"Groq gpt-oss-20b"}); ui.event({kind:"state",state:"idle"}); },
     stop:()=>A(true),set_brain:m=>A({brain:m,cloud:{ok:true,count:2,labels:[]},local:{ok:false}}),set_theme:()=>A(),mic_start:()=>A(true),mic_stop:()=>A(""),mic_level:()=>A(Math.random()),ask_claude:()=>A(true),confirm_reply:()=>A(true),
+    skilllib_get:()=>A({count:505,cats:{Tools:8,Money:24,Writing:44,Code:21,Maths:6,Science:4,School:30,Life:22,Subjects:324},skills:[{name:"quadratic",title:"Quadratic solver",cat:"Maths",desc:"Roots, working and turning point of ax²+bx+c.",kind:"local",example:"1 -5 6"},{name:"essayplan",title:"Essay plan (PEEL)",cat:"School",desc:"Plan an essay: thesis + PEEL paragraphs with quotes to use.",kind:"prompt",example:""},{name:"coldemail",title:"Cold email / DM pitch",cat:"Money",desc:"Short pitch that gets replies.",kind:"prompt",example:""},{name:"convert",title:"Unit converter",cat:"Tools",desc:"Convert lengths, weights, volumes, temps, times, data, speeds.",kind:"local",example:"5 miles to km"},{name:"lowendpc",title:"Low-end PC settings",cat:"Gaming",desc:"More FPS, less lag.",kind:"prompt",example:""},{name:"physics_quiz",title:"Physics: Quick quiz",cat:"Subjects",desc:"GCSE Physics — quick quiz (give the topic).",kind:"prompt",example:""}]}),
+    skilllib_run:async(n,t)=>{ await wait(400); return {ok:true,result:"x = 3 or x = 2\nWorking: x = (−b ± √(b²−4ac)) / 2a = (5 ± √1) / 2\nTurning point: (2.5, -0.25)"}; },
     plus_get:()=>A({grades:[{subject:"Maths",target:"7",grade:"6",pct:63,basis:"3 papers + topics",gap:4,focus:["Circle theorems","Vectors"]},{subject:"English Literature",target:"7",grade:"7",pct:71,basis:"2 papers + topics",gap:9,focus:[]},{subject:"Physics",target:"6",grade:"5",pct:52,basis:"1 paper + topics",gap:3,focus:["Electricity"]}],
       money:{total:84,change:36,best:{amount:30,venture:"Automation services"},per_hour:[["Automation services",18.5,4.2]],goals:[{name:"£500 by summer",pct:31,per_week:22.5}]},gaming:{hours:14.5,prev_hours:18,sessions:4,top:["Roblox",275],longest:180}}),
     plus_action:async b=>{ await wait(700); if(b.action==="price") return {ok:true,result:{kind:b.kind,hours:4.2,rate:15,client:b.client,low:55,price:65,high:80,deposit:20,note:"Quote the middle price, take the deposit up front, and set a clear number of revisions (2)."}};

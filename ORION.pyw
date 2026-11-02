@@ -33,6 +33,7 @@ from core import scholar                                    # noqa: E402
 from core import money                                      # noqa: E402
 from core import holo                                       # noqa: E402,F401
 from core import plus                                       # noqa: E402
+from core import skillbook                                  # noqa: E402
 from core.autonomy import Autonomy                          # noqa: E402
 from core import gaming as gaming_mod                        # noqa: E402
 from core.routines import NightShift                        # noqa: E402
@@ -633,6 +634,10 @@ class Api:
 
             def think():
                 tools.TL.ev = ev
+                hit = skillbook.slash(text) if text.strip().startswith("/") else None
+                if hit:                                  # /skillname input → run that skill directly
+                    on_delta(hit[1])
+                    return hit[1], "skill", hit[0]
                 if self._link.enabled and self._link.online and not autopilot:
                     try:                       # laptop: hand it to the gaming PC — one brain, one conversation
                         self._emit("status", text="asking your gaming PC…")
@@ -1179,7 +1184,7 @@ class Api:
             return pk
         if path == "/api/autonomy":
             return self.autonomy_get()
-        simple = {"/api/plus": self.plus_get, "/api/life": self.life_get, "/api/health": self.health_get, "/api/study": self.study_get, "/api/ventures": self.ventures_get,
+        simple = {"/api/skilllib": self.skilllib_get, "/api/plus": self.plus_get, "/api/life": self.life_get, "/api/health": self.health_get, "/api/study": self.study_get, "/api/ventures": self.ventures_get,
                   "/api/gaming": self.gaming_get, "/api/brain": self.brain_get}
         if path.split("?")[0] in simple:
             return simple[path.split("?")[0]]()
@@ -1247,6 +1252,8 @@ class Api:
             return self.scholar_action(body)
         if path == "/api/plus":
             return self.plus_action(body)
+        if path == "/api/skilllib":
+            return self.skilllib_run(body.get("name", ""), body.get("text", ""))
         if path == "/api/history":
             n = self._memory.merge_turns(body.get("turns", []))
             if n:
@@ -1679,6 +1686,16 @@ class Api:
         if self._window:
             self._window.minimize()
         return True
+
+    # ---------------------------------------------------------------- skill library
+    def skilllib_get(self):
+        return skillbook.catalog()
+
+    def skilllib_run(self, name, text=""):
+        try:
+            return {"ok": True, "result": skillbook.run(name, text)}
+        except Exception as e:
+            return {"ok": False, "error": f"{type(e).__name__}: {e}"}
 
     # ---------------------------------------------------------------- 4.2 extras (grades, marking, wrapped, quotes)
     def plus_get(self):

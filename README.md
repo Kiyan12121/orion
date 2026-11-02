@@ -1,4 +1,16 @@
-# ORION 4.3 — Personal Intelligence System
+# ORION 4.4 — Personal Intelligence System
+
+## New in 4.4: the Skill Library (505 skills)
+- **505 ready-made skills.** ORION finds and uses the right one by itself. You can also browse them (PC: Skills page · phone: More › Skills), or type **/name** in chat, e.g. `/convert 5 miles to km`, `/quadratic 1 -5 6`, `/essayplan How is ambition presented in Macbeth?`.
+- **41 instant tools (no AI, no internet):** unit converter, percentages, VAT, discounts, savings growth, savings goals, split the bill, £/hour, break-even, days until, age, time zones, password generator, decide-for-me, dice, word counter, text case, base64, hashes, JSON check, colour codes, number bases, regex tester, Roman numerals, prime factors, HCF/LCM, quadratic and simultaneous equation solvers, Pythagoras, speed/distance/time, Ohm's law, energy cost, density, score → grade, pomodoro plans, revision time splits, bike ride time and more.
+- **School:** essay plans (PEEL), quote banks, poem and unseen poetry analysis, creative writing, SPaG fixer, command words, mnemonics, mind maps, revision sheets, exam questions with mark schemes, required practicals, maths step-by-step, history sources and interpretations, geography case studies, MFL translation and speaking, trace tables, pseudocode → Python, RE arguments.
+- **27 GCSE subjects × 12 helpers each:** explain, quiz, exam question, common mistakes, memory tricks, revision sheet, key words, worked example, flashcards, grade 9 tips, 20-minute session, topic checklist.
+- **Money & content:** idea check, cold emails/DMs, follow-ups, sales pages, product descriptions, brand names, slogans, pricing, customer and review replies, negotiation, SWOT, lean canvas, gig listings, automation ideas, budgets, payment reminders, hooks, video scripts, YouTube titles, thumbnails, content calendars, stream plans, captions, sponsor pitches.
+- **Code:** explain, debug, refactor, tests, review, README, commit messages, regex, SQL, Roblox Luau, Discord bots, PowerShell, git rescue, APIs, Minecraft plugins.
+- **Gaming:** low-end PC settings (tuned for an i5-2400 + GT 710), loadouts, strategy plans, team names, brackets, patch notes.
+- **Life:** reply drafts, apologies, birthday messages, gifts, days out, packing, cheap meals, decisions, disagreements, habits, pep talks, journal prompts, claim checking, both sides of a debate, bike fixes, formal emails, letters to school, complaints, thank-yous, news explained, wind-down plans.
+- **Rewrite in 20 tones and turn text into 20 formats:** JARVIS butler, formal, funny, Gen Z, Shakespeare… · bullets, table, thread, TikTok script, quiz, timeline, FAQ, speech, revision notes…
+- **Future:** college applications, a first CV, part-time job applications, interview prep, work experience emails.
 
 ## New in 4.3: the phone, redesigned
 - **Portrait, "Aurora":** a new look with a living orb, glass cards, big type, slowly moving colour in the background and a floating dock. The **orb button** in the middle opens chat. Tap it again to talk, or press and hold it from anywhere to talk straight away. PC moved into More.

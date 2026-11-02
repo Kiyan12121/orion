@@ -250,6 +250,10 @@ body.busy .horb u{animation-duration:.9s}body.busy .horb i{animation-duration:1.
 #cLiveBtns{gap:14px}#cLiveBtns .cBtn em{width:62px;height:62px;font-size:24px}
 .phoneRow{display:flex;gap:8px;flex-wrap:wrap}.phoneRow .qa{flex:1 1 22%}
 
+.slm{display:block;width:100%;text-align:left;background:var(--glass);border:1px solid var(--edge);border-radius:18px;padding:13px 14px;margin-bottom:8px;color:var(--text)}
+.slm b{display:block;font:600 15.5px var(--ui)}.slm small{display:block;color:var(--dim);font-size:13px;margin-top:3px;line-height:1.35}
+.slm code{float:right;font:11px var(--mono);color:var(--a2);opacity:.8}.slm .k{color:var(--green);font:600 11px var(--ui);margin-top:5px;display:inline-block}
+
 /* =====================================================================
    LANDSCAPE · COCKPIT
    ===================================================================== */
@@ -477,7 +481,7 @@ body.busy .horb u{animation-duration:.9s}body.busy .horb i{animation-duration:1.
     <section class="view" id="v-more">
       <div class="subnav" id="subnav"><button data-go="pc">🖥️ PC</button>
         <button data-sub="study" class="on">📚 Study</button><button data-sub="money">💷 Money</button><button data-sub="games">🎮 Gaming</button>
-        <button data-sub="brain">🧠 Brain</button><button data-sub="health">🩺 Health</button>
+        <button data-sub="skills">✨ Skills</button><button data-sub="brain">🧠 Brain</button><button data-sub="health">🩺 Health</button>
       </div>
       <div class="msub on" id="s-study">
         <div class="card"><h3>FOCUS <i id="mFocusSt"></i></h3>
@@ -539,6 +543,17 @@ body.busy .horb u{animation-duration:.9s}body.busy .horb i{animation-duration:1.
         <div class="card"><h3>NOTES &amp; IDEAS</h3><div class="two" style="grid-template-columns:1fr auto"><input class="inp" id="mNote" placeholder="Jot something down"><button class="btn sm" id="mNoteAdd">ADD</button></div>
           <div id="mNotes" style="margin-top:8px"><p class="empty">—</p></div></div>
         <div class="card"><h3>WHAT ORION KNOWS <i id="mFactN"></i></h3><div id="mFacts"><p class="empty">—</p></div></div>
+      </div>
+      <div class="msub" id="s-skills">
+        <div class="card"><h3>SKILL LIBRARY <i id="mSlN"></i></h3>
+          <input class="inp" id="mSlQ" placeholder="Search — quadratic, essay plan, cold email…">
+          <div class="subnav" id="mSlCats" style="margin-top:10px;padding-bottom:4px"></div>
+          <p class="empty" style="font-size:12.5px">Or type <b>/name</b> in chat, e.g. <b>/convert 5 miles to km</b>.</p></div>
+        <div class="card" id="mSlRun" style="display:none"><h3 id="mSlT" style="text-transform:none;color:#fff;font-size:18px">—</h3><p class="empty" id="mSlD" style="font-size:13.5px;margin-top:-6px"></p>
+          <textarea class="inp" id="mSlIn" rows="3" style="margin-top:10px"></textarea>
+          <div class="two" style="margin-top:8px"><button class="btn sm ghost" id="mSlX">CLOSE</button><button class="btn sm" id="mSlGo">▶ RUN</button></div>
+          <div id="mSlOut"></div></div>
+        <div id="mSlList"></div>
       </div>
       <div class="msub" id="s-health">
         <div class="card"><h3>HEALTH CHECK <button class="btn sm ghost" id="mHRe" style="border:0;padding:0">RE-CHECK</button></h3><div id="mHealth"><p class="empty">Connect to your PC.</p></div></div>
@@ -1016,6 +1031,7 @@ async function checkLaunch(){ try{ if(Native){ const r=await Native.consumeLaunc
 const money=v=>"£"+(+v||0).toFixed(2).replace(/\.00$/,""), hm=m=>m>=60?`${Math.floor(m/60)}h${String(m%60).padStart(2,"0")}`:`${m}m`;
 function hb2(rows,fmt){ const mx=Math.max(1,...rows.map(r=>r[1])); return rows.length?rows.map(r=>`<div class="hb2"><b>${esc(r[0])}</b><div><i style="width:${r[1]/mx*100}%"></i></div><span>${esc(fmt(r[1]))}</span></div>`).join(""):'<p class="empty">Nothing yet.</p>'; }
 function goSub(n){ store.set("sub",n); $$("#subnav button").forEach(b=>b.classList.toggle("on",b.dataset.sub===n)); $$(".msub").forEach(x=>x.classList.toggle("on",x.id==="s-"+n));
+  if(n==="skills") return loadSkillsM();
   if(!pcOnline){ return; } ({study:loadStudyM,money:loadMoneyM,games:loadGamesM,brain:loadBrainM,health:loadHealthM})[n]?.(); }
 $$("#subnav button").forEach(b=>b.onclick=()=>goSub(b.dataset.sub));
 let MC=[], MCUR=null, MF=null, mfTick=null;
@@ -1367,6 +1383,22 @@ setInterval(paintCluster,1000); setInterval(battRead,60000); battRead();
 const _accept5=acceptCall; acceptCall=async(...a)=>{ try{ if(Native&&Native.nowBar&&!Call.ride) Native.nowBar({title:"Talking to ORION",text:"Tap to go back to the call",chip:"LIVE"}); }catch(e){} return _accept5(...a); };
 const _end5=endCall; endCall=(m)=>{ try{ if(Native&&Native.nowBarClear&&!state.riding) Native.nowBarClear(); }catch(e){} return _end5(m); };
 const _ride5=startRide; startRide=async()=>{ try{ if(Native&&Native.nowBar){ const a=avgRide(new Date().getHours()<12?"school":"home"); Native.nowBar({title:"Ride mode on",text:a?`Usually ${Math.round(a/60)} min · ORION's listening for its name`:"Timing your ride · ORION's listening for its name",chip:"🚲",action:"ride"}); } }catch(e){} return _ride5(); };
+
+/* ---------- skill library (phone) ---------- */
+let MSL=null, MSLC="", MSLS=null;
+async function loadSkillsM(){ if(!pcOnline){ $("#mSlList").innerHTML='<p class="empty">The skill library runs on your PC — it\'s offline right now.</p>'; return; }
+  if(!MSL){ try{ MSL=await api("/api/skilllib"); }catch(e){ return; } }
+  $("#mSlN").textContent=MSL.count; $("#mSlCats").innerHTML=[`<button data-c="" class="${MSLC?"":"on"}">All</button>`,...Object.keys(MSL.cats).map(c=>`<button data-c="${esc(c)}" class="${MSLC===c?"on":""}">${esc(c)}</button>`)].join("");
+  $$("#mSlCats button").forEach(b=>b.onclick=()=>{ MSLC=b.dataset.c; loadSkillsM(); });
+  const w=$("#mSlQ").value.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  const L=MSL.skills.filter(s=>(!MSLC||s.cat===MSLC)&&(!w.length||w.every(x=>(s.name+" "+s.title+" "+s.desc).toLowerCase().includes(x))));
+  $("#mSlList").innerHTML=L.slice(0,80).map(s=>`<button class="slm" data-n="${s.name}"><code>/${esc(s.name)}</code><b>${esc(s.title)}</b><small>${esc(s.desc)}</small>${s.kind==="local"?'<span class="k">⚡ instant</span>':""}</button>`).join("")+(L.length>80?`<p class="empty">…${L.length-80} more — search to narrow down.</p>`:"");
+  $$("#mSlList .slm").forEach(b=>b.onclick=()=>{ MSLS=MSL.skills.find(s=>s.name===b.dataset.n); $("#mSlRun").style.display=""; $("#mSlT").textContent=MSLS.title; $("#mSlD").textContent=MSLS.desc;
+    $("#mSlIn").value=""; $("#mSlIn").placeholder=MSLS.example?"e.g. "+MSLS.example:"Type the input…"; $("#mSlOut").innerHTML=""; $("#mSlRun").scrollIntoView({behavior:"smooth"}); buzz(10); }); }
+$("#mSlQ").oninput=()=>loadSkillsM();
+$("#mSlX").onclick=()=>$("#mSlRun").style.display="none";
+$("#mSlGo").onclick=async()=>{ if(!MSLS) return; $("#mSlGo").textContent="…"; try{ const r=await api("/api/skilllib",{name:MSLS.name,text:$("#mSlIn").value},120000);
+  $("#mSlOut").innerHTML=`<div class="mres">${r.ok?render(r.result):esc(r.error)}</div>`; buzz(20); }catch(e){ toast(e.message); } $("#mSlGo").textContent="▶ RUN"; };
 
 /* ---------- tabs ---------- */
 function go(t){ $$("nav.tabs button").forEach(b=>b.classList.toggle("on",b.dataset.tab===t)); $$(".view").forEach(v=>v.classList.toggle("on",v.id==="v-"+t));
