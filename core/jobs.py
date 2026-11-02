@@ -98,6 +98,8 @@ class Jobs:
             return False
         if j["status"] == "running":
             CTX["cancel"].set()
+            stop = CTX.get("stop_all")
+            stop and stop()
         elif j["status"] in ("queued", "waiting"):
             j["status"] = "cancelled"
             j["finished"] = time.time()

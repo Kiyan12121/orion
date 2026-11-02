@@ -83,6 +83,7 @@ def _need(lib, name):
 # Context set by the app at start-up
 CTX = {"memory": None, "config": {}, "notify": lambda text: None, 
        "set_theme": None, "cancel": threading.Event()}
+TL = threading.local()      # which task this thread belongs to (so a stopped task can't keep acting)
 
 # ---------------------------------------------------------------------------------------------
 # Safeguards — these apply even with safe mode OFF. ORION simply refuses these.
@@ -742,6 +743,9 @@ class Toolbox:
                 args = {k: v for k, v in args.items() if k in params}
         except (TypeError, ValueError):
             args = {k: v for k, v in args.items() if k}
+        ev = getattr(TL, "ev", None)
+        if ev is not None and ev.is_set():
+            return "Stopped by the user."
         pretty = ", ".join(f"{k}={str(v)[:60]!r}" for k, v in args.items())
         self.emit("tool", name=name, args=pretty, status="running")
         if t["dangerous"] and self.config.get("safe_mode", False):

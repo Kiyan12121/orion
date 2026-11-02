@@ -81,6 +81,7 @@ class Api:
         self._recorder = Recorder()
         self._gaming = GamingMode(self._cfg, self._emit, self._notify, self._brain)
         tools.CTX["toolbox_run"] = lambda name, args: self._toolbox.run(name, args)
+        tools.CTX["stop_all"] = self.stop
         self._scheduler = schedule.Scheduler(self._cfg, self._sched_notify)
         self._hotkey = Hotkey(self._cfg.get("hotkey", "ctrl+alt+space"), self._hk_start, self._hk_stop)
         tools.CTX["brain"] = self._brain
@@ -551,6 +552,7 @@ class Api:
 
     def stop(self):
         self._cancel.set()
+        tools.CTX["cancel"].set()
         self._speaker.stop()
         self._emit("stopped")
         return True
@@ -571,7 +573,9 @@ class Api:
 
     def _process(self, text, autopilot=False, speak=True):
         with self._busy:
-            self._cancel.clear()
+            ev = threading.Event()               # a fresh stop button for every task — one click always works
+            self._cancel = ev
+            tools.CTX["cancel"] = ev
             mid = uuid.uuid4().hex[:8]
             self._emit("state", state="thinking")
             self._emit("stream_start", id=mid)
@@ -585,22 +589,46 @@ class Api:
                 last[0] = time.time()
 
             def on_delta(chunk):
+                if ev.is_set():
+                    raise Cancelled()
                 buf.append(chunk)
                 speech.feed(chunk)
                 if time.time() - last[0] > 0.06:
                     flush()
 
-            try:
+            def think():
+                tools.TL.ev = ev
                 if self._link.enabled and self._link.online and not autopilot:
                     try:                       # laptop: hand it to the gaming PC — one brain, one conversation
                         self._emit("status", text="asking your gaming PC…")
-                        reply, tier, model = self._link.ask(text)
-                        on_delta(reply)
+                        out = self._link.ask(text)
+                        on_delta(out[0])
                         threading.Thread(target=self._link.sync_history, daemon=True).start()
+                        return out
+                    except Cancelled:
+                        raise
                     except Exception:
-                        reply, tier, model = self._brain.handle(text, on_delta, self._cancel, autopilot)
-                else:
-                    reply, tier, model = self._brain.handle(text, on_delta, self._cancel, autopilot)
+                        pass
+                return self._brain.handle(text, on_delta, ev, autopilot)
+
+            try:
+                # the thinking runs on its own thread so Stop works INSTANTLY — even mid-reply or mid-tool
+                box = {}
+
+                def work():
+                    try:
+                        box["r"] = think()
+                    except BaseException as e:
+                        box["e"] = e
+                th = threading.Thread(target=work, daemon=True)
+                th.start()
+                while th.is_alive() and not ev.wait(0.15):
+                    pass
+                if ev.is_set():
+                    raise Cancelled()
+                if "e" in box:
+                    raise box["e"]
+                reply, tier, model = box["r"]
                 flush()
                 self._emit("stream_end", id=mid, text=reply, tier=tier, model=model)
                 if speak and not speech.flush():
@@ -608,7 +636,8 @@ class Api:
                 if autopilot:
                     self._push.send(f"Mission complete: {reply[:300]}", "ORION Autopilot")
             except Cancelled:
-                flush()
+                buf.clear()
+                self._speaker.stop()
                 reply, tier, model = "Stopped.", "none", None
                 self._emit("stream_end", id=mid, text=None, tier="none", model=None, stopped=True)
             except Exception as e:
