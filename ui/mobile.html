@@ -187,6 +187,25 @@ nav.tabs button{font-size:9.5px;letter-spacing:.1em}
 .mc p{font-size:14px;white-space:pre-wrap;line-height:1.4}.mc pre{font:11.5px var(--mono);white-space:pre-wrap;max-height:200px;overflow:auto}
 .exq{margin-bottom:14px}.exq p{font-size:15px;line-height:1.45;margin-bottom:6px}.exq textarea{width:100%;min-height:64px}
 .exr{border-left:3px solid var(--green);padding:6px 9px;margin-top:6px;font-size:13px;background:rgba(93,255,176,.05)}.exr.lost{border-color:var(--amber)}
+
+/* ---- 4.2 phone ---- */
+.today{display:flex;gap:8px;overflow-x:auto;margin:-4px 0 12px;scrollbar-width:none}.today::-webkit-scrollbar{display:none}
+.today .tc{flex:none;display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,rgba(var(--ar),.16),rgba(0,0,0,.3));border:1px solid var(--line2);border-radius:14px;padding:9px 12px;font-size:13.5px;animation:rise .4s both}
+.today .tc em{font-style:normal;font-size:18px}.today .tc b{display:block;font-size:14px}.today .tc small{display:block;color:var(--dim);font-size:11.5px}
+.today .tc.warn{border-color:rgba(255,179,71,.6)}
+#ptr{position:fixed;left:50%;top:70px;transform:translate(-50%,-60px) rotate(0);width:38px;height:38px;border-radius:50%;background:rgba(4,16,26,.95);border:1px solid var(--a);color:var(--a2);display:flex;align-items:center;justify-content:center;font-size:20px;z-index:40;opacity:0;transition:opacity .2s}
+#ptr.spin{animation:ptrs .8s linear infinite}@keyframes ptrs{to{transform:translate(-50%,0) rotate(360deg)}}
+.csearch{padding:0 0 8px}.csearch .inp{padding:8px 12px;font-size:14px;border-radius:999px}
+.m.hide{display:none}.m mark{background:rgba(var(--ar),.45);color:#fff;border-radius:3px}
+.seg2{display:flex;border:1px solid var(--line2);border-radius:12px;overflow:hidden}.seg2 button{flex:1;background:none;border:0;color:var(--dim);font:600 14px var(--ui);padding:9px}
+.seg2 button.on{background:rgba(var(--ar),.2);color:#fff}
+.mres{margin-top:10px;border:1px solid rgba(var(--ar),.4);border-radius:14px;padding:12px;background:rgba(var(--ar),.07);animation:rise .4s}
+.mres .big{float:right;font:800 34px var(--ui);color:var(--a2);margin-left:8px;line-height:1}.mres h6{font:700 10.5px var(--ui);letter-spacing:.22em;color:var(--a2);margin:10px 0 4px}
+.mres li{margin-left:18px;font-size:14px;line-height:1.45}.mres p{font-size:14px;line-height:1.45}.mres .bad{color:#ff9fb6;font-family:var(--mono)}
+.gr{display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid var(--line)}.gr:last-child{border:0}.gr .g{font:800 28px var(--ui);color:var(--a2);width:36px;text-align:center}
+.gr div{flex:1;min-width:0}.gr b{display:block}.gr small{display:block;color:var(--dim);font-size:12px}.gr .pb{height:5px;border-radius:3px;background:rgba(var(--ar),.12);margin-top:5px;overflow:hidden}.gr .pb i{display:block;height:100%;background:var(--a)}
+.wbig{font:800 34px var(--ui);color:var(--a2)}.wbig small{font:600 13px var(--ui);margin-left:8px}.up{color:var(--green)}.down{color:#ff9fb6}
+.ride .msgs{font-size:12px;color:var(--a2);margin-top:3px}
 /* ===== LANDSCAPE ===== */
 @media (orientation:landscape) and (max-height:620px){
   .app{display:grid;grid-template-columns:76px 1fr;grid-template-rows:auto 1fr;padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right)}
@@ -231,6 +250,7 @@ nav.tabs button{font-size:9.5px;letter-spacing:.1em}
     <button class="hb" id="setBtn">⚙</button>
   </header>
 
+  <div id="ptr">↻</div>
   <div class="views">
     <!-- HOME -->
     <section class="view on" id="v-home">
@@ -239,6 +259,7 @@ nav.tabs button{font-size:9.5px;letter-spacing:.1em}
         <div class="hello" id="hello">Good day.<small id="helloSub">—</small></div>
       </div>
       <div class="wxline" id="wxline"></div>
+      <div class="today" id="today"></div>
       <div class="glance" id="glance">
         <div class="gl" data-tab="more" data-sub="study"><em>📚</em><b id="glStudy">–</b><span>REVISION</span></div>
         <div class="gl" data-tab="more" data-sub="money"><em>💷</em><b id="glMoney">–</b><span>THIS MONTH</span></div>
@@ -284,6 +305,7 @@ nav.tabs button{font-size:9.5px;letter-spacing:.1em}
 
     <!-- CHAT -->
     <section class="view" id="v-chat">
+      <div class="csearch"><input class="inp" id="cSearch" placeholder="🔎 Search this chat…"></div>
       <div id="log"></div>
       <label class="bgtoggle"><input type="checkbox" id="bgMode"> Run as background job (notify me when done)</label>
       <div class="compose">
@@ -358,6 +380,14 @@ nav.tabs button{font-size:9.5px;letter-spacing:.1em}
           <div class="mcard" id="mCard"><small id="mDeck">—</small><span id="mQ">Connect to your PC to revise.</span><em id="mA"></em></div>
           <div class="two" style="margin-top:10px"><button class="btn sm ghost" id="mWrong" style="color:#ff9fb6">✕ WRONG</button><button class="btn sm" id="mRight" style="color:var(--green)">✓ GOT IT</button></div>
           <p class="empty" style="font-size:12.5px;margin-top:8px">Tap the card to see the answer.</p></div>
+        <div class="card"><h3>PREDICTED GRADES</h3><div id="mGrades"><p class="empty">Connect to your PC.</p></div></div>
+        <div class="card"><h3>MARK MY WORK</h3>
+          <div class="seg2" id="mMwMode"><button class="on" data-m="essay">Essay</button><button data-m="working">Maths working</button></div>
+          <input class="inp" id="mMwSubj" placeholder="Subject — e.g. English Literature" style="margin-top:8px">
+          <input class="inp" id="mMwQ" placeholder="The question" style="margin-top:8px">
+          <textarea class="inp" id="mMwText" rows="4" placeholder="Type or paste your answer…" style="margin-top:8px"></textarea>
+          <div class="two" style="margin-top:8px"><label class="btn sm ghost" style="display:flex;align-items:center;justify-content:center">📷 PHOTO<input type="file" id="mMwPh" accept="image/*" capture="environment" style="display:none"></label><button class="btn sm" id="mMwGo">✦ MARK IT</button></div>
+          <div id="mMwOut"></div></div>
         <div class="card"><h3>EXAM HALL</h3><div id="mPapers"><p class="empty">Connect to your PC to sit papers.</p></div>
           <div class="two" style="margin-top:8px"><select class="inp" id="mExSub"></select><button class="btn sm" id="mExNew">✦ NEW PAPER</button></div></div>
         <div class="card" id="mExam" style="display:none"><h3 id="mExTitle">PAPER</h3><div id="mExBody"></div>
@@ -367,12 +397,21 @@ nav.tabs button{font-size:9.5px;letter-spacing:.1em}
           <div class="two" style="margin-top:8px;grid-template-columns:1fr 1.6fr"><input class="inp" id="mHwS" placeholder="Subject"><input class="inp" id="mHwT" placeholder="Task"></div>
           <div class="two" style="margin-top:8px"><input class="inp" id="mHwD" placeholder="Due — friday"><button class="btn sm" id="mHwAdd">+ ADD</button></div></div>
         <div class="card"><h3>EXAMS</h3><div id="mExams"><p class="empty">—</p></div></div>
-        <div class="card"><h3>NEW DECK</h3><input class="inp" id="mTopic" placeholder="Topic — e.g. GCSE Physics forces"><button class="btn" id="mMake">✦ MAKE FLASHCARDS</button></div>
+        <div class="card"><h3>NEW DECK</h3><input class="inp" id="mTopic" placeholder="Topic — e.g. GCSE Physics forces"><button class="btn" id="mMake">✦ MAKE FLASHCARDS</button>
+          <label class="btn ghost" style="display:flex;align-items:center;justify-content:center">📷 CARDS FROM PHOTOS OF MY NOTES<input type="file" id="mDeckPh" accept="image/*" capture="environment" multiple style="display:none"></label>
+          <p class="empty" style="font-size:12.5px">Then say “ORION, quiz me” on the ride home and answer out loud.</p></div>
       </div>
       <div class="msub" id="s-money">
         <div class="card"><h3>THIS MONTH</h3><div class="bigm" id="mMonth">£0</div><p class="empty" id="mTotal">—</p>
           <div class="two" style="margin-top:10px"><select class="inp" id="mVen"></select><input class="inp" id="mAmt" type="number" step="0.01" inputmode="decimal" placeholder="£"></div>
           <input class="inp" id="mNote" placeholder="What for?" style="margin-top:8px"><button class="btn" id="mLog">+ LOG IT</button></div>
+        <div class="card"><h3>MONEY WRAPPED <i>7 DAYS</i></h3><div id="mMWrap"><p class="empty">—</p></div></div>
+        <div class="card"><h3>GOALS &amp; CLIENTS</h3><div id="mGoals"><p class="empty">—</p></div></div>
+        <div class="card"><h3>QUOTE CALCULATOR</h3>
+          <div class="two"><select class="inp" id="mQK"><option>discord bot</option><option>automation</option><option>website</option><option>roblox script</option><option>minecraft plugin</option><option>video edit</option><option>logo</option><option>app</option><option>other</option></select>
+          <select class="inp" id="mQC"><option>small business</option><option>individual</option><option>friend</option><option>company</option></select></div>
+          <div class="two" style="margin-top:8px"><input class="inp" id="mQH" type="number" inputmode="decimal" placeholder="Hours (optional)"><button class="btn sm" id="mQGo">£ QUOTE</button></div>
+          <div id="mQOut"></div></div>
         <div class="card"><h3>BY VENTURE</h3><div id="mBy"><p class="empty">—</p></div></div>
         <div class="card"><h3>DEV QUEUE <i>OVERNIGHT</i></h3><div id="mDev"><p class="empty">—</p></div>
           <input class="inp" id="mDevT" placeholder="e.g. a tool that renames my clips" style="margin-top:8px"><button class="btn" id="mDevAdd">+ ADD TO DEV QUEUE</button></div>
@@ -380,6 +419,7 @@ nav.tabs button{font-size:9.5px;letter-spacing:.1em}
       <div class="msub" id="s-games">
         <div class="card"><h3>THIS WEEK</h3><div class="bigm" id="mGTot">0h</div><p class="empty" id="mGSub">—</p>
           <div class="mbars" id="mGBars"></div></div>
+        <div class="card"><h3>GAMING WRAPPED</h3><div id="mGWrap"><p class="empty">—</p></div></div>
         <div class="card"><h3>BY GAME</h3><div id="mGBy"><p class="empty">—</p></div></div>
         <div class="card"><h3>QUICK</h3><div class="grid" style="grid-template-columns:repeat(3,1fr)">
           <button class="qa" data-act="gaming"><em>🎮</em>Gaming</button><button class="qa" id="mClip"><em>🎬</em>Clip that</button><button class="qa" data-q="book a gaming party"><em>📨</em>Party</button></div></div>
@@ -443,6 +483,8 @@ nav.tabs button{font-size:9.5px;letter-spacing:.1em}
   <label style="display:flex;gap:10px;align-items:center;letter-spacing:0;font-size:15px;color:var(--text)"><input type="checkbox" id="sHot" style="accent-color:var(--a)"> “Hey ORION” <small style="color:var(--dim)">— beta · offline · pauses at school &amp; low battery</small></label>
   <label style="display:flex;gap:10px;align-items:center;letter-spacing:0;font-size:15px;color:var(--text)"><input type="checkbox" id="sName" style="accent-color:var(--a)"> On calls, only answer when I say “ORION” <small style="color:var(--dim)">— always on in Ride mode</small></label>
   <button class="btn ghost" id="sAssist">🎧 USE ORION AS MY ASSISTANT (EARBUD HOLD)</button>
+  <label style="display:flex;gap:10px;align-items:center;letter-spacing:0;font-size:15px;color:var(--text)"><input type="checkbox" id="sMsgs" style="accent-color:var(--a)"> Read my messages out on rides <small style="color:var(--dim)">— Snapchat, WhatsApp, Insta, Discord, texts · reply by voice</small></label>
+  <button class="btn ghost" id="sMsgAccess">✉️ ALLOW ORION TO SEE MESSAGE NOTIFICATIONS</button>
   <label style="display:flex;gap:10px;align-items:center;letter-spacing:0;font-size:15px;color:var(--text);margin-top:10px"><input type="checkbox" id="sLoc" style="accent-color:var(--a)"> Use my location <small style="color:var(--dim)">— ride timing, ETAs, auto modes · stays on your devices</small></label>
   <button class="btn ghost" id="sBatt">🔋 STOP SAMSUNG PUTTING ORION TO SLEEP</button>
   <h4>APP</h4>
@@ -759,8 +801,9 @@ function orbLoop(){ if(!Call.on) return; let l=0; if(Call.speaking){ l=.35+.3*Ma
 async function listenLoop(){
   while(Call.live){
     if(Call.paused||Call.muted){ cSet(Call.muted?"MUTED":"PAUSED","Tap again to carry on."); await new Promise(r=>setTimeout(r,300)); continue; }
-    cSet("LISTENING…","Go ahead — I'm listening.");
-    const got=await smartListen(Call.stream,{isLive:()=>Call.live&&!Call.muted&&!Call.paused,startTimeout:15000,onPartial:t=>$("#cSub").textContent=`“${t}”`});
+    if(Call.ride&&(Call.inbox||[]).length&&!Call.quiz&&!Call.pendingReply){ await readInbox(); continue; }
+    cSet("LISTENING…",Call.quiz?"Answer out loud…":"Go ahead — I'm listening.");
+    const got=await smartListen(Call.stream,{isLive:()=>Call.live&&!Call.muted&&!Call.paused,startTimeout:Call.ride?7000:15000,onPartial:t=>$("#cSub").textContent=`“${t}”`});
     if(!Call.live) return; if(!got.blob){ continue; }
     cSet("THINKING…",""); let text=got.text;
     if(text==null){ try{ text=(await transcribe(got.blob)||"").replace(SENDW,"").trim(); }catch(e){ cSet("ERROR","Couldn't hear that."); await new Promise(r=>setTimeout(r,1200)); continue; } }
@@ -887,10 +930,10 @@ function paintLifeM(){ const L=MLIFE; if(!L) return; const w=L.weather;
     return `<div class="hwr"><input type="checkbox" data-mhw="${h.id}"><div><b>${esc(h.subject)}</b><small>${esc(h.task)}</small></div><span class="st ${c}">${when}</span></div>`; }).join(""):'<p class="empty">No homework due 🎉</p>';
   $$("[data-mhw]").forEach(c=>c.onchange=async()=>{ MLIFE=await api("/api/life",{action:"hw_done",id:c.dataset.mhw,done:true}); toast("Ticked off ✓"); paintLifeM(); });
   $("#mNotes").innerHTML=L.notes.length?L.notes.slice(0,10).map(n=>`<div class="row" style="font-size:14px"><span class="st">${esc(n.tag||"note")}</span>${esc(n.text)}</div>`).join(""):'<p class="empty">No notes yet.</p>'; }
-async function loadLifeM(){ if(!pcOnline) return; try{ MLIFE=await api("/api/life"); paintLifeM(); }catch(e){} }
+async function loadLifeM(){ if(!pcOnline) return; try{ MLIFE=await api("/api/life"); SJ("lifeCache",{homework:MLIFE.homework||[]}); paintLifeM(); try{ paintToday(); }catch(e){} }catch(e){} }
 $("#mHwAdd").onclick=async()=>{ if(!$("#mHwT").value.trim()) return; try{ MLIFE=await api("/api/life",{action:"hw_add",subject:$("#mHwS").value||"General",task:$("#mHwT").value,due:$("#mHwD").value}); $("#mHwT").value=$("#mHwD").value=""; paintLifeM(); toast("Added."); }catch(e){ toast(e.message); } };
 $("#mNoteAdd").onclick=async()=>{ const t=$("#mNote").value.trim(); if(!t) return; try{ MLIFE=await api("/api/life",{action:"note_add",text:t}); $("#mNote").value=""; paintLifeM(); }catch(e){ toast(e.message); } };
-async function glance(){ loadLifeM(); if(!pcOnline) return; try{ const [st,v,g]=await Promise.all([api("/api/study"),api("/api/ventures"),api("/api/gaming")]);
+async function glance(){ loadLifeM(); if(!pcOnline) return; try{ loadPlusM(); }catch(e){} try{ const [st,v,g]=await Promise.all([api("/api/study"),api("/api/ventures"),api("/api/gaming")]);
   $("#glStudy").textContent=st.today+"m"; $("#glMoney").textContent=money(v.earn.this_month); $("#glGame").textContent=hm(g.total_mins); }catch(e){} }
 
 
@@ -1025,6 +1068,133 @@ $("#sBatt").onclick=()=>{ if(Native&&Native.openBatterySettings) Native.openBatt
 /* launched by "Hey ORION" / earbud hold: just listen */
 const _checkLaunch=checkLaunch; checkLaunch=async()=>{ try{ if(Native){ const r=await Native.consumeLaunchAction(); if(r.action==="listen"){ go("chat"); setTimeout(()=>$("#mic").click(),250); return; }
       if(r.action==="call"){ incoming(r.reason||""); setTimeout(acceptCall,350); return; } if(r.action==="ring"){ Native.stopRing&&Native.stopRing(); toast("📢 Found it!"); return; } } }catch(e){} };
+
+/* ================= ORION 4.2 phone ================= */
+const buzz=(ms=12)=>{ try{ navigator.vibrate&&navigator.vibrate(ms); }catch(e){} };
+document.addEventListener("click",e=>{ if(e.target.closest("button,.qa,.gl,.tc")) buzz(8); },true);
+
+/* today strip: next event · homework · rain at home time · ride */
+let WXH=null;
+async function homeWeather(){ const P=J("places",{}); const at=P.home||null; if(!at) return null;
+  if(WXH&&Date.now()-WXH.t<30*60000) return WXH;
+  try{ const r=await (await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${at.lat}&longitude=${at.lon}&hourly=precipitation_probability,temperature_2m&forecast_days=2&timezone=auto`)).json();
+    WXH={t:Date.now(),h:r.hourly}; return WXH; }catch(e){ return null; } }
+function rainAt(w,dateStr,hh){ if(!w) return null; const k=`${dateStr}T${String(hh).padStart(2,"0")}:00`; const i=w.h.time.indexOf(k); return i<0?null:{p:w.h.precipitation_probability[i],t:Math.round(w.h.temperature_2m[i])}; }
+async function paintToday(){ const el=$("#today"); if(!el) return; const chips=[]; const now=new Date();
+  const ev=(state.today||[]).find(e=>e.time>=now.toTimeString().slice(0,5)); if(ev) chips.push(`<div class="tc" data-tab="sched"><em>📅</em><div><b>${esc(ev.time)}</b><small>${esc(ev.title.slice(0,26))}</small></div></div>`);
+  const hw=(J("lifeCache",{}).homework||[]).filter(h=>!h.done); if(hw.length){ const soon=hw.filter(h=>h.days<=1).length; chips.push(`<div class="tc ${soon?"warn":""}" data-tab="more" data-sub="study"><em>📝</em><div><b>${hw.length} homework</b><small>${soon?soon+" due tomorrow":"none urgent"}</small></div></div>`); }
+  const w=await homeWeather(); if(w){ const d=now.toISOString().slice(0,10); const endH=+((DAY.school_end||"15:10").slice(0,2)); const r=atSchoolDay()&&now.getHours()<endH+1?rainAt(w,d,endH):rainAt(w,d,Math.min(23,now.getHours()+1));
+    if(r) chips.push(`<div class="tc ${r.p>=50?"warn":""}"><em>${r.p>=50?"🌧️":"🌤️"}</em><div><b>${r.p}% rain</b><small>${atSchoolDay()&&now.getHours()<endH+1?"at home time":"next hour"} · ${r.t}°</small></div></div>`); }
+  const a=avgRide("school"); if(a) chips.push(`<div class="tc"><em>🚲</em><div><b>${Math.round(a/60)} min</b><small>usual ride</small></div></div>`);
+  const sv=J("rideLog",[]).length; if(!a&&sv===0) chips.push(`<div class="tc" id="tcRide"><em>🚲</em><div><b>Ride mode</b><small>time your ride</small></div></div>`);
+  el.innerHTML=chips.join(""); const tr=$("#tcRide"); if(tr) tr.onclick=()=>startRide(); }
+
+/* pull to refresh + swipe between tabs */
+(()=>{ const TABS=["home","chat","jobs","sched","pc","more"]; let y0=null,x0=null,pulling=false,t0=0; const ptr=$("#ptr");
+  document.addEventListener("touchstart",e=>{ const v=e.target.closest(".view"); y0=(v&&v.scrollTop<=0)?e.touches[0].clientY:null; x0=e.touches[0].clientX; t0=Date.now(); },{passive:true});
+  document.addEventListener("touchmove",e=>{ if(y0==null) return; const dy=e.touches[0].clientY-y0; if(dy>10){ pulling=dy>80; ptr.style.opacity=Math.min(1,dy/80); ptr.style.transform=`translate(-50%,${Math.min(dy,110)-60}px) rotate(${dy*3}deg)`; } },{passive:true});
+  document.addEventListener("touchend",e=>{ const dx=e.changedTouches[0].clientX-x0, dy=e.changedTouches[0].clientY-(y0??e.changedTouches[0].clientY);
+    if(pulling){ buzz(15); ptr.classList.add("spin"); window._gl=0; Promise.resolve(refresh()).finally(()=>setTimeout(()=>{ ptr.classList.remove("spin"); ptr.style.opacity=0; ptr.style.transform="translate(-50%,-60px)"; },500)); }
+    else { ptr.style.opacity=0; ptr.style.transform="translate(-50%,-60px)"; }
+    pulling=false; y0=null;
+    if(Math.abs(dx)>90&&Math.abs(dx)>Math.abs(dy)*2&&Date.now()-t0<450&&!e.target.closest("input,textarea,.mbars,.today,.modes,#subnav,.mcard,#call")){
+      const cur=store.get("tab","home"); const i=TABS.indexOf(cur); const n=TABS[i+(dx<0?1:-1)]; if(n){ buzz(6); go(n); } } },{passive:true}); })();
+
+/* chat search */
+$("#cSearch").oninput=()=>{ const q=$("#cSearch").value.trim().toLowerCase(); $$("#log .m").forEach(m=>{ m.classList.toggle("hide",!!q&&!m.textContent.toLowerCase().includes(q)); }); };
+
+/* ---------- messages read aloud on rides (Snapchat, WhatsApp, Insta, Discord, texts) ---------- */
+let MSG={last:-1,timer:null};
+async function msgPoll(){ if(!Native||!Native.notifRecent||store.get("msgs","0")!=="1"||atSchool()) return;
+  try{ const r=await Native.notifRecent({since:MSG.last<0?0:MSG.last}); if(MSG.last<0){ MSG.last=r.last; return; } MSG.last=r.last;
+    for(const it of r.items||[]){ (Call.inbox=Call.inbox||[]).push(it); SJ("lastMsgs",[...J("lastMsgs",[]),it].slice(-15)); } }catch(e){} }
+function msgWatch(on){ clearInterval(MSG.timer); MSG.last=-1; if(on){ msgPoll(); MSG.timer=setInterval(msgPoll,3000); } }
+async function readInbox(){ const q=Call.inbox||[]; if(!q.length) return; Call.inbox=[]; const it=q[q.length-1];
+  const more=q.length>1?` That's ${q.length} new messages — the latest is from ${q[q.length-1].who}.`:"";
+  Call.lastMsg=it; await say(`${more?more+" ":""}Message from ${it.who} on ${it.app}: ${it.text.slice(0,220)}${it.canReply?" — want to reply?":""}`);
+  if(it.canReply) Call.followUntil=Date.now()+9000; }
+
+/* ---------- quiz me on the ride ---------- */
+async function quizCards(){ if(pcOnline){ try{ const r=await api("/api/study/cards"); if(r.cards&&r.cards.length){ SJ("cardsCache",r.cards.slice(0,40)); return r.cards; } }catch(e){} } return J("cardsCache",[]); }
+function fuzzyRight(ans,said){ const w=s=>String(s).toLowerCase().replace(/[^a-z0-9 ]/g," ").split(/\s+/).filter(x=>x.length>2&&!["the","and","for","with","that","this","are","was"].includes(x));
+  const a=w(ans), b=new Set(w(said)); if(!a.length) return false; return a.filter(x=>b.has(x)).length/a.length>=.5; }
+async function quizAsk(){ const Q=Call.quiz; if(Q.i>=Q.cards.length||Q.i>=10){ const msg=`Quiz done, ${title()}. ${Q.right} out of ${Q.i}. ${Q.right>=Q.i*.8?"Superb.":Q.right>=Q.i*.5?"Solid — the wrong ones come back sooner.":"We'll go over those again."}`; Call.quiz=null; return msg; }
+  const c=Q.cards[Q.i]; Call.followUntil=Date.now()+30000; return `Question ${Q.i+1}: ${c.q}`; }
+async function quizAnswer(text){ const Q=Call.quiz, c=Q.cards[Q.i]; let right=fuzzyRight(c.a,text), note="";
+  if(!right&&pcOnline){ try{ const r=await api("/api/call",{text:`[QUIZ MARKING — reply with RIGHT or WRONG first] Question: ${c.q} | Correct answer: ${c.a} | Student said: ${text}. Be fair to spoken answers. Then one short sentence.`,first:false},30000); right=/^\W*right/i.test(r.reply||""); note=(r.reply||"").replace(/^\W*(right|wrong)\W*/i,""); }catch(e){} }
+  Q.i++; if(right) Q.right++; if(pcOnline&&c.deck!=null) api("/api/study/mark",{deck:c.deck,i:c.i,ok:right}).catch(()=>{});
+  const next=await quizAsk(); return `${right?"Correct.":"Not quite — it's "+c.a+"."} ${note&&!right?"":""}${next}`; }
+
+/* hook into the call/ride conversation */
+const _reflex42=phoneReflex; phoneReflex=t=>{ const x=t.toLowerCase().trim().replace(/^(hey |ok |okay |yo )?(orion|jarvis|jervis|javis)[,.! ]*/,"").replace(/[.!?]+$/,"");
+  if(/^(quiz me|test me|revise|flashcards?)( on .*)?$/.test(x)) return {kind:"quiz"};
+  if(/^(stop|end) (the )?quiz$/.test(x)) return {kind:"quizstop"};
+  const raw=t.trim().replace(/^(hey |ok |okay |yo )?(orion|jarvis|jervis|javis)[,.! ]*/i,"").replace(/[.!?]+$/,"");
+  let m=raw.match(/^(reply|tell (him|her|them)|say back|text back)[: ,]+(.+)$/i); if(m) return {kind:"reply",text:m[3]};
+  if(/^(read|check|any) (my )?(new )?messages?$|^what did (he|she|they) say$|^read (it|that) again$/.test(x)) return {kind:"readmsgs"};
+  return _reflex42(t); };
+const _do42=phoneDo; phoneDo=async a=>{
+  if(a.kind==="quiz"){ const cards=await quizCards(); if(!cards.length) return "No flashcards yet, sir — make a deck on the PC or photograph your notes in Study."; Call.quiz={cards:cards.slice().sort(()=>Math.random()-.5),i:0,right:0}; return `Right, ten questions. ${await quizAsk()}`; }
+  if(a.kind==="quizstop"){ const Q=Call.quiz; Call.quiz=null; return Q?`Stopped. You got ${Q.right} of ${Q.i}.`:"No quiz running."; }
+  if(a.kind==="readmsgs"){ const l=Call.lastMsg||J("lastMsgs",[]).slice(-1)[0]; if(!l) return "No new messages, sir."; Call.lastMsg=l; return `${l.who} on ${l.app} said: ${l.text}`; }
+  if(a.kind==="reply"){ const l=Call.lastMsg; if(!l) return "Reply to whom, sir? I haven't read you a message yet."; if(!l.canReply) return `${l.app} doesn't let me reply from the notification, sir.`;
+    Call.pendingReply={id:l.id,text:a.text,who:l.who}; Call.followUntil=Date.now()+10000; return `Send “${a.text}” to ${l.who}?`; }
+  return _do42(a); };
+const _callReply42=callReply; callReply=async(text,first)=>{
+  if(!first&&Call.pendingReply){ const p=Call.pendingReply; Call.pendingReply=null;
+    if(/^(yes|yeah|yep|send|send it|do it|go|ok|okay|sure)\b/i.test(text.trim())){ const r=Native&&Native.notifReply?await Native.notifReply({id:p.id,text:p.text}):{ok:false}; return {reply:r.ok?`Sent to ${p.who}.`:"Couldn't send that one, sir — the notification may have gone."}; }
+    return {reply:"Cancelled. Not sent."}; }
+  if(!first&&Call.quiz) return {reply:await quizAnswer(text)};
+  if(!first&&Call.lastMsg&&Date.now()<(Call.followUntil||0)&&/^(yes|yeah|yep|reply|sure)\b/i.test(text.trim())&&!Call.quiz){ Call.followUntil=Date.now()+12000; return {reply:"Go ahead — what should I say?"}; }
+  return _callReply42(text,first); };
+// let quiz answers / replies through without the name, and read new messages between turns
+const _needName=needName; needName=()=>(Call.quiz||Call.pendingReply)?false:_needName();
+const _say42=say; say=async(t,b)=>{ await _say42(t,b); if(Call.live&&Call.ride&&(Call.inbox||[]).length&&!Call.speaking&&!Call.pendingReply&&!Call.quiz) await readInbox(); };
+const _startRide42=startRide; startRide=async()=>{ msgWatch(true); return _startRide42(); };
+const _endCall42=endCall; endCall=(m)=>{ msgWatch(false); Call.quiz=null; Call.pendingReply=null; return _endCall42(m); };
+
+$("#sMsgs").checked=store.get("msgs","0")==="1";
+$("#sMsgs").onchange=async()=>{ store.set("msgs",$("#sMsgs").checked?"1":"0"); if($("#sMsgs").checked&&Native&&Native.notifStatus){ const s=await Native.notifStatus(); if(!s.enabled){ toast("Turn on ORION in the list, then come back."); Native.notifAccess(); } } };
+$("#sMsgAccess").onclick=()=>{ if(Native&&Native.notifAccess) Native.notifAccess(); else toast("Works in the installed app."); };
+
+/* ---------- Study / Money / Games extras (from the PC) ---------- */
+async function imgB64m(f){ const img=await new Promise(r=>{ const fr=new FileReader(); fr.onload=()=>r(fr.result); fr.readAsDataURL(f); });
+  const c=document.createElement("canvas"), im=new Image(); await new Promise(r=>{ im.onload=r; im.src=img; }); const sc=Math.min(1,1600/Math.max(im.width,im.height));
+  c.width=im.width*sc; c.height=im.height*sc; c.getContext("2d").drawImage(im,0,0,c.width,c.height); return c.toDataURL("image/jpeg",.8); }
+async function loadPlusM(){ if(!pcOnline) return; let P; try{ P=await api("/api/plus"); }catch(e){ return; }
+  if(P.grades&&P.grades.length) $("#mGrades").innerHTML=P.grades.map(g=>`<div class="gr"><span class="g">${esc(g.grade)}</span><div><b>${esc(g.subject)}${g.target?` · target ${esc(g.target)}`:""}</b><small>${esc(g.basis)}${g.gap?` · +${g.gap}% for next grade`:""}${g.focus&&g.focus.length?` · focus: ${esc(g.focus.join(", "))}`:""}</small><div class="pb"><i style="width:${g.pct}%"></i></div></div></div>`).join("");
+  else $("#mGrades").innerHTML='<p class="empty">Add your subjects on the PC, then sit a paper.</p>';
+  const m=P.money; if(m&&!m.error) $("#mMWrap").innerHTML=`<div class="wbig">£${(m.total||0).toFixed(2)}<small class="${m.change>=0?"up":"down"}">${m.change>=0?"▲":"▼"} £${Math.abs(m.change||0).toFixed(2)}</small></div>${m.best?`<p class="empty">Best: £${m.best.amount.toFixed(2)} · ${esc(m.best.venture)}</p>`:""}${(m.per_hour||[]).map(r=>`<p class="empty">${esc(r[0])}: £${r[1]}/hour</p>`).join("")}`;
+  if(m&&m.goals) $("#mGoals").innerHTML=(m.goals.length?m.goals.map(g=>`<div class="gr"><span class="g" style="font-size:18px;width:44px">${g.pct}%</span><div><b>${esc(g.name)}</b><small>£${g.per_week}/week to hit it</small><div class="pb"><i style="width:${g.pct}%"></i></div></div></div>`).join(""):'<p class="empty">Say “set a money goal of £500 by July”.</p>');
+  const g=P.gaming; if(g&&!g.error) $("#mGWrap").innerHTML=`<div class="wbig">${g.hours}h<small class="${g.hours<=g.prev_hours?"up":"down"}">${g.hours<=g.prev_hours?"▼":"▲"} vs ${g.prev_hours}h</small></div>${g.top?`<p class="empty">Most played: ${esc(g.top[0])} · ${(g.top[1]/60).toFixed(1)}h · longest ${g.longest} min</p>`:""}`; }
+let MMW="essay", MMWPH=[];
+$$("#mMwMode button").forEach(b=>b.onclick=()=>{ MMW=b.dataset.m; $$("#mMwMode button").forEach(x=>x.classList.toggle("on",x===b)); $("#mMwSubj").placeholder=MMW==="essay"?"Subject — e.g. English Literature":"Subject — e.g. Maths"; });
+$("#mMwPh").onchange=async e=>{ MMWPH=[]; for(const f of e.target.files) MMWPH.push(await imgB64m(f)); toast(MMWPH.length?"📷 Photo added":""); };
+$("#mMwGo").onclick=async()=>{ if(!pcOnline) return toast("Marking runs on your PC — it's offline."); const t=$("#mMwText").value.trim(); if(!t&&!MMWPH.length) return toast("Type your answer or add a photo.");
+  $("#mMwGo").textContent="MARKING…"; let r; try{ r=await api("/api/plus",MMW==="essay"?{action:"essay",text:t,question:$("#mMwQ").value,subject:$("#mMwSubj").value}:{action:"working",working:t,question:$("#mMwQ").value,photos:MMWPH},180000); }catch(e){ r={ok:false,error:e.message}; }
+  $("#mMwGo").textContent="✦ MARK IT"; if(!r.ok) return toast(r.error||"Couldn't mark that."); const x=r.result; buzz(20);
+  $("#mMwOut").innerHTML=MMW==="essay"?`<div class="mres"><span class="big">${esc(String(x.grade||"?"))}</span><b>${x.mark??"?"}/${x.out_of??"?"}</b><p>${esc(x.summary||"")}</p><h6>GOOD</h6><ul>${(x.strengths||[]).map(i=>`<li>${esc(i)}</li>`).join("")}</ul><h6>MORE MARKS</h6><ul>${(x.fixes||[]).map(i=>`<li>${esc(i)}</li>`).join("")}</ul>${x.model_paragraph?`<h6>MODEL PARAGRAPH</h6><p><i>${esc(x.model_paragraph)}</i></p>`:""}</div>`
+    :`<div class="mres"><span class="big">${x.correct?"✓":"✗"}</span><b>${x.correct?"All correct":"Went wrong here:"}</b>${x.wrong_line?`<p class="bad">${esc(x.wrong_line)}</p>`:""}${x.why?`<h6>WHY</h6><p>${esc(x.why)}</p>`:""}${x.fix?`<h6>FIX</h6><p>${esc(x.fix)}</p>`:""}<h6>ANSWER</h6><p>${esc(x.answer||"")}</p></div>`; };
+$("#mDeckPh").onchange=async e=>{ if(!pcOnline) return toast("Card-making runs on your PC — it's offline."); const ph=[]; for(const f of e.target.files) ph.push(await imgB64m(f)); if(!ph.length) return;
+  toast(`Reading ${ph.length} page(s)… about a minute`); try{ const r=await api("/api/plus",{action:"photo_cards",photos:ph,deck:$("#mTopic").value.trim()},240000); if(!r.ok) throw new Error(r.error);
+    toast(`✦ ${r.result.added} cards in “${r.result.deck}” — say “ORION, quiz me” on the ride.`); buzz(25); quizCards(); loadStudyM(); }catch(err){ toast(err.message); } };
+$("#mQGo").onclick=async()=>{ if(!pcOnline) return toast("PC offline."); const r=await api("/api/plus",{action:"price",kind:$("#mQK").value,client:$("#mQC").value,hours:$("#mQH").value||null}); if(!r.ok) return; const p=r.result;
+  $("#mQOut").innerHTML=`<div class="mres"><span class="big">£${p.price}</span><b>Charge £${p.price}</b><p>Range £${p.low}–£${p.high} · ≈${p.hours}h · deposit £${p.deposit}</p><p class="empty">${esc(p.note)}</p></div>`; };
+const _lsm42=loadStudyM; loadStudyM=async()=>{ await _lsm42(); loadPlusM(); quizCards(); };
+const _lmm42=loadMoneyM; loadMoneyM=async()=>{ await _lmm42(); loadPlusM(); };
+const _lgm42=loadGamesM; loadGamesM=async()=>{ await _lgm42(); loadPlusM(); };
+
+/* rain warning before home time, launched from the quick-settings Ride tile */
+const _sm42=scheduleMorning; scheduleMorning=async()=>{ await _sm42(); try{ if(!LN||!atSchoolDay()) return; const w=await homeWeather(); if(!w) return;
+  const d=new Date().toISOString().slice(0,10); const hh=+DAY.school_end.slice(0,2); const r=rainAt(w,d,hh); if(!r||r.p<50) return;
+  const at=new Date(d+"T"+DAY.school_end); at.setMinutes(at.getMinutes()-20); if(at<new Date()) return;
+  await LN.schedule({notifications:[{id:7104,title:`🌧️ ${r.p}% chance of rain at home time`,body:"Jacket on for the ride, sir.",schedule:{at,allowWhileIdle:true}}]}); }catch(e){} };
+checkLaunch=async()=>{ try{ if(Native){ const r=await Native.consumeLaunchAction();
+  if(r.action==="ride"){ go("home"); startRide(); return; }
+  if(r.action==="listen"){ go("chat"); setTimeout(()=>$("#mic").click(),250); return; }
+  if(r.action==="call"){ incoming(r.reason||""); setTimeout(acceptCall,350); return; }
+  if(r.action==="ring"){ Native.stopRing&&Native.stopRing(); toast("📢 Found it!"); return; } } }catch(e){} };
+const _paintHome42=paintHome; paintHome=()=>{ _paintHome42(); paintToday(); try{ paintRide(); }catch(e){} };
 
 /* ---------- tabs ---------- */
 function go(t){ $$("nav.tabs button").forEach(b=>b.classList.toggle("on",b.dataset.tab===t)); $$(".view").forEach(v=>v.classList.toggle("on",v.id==="v-"+t));

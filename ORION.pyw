@@ -32,6 +32,7 @@ from core import daily                                      # noqa: E402,F401
 from core import scholar                                    # noqa: E402
 from core import money                                      # noqa: E402
 from core import holo                                       # noqa: E402,F401
+from core import plus                                       # noqa: E402
 from core.autonomy import Autonomy                          # noqa: E402
 from core import gaming as gaming_mod                        # noqa: E402
 from core.routines import NightShift                        # noqa: E402
@@ -102,6 +103,9 @@ class Api:
         self._jobs = Jobs(self._cfg, self._run_job, lambda t, title=None: self._push.send(t, title), self._emit)
         self._jobs.on_finish = self._job_finished
         self._autonomy = Autonomy(self._cfg, self._jobs, self._emit)
+        self._bedtime = plus.Bedtime(self._cfg, lambda t: self._speaker.say(t),
+                                     lambda t: self._emit("toast", text="🌙 " + t),
+                                     lambda: self._sync.enabled and threading.Thread(target=self._sync.sync_now, daemon=True).start())
         tools.CTX["sync"] = self._sync
         self._shift = NightShift(self._cfg, self._jobs, self._shift_notify, self._emit, self._updater)
         tools.CTX["push_phone"] = lambda t: self._push.send(t, "ORION", 5, "iphone")
@@ -1175,7 +1179,7 @@ class Api:
             return pk
         if path == "/api/autonomy":
             return self.autonomy_get()
-        simple = {"/api/life": self.life_get, "/api/health": self.health_get, "/api/study": self.study_get, "/api/ventures": self.ventures_get,
+        simple = {"/api/plus": self.plus_get, "/api/life": self.life_get, "/api/health": self.health_get, "/api/study": self.study_get, "/api/ventures": self.ventures_get,
                   "/api/gaming": self.gaming_get, "/api/brain": self.brain_get}
         if path.split("?")[0] in simple:
             return simple[path.split("?")[0]]()
@@ -1241,6 +1245,8 @@ class Api:
                       "topics": lambda: scholar.gen_topics(body.get("name", ""))}[body["action"]]
                 return {"result": fn()}
             return self.scholar_action(body)
+        if path == "/api/plus":
+            return self.plus_action(body)
         if path == "/api/history":
             n = self._memory.merge_turns(body.get("turns", []))
             if n:
@@ -1673,6 +1679,35 @@ class Api:
         if self._window:
             self._window.minimize()
         return True
+
+    # ---------------------------------------------------------------- 4.2 extras (grades, marking, wrapped, quotes)
+    def plus_get(self):
+        out = {}
+        for k, fn in (("grades", plus.predict_grades), ("money", plus.money_wrapped), ("gaming", plus.gaming_wrapped)):
+            try:
+                out[k] = fn()
+            except Exception as e:
+                out[k] = {"error": str(e)} if k != "grades" else []
+        return out
+
+    def plus_action(self, body):
+        a = (body or {}).get("action", "")
+        try:
+            if a == "essay":
+                r = plus.mark_writing(body.get("text", ""), body.get("question", ""), body.get("subject") or "English Literature",
+                                      body.get("board", ""))
+            elif a == "working":
+                r = plus.check_working(body.get("question", ""), body.get("working", ""), (body.get("photos") or [None])[0])
+            elif a == "photo_cards":
+                r = plus.cards_from_photo(body.get("photos") or [], body.get("deck", ""), int(body.get("count") or 12))
+            elif a == "price":
+                r = plus.price_job(body.get("kind", "other"), body.get("hours") or None, body.get("client") or "small business",
+                                   bool(body.get("rush")))
+            else:
+                return {"ok": False, "error": "unknown action"}
+            return {"ok": True, "result": r}
+        except Exception as e:
+            return {"ok": False, "error": f"{type(e).__name__}: {e}"}
 
     def power_down(self):
         """Plays the power-down sequence (UI animation + voice), then quits."""

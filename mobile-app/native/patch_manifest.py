@@ -36,6 +36,16 @@ service = ('        <service android:name=".BubbleService" android:exported="fal
            '            <intent-filter><action android:name="android.speech.RecognitionService" /><category android:name="android.intent.category.DEFAULT" /></intent-filter>\n'
            '            <meta-data android:name="android.speech" android:resource="@xml/orion_recognizer" />\n'
            '        </service>\n'
+           '        <service android:name=".OrionNotifyService" android:exported="true" android:label="ORION ride messages" '
+           'android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">\n'
+           '            <intent-filter><action android:name="android.service.notification.NotificationListenerService" /></intent-filter>\n'
+           '        </service>\n'
+           + "".join(f'        <service android:name=".OrionTiles${n}" android:exported="true" android:label="{lbl}" '
+                     f'android:icon="@android:drawable/{ic}" android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">\n'
+                     '            <intent-filter><action android:name="android.service.quicksettings.action.QS_TILE" /></intent-filter>\n'
+                     '        </service>\n'
+                     for n, lbl, ic in (("Ask", "Ask ORION", "ic_btn_speak_now"), ("Ride", "Ride mode", "ic_menu_directions"),
+                                        ("Skip", "Skip song", "ic_media_next"))) +
            '        <receiver android:name=".BootReceiver" android:exported="true">\n'
            '            <intent-filter><action android:name="android.intent.action.BOOT_COMPLETED" /></intent-filter>\n'
            '        </receiver>\n')

@@ -1,4 +1,21 @@
-# ORION 4.1 — Personal Intelligence System
+# ORION 4.2 — Personal Intelligence System
+
+## New in 4.2
+**Phone**
+- **Messages read out on rides:** Snapchat, WhatsApp, Instagram, Discord and texts are read out in Ride mode. Say "ORION, reply …", and ORION reads it back and only sends when you say yes. Turn it on in ⚙ › Hands-free and allow message access. It never reads messages at school, and @everyone/@here pings are ignored.
+- **Quiz me on the ride:** "ORION, quiz me" asks 10 flashcards through your earbuds. Answer out loud with no need to say the name, and the results go back to your PC.
+- **Quick Settings tiles:** pull down from the top of the screen, tap ✏️ and add *Ask ORION*, *Ride mode* and *Skip song*.
+- **Today strip** on Home: next event, homework, rain at home time, your usual ride. Plus a rain warning 20 minutes before school ends.
+- Pull down to refresh, swipe left/right to change tabs, search your chat, and vibration on taps.
+- Study on the phone: predicted grades, **mark my essay / maths working** (or a photo of it), and **flashcards from photos of your notes**.
+- Money on the phone: Money Wrapped, goals and a quote calculator. Gaming Wrapped is on the Games page.
+
+**PC**
+- **Predicted grades** per subject, plus exactly how far off the next grade you are and what to focus on.
+- **Mark my work:** an essay marked like a GCSE examiner (grade, fixes, model paragraph), or maths working checked line by line.
+- **Photo → flashcards** in Study › New deck.
+- **Quote calculator** (never undercharge), **Money Wrapped** and **Gaming Wrapped**.
+- **Bedtime nudge:** 10 minutes before the PC usually goes off, ORION reminds you, saves and syncs your phone.
 
 ## New in 4.1: the Jarvis interface
 - **Boot-up sequence:** the arc reactor assembles, real system checks run (brains, memory, voice, mic, phone link, sync, homework, jobs) and ORION comes online. Click or press Esc to skip (Settings › skip boot gives a quick version).

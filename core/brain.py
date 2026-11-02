@@ -63,7 +63,8 @@ GROUPS = {
                  r"click|type|press|screen|scroll|window|button|close|tab|key|mouse|select|menu|notepad|"
                  r"into|then|and (then )?(type|click|search)"),
     "system": ({"system_status", "media", "set_timer", "lock_pc", "power", "save_screenshot", "run_command",
-                "list_running_apps", "close_app", "gaming_mode", "clip_that", "gaming_stats", "party_plan", "game_profile"},
+                "list_running_apps", "close_app", "gaming_mode", "clip_that", "gaming_stats", "party_plan", "game_profile",
+                "gaming_wrap"},
                r"volume|music|song|play|pause|skip|timer|cpu|ram|memory usage|battery|shut ?down|"
                r"restart|sleep|lock|screenshot|command|powershell|install|process|running|slow|wifi|ip|gam|clip|party|"
                r"hours played|play with|invite"),
@@ -98,11 +99,12 @@ GROUPS = {
              r"clipboard|copied|screen ?time|how long (was|have) i|find (my |a |the )?file|where'?s (my|the) file|"
              r"dictat|type what i say|memo|voice note|brain ?dump"),
     "money": ({"idea_score", "money_goal", "crm_update", "crm_list", "invoice_make", "time_log", "money_meeting",
-               "earning_add", "earnings_summary", "leads_find"},
-              r"idea|money|earn|£|goal|lead|client|customer|crm|invoice|bill |per hour|price|charge|business|sale|profit"),
+               "earning_add", "earnings_summary", "leads_find", "money_wrap", "price_calc"},
+              r"wrapped|quote|how much (should|to) (i )?charge|idea|money|earn|£|goal|lead|client|customer|crm|invoice|bill |per hour|price|charge|business|sale|profit"),
     "scholar": ({"subject_add", "tutor_start", "tutor_progress", "exam_paper", "topic_rate", "revision_plan_tool",
-                 "timetable_set", "scholar_status", "homework_add", "homework_list"},
-                r"teach me|tutor|explain|exam paper|past paper|mock|mark (my|this)|grade|topic|revision (plan|timetable)|"
+                 "timetable_set", "scholar_status", "homework_add", "homework_list", "grade_predict", "essay_mark",
+                 "working_check"},
+                r"predict|essay|my working|where did i go wrong|check (my|this)|teach me|tutor|explain|exam paper|past paper|mock|mark (my|this)|grade|topic|revision (plan|timetable)|"
                 r"timetable|lesson|gcse|subject|exam board|aqa|edexcel|ocr"),
     "study": ({"study_make_flashcards", "study_quiz", "study_mark", "focus_start", "focus_stop", "exam_add",
                "study_stats"},

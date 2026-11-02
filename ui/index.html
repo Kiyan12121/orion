@@ -698,6 +698,20 @@ body.lite #hud .scanl{display:none}
 .toast{border-radius:6px;box-shadow:0 10px 30px rgba(0,0,0,.5),0 0 20px rgba(var(--ar),.15)}
 @keyframes hspin{to{transform:rotate(360deg)}}
 
+/* 4.2 tiles */
+.segs{display:inline-flex;gap:0;margin-left:10px;vertical-align:middle}.segs button{background:none;border:1px solid var(--line2);color:var(--dim);font:700 9.5px var(--ui);letter-spacing:.14em;padding:3px 9px;cursor:pointer}
+.segs button.on{color:#fff;background:rgba(var(--ar),.2);border-color:var(--a)}.segs button+button{border-left:0}
+.pg{display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--line)}.pg:last-child{border:0}
+.pg .g{font:800 30px var(--ui);color:var(--a2);width:40px;text-align:center;text-shadow:0 0 14px rgba(var(--ar),.5)}
+.pg div{flex:1;min-width:0}.pg b{display:block;font-size:14px}.pg small{display:block;color:var(--dim);font-size:12px;line-height:1.35}
+.pg .bar2{height:5px;background:rgba(var(--ar),.12);border-radius:3px;margin-top:5px;overflow:hidden}.pg .bar2 i{display:block;height:100%;background:var(--a);box-shadow:0 0 8px var(--a)}
+.res{margin-top:10px;border:1px solid rgba(var(--ar),.35);border-radius:8px;padding:12px 14px;background:rgba(var(--ar),.06);animation:revU .4s}
+.res .big{font:800 34px var(--ui);color:var(--a2);float:right;margin-left:10px;line-height:1}
+.res h6{font:700 10px var(--ui);letter-spacing:.22em;color:var(--a2);margin:10px 0 4px}.res li{margin-left:18px;font-size:13.5px;line-height:1.45}
+.res p{font-size:13.5px;line-height:1.5}.res .bad{color:var(--red);font-family:var(--mono)}
+.wrapbig{font:800 38px var(--ui);color:var(--a2);text-shadow:0 0 18px rgba(var(--ar),.45)}.wrapbig small{font:600 13px var(--ui);color:var(--dim);margin-left:8px}
+.up{color:var(--green)}.down{color:var(--red)}
+
 </style>
 </head>
 <body class="state-idle" data-theme="standby">
@@ -1031,6 +1045,12 @@ body.lite #hud .scanl{display:none}
                 <button class="btn wide" id="tuGo">🎓 START LESSON</button>
                 <div class="sub2" style="margin-top:8px">Explains step by step, checks you've got it, and remembers what you struggled with. Works by voice too: “teach me photosynthesis”.</div>
                 <h5 style="margin-top:14px">RETRY THESE <i id="msN"></i></h5><div id="msList"><div class="empty">Questions you drop marks on come back here a week later.</div></div></div>
+              <div class="tile s4"><h5>PREDICTED GRADES <i>FROM YOUR PAPERS + TOPICS</i></h5><div id="pgList"><div class="empty">Add subjects and sit a paper to get predictions.</div></div></div>
+              <div class="tile s8"><h5>MARK MY WORK <span class="segs" id="mwMode"><button class="on" data-m="essay">ESSAY</button><button data-m="working">MATHS / SCIENCE WORKING</button></span></h5>
+                <div class="voicerow" style="margin-bottom:6px"><input class="inp" id="mwSubj" placeholder="Subject — e.g. English Literature" style="width:220px;flex:none"><input class="inp" id="mwQ" placeholder="The question (paste it in)"></div>
+                <textarea class="goal" id="mwText" style="min-height:110px;font-size:13.5px" placeholder="Paste your answer here…"></textarea>
+                <div class="voicerow" style="margin-top:8px"><label class="btn small" style="cursor:pointer">📷 PHOTO OF MY WORK<input type="file" id="mwPhoto" accept="image/*" style="display:none"></label><span class="sub2" id="mwPh" style="flex:1"></span><button class="btn" id="mwGo">✦ MARK IT</button></div>
+                <div id="mwOut"></div></div>
               <div class="tile s12"><h5>SUBJECTS &amp; TOPICS <i>CLICK A TOPIC TO CHANGE RED → AMBER → GREEN</i></h5>
                 <div class="voicerow" style="margin-bottom:10px"><input class="inp" id="sbName" placeholder="Subject — e.g. Biology"><input class="inp" id="sbBoard" placeholder="Exam board (if you know)" style="flex:none;width:200px"><input class="inp" id="sbTarget" placeholder="Target" style="flex:none;width:90px"><button class="btn small" id="sbAdd" style="height:36px">+ ADD</button><button class="btn small" id="rpGo" style="height:36px">📅 BUILD REVISION TIMETABLE</button></div>
                 <div id="sbList" class="subjects"><div class="empty">No subjects yet.</div></div></div>
@@ -1055,7 +1075,8 @@ body.lite #hud .scanl{display:none}
               <div class="tile s4"><h5>NEW DECK</h5>
                 <input class="inp" id="mkTopic" placeholder="Topic — e.g. GCSE Chemistry bonding" style="margin-bottom:6px">
                 <textarea class="goal" id="mkNotes" style="min-height:70px;font-size:13px" placeholder="Paste your notes (optional) — cards are made from them"></textarea>
-                <button class="btn wide" id="mkGo" style="margin-top:8px">✦ MAKE FLASHCARDS</button></div>
+                <button class="btn wide" id="mkGo" style="margin-top:8px">✦ MAKE FLASHCARDS</button>
+                <label class="btn wide ghost" style="margin-top:6px;cursor:pointer;display:block;text-align:center">📷 MAKE CARDS FROM PHOTOS OF MY NOTES<input type="file" id="mkPhotos" accept="image/*" multiple style="display:none"></label></div>
               <div class="tile s12"><h5>THIS WEEK <i id="stWeek">—</i></h5><div class="bars withlbl" id="stBars"></div></div>
             </div>
           </div>
@@ -1065,6 +1086,8 @@ body.lite #hud .scanl{display:none}
           <div class="scroll">
             <div class="wtitle"><h2>GAMING</h2><span id="gmSub">—</span></div>
             <div class="dgrid">
+              <div class="tile s4"><h5>GAMING WRAPPED <i>LAST 7 DAYS</i></h5><div id="gwrap"><div class="empty">—</div></div></div>
+              
               <div class="tile s4"><h5>THIS WEEK</h5><div class="big" id="gmTot">0h</div><div class="sub2" id="gmTotSub">—</div>
                 <div class="rowbtns"><button class="btn" id="gmToggle" style="flex:1">🎮 GAMING MODE</button><button class="btn" id="gmClip" style="flex:1">🎬 CLIP THAT</button></div>
                 <div class="sub2"><kbd style="font:10px var(--mono);border:1px solid var(--line2);padding:1px 5px">Ctrl+Alt+C</kbd> or say "clip that" mid-game.</div></div>
@@ -1091,6 +1114,14 @@ body.lite #hud .scanl{display:none}
           <div class="scroll">
             <div class="wtitle"><h2>CEO · VENTURES</h2><span>everything here is about one thing: making you money</span></div>
             <div class="dgrid">
+              <div class="tile s4"><h5>QUOTE CALCULATOR <i>NEVER UNDERCHARGE</i></h5>
+                <div class="voicerow" style="margin-bottom:6px"><select class="inp" id="qcKind"><option>discord bot</option><option>automation</option><option>website</option><option>roblox script</option><option>minecraft plugin</option><option>video edit</option><option>logo</option><option>app</option><option>other</option></select>
+                <input class="inp" id="qcHours" type="number" min="0.5" step="0.5" placeholder="Hours (optional)" style="width:130px;flex:none"></div>
+                <div class="voicerow"><select class="inp" id="qcClient"><option>small business</option><option>individual</option><option>friend</option><option>company</option></select>
+                <label class="sub2" style="display:flex;gap:6px;align-items:center;flex:none"><input type="checkbox" id="qcRush"> rush job</label><button class="btn small" id="qcGo">£ QUOTE</button></div>
+                <div id="qcOut"></div></div>
+              <div class="tile s4"><h5>MONEY WRAPPED <i>LAST 7 DAYS</i></h5><div id="mwrap"><div class="empty">—</div></div></div>
+              
               <div class="tile s4"><h5>THIS MONTH</h5><div class="big" id="vMonth">£0</div><div class="sub2" id="vTotal">All time £0</div>
                 <div class="voicerow" style="margin-top:10px"><select class="inp" id="vVen"></select><input class="inp" id="vAmt" type="number" step="0.01" placeholder="£" style="width:90px"></div>
                 <div class="voicerow" style="margin-top:6px"><input class="inp" id="vNote" placeholder="What for?"><button class="btn small" id="vAdd" style="height:36px">LOG</button></div></div>
@@ -1625,7 +1656,7 @@ function confirmBox(t){ return window.confirm(t); }
 
 /* ---- study ---- */
 let ST=null, CARDS=[], CARD=null;
-async function loadStudy(){ ST=await api.study_get();
+async function loadStudy(){ loadPlus(); ST=await api.study_get();
   $("#stSub").textContent=`${ST.today} min today · ${ST.streak}-day streak · ${ST.decks.reduce((a,d)=>a+d.due,0)} cards due`;
   $("#exList").innerHTML=ST.exams.length?ST.exams.map(e=>`<div class="exam"><div class="d">${e.days}<small>DAYS</small></div><b>${esc(e.subject)}</b><small style="color:var(--dim);font:11px var(--mono)">${esc(e.date)}</small><button class="x" data-exdel="${esc(e.subject)}">×</button></div>`).join(""):'<div class="empty">No exams yet — add your GCSE dates.</div>';
   $("#dkList").innerHTML=ST.decks.length?ST.decks.map(d=>`<div class="deck"><b>${esc(d.name)}</b><small>${d.due} due · ${d.mastered}/${d.cards} mastered</small><button class="btn small" data-rev="${esc(d.name)}">REVISE</button><button class="x" data-dkdel="${esc(d.name)}">×</button></div>`).join(""):'<div class="empty">Make your first deck →</div>';
@@ -1654,7 +1685,7 @@ $("#fGo").onclick=async()=>{ const o=FOC&&FOC.phase!=="off"; const m=+$("#fMin")
 
 /* ---- gaming ---- */
 let GM=null;
-async function loadGaming(){ GM=await api.gaming_get(); $("#gmTot").textContent=hm(GM.total_mins);
+async function loadGaming(){ loadPlus(); GM=await api.gaming_get(); $("#gmTot").textContent=hm(GM.total_mins);
   $("#gmTotSub").textContent=`${GM.sessions} session${GM.sessions===1?"":"s"} · longest ${hm(GM.longest)} · ${GM.all_time_hours}h all time`;
   $("#gmSub").textContent=GM.active?`playing ${GM.game} right now`:"not playing";
   bars($("#gmDaily"),GM.daily.map(d=>({v:d.mins,l:d.day})),{fmt:hm}); hbars($("#gmBy"),GM.by_game,hm);
@@ -1668,7 +1699,7 @@ $("#ptGo").onclick=()=>{ const g=$("#ptGame").value.trim(), w=$("#ptWho").value.
   send(`Party planner: book ${g} on ${$("#ptDate").value} at ${$("#ptTime").value} with ${w} and invite them on Root.`); };
 
 /* ---- ventures ---- */
-async function loadVentures(){ const v=await api.ventures_get(), E=v.earn; paintCEO(v);
+async function loadVentures(){ loadPlus(); const v=await api.ventures_get(), E=v.earn; paintCEO(v);
   $("#vMonth").textContent=money(E.this_month); $("#vTotal").textContent=`All time ${money(E.total)}`;
   if(!$("#vVen").options.length) $("#vVen").innerHTML=E.ventures.map(x=>`<option>${esc(x)}</option>`).join("");
   bars($("#vMonths"),E.months.map(m=>({v:m.total,l:new Date(m.month+"-01").toLocaleDateString("en-GB",{month:"short"})})),{fmt:money});
@@ -1973,6 +2004,38 @@ async function boot(){ const c=await api.init(); applyCfg(c); const st=api.statu
   $("#input").focus(); requestAnimationFrame(frame); setInterval(pollStats,2000); pollStats(); setInterval(pollMeters,6000); pollMeters(); setInterval(async()=>paintLinks(await api.status()),20000); }
 
 
+
+/* ================= 4.2: grades, marking, quotes, wrapped ================= */
+let MWM="essay", MWPH=[];
+async function imgB64(f){ const img=await new Promise(r=>{ const fr=new FileReader(); fr.onload=()=>r(fr.result); fr.readAsDataURL(f); });
+  const c=document.createElement("canvas"), im=new Image(); await new Promise(r=>{ im.onload=r; im.src=img; }); const sc=Math.min(1,1700/Math.max(im.width,im.height));
+  c.width=im.width*sc; c.height=im.height*sc; c.getContext("2d").drawImage(im,0,0,c.width,c.height); return c.toDataURL("image/jpeg",.82); }
+async function loadPlus(){ let P; try{ P=await api.plus_get(); }catch(e){ return; }
+  if($("#pgList")&&P.grades&&P.grades.length) $("#pgList").innerHTML=P.grades.map(g=>`<div class="pg"><span class="g">${esc(g.grade)}</span><div><b>${esc(g.subject)}${g.target?` <small style="display:inline">· target ${esc(g.target)}</small>`:""}</b>
+    <small>${esc(g.basis)}${g.gap?` · ${g.gap}% more for the next grade`:""}${g.focus&&g.focus.length?` · focus: ${esc(g.focus.join(", "))}`:""}</small><div class="bar2"><i style="width:${g.pct}%"></i></div></div></div>`).join("");
+  const m=P.money; if($("#mwrap")&&m&&!m.error) $("#mwrap").innerHTML=`<div class="wrapbig">£${(m.total||0).toFixed(2)}<small class="${m.change>=0?"up":"down"}">${m.change>=0?"▲":"▼"} £${Math.abs(m.change||0).toFixed(2)}</small></div>
+    ${m.best?`<div class="sub2">Best: £${m.best.amount.toFixed(2)} · ${esc(m.best.venture)}</div>`:""}${(m.per_hour||[]).map(r=>`<div class="sub2">${esc(r[0])}: £${r[1]}/hour</div>`).join("")}
+    ${(m.goals||[]).map(g=>`<div class="sub2">🎯 ${esc(g.name)} — ${g.pct}% · £${g.per_week}/week needed</div>`).join("")}`;
+  const g=P.gaming; if($("#gwrap")&&g&&!g.error) $("#gwrap").innerHTML=`<div class="wrapbig">${g.hours}h<small class="${g.hours<=g.prev_hours?"up":"down"}">${g.hours<=g.prev_hours?"▼":"▲"} vs ${g.prev_hours}h</small></div>
+    ${g.top?`<div class="sub2">Most played: ${esc(g.top[0])} (${(g.top[1]/60).toFixed(1)}h)</div>`:""}<div class="sub2">${g.sessions} sessions · longest ${g.longest} min</div>`; }
+$$("#mwMode button").forEach(b=>b.onclick=()=>{ MWM=b.dataset.m; $$("#mwMode button").forEach(x=>x.classList.toggle("on",x===b));
+  $("#mwText").placeholder=MWM==="essay"?"Paste your answer here…":"Type your working line by line (or add a photo)…"; $("#mwSubj").placeholder=MWM==="essay"?"Subject — e.g. English Literature":"Subject — e.g. Maths"; });
+$("#mwPhoto").onchange=async e=>{ MWPH=[]; for(const f of e.target.files) MWPH.push(await imgB64(f)); $("#mwPh").textContent=MWPH.length?"📷 photo added":""; };
+$("#mwGo").onclick=async()=>{ const t=$("#mwText").value.trim(); if(!t&&!MWPH.length) return toast("Paste your answer or add a photo first.","warn");
+  $("#mwGo").textContent="MARKING…"; $("#mwOut").innerHTML=""; let r;
+  try{ r=await api.plus_action(MWM==="essay"?{action:"essay",text:t,question:$("#mwQ").value,subject:$("#mwSubj").value}:{action:"working",working:t,question:$("#mwQ").value,photos:MWPH}); }catch(e){ r={ok:false,error:String(e)}; }
+  $("#mwGo").textContent="✦ MARK IT"; if(!r.ok) return toast(r.error||"Couldn't mark that.","warn"); const x=r.result; sfx("done");
+  if(MWM==="essay") $("#mwOut").innerHTML=`<div class="res"><span class="big">${esc(String(x.grade||"?"))}</span><b>${x.mark??"?"}/${x.out_of??"?"}</b><p>${esc(x.summary||"")}</p>
+    <h6>WHAT'S GOOD</h6><ul>${(x.strengths||[]).map(i=>`<li>${esc(i)}</li>`).join("")}</ul><h6>TO GET MORE MARKS</h6><ul>${(x.fixes||[]).map(i=>`<li>${esc(i)}</li>`).join("")}</ul>
+    ${x.model_paragraph?`<h6>MODEL PARAGRAPH</h6><p><i>${esc(x.model_paragraph)}</i></p>`:""}</div>`;
+  else $("#mwOut").innerHTML=`<div class="res"><span class="big">${x.correct?"✓":"✗"}</span><b>${x.correct?"All correct":"Went wrong here:"}</b>${x.wrong_line?`<p class="bad">${esc(x.wrong_line)}</p>`:""}
+    ${x.why?`<h6>WHY</h6><p>${esc(x.why)}</p>`:""}${x.fix?`<h6>HOW TO FIX IT</h6><p>${esc(x.fix)}</p>`:""}<h6>ANSWER</h6><p>${esc(x.answer||"")} <span class="sub2">${esc(x.marks_estimate||"")}</span></p></div>`; };
+$("#mkPhotos").onchange=async e=>{ const ph=[]; for(const f of e.target.files) ph.push(await imgB64(f)); if(!ph.length) return; toast(`Reading ${ph.length} page(s) and making cards…`);
+  const r=await api.plus_action({action:"photo_cards",photos:ph,deck:$("#mkTopic").value.trim()}); if(!r.ok) return toast(r.error,"warn");
+  toast(`✦ ${r.result.added} cards added to “${r.result.deck}”`); sfx("done"); try{ loadStudy(); }catch(e){} };
+$("#qcGo").onclick=async()=>{ const r=await api.plus_action({action:"price",kind:$("#qcKind").value,hours:$("#qcHours").value||null,client:$("#qcClient").value,rush:$("#qcRush").checked}); if(!r.ok) return;
+  const p=r.result; $("#qcOut").innerHTML=`<div class="res"><span class="big">£${p.price}</span><b>Charge £${p.price}</b><p>Range £${p.low}–£${p.high} · ≈${p.hours}h at £${p.rate}/h for a ${esc(p.client)}<br>Deposit up front: <b>£${p.deposit}</b></p><p class="sub2">${esc(p.note)}</p></div>`; sfx("ok"); };
+
 /* ================= v4.1 · boot-up sequence ================= */
 function tone(f0,f1,dur,vol,type){ try{ if(localStorage.getItem("orion_sfx")==="0") return; SFX=SFX||new (window.AudioContext||window.webkitAudioContext)(); const c=SFX,t=c.currentTime;
   const o=c.createOscillator(),g=c.createGain(); o.type=type||"sine"; o.connect(g); g.connect(c.destination);
@@ -2092,6 +2155,11 @@ setTimeout(()=>{ if(api) return; const wait=ms=>new Promise(r=>setTimeout(r,ms))
       for(const w of "You have 2 messages waiting, sir. **Adrian** asked for help and **Responeded** said “Now?”.".split(" ")){ ui.event({kind:"delta",id:"p",text:w+" "}); await wait(50); }
       ui.event({kind:"stream_end",id:"p",text:"You have 2 messages waiting, sir. **Adrian** asked for help and **Responeded** said “Now?”.",tier:"cloud",model:"Groq gpt-oss-20b"}); ui.event({kind:"state",state:"idle"}); },
     stop:()=>A(true),set_brain:m=>A({brain:m,cloud:{ok:true,count:2,labels:[]},local:{ok:false}}),set_theme:()=>A(),mic_start:()=>A(true),mic_stop:()=>A(""),mic_level:()=>A(Math.random()),ask_claude:()=>A(true),confirm_reply:()=>A(true),
+    plus_get:()=>A({grades:[{subject:"Maths",target:"7",grade:"6",pct:63,basis:"3 papers + topics",gap:4,focus:["Circle theorems","Vectors"]},{subject:"English Literature",target:"7",grade:"7",pct:71,basis:"2 papers + topics",gap:9,focus:[]},{subject:"Physics",target:"6",grade:"5",pct:52,basis:"1 paper + topics",gap:3,focus:["Electricity"]}],
+      money:{total:84,change:36,best:{amount:30,venture:"Automation services"},per_hour:[["Automation services",18.5,4.2]],goals:[{name:"£500 by summer",pct:31,per_week:22.5}]},gaming:{hours:14.5,prev_hours:18,sessions:4,top:["Roblox",275],longest:180}}),
+    plus_action:async b=>{ await wait(700); if(b.action==="price") return {ok:true,result:{kind:b.kind,hours:4.2,rate:15,client:b.client,low:55,price:65,high:80,deposit:20,note:"Quote the middle price, take the deposit up front, and set a clear number of revisions (2)."}};
+      if(b.action==="essay") return {ok:true,result:{mark:14,out_of:20,grade:"6",summary:"A clear argument about ambition with good quotes; analysis of language needs to go deeper.",strengths:["Clear thesis in the first line","Well-chosen quotations"],fixes:["Zoom in on single words (e.g. 'vaulting')","Link to Jacobean context (Divine Right of Kings)","End each paragraph by answering the question"],model_paragraph:"Shakespeare presents ambition as..."}};
+      return {ok:true,result:{correct:false,wrong_line:"2x = 10 so x = 20",why:"You multiplied by 2 instead of dividing.",fix:"Divide both sides by 2: x = 10 ÷ 2",answer:"x = 5",marks_estimate:"1/2"}}; },
     toggle_fullscreen:()=>A(),minimize:()=>A(),quit:()=>A(),power_down:()=>{ ui.event({kind:"powerdown",title:"sir"}); return A(true); },
     browser_click_at:async()=>{ await wait(500); return {img:window.__PIMG||"",url:"https://www.bbc.co.uk/weather",title:"BBC Weather - Desford"}; },
     browser_scroll:async()=>{ await wait(300); return {img:window.__PIMG||""}; },browser_go:async u=>{ await wait(600); return {img:window.__PIMG||"",url:u,title:u}; },

@@ -368,6 +368,48 @@ public class OrionNativePlugin extends Plugin {
         }
     }
 
+    // ---------------------------------------------------------------- messages read aloud on rides
+    @PluginMethod
+    public void notifAccess(PluginCall call) {
+        try { launch(new Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS")); } catch (Exception ignored) { }
+        call.resolve();
+    }
+
+    @PluginMethod
+    public void notifStatus(PluginCall call) {
+        JSObject r = new JSObject();
+        String en = Settings.Secure.getString(getContext().getContentResolver(), "enabled_notification_listeners");
+        r.put("enabled", en != null && en.contains(getContext().getPackageName()));
+        r.put("connected", OrionNotifyService.connected);
+        call.resolve(r);
+    }
+
+    @PluginMethod
+    public void notifRecent(PluginCall call) {
+        int since = call.getInt("since", 0);
+        JSArray arr = new JSArray();
+        int last = since;
+        synchronized (OrionNotifyService.RECENT) {
+            for (OrionNotifyService.Item it : OrionNotifyService.RECENT) {
+                if (it.id <= since) continue;
+                JSObject o = new JSObject();
+                o.put("id", it.id); o.put("app", it.app); o.put("who", it.who); o.put("text", it.text);
+                o.put("t", it.t); o.put("canReply", it.reply != null);
+                arr.put(o); last = Math.max(last, it.id);
+            }
+        }
+        JSObject r = new JSObject();
+        r.put("items", arr); r.put("last", last);
+        call.resolve(r);
+    }
+
+    @PluginMethod
+    public void notifReply(PluginCall call) {
+        JSObject r = new JSObject();
+        r.put("ok", OrionNotifyService.reply(getContext(), call.getInt("id", -1), call.getString("text", "")));
+        call.resolve(r);
+    }
+
     /** Opens Android's "Digital assistant app" picker so ORION can be chosen (earbud press-and-hold). */
     @PluginMethod
     public void openAssistantSettings(PluginCall call) {
