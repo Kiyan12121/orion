@@ -79,7 +79,7 @@ public class HotwordService extends Service implements RecognitionListener {
             File mdir = new File(dir, "vosk-model-small-en-us-0.15");
             if (!new File(mdir, "conf").exists()) download(dir);
             model = new Model(mdir.getAbsolutePath());
-            Recognizer rec = new Recognizer(model, 16000.0f, "[\"hey orion\", \"orion\", \"hey jarvis\", \"[unk]\"]");
+            Recognizer rec = new Recognizer(model, 16000.0f, "[\"hey orion\", \"ok orion\", \"hey jarvis\", \"[unk]\"]");
             speech = new SpeechService(rec, 16000.0f);
             speech.startListening(this);
             speech.setPause(LinkService.atSchool(this));
@@ -120,8 +120,12 @@ public class HotwordService extends Service implements RecognitionListener {
         h.postDelayed(() -> { if (speech != null) speech.setPause(LinkService.atSchool(this)); }, 45000);
     }
 
-    @Override public void onPartialResult(String hyp) { if (hyp != null && hyp.contains("orion")) fire(); }
-    @Override public void onResult(String hyp) { if (hyp != null && (hyp.contains("orion") || hyp.contains("jarvis"))) fire(); }
+    // only a clear "hey orion" / "ok orion" / "hey jarvis" counts — never a stray word in your mates' chat
+    @Override public void onPartialResult(String hyp) { }
+    @Override public void onResult(String hyp) {
+        if (hyp == null) return;
+        if (hyp.contains("hey orion") || hyp.contains("ok orion") || hyp.contains("hey jarvis")) fire();
+    }
     @Override public void onFinalResult(String hyp) { }
     @Override public void onError(Exception e) { }
     @Override public void onTimeout() { }

@@ -441,6 +441,7 @@ nav.tabs button{font-size:9.5px;letter-spacing:.1em}
   <select class="inp" id="sPat"><option value="quick">Quick — send soon after I stop</option><option value="normal">Normal — let me pause to think</option><option value="relaxed">Relaxed — long messages</option></select>
   <h4>HANDS-FREE</h4>
   <label style="display:flex;gap:10px;align-items:center;letter-spacing:0;font-size:15px;color:var(--text)"><input type="checkbox" id="sHot" style="accent-color:var(--a)"> “Hey ORION” <small style="color:var(--dim)">— beta · offline · pauses at school &amp; low battery</small></label>
+  <label style="display:flex;gap:10px;align-items:center;letter-spacing:0;font-size:15px;color:var(--text)"><input type="checkbox" id="sName" style="accent-color:var(--a)"> On calls, only answer when I say “ORION” <small style="color:var(--dim)">— always on in Ride mode</small></label>
   <button class="btn ghost" id="sAssist">🎧 USE ORION AS MY ASSISTANT (EARBUD HOLD)</button>
   <label style="display:flex;gap:10px;align-items:center;letter-spacing:0;font-size:15px;color:var(--text);margin-top:10px"><input type="checkbox" id="sLoc" style="accent-color:var(--a)"> Use my location <small style="color:var(--dim)">— ride timing, ETAs, auto modes · stays on your devices</small></label>
   <button class="btn ghost" id="sBatt">🔋 STOP SAMSUNG PUTTING ORION TO SLEEP</button>
@@ -742,7 +743,7 @@ function incoming(reason){
 async function acceptCall(){
   clearTimeout(Call.ringTimeout); ringtone(false); $("#call").classList.remove("ringing");
   $("#cRingBtns").style.display="none"; $("#cLiveBtns").style.display=""; $("#cLabel").textContent="ON CALL";
-  Call.live=true; Call.t0=Date.now(); Call.timer=setInterval(()=>{ const s=Math.floor((Date.now()-Call.t0)/1000); $("#cTime").textContent=`${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`; },1000);
+  Call.live=true; Call.t0=Date.now(); Call.started=Date.now(); Call.followUntil=Date.now()+20000; Call.timer=setInterval(()=>{ const s=Math.floor((Date.now()-Call.t0)/1000); $("#cTime").textContent=`${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`; },1000);
   try{ Call.stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}});
     Call.ctx=new (window.AudioContext||window.webkitAudioContext)(); const src=Call.ctx.createMediaStreamSource(Call.stream);
     Call.an=Call.ctx.createAnalyser(); Call.an.fftSize=1024; src.connect(Call.an); Call.data=new Uint8Array(Call.an.fftSize); orbLoop();
@@ -764,14 +765,24 @@ async function listenLoop(){
     cSet("THINKING…",""); let text=got.text;
     if(text==null){ try{ text=(await transcribe(got.blob)||"").replace(SENDW,"").trim(); }catch(e){ cSet("ERROR","Couldn't hear that."); await new Promise(r=>setTimeout(r,1200)); continue; } }
     if(!text||text.replace(/[^a-z]/gi,"").length<2) continue;
+    if(/^(orion,? )?(quiet|shush|shh+|be quiet|stop listening|not you)\b/i.test(text.trim())){ Call.quietUntil=Date.now()+60000; cSet("QUIET","I'll wait till you say “ORION”."); await new Promise(r=>setTimeout(r,900)); continue; }
+    const named=NAMED.test(text), followUp=Date.now()<(Call.followUntil||0);
+    if(needName()&&!named&&!followUp){ $("#cSub").textContent="(not for me — say “ORION…”)"; continue; }
+    if(!named&&Date.now()<(Call.quietUntil||0)) continue;
+    if(named){ text=text.replace(NAMED," ").replace(/^[\s,.!?]+/,"").trim()||"yes?"; chime(); }
     $("#cSub").textContent=`“${text}”`;
     if(/^(bye|goodbye|good bye|hang up|end (the )?call|that'?s all|cheers,? bye|see ya|later)\b/i.test(text.trim())){ await say(`Goodbye, ${title()}.`); endCall(); return; }
     const px=phoneReflex(text); let r;
     if(px){ try{ r={reply:(await phoneDo(px))||"Done."}; }catch(e){ r={reply:e.message}; } }
     else r=await callReply(text,false);
     if(!Call.live) return; await say(r.reply,r.audio);
+    Call.followUntil=/\?\s*$/.test(r.reply||"")?Date.now()+8000:0;    // answer a question of mine without saying my name
   }
 }
+const NAMED=/\b(hey |ok |okay |yo )?(orion|o'?ryan|orian|orien|oreon|jarvis)\b[,.!]?/i;
+function needName(){ return Call.ride||store.get("needName","1")==="1"&&Call.reason!=="__morning__"&&Call.started&&Date.now()-Call.started>20000; }
+function chime(){ try{ const c=new (window.AudioContext||window.webkitAudioContext)(), o=c.createOscillator(), g=c.createGain(); o.frequency.value=880; o.frequency.setValueAtTime(1320,c.currentTime+.08);
+  g.gain.setValueAtTime(.12,c.currentTime); g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.22); o.connect(g); g.connect(c.destination); o.start(); o.stop(c.currentTime+.24); }catch(e){} }
 async function transcribe(blob){
   if(pcOnline) return (await api("/api/transcribe",blob,40000)).text||"";
   if(!store.get("key")) throw new Error("no key");
@@ -919,12 +930,15 @@ const _reflex=phoneReflex; phoneReflex=t=>{ const x=t.toLowerCase().trim().repla
   if(/^(louder|turn it up|volume up)$/.test(x)) return {kind:"media",action:"louder"};
   if(/^(quieter|turn it down|volume down)$/.test(x)) return {kind:"media",action:"quieter"};
   if(/^(ride mode|i'?m leaving|start (my )?ride|ride)$/.test(x)) return {kind:"ride"};
-  if(/(when|what time) will i (get|be) (to|at) school|will i make it|am i (going to be )?late|how long (till|until|to) (school|home)|when will i get home/.test(x)) return {kind:"eta",to:/home/.test(x)?"home":"school"};
+  if(/^(i'?m|we'?re) (at|in) school$|^this is (my )?school$|^(i'?m|we'?re) at the bike shed/.test(x)) return {kind:"place",name:"school"};
+  if(/^(i'?m|we'?re) (at )?home$|^this is (my )?home$/.test(x)) return {kind:"place",name:"home"};
+  if(/(get|be|arrive|reach|make it)\b.{0,20}\b(school|home)|how (long|far)\b.{0,25}\b(school|home)|(am i|are we) (gonna|going to) be late|\beta\b|will i make it/.test(x)) return {kind:"eta",to:/home/.test(x)?"home":"school"};
   return _reflex(t); };
 const _phoneDo2=phoneDo; phoneDo=async(a)=>{
   if(a.kind==="media"){ if(!Native) throw new Error("Music control works in the installed app."); await Native.media({action:a.action}); return {next:"Skipped.",previous:"Back one.",pause:"Paused.",play:"Playing.",louder:"Louder.",quieter:"Quieter."}[a.action]; }
   if(a.kind==="ride"){ startRide(); return ""; }
   if(a.kind==="eta") return await eta(a.to);
+  if(a.kind==="place"){ const p=await here(); if(!p) return "Turn on “Use my location” in settings first, sir."; const P=J("places",{}); P[a.name]={...p,n:20}; SJ("places",P); return `Noted — this is ${a.name}. I'll time your rides from now on.`; }
   return _phoneDo2(a); };
 
 /* places: learns home and school from where the phone is (only stored on this phone) */
@@ -933,18 +947,24 @@ async function here(){ if(!Native||!Native.getLocation||store.get("loc","0")!=="
 async function learnPlaces(){ const p=await here(); if(!p) return; const d=new Date(), h=d.getHours(), wd=d.getDay(); const P=J("places",{});
   const add=(k)=>{ const o=P[k]; P[k]=o?{lat:(o.lat*o.n+p.lat)/(o.n+1),lon:(o.lon*o.n+p.lon)/(o.n+1),n:Math.min(o.n+1,50)}:{...p,n:1}; };
   if(h>=21||h<7) add("home"); else if(atSchool()&&wd>0&&wd<6) add("school"); SJ("places",P); }
-function rideStats(to){ return (J("rideLog",[])).filter(r=>r.to===to).map(r=>r.secs); }
+function rideStats(to){ return (J("rideLog",[])).filter(r=>r.to===to&&r.secs>=120&&r.secs<=2400).map(r=>r.secs); }
 function avgRide(to){ const r=rideStats(to); if(!r.length) return null; const s=[...r].sort((a,b)=>a-b); return s[Math.floor(s.length/2)]; }
 async function syncRides(){ if(!Native||!Native.rides) return; try{ const r=await Native.rides(); const log=(r.rides||"").split(";").filter(Boolean).map(x=>{ const [to,t,secs]=x.split(","); return {to,t:+t,secs:+secs}; });
   if(log.length) SJ("rideLog",log); state.riding=r.riding; paintRide(); }catch(e){} }
 async function eta(to){ const P=J("places",{}); const dest=P[to]; const avg=avgRide(to); const p=await here();
-  const pace=avg||420; let left=pace;
-  if(p&&dest&&P.home&&P.school){ const total=distM(P.home,P.school)||1; left=Math.max(30,pace*Math.min(1.2,distM(p,dest)/total)); }
-  else if(!avg) return `I haven't timed a ride to ${to} yet, ${title()} — start Ride mode on the way and I'll learn it.`;
-  const at=new Date(Date.now()+left*1000); const atS=at.toTimeString().slice(0,5); let msg=`About ${Math.max(1,Math.round(left/60))} minutes, ${title()}. You'll be there by ${atS}`;
-  if(to==="school"&&atS<=DAY.school_start) msg+=`, with ${Math.round((new Date(at.toDateString()+" "+DAY.school_start)-at)/60000)} minutes to spare.`;
-  else if(to==="school") msg+=` — that's after ${DAY.school_start}. Pedal on, sir.`; else msg+=".";
+  const BIKE=4.4;   // m/s ≈ 16 km/h, with a bit added for junctions
+  let left=null;
+  if(p&&dest){ const d=distM(p,dest)*1.3; if(d<120) return `You're there, ${title()}.`;
+    left=d/BIKE; if(avg&&P.home&&P.school){ const total=distM(P.home,P.school)*1.3; left=Math.min(left*1.5,Math.max(30,avg*d/Math.max(total,1))); } }
+  else if(avg) left=avg;
+  if(left==null){ if(!dest) return `I don't know where ${to} is yet, ${title()}. When you get there, say “ORION, I'm at ${to}” and I'll remember it.`;
+    return `Turn on “Use my location” in settings and I'll work it out, ${title()}.`; }
+  const at=new Date(Date.now()+left*1000); const atS=at.toTimeString().slice(0,5); let msg=`About ${Math.max(1,Math.round(left/60))} minute${Math.round(left/60)===1?"":"s"}, ${title()} — there by ${atS}`;
+  if(to==="school"&&atSchoolDay()){ const late=new Date(at.toDateString()+" "+DAY.school_start); const spare=Math.round((late-at)/60000);
+    msg+=spare>=0?`, ${spare} minute${spare===1?"":"s"} before the bell.`:`. That's ${-spare} minute${spare===-1?"":"s"} after ${DAY.school_start}, so pedal on, sir.`; }
+  else msg+=".";
   return msg; }
+function atSchoolDay(){ const wd=new Date().getDay(); return !DAY.holiday&&wd>0&&wd<6; }
 async function startRide(){ const to=new Date().getHours()<12?"school":"home"; const P=J("places",{});
   if(Native&&Native.startRide&&P[to]) await Native.startRide({lat:P[to].lat,lon:P[to].lon,radius:to==="school"?150:80,to});
   state.riding=true; paintRide();
@@ -972,7 +992,7 @@ async function morningBriefing(){ const m=J("morning",{}); const h=new Date().ge
   const hw=(m.homework||[]).length?` Homework due soon: ${(m.homework||[]).slice(0,2).map(x=>x.subject+" — "+x.task).join("; ")}.`:"";
   return `Good morning, ${title()}.${w} ${lines}${hw} Bike shed by ${DAY.school_start}.`.replace(/\s+/g," "); }
 const _callReply=callReply; callReply=async(text,first)=>{ if(first&&text==="__morning__") return {reply:await morningBriefing()};
-  if(first&&Call.ride){ const e=await eta(new Date().getHours()<12?"school":"home"); return {reply:`Ride mode on, ${title()}. ${e} I'm listening — say "that's all" when you're done.`}; }
+  if(first&&Call.ride){ const e=await eta(new Date().getHours()<12?"school":"home"); return {reply:`Ride mode on, ${title()}. ${e} I'll only answer when you say “ORION” — chat with your mates all you like.`}; }
   return _callReply(text,first); };
 const _endCall=endCall; endCall=(msg)=>{ if(Call.ride){ Call.ride=false; try{ Native&&Native.media&&Native.media({action:"play"}); }catch(e){} } _endCall(msg); try{ Native&&Native.hotword&&store.get("hot")==="1"&&Native.hotword({action:"resume"}); }catch(e){} };
 
@@ -997,6 +1017,7 @@ const _lsm=loadStudyM; loadStudyM=async()=>{ await _lsm(); loadPapersM(); };
 /* hands-free settings */
 $("#sHot").onchange=async()=>{ store.set("hot",$("#sHot").checked?"1":"0"); if(!Native||!Native.hotword) return toast("Works in the installed app.");
   if($("#sHot").checked){ await Native.requestMic(); const r=await Native.hotword({action:"on"}); toast(r.ok?"“Hey ORION” on — first time it downloads a small offline model (~40 MB).":"Couldn't start “Hey ORION”: "+(r.error||"not available in this build")); } else Native.hotword({action:"off"}); };
+$("#sName").onchange=()=>store.set("needName",$("#sName").checked?"1":"0");
 $("#sAssist").onclick=()=>{ if(Native&&Native.openAssistantSettings){ Native.openAssistantSettings(); toast("Pick ORION as the Digital assistant app — then hold your earbud or side key."); } };
 $("#sLoc").onchange=async()=>{ store.set("loc",$("#sLoc").checked?"1":"0"); if($("#sLoc").checked&&Native&&Native.requestLocation){ await Native.requestLocation(); setTimeout(learnPlaces,4000); } };
 $("#sBatt").onclick=()=>{ if(Native&&Native.openBatterySettings) Native.openBatterySettings(); };
@@ -1011,7 +1032,7 @@ function go(t){ $$("nav.tabs button").forEach(b=>b.classList.toggle("on",b.datas
 $$("nav.tabs button").forEach(b=>b.onclick=()=>go(b.dataset.tab));
 
 /* ---------- settings ---------- */
-$("#setBtn").onclick=()=>{ $("#sAddr").value=store.get("addr"); $("#sPin").value=store.get("pin"); $("#sKey").value=store.get("key"); $("#sTitle").value=title(); $("#sMute").checked=store.get("mute")==="1"; $("#sLink").checked=store.get("link","1")==="1"; $("#sPat").value=store.get("patience","normal"); $("#sHot").checked=store.get("hot")==="1"; $("#sLoc").checked=store.get("loc")==="1"; loadCalls(); $("#vSet").classList.add("show"); };
+$("#setBtn").onclick=()=>{ $("#sAddr").value=store.get("addr"); $("#sPin").value=store.get("pin"); $("#sKey").value=store.get("key"); $("#sTitle").value=title(); $("#sMute").checked=store.get("mute")==="1"; $("#sLink").checked=store.get("link","1")==="1"; $("#sPat").value=store.get("patience","normal"); $("#sHot").checked=store.get("hot")==="1"; $("#sName").checked=store.get("needName","1")==="1"; $("#sLoc").checked=store.get("loc")==="1"; loadCalls(); $("#vSet").classList.add("show"); };
 $("#sClose").onclick=()=>$("#vSet").classList.remove("show");
 $("#sSave").onclick=()=>{ let a=$("#sAddr").value.trim(); if(a&&!/^https?:\/\//.test(a)) a="http://"+a; if(a&&!/:\d+\/?$/.test(a)) a=a.replace(/\/$/,"")+":7777";
   store.set("addr",a); store.set("pin",$("#sPin").value.trim()); store.set("key",$("#sKey").value.trim()); store.set("title",$("#sTitle").value.trim()||"sir"); store.set("mute",$("#sMute").checked?"1":"0");

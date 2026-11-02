@@ -197,10 +197,33 @@ public class OrionNativePlugin extends Plugin {
             ttsReady = status == android.speech.tts.TextToSpeech.SUCCESS;
             if (ttsReady) {
                 tts.setLanguage(java.util.Locale.UK);
-                tts.setSpeechRate(1.02f);
+                pickVoice();
+                tts.setSpeechRate(1.0f);
+                tts.setPitch(0.92f);
             }
             then.run();
         });
+    }
+
+    /** Picks the most natural British male voice on the phone (Google's are best; avoids robotic ones). */
+    private void pickVoice() {
+        try {
+            String[] pref = {"en-gb-x-rjs-network", "en-gb-x-gbd-network", "en-gb-x-rjs-local", "en-gb-x-gbd-local",
+                             "en-gb-x-gbb-network", "en-gb-x-gbb-local"};
+            java.util.Set<android.speech.tts.Voice> all = tts.getVoices();
+            if (all == null) return;
+            for (String want : pref)
+                for (android.speech.tts.Voice v : all)
+                    if (v.getName().equalsIgnoreCase(want) && !v.getFeatures().contains("notInstalled")) { tts.setVoice(v); return; }
+            android.speech.tts.Voice best = null;
+            for (android.speech.tts.Voice v : all) {
+                if (!"GBR".equals(v.getLocale().getISO3Country()) || v.getFeatures().contains("notInstalled")) continue;
+                String n = v.getName().toLowerCase();
+                int score = v.getQuality() + (n.contains("male") && !n.contains("female") ? 200 : 0) - (v.isNetworkConnectionRequired() ? 0 : 50);
+                if (best == null || score > best.getQuality()) best = v;
+            }
+            if (best != null) tts.setVoice(best);
+        } catch (Exception ignored) { }
     }
 
     /** Speaks with the phone's own voice (used when the PC's natural voice isn't available). Resolves when done. */
