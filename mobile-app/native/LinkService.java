@@ -113,7 +113,27 @@ public class LinkService extends Service {
         if (dLat == 0 && dLon == 0) return;
         float[] d = new float[1];
         android.location.Location.distanceBetween(loc.getLatitude(), loc.getLongitude(), dLat, dLon, d);
+        String to = sp.getString("ride_to", "school");
+        if (d[0] >= sp.getFloat("dest_radius", 120)) {             // Now Bar: live ETA while riding
+            float d0 = sp.getFloat("ride_d0", 0);
+            if (d0 <= 0 || d[0] > d0) { d0 = d[0]; sp.edit().putFloat("ride_d0", d0).apply(); }
+            long eta = (long) (d[0] * 1.3f / 4.4f);
+            java.util.Calendar at = java.util.Calendar.getInstance();
+            at.add(java.util.Calendar.SECOND, (int) eta);
+            String atS = String.format(java.util.Locale.UK, "%02d:%02d", at.get(java.util.Calendar.HOUR_OF_DAY), at.get(java.util.Calendar.MINUTE));
+            long mins = Math.max(1, Math.round(eta / 60.0));
+            String late = "";
+            if ("school".equals(to)) {
+                String start = sp.getString("school_start", "08:40");
+                late = atS.compareTo(start) > 0 ? " · after " + start + "!" : " · before the bell";
+            }
+            NowBar.post(this, (to.equals("school") ? "School" : "Home") + " in " + mins + " min",
+                    "Arrive " + atS + late + " · " + String.format(java.util.Locale.UK, "%.1f km to go", d[0] / 1000f),
+                    mins + " min", (int) Math.max(0, d0 - d[0]), (int) Math.max(1, d0), "ride");
+        }
         if (d[0] < sp.getFloat("dest_radius", 120)) {
+            NowBar.clear(this);
+            sp.edit().remove("ride_d0").apply();
             long secs = (System.currentTimeMillis() - started) / 1000;
             String rides = sp.getString("rides", "");
             rides += (rides.isEmpty() ? "" : ";") + sp.getString("ride_to", "school") + "," + (started / 1000) + "," + secs;

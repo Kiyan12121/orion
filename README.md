@@ -1,4 +1,9 @@
-# ORION 4.2 — Personal Intelligence System
+# ORION 4.3 — Personal Intelligence System
+
+## New in 4.3: the phone, redesigned
+- **Portrait, "Aurora":** a new look with a living orb, glass cards, big type, slowly moving colour in the background and a floating dock. The **orb button** in the middle opens chat. Tap it again to talk, or press and hold it from anywhere to talk straight away. PC moved into More.
+- **Landscape, "Cockpit":** a completely different layout. It has an angular HUD with a side rail, plus an instrument cluster showing a big clock, CPU, RAM and battery gauges, next event, homework, ride, mode and jobs. Everything else is laid out in two columns, and calls/rides become a dashboard.
+- **Now Bar (S23, One UI 8 / Android 16):** Ride mode shows a live ETA on the lock screen Now Bar and status-bar chip ("School in 6 min · arrive 08:31 · before the bell"), with a progress bar. Calls with ORION show there too. On older software it's a normal ongoing notification.
 
 ## New in 4.2
 **Phone**

@@ -319,7 +319,8 @@ public class OrionNativePlugin extends Plugin {
 
     @PluginMethod
     public void stopRide(PluginCall call) {
-        getContext().getSharedPreferences(LinkService.PREFS, Context.MODE_PRIVATE).edit().putBoolean("riding", false).apply();
+        getContext().getSharedPreferences(LinkService.PREFS, Context.MODE_PRIVATE).edit().putBoolean("riding", false).remove("ride_d0").apply();
+        NowBar.clear(getContext());
         call.resolve();
     }
 
@@ -366,6 +367,20 @@ public class OrionNativePlugin extends Plugin {
         } catch (Exception e) {
             JSObject r = new JSObject(); r.put("ok", false); r.put("error", String.valueOf(e.getMessage())); call.resolve(r);
         }
+    }
+
+    // ---------------------------------------------------------------- Now Bar (Live Updates)
+    @PluginMethod
+    public void nowBar(PluginCall call) {
+        NowBar.post(getContext(), call.getString("title", "ORION"), call.getString("text", ""), call.getString("chip", null),
+                call.getInt("progress", -1), call.getInt("max", -1), call.getString("action", ""));
+        call.resolve();
+    }
+
+    @PluginMethod
+    public void nowBarClear(PluginCall call) {
+        NowBar.clear(getContext());
+        call.resolve();
     }
 
     // ---------------------------------------------------------------- messages read aloud on rides

@@ -11,7 +11,8 @@ perms = ["android.permission.RECORD_AUDIO", "android.permission.MODIFY_AUDIO_SET
          "android.permission.INTERNET", "android.permission.ACCESS_NOTIFICATION_POLICY",
          "android.permission.ACCESS_FINE_LOCATION", "android.permission.ACCESS_COARSE_LOCATION",
          "android.permission.ACCESS_BACKGROUND_LOCATION", "android.permission.FOREGROUND_SERVICE_LOCATION",
-         "android.permission.FOREGROUND_SERVICE_MICROPHONE", "android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"]
+         "android.permission.FOREGROUND_SERVICE_MICROPHONE", "android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS",
+         "android.permission.POST_PROMOTED_NOTIFICATIONS"]
 block = "".join(f'    <uses-permission android:name="{x}" />\n' for x in perms if x not in s)
 block += ('    <queries>\n        <intent>\n            <action android:name="android.intent.action.MAIN" />\n'
           '            <category android:name="android.intent.category.LAUNCHER" />\n        </intent>\n    </queries>\n')
