@@ -65,6 +65,7 @@ public class LinkService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent != null && STOP_RING.equals(intent.getAction())) stopRing();
+        if (intent != null && WAKE_CALL.equals(intent.getAction())) incomingCall("__morning__");
         return START_STICKY;
     }
 
@@ -220,12 +221,14 @@ public class LinkService extends Service {
         return Build.VERSION.SDK_INT >= 26 ? new Notification.Builder(this, ch) : new Notification.Builder(this);
     }
 
+    static final String WAKE_CALL = "dev.kiyan.orion.WAKE_CALL";
+
     private void incomingCall(String reason) {
         PendingIntent answer = openApp("call", reason, 11);
         Notification n = builder(CH_CALL)
                 .setSmallIcon(android.R.drawable.sym_call_incoming)
                 .setContentTitle("ORION is calling")
-                .setContentText(reason.isEmpty() ? "Tap to answer" : reason)
+                .setContentText(reason.isEmpty() ? "Tap to answer" : "__morning__".equals(reason) ? "Good morning — your wake-up call" : reason)
                 .setCategory(Notification.CATEGORY_CALL)
                 .setPriority(Notification.PRIORITY_MAX)
                 .setFullScreenIntent(answer, true)

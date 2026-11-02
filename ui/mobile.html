@@ -588,6 +588,9 @@ body.busy .horb u{animation-duration:.9s}body.busy .horb i{animation-duration:1.
   <div style="display:flex;gap:8px"><input class="inp" type="time" id="cQf" value="23:00"><input class="inp" type="time" id="cQt" value="07:00"></div>
   <label>WHEN YOU PAUSE WHILE TALKING</label>
   <select class="inp" id="sPat"><option value="quick">Quick — send soon after I stop</option><option value="normal">Normal — let me pause to think</option><option value="relaxed">Relaxed — long messages</option></select>
+  <h4>MORNINGS</h4>
+  <label style="display:flex;gap:10px;align-items:center;letter-spacing:0;font-size:15px;color:var(--text)"><input type="checkbox" id="sWake" style="accent-color:var(--a)"> Wake-up call on school days <small style="color:var(--dim)" id="sWakeNext"></small></label>
+  <p style="font-size:12.5px">Runs on the phone itself, so the PC and laptop can be off. Change the time on the PC (Devices › My Day) or say “wake me at 7:45”.</p>
   <h4>HANDS-FREE</h4>
   <label style="display:flex;gap:10px;align-items:center;letter-spacing:0;font-size:15px;color:var(--text)"><input type="checkbox" id="sHot" style="accent-color:var(--a)"> “Hey ORION” <small style="color:var(--dim)">— beta · offline · pauses at school &amp; low battery</small></label>
   <label style="display:flex;gap:10px;align-items:center;letter-spacing:0;font-size:15px;color:var(--text)"><input type="checkbox" id="sName" style="accent-color:var(--a)"> On calls, only answer when I say “ORION” <small style="color:var(--dim)">— always on in Ride mode</small></label>
@@ -1146,19 +1149,25 @@ $("#rideGo").onclick=async()=>{ if(state.riding){ state.riding=false; if(Native&
 
 /* morning: the PC packs tomorrow's briefing before it goes off; the phone does the wake-up call */
 async function pullMorning(){ try{ const m=await api("/api/morning"); SJ("morning",m); if(m.day){ DAY=m.day; SJ("day",DAY); if(Native&&Native.setSchool) Native.setSchool({start:DAY.school_start,end:DAY.school_end,holiday:!!DAY.holiday}); } scheduleMorning(); }catch(e){} }
-async function scheduleMorning(){ if(!LN) return; const m=J("morning",null); if(!m||!m.school_day||store.get("wakecall","1")!=="1") return;
-  const [h,mi]=(DAY.wake||"08:00").split(":").map(Number); const at=new Date(m.date+"T00:00"); at.setHours(h,mi,0,0); if(at<new Date()) return;
+function nextSchoolDay(){ const d=new Date(); const [h,mi]=(DAY.wake||"08:00").split(":").map(Number);
+  for(let k=0;k<10;k++){ const x=new Date(d); x.setDate(d.getDate()+k); x.setHours(h,mi,0,0); const wd=x.getDay(); if(wd>0&&wd<6&&x>new Date()&&!(DAY.holiday&&k<1)) return x; } return null; }
+async function scheduleMorning(){ const on=store.get("wakecall","1")==="1";
+  // the wake-up call itself is a real phone alarm (works with the PC and laptop off all night)
+  if(Native&&Native.scheduleWake){ try{ const r=await Native.scheduleWake({on,wake:DAY.wake||"08:00",days:"12345",holiday:!!DAY.holiday}); store.set("wakeNext",String(r.next||"")); }catch(e){} }
+  if(!LN) return; const at=nextSchoolDay(); if(!at) return;
   const avg=avgRide("school")||480; const [sh,sm]=DAY.school_start.split(":").map(Number); const leave=new Date(at); leave.setHours(sh,sm,0,0); leave.setSeconds(leave.getSeconds()-avg-300);
   const ready=new Date(leave.getTime()-15*60000);
   try{ await LN.cancel({notifications:[{id:7101},{id:7102},{id:7103}]}); }catch(e){}
-  const nots=[{id:7101,title:"📞 ORION — good morning",body:"Tap to answer your wake-up call",schedule:{at,allowWhileIdle:true},extra:{action:"call",reason:"__morning__"}},
-    {id:7102,title:"⏰ 15 minutes till you should leave",body:"Homework packed? Shoes on soon, sir.",schedule:{at:ready,allowWhileIdle:true}},
+  if(!on) return;
+  const nots=[{id:7102,title:"⏰ 15 minutes till you should leave",body:"Homework packed? Shoes on soon, sir.",schedule:{at:ready,allowWhileIdle:true}},
     {id:7103,title:"🚲 Time to go",body:`Leave now to be at the bike shed by ${DAY.school_start}.`,schedule:{at:leave,allowWhileIdle:true}}];
+  if(!(Native&&Native.scheduleWake)) nots.push({id:7101,title:"📞 ORION — good morning",body:"Tap to answer your wake-up call",schedule:{at,allowWhileIdle:true},extra:{action:"call",reason:"__morning__"}});
   try{ await LN.schedule({notifications:nots.filter(n=>n.schedule.at>new Date())}); }catch(e){} }
-async function morningBriefing(){ const m=J("morning",{}); const h=new Date().getHours(); let w="";
+async function morningBriefing(){ let m=J("morning",{}); const today=new Date().toISOString().slice(0,10); if(m.date!==today) m={homework:(J("lifeCache",{}).homework||[]).filter(h=>!h.done&&h.days<=2)}; let w="";
+  if(m.weather&&m.weather.temp!=null) w=` Up to ${m.weather.temp} degrees today, ${m.weather.sky||""}${m.weather.rain!=null?`, ${m.weather.rain}% chance of rain`:""}.`;
   const P=J("places",{}); try{ if(P.home){ const r=await (await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${P.home.lat}&longitude=${P.home.lon}&current=temperature_2m,weather_code&daily=precipitation_probability_max&timezone=auto&forecast_days=1`)).json();
-      w=` It's ${Math.round(r.current.temperature_2m)} degrees, with a ${r.daily.precipitation_probability_max[0]}% chance of rain.`; } }catch(e){}
-  const lines=(m.lines||[]).map(l=>l.replace(/^•\s*\S+\s*/,"")).filter(l=>!/School day tomorrow/.test(l)).slice(0,3).join(" ");
+      w=` It's ${Math.round(r.current.temperature_2m)} degrees, with a ${r.daily.precipitation_probability_max[0]}% chance of rain today.`; } }catch(e){}
+  const lines=(m.lines||[]).map(l=>l.replace(/^•\s*\S+\s*/,"")).filter(l=>!/School day tomorrow/.test(l)).slice(0,3).map(l=>l.replace(/[.\s]+$/,"")).join(". ")+((m.lines||[]).length?".":"");
   const hw=(m.homework||[]).length?` Homework due soon: ${(m.homework||[]).slice(0,2).map(x=>x.subject+" — "+x.task).join("; ")}.`:"";
   return `Good morning, ${title()}.${w} ${lines}${hw} Bike shed by ${DAY.school_start}.`.replace(/\s+/g," "); }
 const _callReply=callReply; callReply=async(text,first)=>{ if(first&&text==="__morning__") return {reply:await morningBriefing()};
@@ -1255,6 +1264,8 @@ async function quizAnswer(text){ const Q=Call.quiz, c=Q.cards[Q.i]; let right=fu
 /* hook into the call/ride conversation */
 const _reflex42=phoneReflex; phoneReflex=t=>{ const x=t.toLowerCase().trim().replace(/^(hey |ok |okay |yo )?(orion|jarvis|jervis|javis)[,.! ]*/,"").replace(/[.!?]+$/,"");
   if(/^(quiz me|test me|revise|flashcards?)( on .*)?$/.test(x)) return {kind:"quiz"};
+  let w=x.match(/^(wake me|wake me up|set (my )?wake[- ]?up( call)?)( up)? (at|for) (\d{1,2})(?:[:. ]?(\d{2}))? ?(am)?$/); if(w) return {kind:"wake",time:`${String(+w[6]).padStart(2,"0")}:${w[7]||"00"}`};
+  if(/^(no|cancel|turn off)( the)? wake[- ]?up( call)?( tomorrow)?$/.test(x)) return {kind:"wakeoff"};
   if(/^(stop|end) (the )?quiz$/.test(x)) return {kind:"quizstop"};
   const raw=t.trim().replace(/^(hey |ok |okay |yo )?(orion|jarvis|jervis|javis)[,.! ]*/i,"").replace(/[.!?]+$/,"");
   let m=raw.match(/^(reply|tell (him|her|them)|say back|text back)[: ,]+(.+)$/i); if(m) return {kind:"reply",text:m[3]};
@@ -1262,6 +1273,9 @@ const _reflex42=phoneReflex; phoneReflex=t=>{ const x=t.toLowerCase().trim().rep
   return _reflex42(t); };
 const _do42=phoneDo; phoneDo=async a=>{
   if(a.kind==="quiz"){ const cards=await quizCards(); if(!cards.length) return "No flashcards yet, sir — make a deck on the PC or photograph your notes in Study."; Call.quiz={cards:cards.slice().sort(()=>Math.random()-.5),i:0,right:0}; return `Right, ten questions. ${await quizAsk()}`; }
+  if(a.kind==="wake"){ DAY.wake=a.time; SJ("day",DAY); store.set("wakecall","1"); await scheduleMorning(); if(pcOnline) api("/api/autonomy",{wake:a.time}).catch(()=>{});
+    return `Done — I'll ring you at ${a.time} on school days, ${title()}.`; }
+  if(a.kind==="wakeoff"){ store.set("wakecall","0"); await scheduleMorning(); return "Wake-up call off. Say “wake me at 8” to turn it back on."; }
   if(a.kind==="quizstop"){ const Q=Call.quiz; Call.quiz=null; return Q?`Stopped. You got ${Q.right} of ${Q.i}.`:"No quiz running."; }
   if(a.kind==="readmsgs"){ const l=Call.lastMsg||J("lastMsgs",[]).slice(-1)[0]; if(!l) return "No new messages, sir."; Call.lastMsg=l; return `${l.who} on ${l.app} said: ${l.text}`; }
   if(a.kind==="reply"){ const l=Call.lastMsg; if(!l) return "Reply to whom, sir? I haven't read you a message yet."; if(!l.canReply) return `${l.app} doesn't let me reply from the notification, sir.`;
@@ -1281,6 +1295,8 @@ const _startRide42=startRide; startRide=async()=>{ msgWatch(true); return _start
 const _endCall42=endCall; endCall=(m)=>{ msgWatch(false); Call.quiz=null; Call.pendingReply=null; return _endCall42(m); };
 
 $("#sMsgs").checked=store.get("msgs","0")==="1";
+$("#sWake").onchange=()=>{ store.set("wakecall",$("#sWake").checked?"1":"0"); scheduleMorning(); toast($("#sWake").checked?"Wake-up call on.":"Wake-up call off."); };
+setTimeout(()=>{ try{ scheduleMorning(); }catch(e){} },2500);   // keep the alarm set even if the PC never comes online
 $("#sMsgs").onchange=async()=>{ store.set("msgs",$("#sMsgs").checked?"1":"0"); if($("#sMsgs").checked&&Native&&Native.notifStatus){ const s=await Native.notifStatus(); if(!s.enabled){ toast("Turn on ORION in the list, then come back."); Native.notifAccess(); } } };
 $("#sMsgAccess").onclick=()=>{ if(Native&&Native.notifAccess) Native.notifAccess(); else toast("Works in the installed app."); };
 
@@ -1358,7 +1374,7 @@ function go(t){ $$("nav.tabs button").forEach(b=>b.classList.toggle("on",b.datas
 $$("nav.tabs button").forEach(b=>b.onclick=()=>go(b.dataset.tab));
 
 /* ---------- settings ---------- */
-$("#setBtn").onclick=()=>{ const L=addrs(); $("#sAddr").value=L.find(a=>!isLan(a))||""; $("#sAddr2").value=L.find(isLan)||""; $("#sAddrNow").textContent=addr()?`Using: ${addr().replace(/^https?:\/\//,"")}${isLan(addr())?" (home Wi-Fi)":" (anywhere)"}`:""; $("#sPin").value=store.get("pin"); $("#sKey").value=store.get("key"); $("#sTitle").value=title(); $("#sMute").checked=store.get("mute")==="1"; $("#sLink").checked=store.get("link","1")==="1"; $("#sPat").value=store.get("patience","normal"); $("#sHot").checked=store.get("hot")==="1"; $("#sName").checked=store.get("needName","1")==="1"; $("#sLoc").checked=store.get("loc")==="1"; loadCalls(); $("#vSet").classList.add("show"); };
+$("#setBtn").onclick=()=>{ const L=addrs(); $("#sAddr").value=L.find(a=>!isLan(a))||""; $("#sAddr2").value=L.find(isLan)||""; $("#sAddrNow").textContent=addr()?`Using: ${addr().replace(/^https?:\/\//,"")}${isLan(addr())?" (home Wi-Fi)":" (anywhere)"}`:""; $("#sPin").value=store.get("pin"); $("#sKey").value=store.get("key"); $("#sTitle").value=title(); $("#sMute").checked=store.get("mute")==="1"; $("#sLink").checked=store.get("link","1")==="1"; $("#sPat").value=store.get("patience","normal"); $("#sHot").checked=store.get("hot")==="1"; $("#sWake").checked=store.get("wakecall","1")==="1"; { const n=+store.get("wakeNext","0"); $("#sWakeNext").textContent=n?"— next: "+new Date(n).toLocaleString("en-GB",{weekday:"short",hour:"2-digit",minute:"2-digit"}):""; } $("#sName").checked=store.get("needName","1")==="1"; $("#sLoc").checked=store.get("loc")==="1"; loadCalls(); $("#vSet").classList.add("show"); };
 $("#sClose").onclick=()=>$("#vSet").classList.remove("show");
 $("#sSave").onclick=()=>{ const both=[$("#sAddr").value,$("#sAddr2").value].join(",").split(/[,\s]+/).map(normAddr).filter(Boolean); SJ("addrs",[...new Set(both)]);
   let a=both.find(isLan)||both[0]||""; store.set("addr",a); store.set("pin",$("#sPin").value.trim()); store.set("key",$("#sKey").value.trim()); store.set("title",$("#sTitle").value.trim()||"sir"); store.set("mute",$("#sMute").checked?"1":"0");

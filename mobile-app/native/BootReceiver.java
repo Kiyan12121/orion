@@ -8,6 +8,7 @@ import android.content.Intent;
 public class BootReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context c, Intent i) {
+        try { WakeAlarm.schedule(c); } catch (Exception ignored) { }
         if (c.getSharedPreferences(LinkService.PREFS, Context.MODE_PRIVATE).getBoolean("on", false)) {
             try { LinkService.start(c); } catch (Exception ignored) { }
         }

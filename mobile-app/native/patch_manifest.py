@@ -12,7 +12,7 @@ perms = ["android.permission.RECORD_AUDIO", "android.permission.MODIFY_AUDIO_SET
          "android.permission.ACCESS_FINE_LOCATION", "android.permission.ACCESS_COARSE_LOCATION",
          "android.permission.ACCESS_BACKGROUND_LOCATION", "android.permission.FOREGROUND_SERVICE_LOCATION",
          "android.permission.FOREGROUND_SERVICE_MICROPHONE", "android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS",
-         "android.permission.POST_PROMOTED_NOTIFICATIONS"]
+         "android.permission.POST_PROMOTED_NOTIFICATIONS", "android.permission.USE_EXACT_ALARM"]
 block = "".join(f'    <uses-permission android:name="{x}" />\n' for x in perms if x not in s)
 block += ('    <queries>\n        <intent>\n            <action android:name="android.intent.action.MAIN" />\n'
           '            <category android:name="android.intent.category.LAUNCHER" />\n        </intent>\n    </queries>\n')
@@ -47,6 +47,7 @@ service = ('        <service android:name=".BubbleService" android:exported="fal
                      '        </service>\n'
                      for n, lbl, ic in (("Ask", "Ask ORION", "ic_btn_speak_now"), ("Ride", "Ride mode", "ic_menu_directions"),
                                         ("Skip", "Skip song", "ic_media_next"))) +
+           '        <receiver android:name=".WakeAlarm" android:exported="false" />\n'
            '        <receiver android:name=".BootReceiver" android:exported="true">\n'
            '            <intent-filter><action android:name="android.intent.action.BOOT_COMPLETED" /></intent-filter>\n'
            '        </receiver>\n')

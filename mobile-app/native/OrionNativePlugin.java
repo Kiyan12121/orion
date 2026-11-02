@@ -369,6 +369,19 @@ public class OrionNativePlugin extends Plugin {
         }
     }
 
+    // ---------------------------------------------------------------- wake-up call (runs with the PC off)
+    @PluginMethod
+    public void scheduleWake(PluginCall call) {
+        SharedPreferences.Editor e = getContext().getSharedPreferences(LinkService.PREFS, Context.MODE_PRIVATE).edit();
+        e.putBoolean("wake_on", Boolean.TRUE.equals(call.getBoolean("on", true)))
+                .putString("wake", call.getString("wake", "08:00")).putString("wake_days", call.getString("days", "12345"))
+                .putLong("holiday_until", call.getBoolean("holiday", false) ? System.currentTimeMillis() + 86400000L : 0).apply();
+        WakeAlarm.schedule(getContext());
+        JSObject r = new JSObject();
+        r.put("next", getContext().getSharedPreferences(LinkService.PREFS, Context.MODE_PRIVATE).getLong("wake_next", 0));
+        call.resolve(r);
+    }
+
     // ---------------------------------------------------------------- Now Bar (Live Updates)
     @PluginMethod
     public void nowBar(PluginCall call) {

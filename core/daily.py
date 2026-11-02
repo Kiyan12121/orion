@@ -119,6 +119,13 @@ def morning_pack(cfg=None):
         pack["streak"] = o["streak"]
     except Exception:
         pass
+    try:                                   # tomorrow's weather, so the phone can say it with the PC off
+        from .life import forecast
+        w = forecast("")
+        t = (w.get("days") or [{}, {}])[1] if len(w.get("days") or []) > 1 else {}
+        pack["weather"] = {"temp": t.get("max"), "rain": t.get("rain"), "sky": t.get("sky")}
+    except Exception:
+        pass
     try:
         from .scholar import weakest_topics
         pack["weak"] = weakest_topics(3)
