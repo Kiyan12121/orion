@@ -489,7 +489,7 @@ class Api:
         c = self._cfg
         vis = c.get("visuals", "auto")
         lite = vis == "lite" or (vis == "auto" and self.lite_profile)
-        return {"custom_modes": c.get("custom_modes", {}), "name": c["assistant_name"], "title": c["user_title"], "version": config_mod.VERSION,
+        return {"custom_modes": c.get("custom_modes", {}), "owner": c.get("owner_name", ""), "name": c["assistant_name"], "title": c["user_title"], "version": config_mod.VERSION,
                 "theme": c["theme"], "brain": c["brain"], "speak": c["voice"]["speak_replies"],
                 "safe_mode": c["safe_mode"], "lite": lite, "skip_boot": c.get("skip_boot", False),
                 "has_key": bool(self._brain.cloud), "mic": self._recorder.available,
@@ -497,7 +497,38 @@ class Api:
                 "gaming": self._gaming.active, "game": self._gaming.game,
                 "afk": getattr(self, "_root", None) and self._root.afk,
                 "afk_note": getattr(self, "_root", None) and self._root.afk_note,
-                "history": self._memory.recent(16), "facts": len(self._memory.facts)}
+                "history": self._memory.recent(16), "facts": len(self._memory.facts),
+                "boot_checks": self._boot_checks()}
+
+    def _boot_checks(self):
+        """Real system checks shown during the boot-up sequence."""
+        out = []
+        try:
+            b = self._brain.status()
+            labels = b.get("cloud", {}).get("labels", [])
+            out.append(["Neural core", " + ".join(labels[:3]) or "local only", bool(labels) or b.get("local", {}).get("ok")])
+            out.append(["Local brain", b.get("local", {}).get("model") or "offline", bool(b.get("local", {}).get("ok"))])
+        except Exception:
+            out.append(["Neural core", "unknown", False])
+        out.append(["Long-term memory", f"{len(self._memory.facts)} facts", True])
+        out.append(["Voice", "neural" if self._speaker.neural_ok else "Windows voice", True])
+        out.append(["Microphone", "ready" if self._recorder.available else "not found", bool(self._recorder.available)])
+        try:
+            out.append(["Phone link", "online" if self._cfg.get("remote", {}).get("enabled") else "off",
+                        bool(self._cfg.get("remote", {}).get("enabled"))])
+            out.append(["Cloud sync", self._sync.status or ("on" if self._sync.enabled else "off"), bool(self._sync.enabled)])
+        except Exception:
+            pass
+        try:
+            hw = [h for h in life.homework() if not h.get("done")]
+            out.append(["Homework", f"{len(hw)} due" if hw else "all clear", True])
+        except Exception:
+            pass
+        try:
+            out.append(["Jobs", f"{sum(1 for j in self._jobs.jobs if j['status'] in ('queued', 'waiting'))} queued", True])
+        except Exception:
+            pass
+        return out
 
     def status(self):
         return self._brain.status()
@@ -1641,6 +1672,87 @@ class Api:
     def minimize(self):
         if self._window:
             self._window.minimize()
+        return True
+
+    def power_down(self):
+        """Plays the power-down sequence (UI animation + voice), then quits."""
+        self._emit("powerdown", title=self._cfg.get("user_title", "sir"))
+        try:
+            if self._cfg["voice"]["speak_replies"]:
+                self._speaker.say(f"Powering down. Goodbye, {self._cfg.get('user_title', 'sir')}.")
+        except Exception:
+            pass
+        threading.Timer(3.2, self.quit).start()
+        return True
+
+    # ---------------------------------------------------------------- holo browser windows (click to drive it yourself)
+    def _bshot(self, delay=0.0):
+        from core.browser import B
+        import base64 as _b64
+
+        def grab(p):
+            if delay:
+                p.wait_for_timeout(int(delay * 1000))
+            return _b64.b64encode(p.screenshot(type="jpeg", quality=60)).decode(), p.url, p.title()
+        img, url, title = B.call(grab, 30)
+        return {"img": img, "url": url, "title": title}
+
+    def browser_shot(self):
+        try:
+            return self._bshot()
+        except Exception as e:
+            return {"error": str(e)}
+
+    def browser_click_at(self, fx, fy):
+        from core.browser import B
+        try:
+            B.call(lambda p: p.mouse.click(float(fx) * p.viewport_size["width"], float(fy) * p.viewport_size["height"]), 20)
+            return self._bshot(0.9)
+        except Exception as e:
+            return {"error": str(e)}
+
+    def browser_scroll(self, dy):
+        from core.browser import B
+        try:
+            B.call(lambda p: p.mouse.wheel(0, int(dy)), 15)
+            return self._bshot(0.35)
+        except Exception as e:
+            return {"error": str(e)}
+
+    def browser_go(self, text):
+        from core.browser import B
+        import urllib.parse as _u
+        t = (text or "").strip()
+        if not t:
+            return {"error": "empty"}
+        if t.lower() == "back":
+            fn = lambda p: p.go_back(timeout=15000)
+        else:
+            url = t if "://" in t else (f"https://{t}" if "." in t and " " not in t else
+                                         "https://duckduckgo.com/?q=" + _u.quote_plus(t))
+            fn = lambda p: p.goto(url, timeout=20000, wait_until="domcontentloaded")
+        try:
+            B.call(fn, 30)
+            return self._bshot(0.6)
+        except Exception as e:
+            return {"error": str(e)}
+
+    def browser_type_text(self, text, enter=False):
+        from core.browser import B
+        try:
+            def go(p):
+                p.keyboard.type(str(text)[:2000], delay=8)
+                if enter:
+                    p.keyboard.press("Enter")
+            B.call(go, 20)
+            return self._bshot(0.8 if enter else 0.2)
+        except Exception as e:
+            return {"error": str(e)}
+
+    def browser_show_real(self, url):
+        import webbrowser
+        if str(url).startswith("http"):
+            webbrowser.open(url)
         return True
 
     def quit(self):

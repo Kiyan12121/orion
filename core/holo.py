@@ -35,7 +35,7 @@ def after_tool(name, args, result):
     """Called by the toolbox after every tool — turns some results into cards / live frames."""
     try:
         if name in LIVE_TOOLS or name.startswith("browser_"):
-            _browser_frame(name, args)
+            _browser_frame(name, args, result)
         elif name in SCREEN_TOOLS:
             _screen_frame(name, args)
         if name == "weather" and not result.startswith("ERROR"):
@@ -47,15 +47,17 @@ def after_tool(name, args, result):
         elif name in ("screen_time", "gaming_stats", "earnings_summary", "money_meeting", "scholar_status",
                       "homework_list", "crm_list", "study_stats"):
             emit_card("text", name.replace("_", " ").title(), text=result[:900])
+        elif name == "web_search" and not result.startswith("ERROR"):
+            items = [l.strip("•-* ").strip() for l in result.split("\n") if l.strip() and not l.strip().lower().startswith(("http", "url"))]
+            if items:
+                emit_card("points", "Search results", items=[i[:150] for i in items[:6]])
         elif name == "idea_score":
             emit_card("text", "Idea scorecard", text=result[:900])
     except Exception:
         pass
 
 
-def _browser_frame(name, args):
-    if time.time() - _last_live[0] < 0.8:
-        return
+def _browser_frame(name, args, result=""):
     _last_live[0] = time.time()
 
     def grab():
@@ -67,11 +69,21 @@ def _browser_frame(name, args):
                    "browser_type": "Typing", "browser_scroll": "Scrolling", "browser_back": "Going back",
                    "browser_read": "Reading", "fetch_page": "Reading"}.get(name, "Working")
             what = args.get("target") or args.get("url") or args.get("url_or_query") or args.get("text") or ""
-            CTX["emit"]("live", kind="browser", img=img_b, url=png[1], title=png[2],
-                        caption=f"{cap} {str(what)[:60]}".strip())
+            CTX["emit"]("live", src="browser", img=img_b, url=png[1], title=png[2],
+                        caption=f"{cap} {str(what)[:60]}".strip(),
+                        found=_found_text(result), tool=name)
         except Exception:
             pass
     threading.Thread(target=grab, daemon=True).start()
+
+
+def _found_text(result):
+    """A short 'what I found' line for the browser window, from the tool's result."""
+    r = str(result or "")
+    if r.startswith("ERROR"):
+        return ""
+    lines = [l.strip() for l in r.split("\n") if l.strip() and not l.strip().startswith(("URL:", "Title:", "["))]
+    return " ".join(lines)[:320]
 
 
 def _screen_frame(name, args):
@@ -83,7 +95,7 @@ def _screen_frame(name, args):
         try:
             time.sleep(0.35)
             import pyautogui
-            CTX["emit"]("live", kind="screen", img=_jpeg(pyautogui.screenshot()), url="", title="Your PC",
+            CTX["emit"]("live", src="screen", img=_jpeg(pyautogui.screenshot()), url="", title="Your PC",
                         caption=f"{name.replace('_', ' ')} {str(list(args.values())[:1])[1:-1][:50]}")
         except Exception:
             pass
@@ -111,3 +123,13 @@ def show_card(kind, title, items=None, text=""):
         data["points"] = pts
     emit_card(kind, title, **data)
     return "Card shown."
+
+
+@tool("Close (or minimise) the pop-up windows/cards on screen — e.g. when the user says 'close that', 'close the browser "
+      "window', 'get rid of that'. what: windows | cards | all. minimise=true to tuck them away instead.",
+      {"what": ("string", "windows | cards | all", False), "minimise": ("boolean", "Minimise instead of closing", False)})
+def close_popups(what="all", minimise=False):
+    emit = CTX.get("emit")
+    if emit:
+        emit("popups", what=what or "all", minimise=bool(minimise))
+    return "Done — tucked away." if minimise else "Closed."

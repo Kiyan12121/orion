@@ -55,7 +55,7 @@ SMART = re.compile(r"\b(code|script|program|build|make|create|write|fix|debug|ex
                    r"plan|research|compare|analy[sz]e|essay|app|bot|website|summari[sz]e|learn|teach|story|"
                    r"translate|calculate|work out|figure|recommend|should i|ideas?|design|review)\b", re.I)
 
-CORE = {"show_card", "queue_job", "mission_start", "weather", "note_add", "homework_add", "get_time", "open_app", "open_website", "web_search", "remember",
+CORE = {"show_card", "close_popups", "queue_job", "mission_start", "weather", "note_add", "homework_add", "get_time", "open_app", "open_website", "web_search", "remember",
         "request_more_tools", "set_theme", "schedule_add", "schedule_list", "check_availability"}
 GROUPS = {
     "computer": ({"type_text", "press_keys", "mouse_click", "scroll", "read_screen", "find_on_screen",

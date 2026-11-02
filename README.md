@@ -1,4 +1,12 @@
-# ORION 4.0 — Personal Intelligence System
+# ORION 4.1 — Personal Intelligence System
+
+## New in 4.1: the Jarvis interface
+- **Boot-up sequence:** the arc reactor assembles, real system checks run (brains, memory, voice, mic, phone link, sync, homework, jobs) and ORION comes online. Click or press Esc to skip (Settings › skip boot gives a quick version).
+- **Power-down sequence:** the power button now powers ORION down properly: it saves, syncs your phone and laptop, says goodbye, and the screen collapses like an old TV.
+- **Pop-up browser windows:** when ORION uses its hidden browser, a holographic window pops out showing it live, then shows what it **found**. Drag it around, pin it, make it full size, minimise it to the dock, or close it (✕ or Esc). You can also drive it yourself: click the page to click, scroll to scroll, type an address, type into the page, or open it in Chrome.
+- Say **"close that"** or **"tuck those away"** and ORION closes or minimises its pop-ups.
+- Web searches pop up as result cards, plus a HUD frame, scan line and click ripples.
+- **Fixed:** the live view from 4.0 never appeared because of a bug. It works now.
 
 ## New in 4.0
 **One brain, everywhere**
