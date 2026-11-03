@@ -85,7 +85,8 @@ class Proactive:
         if items:
             h = dt.datetime.now().hour
             self._card("brief", "points", ("Good morning" if h < 12 else "Good afternoon" if h < 18 else "Good evening") +
-                       f", {self.cfg.get('user_title', 'sir')}", items=items)
+                       f", {self.cfg.get('user_title', 'sir')}", items=items, icon="🌅" if h < 12 else "👋",
+                       actions=[{"label": "Read it to me", "say": "give me a quick briefing out loud"}, {"label": "Dashboard", "page": "dash"}])
 
     def _welcome_back(self, since):
         mins = int((time.time() - since) / 60)
@@ -111,7 +112,7 @@ class Proactive:
             pass
         if items and mins >= 20:
             self._card(f"back-{int(since)}", "points", f"While you were away ({mins // 60}h {mins % 60}m)" if mins >= 60 else f"While you were away ({mins} min)",
-                       items=items[:6])
+                       items=items[:6], icon="🛰️", actions=[{"label": "Tell me more", "say": "what did you get done while I was away?"}])
 
     def _checks(self):
         now = dt.datetime.now()
@@ -120,8 +121,9 @@ class Proactive:
             for o in upcoming(1):
                 mins = (o["at"] - now).total_seconds() / 60
                 if 0 < mins <= 15:
-                    self._card(f"ev-{o['title']}-{o['at']:%H%M}", "text", f"In {int(mins) + 1} min: {o['title']}",
-                               text=f"{o['at']:%H:%M} — {o['title']}" + (f"\n{o.get('notes', '')}" if o.get("notes") else ""))
+                    self._card(f"ev-{o['title']}-{o['at']:%H%M}", "text", f"In {int(mins) + 1} min: {o['title']}", icon="⏰",
+                               text=f"{o['at']:%H:%M} — {o['title']}" + (f"\n{o.get('notes', '')}" if o.get("notes") else ""),
+                               actions=[{"label": "Snooze 10 min", "say": f"remind me about {o['title']} in 10 minutes"}, {"label": "Open plan", "page": "sched"}])
         except Exception:
             pass
         try:                                                     # homework due tomorrow (after school)
@@ -129,7 +131,8 @@ class Proactive:
                 from .life import homework
                 due = [h for h in homework() if not h.get("done") and h["days"] == 1]
                 if due:
-                    self._card("hw-tomorrow", "points", "Due tomorrow", items=[f"{h['subject']} — {h['task']}" for h in due[:5]])
+                    self._card("hw-tomorrow", "points", "Due tomorrow", items=[f"{h['subject']} — {h['task']}" for h in due[:5]], icon="📝",
+                               actions=[{"label": "Plan tonight", "say": "plan my homework for tonight around my schedule"}, {"label": "Open homework", "page": "study"}])
         except Exception:
             pass
         try:                                                     # rain coming
@@ -139,7 +142,7 @@ class Proactive:
                 if w.get("rain_at"):
                     rh = int(w["rain_at"][:2])
                     if 0 <= rh - now.hour <= 2:
-                        self._card(f"rain-{rh}", "weather", f"Rain around {w['rain_at']}", weather=w)
+                        self._card(f"rain-{rh}", "weather", f"Rain around {w['rain_at']}", weather=w, actions=[{"label": "Full forecast", "say": "what's the weather for the rest of today?"}])
         except Exception:
             pass
         try:                                                     # too much YouTube/TikTok tonight
@@ -148,7 +151,8 @@ class Proactive:
                 for app, mins in screen_day()[:6]:
                     if app.lower() in ("youtube", "tiktok") and mins >= 90:
                         self._card(f"st-{app}", "text", f"{app}: {mins // 60}h {mins % 60}m today",
-                                   text="Shall I start a 25-minute focus round? Say “focus 25”.")
+                                   text="Shall I start a 25-minute focus round?", icon="📵",
+                                   actions=[{"label": "Focus 25", "say": "start a 25 minute focus session"}, {"label": "Not now", "page": ""}])
         except Exception:
             pass
         try:                                                     # money goal milestones
@@ -164,6 +168,7 @@ class Proactive:
                     self.once.add(f"{key}@{top}")
                     m = top
                     self._card(f"goal-{g['name']}-{m}", "chart", f"🎯 {g['name']}: {g['pct']}%",
-                                   points=[["Got", g["got"]], ["Target", g["target"]]], sound=m == 100)
+                                   points=[["Got", g["got"]], ["Target", g["target"]]], sound=m == 100, icon="🎯",
+                                   actions=[{"label": "CEO page", "page": "ventures"}])
         except Exception:
             pass

@@ -885,6 +885,63 @@ body.skin-aurora .page .tile h5{color:var(--text)!important}
 body.skin-aurora .toast{border-radius:18px}
 body.skin-aurora #liveview{border-radius:22px}
 
+/* ===== 5.1 pop-ups ===== */
+#holo .hcol{position:absolute;top:10px;bottom:40px;width:min(340px,42%);display:flex;flex-direction:column;gap:12px;pointer-events:none}
+#holo .hcol.r{right:0;align-items:flex-end}#holo .hcol.l{left:0}
+#holo .hcol .hc2{position:relative!important;left:auto!important;top:auto!important;width:100%!important;flex:none;pointer-events:auto}
+.hc2{width:min(340px,40%)!important;padding:0!important;border-radius:14px!important;overflow:hidden;border:1px solid rgba(var(--ar),.45)!important;
+  background:linear-gradient(160deg,rgba(var(--ar),.18),rgba(4,12,22,.92) 55%)!important;box-shadow:0 18px 50px rgba(0,0,0,.55),0 0 34px rgba(var(--ar),.18),inset 0 1px 0 rgba(255,255,255,.08)!important;
+  backdrop-filter:blur(16px);animation:hcIn .7s cubic-bezier(.2,1.1,.3,1) var(--d,0s) both!important;transform-origin:top center;transition:width .35s,box-shadow .3s}
+@keyframes hcIn{0%{opacity:0;transform:perspective(700px) rotateX(-75deg) scale(.6);filter:blur(8px) brightness(2)}60%{opacity:1;filter:blur(0) brightness(1.4)}100%{transform:none;filter:none}}
+.hc2.out{animation:hcOut .5s cubic-bezier(.6,0,.8,.4) forwards!important}
+@keyframes hcOut{to{opacity:0;transform:perspective(700px) rotateX(60deg) scale(.5) translateY(-20px);filter:blur(6px)}}
+.hc2::before{background:repeating-linear-gradient(0deg,rgba(var(--ar),.05) 0 1px,transparent 1px 4px)!important}
+.hc2 .hc-top{display:flex;align-items:center;gap:11px;padding:12px 12px 10px 14px;border-bottom:1px solid rgba(var(--ar),.18);position:relative}
+.hc2 .hc-ic{font-style:normal;width:36px;height:36px;border-radius:10px;display:grid;place-items:center;font-size:19px;flex:none;
+  background:radial-gradient(circle at 30% 25%,rgba(255,255,255,.25),rgba(var(--ar),.25) 60%,rgba(var(--ar),.08));box-shadow:0 0 16px rgba(var(--ar),.35),inset 0 0 0 1px rgba(var(--ar),.45)}
+.hc2 .hc-t{flex:1;min-width:0}.hc2 .hc-t small{display:block;font:600 9.5px var(--ui);letter-spacing:.22em;color:var(--dim);text-transform:uppercase}
+.hc2 .hc-t b{display:block;font:700 15px var(--ui);color:#fff;margin-top:2px;line-height:1.25}
+.hc2 .hc-btns{display:flex;gap:2px;opacity:.55;transition:.2s}.hc2:hover .hc-btns{opacity:1}
+.hc2 .hc-btns button{background:none;border:0;color:var(--dim);cursor:pointer;font-size:12px;width:24px;height:24px;border-radius:6px}.hc2 .hc-btns button:hover{background:rgba(var(--ar),.15);color:#fff}
+.hc2 .hc-body{padding:11px 14px 12px;cursor:zoom-in;font-size:14px}
+.hc2 .hc-body ul{font-size:14px}.hc2 .hc-body p{font-size:14px}
+.hc2 .hbar i{width:var(--w);animation:barIn .9s cubic-bezier(.2,.9,.2,1) both}@keyframes barIn{from{width:0}}
+.hc2 .hbar i{display:block;height:100%}
+.hc2 .hc-acts{display:flex;gap:6px;padding:0 14px 12px;flex-wrap:wrap}
+.hc2 .hc-acts button{flex:1;min-width:0;background:rgba(var(--ar),.14);border:1px solid rgba(var(--ar),.45);color:#fff;font:600 12.5px var(--ui);padding:8px 10px;border-radius:9px;cursor:pointer;transition:.15s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hc2 .hc-acts button:first-child{background:linear-gradient(135deg,rgba(var(--ar),.55),rgba(var(--ar),.25))}
+.hc2 .hc-acts button:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(var(--ar),.3)}
+.hc2 .hc-life{height:2px;background:rgba(var(--ar),.1)}.hc2 .hc-life i{display:block;height:100%;background:linear-gradient(90deg,var(--a),var(--a2));box-shadow:0 0 8px var(--a);animation:lifeBar linear forwards;transform-origin:left}
+@keyframes lifeBar{from{transform:scaleX(1)}to{transform:scaleX(0)}}
+.hc2.hold .hc-life i{animation-play-state:paused}
+.hc2.pinned{border-color:var(--a2)!important}.hc2.pinned .hc-life{display:none}
+.hc2.big{position:fixed!important;left:50%!important;top:50%!important;width:min(680px,80vw)!important;transform:translate(-50%,-50%);z-index:70;animation:none!important;cursor:auto}
+.hc2.big .hc-body{cursor:zoom-out;font-size:16px;max-height:60vh;overflow:auto}.hc2.big .hc-body p,.hc2.big ul{font-size:16px}
+.hc2.pro{border-color:rgba(255,190,85,.6)!important;box-shadow:0 18px 50px rgba(0,0,0,.55),0 0 34px rgba(255,190,85,.22)!important}
+.hc2.pro .hc-ic{background:radial-gradient(circle at 30% 25%,rgba(255,255,255,.3),rgba(255,190,85,.35) 60%,rgba(255,190,85,.1));box-shadow:0 0 16px rgba(255,190,85,.4),inset 0 0 0 1px rgba(255,190,85,.55)}
+.hc2.pro .hc-t small{color:var(--amber)}.hc2.pro h6::before{display:none}
+.hc2.pro .hc-life i{background:linear-gradient(90deg,var(--amber),#ffe1a8);box-shadow:0 0 8px var(--amber)}
+.hbeam{position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:6}
+.hbeam line{stroke:var(--a2);stroke-width:1.5;stroke-dasharray:1200;stroke-dashoffset:1200;animation:beam .8s ease-out forwards;filter:drop-shadow(0 0 6px var(--a))}
+.hbeam circle{fill:#fff;opacity:0;animation:beamDot .8s .3s ease-out forwards;filter:drop-shadow(0 0 8px var(--a))}
+@keyframes beam{40%{stroke-dashoffset:0;opacity:1}100%{stroke-dashoffset:0;opacity:0}}@keyframes beamDot{30%{opacity:1;r:7}100%{opacity:0;r:16}}
+/* toasts */
+.toast.t2{display:flex!important;align-items:center;gap:11px;padding:12px 16px 14px!important;border-radius:12px!important;border:1px solid rgba(var(--ar),.35)!important;border-left:3px solid var(--a)!important;
+  background:linear-gradient(135deg,rgba(var(--ar),.16),rgba(4,12,22,.95) 60%)!important;backdrop-filter:blur(14px);pointer-events:auto;cursor:pointer;font-size:14.5px!important;
+  animation:tIn .5s cubic-bezier(.2,1.2,.3,1)!important;box-shadow:0 12px 34px rgba(0,0,0,.5),0 0 22px rgba(var(--ar),.15)!important}
+.toast.t2::before{display:none!important}.toast.t2::after{display:none!important}
+.toast.t2 .tic{font-style:normal;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-size:12px;background:rgba(var(--ar),.25);color:#fff;flex:none}
+.toast.t2.warn{border-left-color:var(--amber)!important}.toast.t2.warn .tic{background:rgba(255,179,71,.3)}
+.toast.t2 u{position:absolute;left:0;bottom:0;height:2px;width:100%;background:var(--a);transform-origin:left;animation:lifeBar 4.6s linear forwards}
+@keyframes tIn{from{opacity:0;transform:translateX(40px) scale(.95);filter:blur(4px)}}
+/* feed */
+.feedwrap{padding:4px 0}.feedh{font:700 9.5px var(--ui);letter-spacing:.24em;color:var(--dim);padding:10px 14px 6px}
+.fd{padding:9px 14px;border-bottom:1px solid var(--line);cursor:pointer;transition:.15s}.fd:hover{background:rgba(var(--ar),.08)}
+.fd time{font:10px var(--mono);color:var(--a);margin-right:8px}.fd b{font-size:13.5px}.fd small{display:block;color:var(--dim);font-size:12px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+body.skin-aurora .hc2{border-radius:22px!important;background:rgba(22,26,36,.88)!important;border:1px solid rgba(255,255,255,.12)!important}
+body.skin-aurora .hc2::before{display:none}body.skin-aurora .hc2 .hc-acts button{border-radius:999px}
+body.skin-aurora .toast.t2{border-radius:18px!important;background:rgba(22,26,36,.92)!important;border:1px solid rgba(255,255,255,.12)!important}
+
 </style>
 </head>
 <body class="state-idle" data-theme="standby">
@@ -1409,7 +1466,7 @@ body.skin-aurora #liveview{border-radius:22px}
 <div id="toasts"></div>
 <div id="upd"><span id="updtxt">Update available</span><button class="btn small" id="updGo">INSTALL</button><button class="x" id="updX">×</button></div>
 
-<div class="drawer" id="drawer"><div class="ph">NOTIFICATIONS <span><button id="nclear">CLEAR</button> <button id="nclose">CLOSE</button></span></div><div style="flex:1;overflow:auto" id="nlist"><div class="nt"><div class="empty">Nothing yet.</div></div></div></div>
+<div class="drawer" id="drawer"><div class="ph">TODAY'S FEED <span><button id="nclear">CLEAR</button> <button id="nclose">CLOSE</button></span></div><div class="feedwrap"><h6 class="feedh">POP-UPS · CLICK TO REOPEN</h6><div id="feedList"></div><h6 class="feedh">NOTIFICATIONS</h6></div><div style="flex:1;overflow:auto" id="nlist"><div class="nt"><div class="empty">Nothing yet.</div></div></div></div>
 
 <div id="palette"><div class="pal"><input id="palin" placeholder="Type a command or ask anything…"><div class="items" id="palitems"></div></div></div>
 
@@ -1625,8 +1682,12 @@ function logTool(e){ const key=e.name+e.args, icon={running:"◌",ok:"✓",error
 $("#undoBtn").onclick=()=>api.undo();
 
 /* ================= toasts + notification centre ================= */
-function toast(text,level){ const t=document.createElement("div"); t.className="toast "+(level||""); t.textContent=text; $("#toasts").appendChild(t);
-  setTimeout(()=>{t.classList.add("out"); setTimeout(()=>t.remove(),300);},4400);
+function toast(text,level){ const t=document.createElement("div"); t.className="toast t2 "+(level||"");
+  const ic=level==="warn"?"⚠":level==="err"?"✕":/^[\p{Extended_Pictographic}]/u.test(text)?"":"◆";
+  t.innerHTML=`${ic?`<i class="tic">${ic}</i>`:""}<span>${esc(text)}</span><u></u>`; $("#toasts").appendChild(t);
+  t.onclick=()=>{ t.classList.add("out"); setTimeout(()=>t.remove(),300); };
+  if($("#toasts").children.length>4) $("#toasts").firstElementChild.remove();
+  setTimeout(()=>{t.classList.add("out"); setTimeout(()=>t.remove(),300);},4600);
   notes.unshift({t:hhmm(),text,level}); notes=notes.slice(0,80); if(!$("#drawer").classList.contains("show")){ unread++; paintBell(); } renderNotes(); }
 function paintBell(){ $("#ncount").textContent=unread>9?"9+":unread; $("#ncount").classList.toggle("show",unread>0); }
 function renderNotes(){ $("#nlist").innerHTML=notes.length?notes.map(n=>`<div class="nt"><time>${n.t}</time>${esc(n.text)}</div>`).join(""):'<div class="nt"><div class="empty">Nothing yet.</div></div>'; }
@@ -1980,23 +2041,43 @@ $("#ntText").addEventListener("keydown",e=>{ if(e.key==="Enter") $("#ntAdd").cli
 
 /* ================= v4: holographic cards ================= */
 const HOLO={list:[],slots:[[58,8],[58,36],[58,64],[2,10],[2,40],[2,68]]};
-function holoCard(c){ const el=document.createElement("div"); if(c&&c.proactive) setTimeout(()=>el.classList.add("pro"),0); el.className="hcard"; let body="";
-  if(c.kind==="weather"&&c.weather){ const w=c.weather; body=`<div class="hwx"><div class="i">${WXI(w.code)}</div><div><b>${w.temp}°</b><small>${esc(w.sky)} · feels ${w.feels}°</small><small>${w.rain_at?"rain from "+w.rain_at:"no rain soon"} · sunset ${w.sunset}</small></div></div>`; }
-  else if(c.kind==="steps") body=`<ol>${(c.items||[]).map((x,i)=>`<li style="animation-delay:${i*.12}s">${esc(x)}</li>`).join("")}</ol>`;
-  else if(c.kind==="chart"){ const pts=c.points||[]; const mx=Math.max(1,...pts.map(p=>p[1])); body=pts.map(p=>`<div class="hbar"><b>${esc(p[0])}</b><div><i style="width:${p[1]/mx*100}%"></i></div><span>${p[1]}</span></div>`).join(""); }
+const HC_ICON={weather:"",points:"💠",steps:"🧭",chart:"📊",code:"⌨️",text:"💬",image:"🖼️",list:"📰"};
+function holoCard(c){ c=c||{}; const el=document.createElement("div"); el.className="hcard hc2 kind-"+(c.kind||"points")+(c.proactive?" pro":""); let body="";
+  if(c.kind==="weather"&&c.weather){ const w=c.weather; body=`<div class="hwx"><div class="i">${WXI(w.code)}</div><div><b>${w.temp}°</b><small>${esc(w.sky)}${w.feels!=null?` · feels ${w.feels}°`:""}</small><small>${w.rain_at?"rain from "+esc(w.rain_at):"no rain soon"}${w.sunset?` · sunset ${esc(w.sunset)}`:""}</small></div></div>`; }
+  else if(c.kind==="steps") body=`<ol>${(c.items||[]).map((x,i)=>`<li style="animation-delay:${.25+i*.1}s">${esc(x)}</li>`).join("")}</ol>`;
+  else if(c.kind==="chart"){ const pts=c.points||[]; const mx=Math.max(1,...pts.map(p=>p[1])); body=pts.map((p,i)=>`<div class="hbar"><b>${esc(p[0])}</b><div><i style="--w:${p[1]/mx*100}%;animation-delay:${.2+i*.08}s"></i></div><span>${p[1]}</span></div>`).join(""); }
   else if(c.kind==="code") body=`<pre>${esc(c.text||"")}</pre>`;
-  else if(c.kind==="image") body=`<img src="${c.src}" style="width:100%;border-radius:6px">`;
+  else if(c.kind==="image") body=`<img src="${c.src}" style="width:100%;border-radius:8px">`;
   else if(c.kind==="text") body=`<p>${esc(c.text||"")}</p>`;
-  else body=`<ul>${(c.items||[]).map((x,i)=>`<li style="animation-delay:${i*.1}s">${esc(x)}</li>`).join("")}</ul>`;
-  el.innerHTML=`<h6>${esc(c.title||"")}<span><button title="Pin">📌</button><button title="Close">✕</button></span></h6>${body}`;
-  const used=HOLO.list.map(h=>h.slot); const slot=HOLO.slots.findIndex((_,i)=>!used.includes(i)); const si=slot<0?0:slot;
-  if(slot<0){ const old=HOLO.list.find(h=>!h.pinned); if(old) holoKill(old); }
-  const [x,y]=HOLO.slots[si]; el.style.left=x+"%"; el.style.top=y+"%"; if(x<20) el.style.transformOrigin="center right";
-  const h={el,slot:si,pinned:false}; HOLO.list.push(h); $("#holo").appendChild(el); sfx("card");
-  el.querySelectorAll("h6 button")[0].onclick=()=>{ h.pinned=!h.pinned; el.classList.toggle("pinned",h.pinned); };
-  el.querySelectorAll("h6 button")[1].onclick=()=>holoKill(h);
-  h.timer=setTimeout(()=>{ if(!h.pinned) holoKill(h); },32000); }
-function holoKill(h){ clearTimeout(h.timer); h.el.classList.add("out"); setTimeout(()=>h.el.remove(),450); HOLO.list=HOLO.list.filter(x=>x!==h); }
+  else body=`<ul>${(c.items||[]).map((x,i)=>`<li style="animation-delay:${.25+i*.08}s">${esc(x)}</li>`).join("")}</ul>`;
+  const icon=c.icon||(c.kind==="weather"&&c.weather?WXI(c.weather.code):HC_ICON[c.kind]||"💠");
+  const acts=(c.actions||[]).slice(0,3).map((a,i)=>`<button data-i="${i}">${esc(typeof a==="string"?a:a.label)}</button>`).join("");
+  const life=c.pinned?0:(c.proactive?45:32);
+  el.innerHTML=`<div class="hc-top"><i class="hc-ic">${icon}</i><div class="hc-t"><small>${c.proactive?"ORION · on its own":"ORION"} · ${hhmm()}</small><b>${esc(c.title||"")}</b></div>
+    <span class="hc-btns"><button title="Pin">📌</button><button title="Close">✕</button></span></div><div class="hc-body">${body}</div>${acts?`<div class="hc-acts">${acts}</div>`:""}${life?`<div class="hc-life"><i style="animation-duration:${life}s"></i></div>`:""}`;
+  if(!$("#holo .hcol")) $("#holo").innerHTML='<div class="hcol l"></div><div class="hcol r"></div>';
+  const nR=HOLO.list.filter(h=>h.col==="r").length, nL=HOLO.list.filter(h=>h.col==="l").length;
+  if(nR>=3&&nL>=3){ const old=HOLO.list.find(h=>!h.pinned); if(old) holoKill(old); }
+  const col=(nR<=nL||nL>=3)&&nR<3?"r":"l";
+  const h={el,col,pinned:false,card:c}; HOLO.list.push(h); $("#holo .hcol."+col).prepend(el); sfx(c.proactive?"done":"card"); holoBeam(el);
+  const [pin,close]=el.querySelectorAll(".hc-btns button");
+  pin.onclick=e=>{ e.stopPropagation(); h.pinned=!h.pinned; el.classList.toggle("pinned",h.pinned); };
+  close.onclick=e=>{ e.stopPropagation(); holoKill(h); };
+  el.querySelectorAll(".hc-acts button").forEach(b=>b.onclick=e=>{ e.stopPropagation(); const a=(c.actions||[])[+b.dataset.i]; if(!a) return;
+    if(typeof a==="string"||a.say) send(typeof a==="string"?a:a.say); else if(a.page) go(a.page); else if(a.tool&&api.pc_tool) pcTool(a.tool,a.args||{},a.label);
+    sfx("ok"); holoKill(h); });
+  el.querySelector(".hc-body").onclick=()=>{ el.classList.toggle("big"); if(el.classList.contains("big")){ h.pinned=true; el.classList.add("pinned"); } };
+  if(life) h.timer=setTimeout(()=>{ if(!h.pinned) holoKill(h); },life*1000);
+  el.addEventListener("mouseenter",()=>{ clearTimeout(h.timer); el.classList.add("hold"); });
+  el.addEventListener("mouseleave",()=>{ el.classList.remove("hold"); if(!h.pinned&&life) h.timer=setTimeout(()=>{ if(!h.pinned) holoKill(h); },8000); });
+  FEED.unshift({t:hhmm(),c}); FEED=FEED.slice(0,60); renderFeed(); }
+let FEED=[];
+function holoBeam(el){ const core=document.querySelector(".orb"); if(!core||document.body.classList.contains("lite")) return; const a=core.getBoundingClientRect(), b=el.getBoundingClientRect();
+  const sv=document.createElementNS("http://www.w3.org/2000/svg","svg"); sv.setAttribute("class","hbeam"); const x1=a.left+a.width/2, y1=a.top+a.height/2, x2=b.left+(b.left>x1?0:b.width), y2=b.top+20;
+  sv.innerHTML=`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/><circle cx="${x2}" cy="${y2}" r="4"/>`; document.body.appendChild(sv); setTimeout(()=>sv.remove(),900); }
+function renderFeed(){ const l=$("#feedList"); if(!l) return; l.innerHTML=FEED.length?FEED.map((f,i)=>`<div class="fd" data-i="${i}"><time>${f.t}</time><b>${esc(f.c.title||"")}</b><small>${esc(((f.c.items||[]).join(" · ")||f.c.text||"").slice(0,110))}</small></div>`).join(""):'<div class="empty" style="padding:12px 14px">Nothing yet today.</div>';
+  $$("#feedList .fd").forEach(d=>d.onclick=()=>holoCard({...FEED[+d.dataset.i].c,proactive:false})); }
+function holoKill(h){ clearTimeout(h.timer); h.el.classList.add("out"); setTimeout(()=>h.el.remove(),500); HOLO.list=HOLO.list.filter(x=>x!==h); }
 function holoClear(){ HOLO.list.filter(h=>!h.pinned).forEach(holoKill); }
 
 /* ================= v4: live view ================= */

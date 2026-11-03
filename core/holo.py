@@ -107,8 +107,9 @@ def _screen_frame(name, args):
       {"kind": ("string", "points | steps | chart | code | text", True),
        "title": ("string", "Short title", True),
        "items": ("array", "Bullet points / steps / 'label: number' pairs for a chart", False),
-       "text": ("string", "Text or code (for kind text/code)", False)})
-def show_card(kind, title, items=None, text=""):
+       "text": ("string", "Text or code (for kind text/code)", False),
+       "actions": ("array", "Optional 1-3 one-click buttons: short things the user might say next, e.g. 'Quiz me on this'", False)})
+def show_card(kind, title, items=None, text="", actions=None):
     kind = kind if kind in ("points", "steps", "chart", "code", "text") else "points"
     data = {"items": [str(i)[:160] for i in (items or [])][:10], "text": (text or "")[:2500]}
     if kind == "chart":
@@ -121,6 +122,8 @@ def show_card(kind, title, items=None, text=""):
                 except ValueError:
                     pass
         data["points"] = pts
+    if actions:
+        data["actions"] = [{"label": str(a)[:30], "say": str(a)[:200]} for a in actions[:3]]
     emit_card(kind, title, **data)
     return "Card shown."
 

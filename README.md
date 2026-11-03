@@ -1,4 +1,14 @@
-# ORION 5.0 — Personal Intelligence System
+# ORION 5.1 — Personal Intelligence System
+
+## New in 5.1: pop-ups, rebuilt
+- **New holographic pop-ups:**
+  - They unfold in 3D with a beam firing from the reactor.
+  - Each has an icon, title and time, and charts animate in.
+  - They stack neatly on either side of the reactor without covering each other.
+- **Buttons on pop-ups:** "Snooze 10 min", "Plan tonight", "Focus 25", "Read it to me", "Quiz me on this"… ORION adds follow-up buttons to its own cards too.
+- **Hover to keep it:** hovering pauses it, a countdown line shows how long it'll stay, 📌 pins it, and clicking it opens it big.
+- **Today's feed:** the 🔔 drawer lists every pop-up from today, and you can click one to reopen it.
+- **New toasts:** icons and a countdown line, click to dismiss, and at most 4 at once.
 
 ## New in 5.0: the PC interface, rebuilt
 - **Two styles:** the upgraded **Jarvis HUD** (default), or **Aurora**: soft glass, rounded panels, a glowing orb and moving colour behind it. Switch with the ◐ button in the top bar or in Settings.
