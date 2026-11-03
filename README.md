@@ -1,4 +1,16 @@
-# ORION 4.4 — Personal Intelligence System
+# ORION 4.5 — Personal Intelligence System
+
+## New in 4.5 (PC)
+- **Holographic screensaver:** when you're away (same time as autonomous mode, 30 min by default), ORION goes full-screen with a rotating wireframe globe, orbit rings, data arcs, a big clock, weather, what's coming up, money and homework, live CPU/RAM, and a running feed of what it's doing on its own. Move the mouse and it's gone. It never appears while you're gaming, watching a video or playing music, or when another app is full-screen. Elements drift slowly so nothing burns in. Settings › screensaver; "show the screensaver" or the button on the Dashboard shows it any time.
+- **PC tools** (Dashboard, or just ask):
+  - Tidy Downloads into folders, which can be undone.
+  - Biggest files, duplicate finder (report only), copy all the text on screen (OCR) and a colour picker.
+  - Internet speed test and startup apps.
+  - Window layouts ("put Discord and Chrome side by side", quarters, thirds, focus).
+  - Per-app volume ("turn Discord down", "mute Chrome").
+- **Ambient sounds for focus:** rain, brown noise, white noise, waves, café or space, generated live ("play rain for 45 minutes").
+- **Habits:** track habits with streaks and a 7-day strip on the Dashboard ("done revise 30 min").
+- **Break reminders:** after 50 minutes of non-stop PC use you get a stretch, water or eyes reminder. Never while gaming, and you can turn on voice in Settings.
 
 ## New in 4.4: the Skill Library (505 skills)
 - **505 ready-made skills.** ORION finds and uses the right one by itself. You can also browse them (PC: Skills page · phone: More › Skills), or type **/name** in chat, e.g. `/convert 5 miles to km`, `/quadratic 1 -5 6`, `/essayplan How is ambition presented in Macbeth?`.

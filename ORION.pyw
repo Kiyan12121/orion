@@ -34,6 +34,7 @@ from core import money                                      # noqa: E402
 from core import holo                                       # noqa: E402,F401
 from core import plus                                       # noqa: E402
 from core import skillbook                                  # noqa: E402
+from core import saver, pctools                             # noqa: E402
 from core.autonomy import Autonomy                          # noqa: E402
 from core import gaming as gaming_mod                        # noqa: E402
 from core.routines import NightShift                        # noqa: E402
@@ -104,6 +105,8 @@ class Api:
         self._jobs = Jobs(self._cfg, self._run_job, lambda t, title=None: self._push.send(t, title), self._emit)
         self._jobs.on_finish = self._job_finished
         self._autonomy = Autonomy(self._cfg, self._jobs, self._emit)
+        self._saver = saver.Saver(self._cfg, self._emit, lambda: self._window)
+        self._breaks = pctools.Breaks(self._cfg, lambda t: self._speaker.say(t), lambda t: self._emit("toast", text="🧘 " + t))
         self._bedtime = plus.Bedtime(self._cfg, lambda t: self._speaker.say(t),
                                      lambda t: self._emit("toast", text="🌙 " + t),
                                      lambda: self._sync.enabled and threading.Thread(target=self._sync.sync_now, daemon=True).start())
@@ -1686,6 +1689,49 @@ class Api:
         if self._window:
             self._window.minimize()
         return True
+
+    # ---------------------------------------------------------------- screensaver + PC tools
+    def saver_data(self):
+        d = saver.saver_data()
+        d["on"] = self._saver.on
+        return d
+
+    def saver_show(self):
+        threading.Timer(0.6, lambda: self._saver.show(auto=False)).start()
+        return True
+
+    def saver_exit(self):
+        self._saver.hide()
+        return True
+
+    def saver_get(self):
+        return {**self._saver.sc, "autonomy_idle": self._cfg.get("autonomy", {}).get("idle_minutes", 30),
+                "break_minutes": self._cfg.get("break_minutes", 50), "break_voice": self._cfg.get("break_voice", False)}
+
+    def saver_set(self, b):
+        sc = self._saver.sc
+        for k in ("enabled", "only_autonomy"):
+            if k in b:
+                sc[k] = bool(b[k])
+        if "idle_minutes" in b:
+            sc["idle_minutes"] = max(0, int(b["idle_minutes"] or 0))
+        if "break_minutes" in b:
+            self._cfg["break_minutes"] = max(0, int(b["break_minutes"] or 0))
+        if "break_voice" in b:
+            self._cfg["break_voice"] = bool(b["break_voice"])
+        config_mod.save(self._cfg)
+        return self.saver_get()
+
+    def pc_tool(self, name, args=None):
+        """Buttons on the dashboard run PC tools directly."""
+        allowed = {"tidy_downloads", "tidy_undo", "big_files", "find_duplicates", "screen_text", "pick_colour", "speed_test",
+                   "startup_apps", "habit", "ambient", "window_layout", "screensaver_show"}
+        if name not in allowed:
+            return {"ok": False, "result": "Not allowed."}
+        return {"ok": True, "result": self._toolbox.run(name, args or {})}
+
+    def habits_get(self):
+        return pctools.habits()
 
     # ---------------------------------------------------------------- skill library
     def skilllib_get(self):

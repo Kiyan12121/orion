@@ -727,6 +727,42 @@ body.lite #hud .scanl{display:none}
 #slOut .res{white-space:pre-wrap;font-size:13.5px;line-height:1.5;user-select:text}
 .sltitle{font:700 11px var(--ui);letter-spacing:.3em;color:var(--dim);margin:6px 0 8px}.sltitle i{font-style:normal;color:var(--a2)}
 
+/* ---- 4.5 screensaver ---- */
+#saver{position:fixed;inset:0;z-index:150;background:#000;display:none;opacity:0;transition:opacity .6s;cursor:none;--sx:0px;--sy:0px;overflow:hidden}
+#saver.show{display:block;opacity:1;animation:svin 1.2s ease}#saver.bye{opacity:0}
+@keyframes svin{from{opacity:0;filter:brightness(3) blur(6px)}}
+#svC{position:absolute;inset:0;width:100%;height:100%}
+.svvig{position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 50%,rgba(0,0,0,.75));pointer-events:none}
+#saver>div:not(.svvig){transform:translate(var(--sx),var(--sy));transition:transform 3s}
+.svtl{position:absolute;left:5vw;top:6vh}.svclock{font:200 13vh/1 var(--ui);color:#fff;letter-spacing:.02em;text-shadow:0 0 30px rgba(var(--ar),.7)}
+.svclock em{font-style:normal;color:var(--a);animation:blink 1s steps(1) infinite}
+.svdate{font:700 1.6vh var(--ui);letter-spacing:.5em;color:var(--a2);margin-top:1.2vh}.svwx{font:500 2vh var(--ui);color:var(--dim);margin-top:1.4vh}.svwx b{color:#fff;font-size:2.6vh}
+.svtr{position:absolute;right:5vw;top:7vh;width:24vw;text-align:right}
+.svtr h6,.svbl .svmode{font:700 1.15vh var(--ui);letter-spacing:.4em;color:var(--a2);margin-bottom:1vh}
+.svrow{font:500 1.8vh var(--ui);color:var(--dim);padding:.6vh 0;border-bottom:1px solid rgba(var(--ar),.12)}.svrow b{color:#fff;margin-right:.8vw;font-weight:600}
+.svbl{position:absolute;left:5vw;bottom:10vh;width:38vw}
+.svmode{display:flex;align-items:center;gap:.8vw}.svmode i{width:1vh;height:1vh;border-radius:50%;background:var(--green);box-shadow:0 0 12px var(--green);animation:blink 1.6s infinite}
+.svnow{font:600 2.6vh var(--ui);color:#fff;margin:.6vh 0 1.4vh;text-shadow:0 0 18px rgba(var(--ar),.5)}
+.svlog div{font:1.55vh var(--mono);color:var(--dim);padding:.35vh 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;animation:revU .6s both}
+.svlog time{color:var(--a);margin-right:1vw}
+.svbr{position:absolute;right:5vw;bottom:10vh;display:flex;gap:2.4vw}
+.svg{text-align:center;min-width:6vw}.svg b{display:block;font:300 4.6vh var(--ui);color:#fff}.svg span{font:700 1.1vh var(--ui);letter-spacing:.35em;color:var(--dim)}
+.svg i{display:block;height:3px;background:rgba(var(--ar),.15);margin-top:.8vh;border-radius:2px;overflow:hidden}.svg u{display:block;height:100%;background:var(--a);box-shadow:0 0 8px var(--a);transition:width 1s}
+.svticker{position:absolute;left:0;right:0;bottom:4.2vh;white-space:nowrap;overflow:hidden;font:600 1.5vh var(--ui);letter-spacing:.18em;color:rgba(var(--ar),.65);transform:none!important}
+.svticker span{display:inline-block;animation:tick 60s linear infinite;padding-right:2vw}@keyframes tick{to{transform:translateX(-100%)}}
+.svhint{position:absolute;left:0;right:0;bottom:1.4vh;text-align:center;font:600 1.05vh var(--ui);letter-spacing:.5em;color:var(--faint)}
+/* ---- 4.5 tools ---- */
+.ptgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.ptgrid button{background:rgba(var(--ar),.06);border:1px solid var(--line);border-radius:6px;color:var(--text);font-size:20px;padding:10px 4px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;transition:.15s}
+.ptgrid button span{font:600 11px var(--ui);color:var(--dim)}.ptgrid button:hover{border-color:var(--a);background:rgba(var(--ar),.16);transform:translateY(-2px)}
+.ambbtns{display:flex;gap:6px;flex-wrap:wrap}.ambbtns button{background:none;border:1px solid var(--line2);color:var(--dim);font:600 12px var(--ui);padding:6px 11px;border-radius:999px;cursor:pointer}
+.ambbtns button.on{color:#fff;border-color:var(--a);background:rgba(var(--ar),.2);box-shadow:0 0 12px rgba(var(--ar),.3)}
+.hab{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--line)}.hab:last-child{border:0}
+.hab button{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--line2);background:none;color:#04121c;font-weight:800;cursor:pointer;flex:none}
+.hab.done button{background:var(--green);border-color:var(--green);box-shadow:0 0 10px rgba(93,255,176,.5)}
+.hab div{flex:1;min-width:0}.hab b{display:block;font-size:13.5px}.hab small{color:var(--dim);font-size:11.5px}
+.hab .wk{display:flex;gap:3px}.hab .wk i{width:7px;height:16px;border-radius:2px;background:rgba(var(--ar),.12)}.hab .wk i.on{background:var(--a)}
+
 </style>
 </head>
 <body class="state-idle" data-theme="standby">
@@ -1039,6 +1075,23 @@ body.lite #hud .scanl{display:none}
               <div class="tile s4"><h5>MONEY GOAL <button class="mini" data-go="ventures">CEO ›</button></h5><div id="dGoal"><div class="empty">Set a goal on the Ventures page.</div></div></div>
               <div class="tile s4"><h5>GRADES <button class="mini" data-go="study">SCHOLAR ›</button></h5><div id="dGrades"><div class="empty">Sit a paper in the Exam Hall.</div></div></div>
               <div class="tile s4 autofeed"><h5>ORION ON ITS OWN <i id="dAuto">—</i></h5><div id="dAutoList"><div class="empty">Nothing yet — I get to work after you've been away a while.</div></div></div>
+              <div class="tile s8"><h5>PC TOOLS <button class="mini" id="svNowBtn">◉ SCREENSAVER</button></h5>
+                <div class="ptgrid">
+                  <button data-t="tidy_downloads" data-l="Tidy Downloads">🗂️<span>Tidy Downloads</span></button>
+                  <button data-t="tidy_undo" data-l="Undo tidy">↩️<span>Undo tidy</span></button>
+                  <button data-t="big_files" data-l="Biggest files" data-a='{"folder":"home"}'>📦<span>Big files</span></button>
+                  <button data-t="find_duplicates" data-l="Duplicate files">👯<span>Duplicates</span></button>
+                  <button data-t="screen_text" data-l="Screen text copied">🔤<span>Copy screen text</span></button>
+                  <button data-t="pick_colour" data-l="Colour picker">🎨<span>Colour picker</span></button>
+                  <button data-t="speed_test" data-l="Speed test">📶<span>Speed test</span></button>
+                  <button data-t="startup_apps" data-l="Startup apps">🚀<span>Startup apps</span></button>
+                  <button data-t="window_layout" data-l="Windows side by side" data-a='{"layout":"split"}'>🪟<span>Split windows</span></button>
+                  <button data-t="window_layout" data-l="Focus" data-a='{"layout":"focus"}'>🎯<span>Focus window</span></button>
+                </div>
+                <h5 style="margin-top:12px">AMBIENT SOUND <i>FOR FOCUS</i></h5>
+                <div class="ambbtns" id="ambBtns"><button data-s="rain">🌧 Rain</button><button data-s="brown">🟫 Brown noise</button><button data-s="white">⬜ White noise</button><button data-s="waves">🌊 Waves</button><button data-s="cafe">☕ Café</button><button data-s="space">🪐 Space</button><button data-s="off">■ Off</button></div></div>
+              <div class="tile s4"><h5>HABITS <i>TAP TO TICK</i></h5><div id="habList"></div>
+                <div class="voicerow" style="margin-top:8px"><input class="inp" id="habNew" placeholder="New habit — e.g. revise 30 min"><button class="btn small" id="habAdd">+</button></div></div>
               <div class="tile s5"><h5>SYSTEM <i id="dUp">—</i></h5>
                 <div class="rings"><div><div class="ring" id="rCpu"><b>0%</b></div>CPU</div><div><div class="ring" id="rRam"><b>0%</b></div>RAM</div><div><div class="ring" id="rDisk"><b>0%</b></div>DISK</div></div></div>
               <div class="tile s7"><h5>LIVE LOAD <i>LAST 2 MIN</i></h5><canvas id="dLoad" style="height:110px"></canvas></div>
@@ -1278,6 +1331,8 @@ body.lite #hud .scanl{display:none}
   <div class="field" style="margin-top:6px"><label>MIC SENSITIVITY <a id="sSensV">1.0×</a></label><input type="range" id="sSens" min="0.5" max="2" step="0.1" style="padding:0;accent-color:var(--a)"></div>
   <h3>BEHAVIOUR</h3>
   <label class="tog"><input type="checkbox" id="sSafe"> Safe mode <small>— ask before risky actions (blocklist + backups are always on)</small></label>
+  <label class="tog"><input type="checkbox" id="sSaver"> Holographic screensaver when I'm away <small>— <input class="inp" id="sSaverMin" type="number" min="0" style="width:64px;display:inline-block;padding:2px 6px"> min (0 = same as autonomous mode) · never while gaming or watching something</small></label>
+  <label class="tog"><input type="checkbox" id="sBreakVoice"> Say break reminders out loud <small>— every <input class="inp" id="sBreakMin" type="number" min="0" style="width:64px;display:inline-block;padding:2px 6px"> min of non-stop PC use (0 = off)</small></label>
   <label class="tog"><input type="checkbox" id="sAutoMode"> Switch modes automatically <small>— CEO for money, Scholar for school, Hacker for code…</small></label>
   <label class="tog"><input type="checkbox" id="sModeVoice"> Each mode has its own voice</label>
   <label class="tog"><input type="checkbox" id="sSfx"> Interface sounds</label>
@@ -1363,6 +1418,8 @@ window.ui={event(e){ switch(e.kind){
   case "history_merged": toast(`🧠 Caught up on ${e.count} message(s) from your other device.`); break;
   case "live": if(e.src==="browser") hwLive(e); else liveFrame(e); break;
   case "powerdown": powerDown(e.title); break;
+  case "saver": if(e.on) svStart(); else svStop(false); break;
+  case "ambient": ambient(e.sound,e.minutes); break;
   case "popups": if(e.what!=="cards") HW.list.filter(w=>!w.closed).forEach(w=>e.minimise?hwMin(w):hwClose(w)); if(e.what!=="windows") holoClear(); break;
   case "study": toast(e.text,e.ok?"":"warn"); $("#mkGo").textContent="✦ MAKE FLASHCARDS"; $("#mkGo").disabled=false; if(e.ok){ $("#mkTopic").value=$("#mkNotes").value=""; CARD=null; } if(on("study")) loadStudy(); break;
   case "health_badge": $("#b-health").classList.add("show"); break;
@@ -1488,7 +1545,7 @@ function paintAfk(on,note){ $("#afkchip").classList.toggle("show",!!on); $("#afk
 $("#afkchip").onclick=()=>go("root");
 
 /* ================= settings / memory ================= */
-$("#nSet").onclick=async()=>{ const s=await api.get_settings(); $("#sAutoMode").checked=s.auto_mode!==false; $("#sModeVoice").checked=s.per_mode!==false; $("#sSfx").checked=localStorage.getItem("orion_sfx")!=="0";
+$("#nSet").onclick=async()=>{ const s=await api.get_settings(); (async()=>{ try{ const sv=await api.saver_get(); $("#sSaver").checked=sv.enabled; $("#sSaverMin").value=sv.idle_minutes; $("#sBreakMin").value=sv.break_minutes; $("#sBreakVoice").checked=sv.break_voice; }catch(e){} })(); $("#sAutoMode").checked=s.auto_mode!==false; $("#sModeVoice").checked=s.per_mode!==false; $("#sSfx").checked=localStorage.getItem("orion_sfx")!=="0";
   $("#cmList").textContent=Object.keys(s.custom_modes||{}).length?"Your modes: "+Object.values(s.custom_modes).map(m=>m.label).join(", "):""; try{ $("#sPlace").value=(await api.life_get()).home_place||""; }catch(e){} try{ const v=await api.voice_settings(); $("#sPatience").value=v.patience; $("#sConvo").checked=!!v.conversation; $("#sBarge").checked=!!v.barge_in; $("#sDuck").checked=v.duck!==false; $("#sSens").value=v.mic_sensitivity; $("#sSensV").textContent=(+v.mic_sensitivity).toFixed(1)+"×"; }catch(e){} $("#sName").value=s.name; $("#sTitle").value=s.title; $("#sOwner").value=s.owner||""; $("#sLocal").value=s.local_model; $("#sLocalV").value=s.local_vision||"";
   $("#sKeys").innerHTML=s.providers.map(p=>`<div class="field"><label>${esc(p.label.toUpperCase())} KEY ${p.key_url?`<a data-url="${esc(p.key_url)}">get a free key ↗</a>`:""}</label>
     <input type="password" data-pid="${esc(p.id)}" value="${esc(p.key)}" placeholder="${p.id==="groq"?"gsk_…  (needed for voice + captions)":p.id==="gemini"?"best free vision brain":"optional — extra free allowance"}"></div>`).join("");
@@ -1504,7 +1561,7 @@ $("#sSave").onclick=async()=>{ const keys={}; $$("#sKeys input").forEach(i=>keys
   if($("#sPlace").value.trim()) api.life_action({action:"place",place:$("#sPlace").value.trim()});
   api.voice_settings({patience:$("#sPatience").value,conversation:$("#sConvo").checked,barge_in:$("#sBarge").checked,duck:$("#sDuck").checked,mic_sensitivity:+$("#sSens").value});
   const r=await api.save_settings({name:$("#sName").value,title:$("#sTitle").value,owner:$("#sOwner").value,keys,local_model:$("#sLocal").value,local_vision:$("#sLocalV").value,voice:$("#sVoice").value,engine:$("#sEngine").value,
-    speak:$("#sSpeak").checked,safe_mode:$("#sSafe").checked,auto_mode:$("#sAutoMode").checked,per_mode:$("#sModeVoice").checked,fullscreen:$("#sFs").checked,skip_boot:$("#sBoot").checked,visuals:$("#sVis").value});
+    speak:$("#sSpeak").checked,safe_mode:$("#sSafe").checked,auto_mode:(api.saver_set&&api.saver_set({enabled:$("#sSaver").checked,idle_minutes:+$("#sSaverMin").value||0,break_minutes:+$("#sBreakMin").value||0,break_voice:$("#sBreakVoice").checked}),$("#sAutoMode").checked),per_mode:$("#sModeVoice").checked,fullscreen:$("#sFs").checked,skip_boot:$("#sBoot").checked,visuals:$("#sVis").value});
   applyCfg(r); $("#vSet").classList.remove("show"); toast("Configuration saved."); paintLinks(await api.status()); pollMeters(); };
 $("#mClose").onclick=()=>$("#vMem").classList.remove("show");
 $("#clearChat").onclick=async()=>{ await api.clear_chat(); $("#log").innerHTML=""; $("#vMem").classList.remove("show"); toast("Chat history cleared."); };
@@ -1917,7 +1974,7 @@ $("#lkSave").onclick=async()=>{ await api.link_set({addr:$("#lkAddr").value,pin:
 $("#auNow").onclick=()=>{ api.autonomy_set({run_now:true}); toast("🤖 Starting an autonomous check-in."); };
 
 /* ================= v4: dashboard extras ================= */
-async function loadDash4(){
+async function loadDash4(){ loadHabits();
   try{ const v=await api.ventures_get(); const g=(v.goals||[])[0]; $("#dGoal").innerHTML=g?`<div class="big">£${g.got.toFixed(0)}<small>of £${g.target.toFixed(0)}</small></div><div class="goalbar"><i style="width:${g.pct}%"></i></div><div class="sub2">${esc(g.name)} · £${g.per_week.toFixed(2)}/week to hit it by ${g.by}</div>`:$("#dGoal").innerHTML; }catch(e){}
   try{ const sc=await api.scholar_get(); $("#dGrades").innerHTML=sc.subjects.length?sc.subjects.slice(0,5).map(x=>`<div class="hbar"><b>${esc(x.name)}</b><div><i style="width:${(x.trend.slice(-1)[0]||{}).pct||0}%"></i></div><span>${x.latest??"—"}${x.target?" → "+esc(x.target):""}</span></div>`).join(""):$("#dGrades").innerHTML; }catch(e){}
   try{ const a=await api.autonomy_get(); $("#dAuto").textContent=a.enabled?`ON · AFTER ${a.idle_minutes} MIN AWAY`:"OFF"; if(a.log.length) $("#dAutoList").innerHTML=a.log.slice(0,5).map(x=>`<div class="li"><span class="t">${esc(x.when)}</span><span class="g">${esc(x.text.slice(0,110))}</span></div>`).join(""); }catch(e){}
@@ -2029,6 +2086,107 @@ async function boot(){ const c=await api.init(); applyCfg(c); const st=api.statu
 
 
 
+
+
+/* ================= 4.5: autonomous-mode screensaver ================= */
+const SV={on:false,raf:0,t0:0,data:null,stats:null,log:[],timers:[],pts:[],stars:[],arcs:[],shift:0,armed:0};
+function svBuild(){ if($("#saver")) return; const d=document.createElement("div"); d.id="saver";
+  d.innerHTML=`<canvas id="svC"></canvas><div class="svvig"></div>
+  <div class="svtl"><div class="svclock" id="svClock">--:--</div><div class="svdate" id="svDate">—</div><div class="svwx" id="svWx"></div></div>
+  <div class="svtr"><h6>COMING UP</h6><div id="svNext"></div><h6 style="margin-top:14px">STATUS</h6><div id="svStat"></div></div>
+  <div class="svbl"><div class="svmode"><i></i><span id="svMode">AUTONOMOUS MODE</span></div><div class="svnow" id="svNow">Standing by, sir.</div><div class="svlog" id="svLog"></div></div>
+  <div class="svbr"><div class="svg"><b id="svCpu">–</b><span>CPU</span><i><u id="svCpuB"></u></i></div><div class="svg"><b id="svRam">–</b><span>RAM</span><i><u id="svRamB"></u></i></div>
+    <div class="svg"><b id="svJobs">0</b><span>QUEUED</span></div></div>
+  <div class="svticker" id="svTick"></div><div class="svhint">MOVE THE MOUSE TO WAKE ORION</div>`;
+  document.body.appendChild(d); }
+function svSize(){ const c=$("#svC"); if(!c) return; c.width=innerWidth*devicePixelRatio; c.height=innerHeight*devicePixelRatio; }
+function svInit(){ const N=lite?700:1400; SV.pts=[]; for(let i=0;i<N;i++){ const u=Math.random()*2-1, th=Math.random()*Math.PI*2, r=Math.sqrt(1-u*u); SV.pts.push([r*Math.cos(th),u,r*Math.sin(th),Math.random()]); }
+  SV.stars=Array.from({length:lite?80:220},()=>[Math.random(),Math.random(),Math.random()*1.4+.2,Math.random()]); SV.arcs=[]; }
+function svColor(a){ const c=getComputedStyle(document.body).getPropertyValue("--ar").trim()||"63,216,255"; return `rgba(${c},${a})`; }
+function svFrame(ts){ if(!SV.on) return; const c=$("#svC"), x=c.getContext("2d"), W=c.width, H=c.height, k=devicePixelRatio; const t=(ts-SV.t0)/1000;
+  x.clearRect(0,0,W,H);
+  // stars drifting
+  for(const s of SV.stars){ s[0]-=.00006*s[2]; if(s[0]<0) s[0]=1; x.fillStyle=`rgba(200,235,255,${.25+.5*Math.abs(Math.sin(t*.7+s[3]*9))*s[2]/1.6})`; x.fillRect(s[0]*W,s[1]*H,s[2]*k,s[2]*k); }
+  const cx=W*.5+Math.sin(t*.05)*W*.01, cy=H*.5+Math.cos(t*.04)*H*.01, R=Math.min(W,H)*.27; const ry=t*.18, rx=.38+Math.sin(t*.1)*.06;
+  const P=(px,py,pz)=>{ let X=px*Math.cos(ry)+pz*Math.sin(ry), Z=-px*Math.sin(ry)+pz*Math.cos(ry), Y=py*Math.cos(rx)-Z*Math.sin(rx); Z=py*Math.sin(rx)+Z*Math.cos(rx); const s=3.6/(3.6+Z); return [cx+X*R*s,cy+Y*R*s,Z]; };
+  // glow
+  const g=x.createRadialGradient(cx,cy,R*.1,cx,cy,R*1.5); g.addColorStop(0,svColor(.18)); g.addColorStop(.6,svColor(.05)); g.addColorStop(1,"rgba(0,0,0,0)"); x.fillStyle=g; x.fillRect(0,0,W,H);
+  // lat/long wireframe
+  x.lineWidth=1*k;
+  for(let la=-75;la<=75;la+=15){ x.beginPath(); for(let lo=0;lo<=360;lo+=6){ const a=la*Math.PI/180,b=lo*Math.PI/180; const [X,Y,Z]=P(Math.cos(a)*Math.cos(b),Math.sin(a),Math.cos(a)*Math.sin(b)); lo?x.lineTo(X,Y):x.moveTo(X,Y);} x.strokeStyle=svColor(.13); x.stroke(); }
+  for(let lo=0;lo<180;lo+=15){ x.beginPath(); for(let la=0;la<=360;la+=6){ const a=la*Math.PI/180,b=lo*Math.PI/180; const [X,Y]=P(Math.cos(a)*Math.cos(b),Math.sin(a),Math.cos(a)*Math.sin(b)); la?x.lineTo(X,Y):x.moveTo(X,Y);} x.strokeStyle=svColor(.1); x.stroke(); }
+  // surface points (front brighter)
+  for(const p of SV.pts){ const [X,Y,Z]=P(p[0],p[1],p[2]); const a=Z<0?.85:.18; const tw=.6+.4*Math.sin(t*2+p[3]*20); x.fillStyle=svColor(a*tw); const s=(Z<0?1.6:1)*k; x.fillRect(X,Y,s,s); }
+  // data arcs between points
+  if(Math.random()<.03&&SV.arcs.length<4){ const a=SV.pts[Math.random()*SV.pts.length|0]; let b=null; for(let k=0;k<40&&!b;k++){ const c=SV.pts[Math.random()*SV.pts.length|0]; const d=a[0]*c[0]+a[1]*c[1]+a[2]*c[2]; if(d>.35&&d<.85) b=c; } if(b) SV.arcs.push({a,b,t0:t}); }
+  SV.arcs=SV.arcs.filter(r=>t-r.t0<3.2);
+  for(const r of SV.arcs){ const pr=Math.min(1,(t-r.t0)/1.4), fade=1-Math.max(0,(t-r.t0-2)/1.2); x.beginPath();
+    for(let i=0;i<=30*pr;i++){ const f=i/30, h=1+Math.sin(f*Math.PI)*.18; const v=[(r.a[0]*(1-f)+r.b[0]*f),(r.a[1]*(1-f)+r.b[1]*f),(r.a[2]*(1-f)+r.b[2]*f)]; const m=Math.hypot(...v)||1; const [X,Y]=P(v[0]/m*h,v[1]/m*h,v[2]/m*h); i?x.lineTo(X,Y):x.moveTo(X,Y); }
+    x.strokeStyle=`rgba(220,250,255,${.6*fade})`; x.lineWidth=1*k; x.shadowColor=svColor(1); x.shadowBlur=8*k; x.stroke(); x.shadowBlur=0;
+    if(pr>=1){ const [X,Y]=P(r.b[0],r.b[1],r.b[2]); x.beginPath(); x.arc(X,Y,(3+4*Math.min(1,(t-r.t0-1.4)))*k,0,Math.PI*2); x.strokeStyle=`rgba(220,250,255,${.5*fade})`; x.stroke(); } }
+  // orbit rings + satellites
+  for(let i=0;i<3;i++){ const tilt=.25+i*.35, rr=R*(1.25+i*.16), sp=t*(.4-i*.11); x.save(); x.translate(cx,cy); x.rotate(tilt+Math.sin(t*.05+i)*.1); x.scale(1,.28+i*.06);
+    x.beginPath(); x.arc(0,0,rr,0,Math.PI*2); x.strokeStyle=svColor(.45-i*.1); x.lineWidth=(1.2-i*.2)*k; x.setLineDash([14*k,(10+i*8)*k]); x.stroke(); x.setLineDash([]);
+    x.beginPath(); x.arc(Math.cos(sp)*rr,Math.sin(sp)*rr,(3.5-i)*k,0,Math.PI*2); x.fillStyle="#fff"; x.shadowColor=svColor(1); x.shadowBlur=14*k; x.fill(); x.shadowBlur=0; x.restore(); }
+  // HUD reticle
+  x.save(); x.translate(cx,cy); x.rotate(-t*.1); x.strokeStyle=svColor(.35); x.lineWidth=1.5*k;
+  for(let i=0;i<4;i++){ x.beginPath(); x.arc(0,0,R*1.08,i*Math.PI/2+.2,i*Math.PI/2+1.1); x.stroke(); } x.restore();
+  // scan sweep
+  const sy=((t*.12)%1)*H; const sg=x.createLinearGradient(0,sy-60*k,0,sy); sg.addColorStop(0,"rgba(0,0,0,0)"); sg.addColorStop(1,svColor(.07)); x.fillStyle=sg; x.fillRect(0,sy-60*k,W,60*k);
+  SV.raf=requestAnimationFrame(svFrame); }
+function svText(){ const d=new Date(); $("#svClock").innerHTML=`${String(d.getHours()).padStart(2,"0")}<em>:</em>${String(d.getMinutes()).padStart(2,"0")}`;
+  $("#svDate").textContent=d.toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long"}).toUpperCase(); }
+async function svData(){ try{ SV.data=await api.saver_data(); }catch(e){ return; } const D=SV.data;
+  $("#svWx").innerHTML=D.weather?`${WXI(D.weather.code||0)} <b>${D.weather.temp}°</b> ${esc(D.weather.sky)} · ${esc(D.weather.place||"")}${D.weather.rain_at?` · rain from ${esc(D.weather.rain_at)}`:""}`:"";
+  $("#svNext").innerHTML=(D.next||[]).length?D.next.map(e=>`<div class="svrow"><b>${esc(e.at)}</b>${esc(e.title)}</div>`).join(""):'<div class="svrow">Nothing scheduled</div>';
+  $("#svStat").innerHTML=[D.money!=null?`<div class="svrow"><b>£${(+D.money).toFixed(2)}</b>this month</div>`:"",`<div class="svrow"><b>${D.homework||0}</b>homework open</div>`].join("");
+  $("#svJobs").textContent=D.queued||0; $("#svMode").textContent=D.autonomy?"AUTONOMOUS MODE · ACTIVE":"STANDBY · AWAY";
+  $("#svNow").textContent=D.job?`Working on: ${D.job}`:(D.autonomy?"Looking for something useful to do…":"Standing by, sir.");
+  const L=(D.log||[]).slice(-6).reverse(); $("#svLog").innerHTML=L.map(e=>`<div><time>${esc((e.t||"").slice(11,16))}</time>${esc((e.text||"").slice(0,120))}</div>`).join("");
+  const tk=[`${D.queued||0} job${D.queued===1?"":"s"} queued`,D.weather?`${D.weather.temp}° ${D.weather.sky}`:"",...(D.next||[]).map(e=>`${e.at} — ${e.title}`),...L.map(e=>e.text)].filter(Boolean);
+  $("#svTick").innerHTML=`<span>${tk.map(esc).join("   ◆   ")}   ◆   </span><span>${tk.map(esc).join("   ◆   ")}   ◆   </span>`; }
+async function svStats(){ try{ const s=await api.stats(); $("#svCpu").textContent=Math.round(s.cpu)+"%"; $("#svRam").textContent=Math.round(s.ram)+"%"; $("#svCpuB").style.width=s.cpu+"%"; $("#svRamB").style.width=s.ram+"%"; }catch(e){} }
+function svShift(){ SV.shift=(SV.shift+1)%4; const d=[[0,0],[6,-4],[-5,5],[4,6]][SV.shift]; $("#saver").style.setProperty("--sx",d[0]+"px"); $("#saver").style.setProperty("--sy",d[1]+"px"); }   // no burn-in
+function svStart(){ svBuild(); if(SV.on) return; SV.on=true; SV.t0=performance.now(); SV.armed=Date.now()+1800; svInit(); svSize();
+  $("#saver").classList.add("show"); svText(); svData(); svStats(); SV.timers=[setInterval(svText,1000),setInterval(svData,15000),setInterval(svStats,2500),setInterval(svShift,60000)];
+  SV.raf=requestAnimationFrame(svFrame); sfx&&sfx("open"); }
+function svStop(fromUser){ if(!SV.on) return; SV.on=false; cancelAnimationFrame(SV.raf); SV.timers.forEach(clearInterval); $("#saver").classList.add("bye");
+  setTimeout(()=>$("#saver").classList.remove("show","bye"),600); if(fromUser) api.saver_exit&&api.saver_exit(); }
+["mousemove","keydown","mousedown","wheel","touchstart"].forEach(ev=>addEventListener(ev,()=>{ if(SV.on&&Date.now()>SV.armed) svStop(true); },{passive:true,capture:true}));
+addEventListener("resize",()=>SV.on&&svSize());
+
+/* ================= 4.5: ambient sound engine (generated live, no files) ================= */
+const AMB={ctx:null,nodes:[],timer:null,stopAt:0};
+function ambStop(){ AMB.nodes.forEach(n=>{ try{ n.stop?n.stop():n.disconnect(); }catch(e){} }); AMB.nodes=[]; clearInterval(AMB.timer); AMB.timer=null; }
+function ambNoise(c,color){ const len=c.sampleRate*4, b=c.createBuffer(2,len,c.sampleRate);
+  for(let ch=0;ch<2;ch++){ const d=b.getChannelData(ch); let last=0; for(let i=0;i<len;i++){ const w=Math.random()*2-1; if(color==="brown"){ last=(last+.02*w)/1.02; d[i]=last*3.5; } else if(color==="pink"){ last=.97*last+.03*w; d[i]=(last*4+w*.25)*.5; } else d[i]=w*.4; } }
+  const s=c.createBufferSource(); s.buffer=b; s.loop=true; return s; }
+function ambient(sound,minutes){ ambStop(); if(!sound||sound==="off"){ toast("Ambient sound off."); return; }
+  const c=AMB.ctx=AMB.ctx||new (window.AudioContext||window.webkitAudioContext)(); c.resume(); const out=c.createGain(); out.gain.value=0; out.connect(c.destination); out.gain.linearRampToValueAtTime(.55,c.currentTime+2); AMB.nodes.push(out);
+  const add=(node)=>{ AMB.nodes.push(node); return node; };
+  if(sound==="white"||sound==="brown"){ const n=add(ambNoise(c,sound)); const f=c.createBiquadFilter(); f.type="lowpass"; f.frequency.value=sound==="white"?9000:900; n.connect(f); f.connect(out); n.start(); }
+  else if(sound==="rain"){ const n=add(ambNoise(c,"pink")); const f=c.createBiquadFilter(); f.type="bandpass"; f.frequency.value=2200; f.Q.value=.6; n.connect(f); f.connect(out); n.start();
+    const n2=add(ambNoise(c,"brown")); const g2=c.createGain(); g2.gain.value=.4; n2.connect(g2); g2.connect(out); n2.start();
+    AMB.timer=setInterval(()=>{ for(let i=0;i<6;i++){ const o=c.createOscillator(), g=c.createGain(); o.frequency.value=2000+Math.random()*4000; g.gain.setValueAtTime(.02*Math.random(),c.currentTime+i*.03); g.gain.exponentialRampToValueAtTime(.0001,c.currentTime+i*.03+.03); o.connect(g); g.connect(out); o.start(c.currentTime+i*.03); o.stop(c.currentTime+i*.03+.05); } },120); }
+  else if(sound==="waves"){ const n=add(ambNoise(c,"pink")); const f=c.createBiquadFilter(); f.type="lowpass"; f.frequency.value=1200; const g=c.createGain(); g.gain.value=.2; const l=add(c.createOscillator()); l.frequency.value=.09; const lg=c.createGain(); lg.gain.value=.5; l.connect(lg); lg.connect(g.gain); n.connect(f); f.connect(g); g.connect(out); n.start(); l.start(); }
+  else if(sound==="cafe"){ const n=add(ambNoise(c,"brown")); const f=c.createBiquadFilter(); f.type="bandpass"; f.frequency.value=500; f.Q.value=.4; n.connect(f); f.connect(out); n.start();
+    AMB.timer=setInterval(()=>{ if(Math.random()<.35){ const o=c.createOscillator(), g=c.createGain(); o.type="triangle"; o.frequency.value=2400+Math.random()*1800; g.gain.setValueAtTime(.03,c.currentTime); g.gain.exponentialRampToValueAtTime(.0001,c.currentTime+.35); o.connect(g); g.connect(out); o.start(); o.stop(c.currentTime+.4); } },700); }
+  else { [55,82.4,110,164.8].forEach((fq,i)=>{ const o=add(c.createOscillator()); o.type=i%2?"sine":"triangle"; o.frequency.value=fq; const g=c.createGain(); g.gain.value=.05/(i+1); const l=add(c.createOscillator()); l.frequency.value=.05+i*.03; const lg=c.createGain(); lg.gain.value=.03/(i+1); l.connect(lg); lg.connect(g.gain); o.connect(g); g.connect(out); o.start(); l.start(); }); }
+  toast(`🎧 ${sound[0].toUpperCase()+sound.slice(1)} playing${minutes?` for ${minutes} min`:""}.`); if(minutes) setTimeout(ambStop,minutes*60000);
+  $$("#ambBtns button").forEach(b=>b.classList.toggle("on",b.dataset.s===sound)); }
+
+/* ================= 4.5: PC tools + habits on the dashboard ================= */
+async function pcTool(name,args,label){ toast(`${label||name}…`); const r=await api.pc_tool(name,args||{}); if(!r.ok) return toast(r.result,"warn");
+  holoCard({kind:"text",title:label||name,text:r.result}); }
+async function loadHabits(){ if(!$("#habList")) return; let H=[]; try{ H=await api.habits_get(); }catch(e){}
+  $("#habList").innerHTML=H.length?H.map(h=>`<div class="hab ${h.today?"done":""}"><button data-h="${esc(h.name)}">${h.today?"✓":""}</button><div><b>${esc(h.name)}</b><small>${h.streak}-day streak${h.streak>=3?" 🔥":""} · best ${h.best}</small></div><span class="wk">${h.week.map(x=>`<i class="${x?"on":""}"></i>`).join("")}</span></div>`).join(""):'<div class="empty">Track a habit — revise 30 min, gym, read, water…</div>';
+  $$("#habList button").forEach(b=>b.onclick=async()=>{ await api.pc_tool("habit",{action:"done",name:b.dataset.h}); sfx("ok"); loadHabits(); }); }
+
+$$(".ptgrid button").forEach(b=>b.onclick=()=>pcTool(b.dataset.t,b.dataset.a?JSON.parse(b.dataset.a):{},b.dataset.l));
+$$("#ambBtns button").forEach(b=>b.onclick=()=>ambient(b.dataset.s,0));
+$("#svNowBtn").onclick=()=>{ api.saver_show(); };
+$("#habAdd").onclick=async()=>{ const n=$("#habNew").value.trim(); if(!n) return; await api.pc_tool("habit",{action:"add",name:n}); $("#habNew").value=""; loadHabits(); };
+$("#habNew").addEventListener("keydown",e=>{ if(e.key==="Enter") $("#habAdd").click(); });
 
 /* ================= skill library ================= */
 let SL=null, SLC="", SLS=null;
@@ -2199,6 +2357,10 @@ setTimeout(()=>{ if(api) return; const wait=ms=>new Promise(r=>setTimeout(r,ms))
       for(const w of "You have 2 messages waiting, sir. **Adrian** asked for help and **Responeded** said “Now?”.".split(" ")){ ui.event({kind:"delta",id:"p",text:w+" "}); await wait(50); }
       ui.event({kind:"stream_end",id:"p",text:"You have 2 messages waiting, sir. **Adrian** asked for help and **Responeded** said “Now?”.",tier:"cloud",model:"Groq gpt-oss-20b"}); ui.event({kind:"state",state:"idle"}); },
     stop:()=>A(true),set_brain:m=>A({brain:m,cloud:{ok:true,count:2,labels:[]},local:{ok:false}}),set_theme:()=>A(),mic_start:()=>A(true),mic_stop:()=>A(""),mic_level:()=>A(Math.random()),ask_claude:()=>A(true),confirm_reply:()=>A(true),
+    saver_data:()=>A({log:[{t:"2026-11-03 16:02",text:"Built tomorrow's revision plan: Physics electricity (red) + Maths vectors"},{t:"2026-11-03 16:10",text:"Drafted 3 cold emails to Desford cafés for the booking-bot offer (waiting for you)"},{t:"2026-11-03 16:18",text:"Tidied Downloads: 41 files into folders"}],weather:{temp:11,sky:"cloudy",place:"Desford",rain_at:"18:00",code:3},next:[{at:"Tue 17:00",title:"Money meeting"},{at:"Wed 08:40",title:"School"}],job:"Researching automation leads in Leicester",queued:2,money:168,homework:2,autonomy:true}),
+    saver_show:()=>{ setTimeout(()=>ui.event({kind:"saver",on:true}),300); return A(true); },saver_exit:()=>A(true),saver_get:()=>A({enabled:true,idle_minutes:0,break_minutes:50,break_voice:false}),saver_set:b=>A(b),
+    pc_tool:async(n,a)=>{ await wait(400); return {ok:true,result:n==="speed_test"?"Download 54.2 Mbps, ping 18 ms — great for gaming and streaming.":"Done."}; },
+    habits_get:()=>A([{name:"Revise 30 min",streak:4,today:true,week:[0,1,1,0,1,1,1],best:6},{name:"Gym",streak:0,today:false,week:[1,0,1,0,0,1,0],best:3},{name:"Read 10 pages",streak:2,today:false,week:[0,0,0,0,1,1,0],best:2}]),
     skilllib_get:()=>A({count:505,cats:{Tools:8,Money:24,Writing:44,Code:21,Maths:6,Science:4,School:30,Life:22,Subjects:324},skills:[{name:"quadratic",title:"Quadratic solver",cat:"Maths",desc:"Roots, working and turning point of ax²+bx+c.",kind:"local",example:"1 -5 6"},{name:"essayplan",title:"Essay plan (PEEL)",cat:"School",desc:"Plan an essay: thesis + PEEL paragraphs with quotes to use.",kind:"prompt",example:""},{name:"coldemail",title:"Cold email / DM pitch",cat:"Money",desc:"Short pitch that gets replies.",kind:"prompt",example:""},{name:"convert",title:"Unit converter",cat:"Tools",desc:"Convert lengths, weights, volumes, temps, times, data, speeds.",kind:"local",example:"5 miles to km"},{name:"lowendpc",title:"Low-end PC settings",cat:"Gaming",desc:"More FPS, less lag.",kind:"prompt",example:""},{name:"physics_quiz",title:"Physics: Quick quiz",cat:"Subjects",desc:"GCSE Physics — quick quiz (give the topic).",kind:"prompt",example:""}]}),
     skilllib_run:async(n,t)=>{ await wait(400); return {ok:true,result:"x = 3 or x = 2\nWorking: x = (−b ± √(b²−4ac)) / 2a = (5 ± √1) / 2\nTurning point: (2.5, -0.25)"}; },
     plus_get:()=>A({grades:[{subject:"Maths",target:"7",grade:"6",pct:63,basis:"3 papers + topics",gap:4,focus:["Circle theorems","Vectors"]},{subject:"English Literature",target:"7",grade:"7",pct:71,basis:"2 papers + topics",gap:9,focus:[]},{subject:"Physics",target:"6",grade:"5",pct:52,basis:"1 paper + topics",gap:3,focus:["Electricity"]}],

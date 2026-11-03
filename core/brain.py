@@ -58,7 +58,7 @@ SMART = re.compile(r"\b(code|script|program|build|make|create|write|fix|debug|ex
                    r"plan|research|compare|analy[sz]e|essay|app|bot|website|summari[sz]e|learn|teach|story|"
                    r"translate|calculate|work out|figure|recommend|should i|ideas?|design|review)\b", re.I)
 
-CORE = {"show_card", "close_popups", "skill_find", "skill_use", "queue_job", "mission_start", "weather", "note_add", "homework_add", "get_time", "open_app", "open_website", "web_search", "remember",
+CORE = {"show_card", "close_popups", "skill_find", "skill_use", "habit", "ambient", "screensaver_show", "queue_job", "mission_start", "weather", "note_add", "homework_add", "get_time", "open_app", "open_website", "web_search", "remember",
         "request_more_tools", "set_theme", "schedule_add", "schedule_list", "check_availability"}
 GROUPS = {
     "computer": ({"type_text", "press_keys", "mouse_click", "scroll", "read_screen", "find_on_screen",
@@ -67,7 +67,10 @@ GROUPS = {
                  r"into|then|and (then )?(type|click|search)"),
     "system": ({"system_status", "media", "set_timer", "lock_pc", "power", "save_screenshot", "run_command",
                 "list_running_apps", "close_app", "gaming_mode", "clip_that", "gaming_stats", "party_plan", "game_profile",
-                "gaming_wrap"},
+                "gaming_wrap", "window_layout", "app_volume", "tidy_downloads", "tidy_undo", "big_files", "find_duplicates",
+                "screen_text", "pick_colour", "speed_test", "startup_apps"},
+               r"arrange|side by side|layout|snap|tidy|downloads|big files|duplicate|disk space|free up|speed ?test|internet speed|"
+               r"wifi|startup|colou?r (picker|under)|text on (the )?screen|ocr|copy the text|"
                r"volume|music|song|play|pause|skip|timer|cpu|ram|memory usage|battery|shut ?down|"
                r"restart|sleep|lock|screenshot|command|powershell|install|process|running|slow|wifi|ip|gam|clip|party|"
                r"hours played|play with|invite"),
