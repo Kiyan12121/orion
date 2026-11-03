@@ -68,8 +68,8 @@ def _state():
 
 
 def _save_state(s):
-    with open(STATE, "w", encoding="utf-8") as f:
-        json.dump(s, f, indent=1)
+    from .safeio import write_json
+    write_json(STATE, s, indent=1)
 
 
 def _days(d):

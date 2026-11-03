@@ -71,8 +71,8 @@ def record_usage(pid, tokens):
         u["requests"] += 1
         u["tokens"] += int(tokens)
         try:
-            with open(USAGE_PATH, "w", encoding="utf-8") as f:
-                json.dump(USAGE, f)
+            from .safeio import write_json
+            write_json(USAGE_PATH, USAGE)
         except Exception:
             pass
 

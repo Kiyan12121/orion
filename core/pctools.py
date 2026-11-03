@@ -170,8 +170,8 @@ def tidy_downloads(preview=False, folder=""):
             done.append([src, dst])
         except Exception:
             pass
-    with open(UNDO, "w", encoding="utf-8") as fh:
-        json.dump(done, fh)
+    from .safeio import write_json
+    write_json(UNDO, done)
     return f"Sorted {len(done)} files into folders ({summary}). Say 'undo the tidy' to put them back."
 
 
@@ -379,8 +379,8 @@ def _hload():
 
 
 def _hsave(h):
-    with open(HABITS, "w", encoding="utf-8") as f:
-        json.dump(h, f, indent=1)
+    from .safeio import write_json
+    write_json(HABITS, h, indent=1)
 
 
 def habits():

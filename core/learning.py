@@ -29,8 +29,8 @@ def _load(p, d):
 
 
 def _save(p, v):
-    with open(p, "w", encoding="utf-8") as f:
-        json.dump(v, f, indent=1)
+    from .safeio import write_json
+    write_json(p, v, indent=1)
 
 
 def norm(t):

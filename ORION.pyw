@@ -45,7 +45,7 @@ from core.ears import END_CONVO, Ears              # noqa: E402
 from core import ducking                                    # noqa: E402
 from core.brain import Brain                                # noqa: E402
 from core.memory import Memory                              # noqa: E402
-from core.paths import LOG_PATH, UI_PATH                    # noqa: E402
+from core.paths import LOG_PATH, UI_PATH, DATA_DIR          # noqa: E402
 from core.providers import Cancelled                        # noqa: E402
 from core.voice import Recorder, SentenceStream, Speaker    # noqa: E402
 
@@ -70,6 +70,8 @@ class Api:
     def __init__(self):
         self._window = None
         self._cfg = config_mod.load()
+        from core.safeio import cleanup_temps
+        cleanup_temps(DATA_DIR)
         self._memory = Memory()
         self._busy = threading.Lock()
         self._cancel = threading.Event()

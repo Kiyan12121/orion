@@ -358,8 +358,8 @@ class Sync:
                     continue
                 txt = json.dumps(merged, indent=1)
                 if txt != local_txt:
-                    with open(path, "w", encoding="utf-8") as f:
-                        f.write(txt)
+                    from .safeio import write_json
+                    write_json(path, merged)
                     changed_remote = True
                 if txt != remote_txt:
                     push[name] = {"content": txt}
@@ -367,8 +367,8 @@ class Sync:
                 requests.patch(f"{self.API}/{self.sc['gist_id']}", headers=self._h(), timeout=20,
                                json={"files": push}).raise_for_status()
             state["last"] = time.strftime("%H:%M")
-            with open(STATE_PATH, "w", encoding="utf-8") as f:
-                json.dump(state, f)
+            from .safeio import write_json
+            write_json(STATE_PATH, state)
             self.status = f"synced {state['last']}"
             if changed_remote:
                 self.emit("synced")

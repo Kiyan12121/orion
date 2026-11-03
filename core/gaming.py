@@ -35,8 +35,8 @@ def record_session(game, start, mins):
     s = _stats()
     s["sessions"].append({"game": game, "start": start, "mins": mins, "day": time.strftime("%Y-%m-%d", time.localtime(start))})
     s["sessions"] = s["sessions"][-2000:]
-    with open(STATS, "w", encoding="utf-8") as f:
-        json.dump(s, f, indent=1)
+    from .safeio import write_json
+    write_json(STATS, s, indent=1)
 
 
 def game_stats(days=7):

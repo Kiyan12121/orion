@@ -103,8 +103,8 @@ def _layout():
 
 
 def _save_layout(d):
-    with open(LAYOUT_PATH, "w", encoding="utf-8") as f:
-        json.dump(d, f, indent=1)
+    from .safeio import write_json
+    write_json(LAYOUT_PATH, d, indent=1)
 
 
 def _uia_find(hwnd, name_part, control="EditControl"):
@@ -437,8 +437,8 @@ def _log(kind, who, text):
     except Exception:
         log = []
     log.append({"t": time.strftime("%Y-%m-%d %H:%M"), "kind": kind, "who": who, "text": text[:300]})
-    with open(LOG_PATH, "w", encoding="utf-8") as f:
-        json.dump(log[-200:], f, indent=1)
+    from .safeio import write_json
+    write_json(LOG_PATH, log[-200:], indent=1)
     CTX.get("emit", lambda *a, **k: None)("root_log", entry=log[-1])
 
 

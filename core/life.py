@@ -32,11 +32,9 @@ def _load(p, d):
 
 
 def _save(p, v):
+    from .safeio import write_json
     with _lock:
-        tmp = p + ".tmp"
-        with open(tmp, "w", encoding="utf-8") as f:
-            json.dump(v, f, indent=1)
-        os.replace(tmp, p)
+        write_json(p, v)
 
 
 def _id():

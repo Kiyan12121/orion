@@ -105,8 +105,8 @@ def set_enabled(name, on):
     with open(mp, "r", encoding="utf-8") as f:
         meta = json.load(f)
     meta["enabled"] = bool(on)
-    with open(mp, "w", encoding="utf-8") as f:
-        json.dump(meta, f, indent=1)
+    from .safeio import write_json
+    write_json(mp, meta, indent=1)
     if on:
         _register(meta)
     else:

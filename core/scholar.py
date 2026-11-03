@@ -36,11 +36,9 @@ def _load():
 
 
 def _save(d):
+    from .safeio import write_json
     with _lock:
-        tmp = PATH + ".tmp"
-        with open(tmp, "w", encoding="utf-8") as f:
-            json.dump(d, f, indent=1)
-        os.replace(tmp, PATH)
+        write_json(PATH, d)
 
 
 def _quick(system, user, tier="smart"):

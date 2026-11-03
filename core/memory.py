@@ -63,10 +63,8 @@ class Memory:
             x.setdefault("uses", 0)
 
     def _save(self):
-        tmp = MEM_PATH + ".tmp"
-        with open(tmp, "w", encoding="utf-8") as f:
-            json.dump({"facts": self.facts, "history": self.history}, f, indent=1)
-        os.replace(tmp, MEM_PATH)
+        from .safeio import write_json
+        write_json(MEM_PATH, {"facts": list(self.facts), "history": list(self.history)})
 
     # ------------------------------------------------------------------ facts
     def add_fact(self, fact, cat="fact", source="you"):

@@ -126,8 +126,8 @@ def _changes():
 
 
 def _save_changes(c):
-    with open(CHANGES, "w", encoding="utf-8") as f:
-        json.dump(c[-50:], f, indent=1)
+    from .safeio import write_json
+    write_json(CHANGES, c[-50:], indent=1)
 
 # ---------------------------------------------------------------------------------------------
 # Apps & websites

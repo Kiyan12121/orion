@@ -5,7 +5,7 @@ import os
 
 from .paths import CONFIG_PATH
 
-VERSION = "5.0.0"
+VERSION = "5.0.1"
 
 # Any OpenAI-compatible service can be added here. Each has its OWN free allowance,
 # so ORION spreads work across all providers that have a key.
@@ -165,5 +165,5 @@ def load():
 
 
 def save(cfg):
-    with open(CONFIG_PATH, "w", encoding="utf-8") as f:
-        json.dump(cfg, f, indent=2)
+    from .safeio import write_json
+    write_json(CONFIG_PATH, cfg, indent=2)

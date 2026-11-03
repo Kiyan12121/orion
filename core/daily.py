@@ -131,8 +131,8 @@ def morning_pack(cfg=None):
         pack["weak"] = weakest_topics(3)
     except Exception:
         pack["weak"] = []
-    with open(PACK, "w", encoding="utf-8") as f:
-        json.dump(pack, f, indent=1)
+    from .safeio import write_json
+    write_json(PACK, pack, indent=1)
     return pack
 
 
