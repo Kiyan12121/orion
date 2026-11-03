@@ -1,4 +1,24 @@
-# ORION 4.5 — Personal Intelligence System
+# ORION 5.0 — Personal Intelligence System
+
+## New in 5.0: the PC interface, rebuilt
+- **Two styles:** the upgraded **Jarvis HUD** (default), or **Aurora**: soft glass, rounded panels, a glowing orb and moving colour behind it. Switch with the ◐ button in the top bar or in Settings.
+- **Bigger, calmer text,** with a text-size setting (Small, Normal, Large, Extra large).
+- **Less clutter:** *Simple layout* hides the telemetry column. The ◧ button in the top bar brings it back.
+- **More alive:**
+  - Light runs round the panel edges.
+  - The reactor tilts towards your mouse and breathes faster while thinking.
+  - Dashboard tiles fly in one after another.
+  - Each message arrives with a scan-line.
+- **New chat look:** ORION speaks from a holographic panel with a spinning mini-reactor avatar. Your messages sit on the right, the "thinking" indicator is a waveform, and the input bar is bigger.
+- **Every page has its own identity:** Scholar purple, CEO gold, Gaming red, Schedule teal, Health green… each with a big animated banner.
+- **ORION pops things up by itself** (with a gold ◆ ORION tag):
+  - A greeting card with weather, today and homework when you sit down.
+  - "While you were away" when you come back: what it did, jobs finished, DMs.
+  - Events starting in 15 minutes and homework due tomorrow.
+  - Rain coming in the next couple of hours.
+  - A nudge when YouTube or TikTok passes 90 minutes in the evening.
+  - Money-goal milestones.
+  - Each one shows once, never while you're gaming or the screensaver is on, and they can be turned off in Settings.
 
 ## New in 4.5 (PC)
 - **Holographic screensaver:** when you're away (same time as autonomous mode, 30 min by default), ORION goes full-screen with a rotating wireframe globe, orbit rings, data arcs, a big clock, weather, what's coming up, money and homework, live CPU/RAM, and a running feed of what it's doing on its own. Move the mouse and it's gone. It never appears while you're gaming, watching a video or playing music, or when another app is full-screen. Elements drift slowly so nothing burns in. Settings › screensaver; "show the screensaver" or the button on the Dashboard shows it any time.

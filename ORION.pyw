@@ -34,7 +34,7 @@ from core import money                                      # noqa: E402
 from core import holo                                       # noqa: E402,F401
 from core import plus                                       # noqa: E402
 from core import skillbook                                  # noqa: E402
-from core import saver, pctools                             # noqa: E402
+from core import saver, pctools, proactive                  # noqa: E402
 from core.autonomy import Autonomy                          # noqa: E402
 from core import gaming as gaming_mod                        # noqa: E402
 from core.routines import NightShift                        # noqa: E402
@@ -105,6 +105,7 @@ class Api:
         self._jobs = Jobs(self._cfg, self._run_job, lambda t, title=None: self._push.send(t, title), self._emit)
         self._jobs.on_finish = self._job_finished
         self._autonomy = Autonomy(self._cfg, self._jobs, self._emit)
+        self._proactive = proactive.Proactive(self._cfg, self._emit)
         self._saver = saver.Saver(self._cfg, self._emit, lambda: self._window)
         self._breaks = pctools.Breaks(self._cfg, lambda t: self._speaker.say(t), lambda t: self._emit("toast", text="🧘 " + t))
         self._bedtime = plus.Bedtime(self._cfg, lambda t: self._speaker.say(t),
@@ -1703,6 +1704,20 @@ class Api:
     def saver_exit(self):
         self._saver.hide()
         return True
+
+    def ui_prefs(self, b=None):
+        """Interface style: skin (hud/aurora), text size, simple layout, proactive pop-ups."""
+        u = self._cfg.setdefault("ui", {"skin": "hud", "text": "m", "simple": True})
+        if b:
+            for k in ("skin", "text"):
+                if k in b:
+                    u[k] = str(b[k])[:10]
+            if "simple" in b:
+                u["simple"] = bool(b["simple"])
+            if "proactive" in b:
+                self._cfg["proactive"] = bool(b["proactive"])
+            config_mod.save(self._cfg)
+        return {**u, "proactive": self._cfg.get("proactive", True)}
 
     def saver_get(self):
         return {**self._saver.sc, "autonomy_idle": self._cfg.get("autonomy", {}).get("idle_minutes", 30),

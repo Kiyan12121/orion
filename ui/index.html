@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ORION</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Orbitron:wght@600;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Orbitron:wght@600;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 /* ======================= THEMES ======================= */
 :root,body[data-theme=standby]{--a:#3fd8ff;--a2:#8af5ff;--ar:63,216,255;--think:#ffb347;--thinkr:255,179,71;--listen:#ff4f7b;--listenr:255,79,123;--tint:20,80,120}
@@ -763,6 +763,128 @@ body.lite #hud .scanl{display:none}
 .hab div{flex:1;min-width:0}.hab b{display:block;font-size:13.5px}.hab small{color:var(--dim);font-size:11.5px}
 .hab .wk{display:flex;gap:3px}.hab .wk i{width:7px;height:16px;border-radius:2px;background:rgba(var(--ar),.12)}.hab .wk i.on{background:var(--a)}
 
+/* =====================================================================
+   ORION 5.0 interface — HUD upgrade (default) + Aurora skin (Settings)
+   ===================================================================== */
+/* ---- per-page identity ---- */
+#page-dash{--pa:63,216,255}#page-comms{--pa:63,216,255}#page-study{--pa:180,140,255}#page-ventures{--pa:240,192,78}
+#page-gaming{--pa:255,90,120}#page-sched{--pa:77,224,200}#page-root{--pa:110,150,255}#page-auto{--pa:255,179,71}
+#page-shift{--pa:140,170,255}#page-studio{--pa:255,120,200}#page-skills{--pa:120,255,190}#page-devices{--pa:120,200,255}
+#page-brain{--pa:200,160,255}#page-health{--pa:93,255,176}
+.page{--pa:var(--ar)}
+
+/* ---- bigger, calmer text ---- */
+body{font-size:16px}
+.ph{font-size:11.5px;letter-spacing:.26em;padding:12px 16px}
+.empty,.none{font-size:14.5px}
+.sub2{font-size:13px}
+.meter .row,.kv,.allow .pn{font-size:12.5px}
+.tile{padding:16px 18px}
+.tile h5{font-size:11.5px!important;letter-spacing:.26em!important}
+body.ts-l{font-size:17.5px}body.ts-l .msg .body{font-size:18px}body.ts-l .tile h5,body.ts-l .ph{font-size:12.5px!important}body.ts-l .empty{font-size:15.5px}body.ts-l #input{font-size:18px}
+body.ts-xl{font-size:19px}body.ts-xl .msg .body{font-size:20px}body.ts-xl .tile h5,body.ts-xl .ph{font-size:13.5px!important}body.ts-xl .empty{font-size:17px}body.ts-xl #input{font-size:19.5px}
+body.ts-s{font-size:15px}body.ts-s .msg .body{font-size:15px}
+
+/* ---- simple layout: hide the telemetry column (toggle in the header) ---- */
+body.simple .stage:not(.wide){grid-template-columns:minmax(0,1fr) minmax(440px,42%)}
+body.simple .stage:not(.wide) .left{display:none}
+body.simple .stage.wide{grid-template-columns:minmax(0,1fr)}
+body.simple .stage.wide .left{display:none}
+
+/* ---- page banners ---- */
+.wtitle{position:relative;padding:4px 0 14px;margin-bottom:16px!important;align-items:center!important}
+.wtitle h2{font:800 22px var(--disp)!important;letter-spacing:.24em!important;background:linear-gradient(90deg,#fff,rgb(var(--pa)));-webkit-background-clip:text;background-clip:text;color:transparent!important;filter:drop-shadow(0 0 14px rgba(var(--pa),.45))}
+.wtitle span{font-size:13px!important}
+.wtitle::after{content:"";position:absolute;left:0;bottom:0;height:2px;width:100%;background:linear-gradient(90deg,rgb(var(--pa)),rgba(var(--pa),.2) 40%,transparent);transform-origin:left;animation:lineIn 1s cubic-bezier(.2,.9,.2,1) both}
+.wtitle::before{content:"";position:absolute;left:0;bottom:-1px;width:60px;height:4px;background:rgb(var(--pa));box-shadow:0 0 14px rgb(var(--pa));animation:lineRun 4s ease-in-out infinite}
+@keyframes lineIn{from{transform:scaleX(0)}}@keyframes lineRun{0%,100%{left:0}50%{left:calc(100% - 60px)}}
+.page .tile{border-color:rgba(var(--pa),.18);background:linear-gradient(160deg,rgba(var(--pa),.08),rgba(0,0,0,.28))}
+.page .tile h5{color:rgba(var(--pa),.95)!important}
+.page .tile:hover{border-color:rgba(var(--pa),.55);box-shadow:0 14px 34px rgba(0,0,0,.35),0 0 22px rgba(var(--pa),.14);transform:translateY(-2px)}
+.tile{transition:transform .25s,box-shadow .25s,border-color .25s}
+.page.on .tile{animation:tileIn .6s cubic-bezier(.2,.9,.2,1) both;animation-delay:calc(var(--i,0)*45ms)}
+@keyframes tileIn{from{opacity:0;transform:translateY(16px) scale(.98);filter:blur(4px)}}
+
+/* ---- living panels: a light travels round the edge ---- */
+.panel{background:linear-gradient(90deg,transparent,rgba(var(--ar),.8),transparent) -40% 0/40% 1px no-repeat,var(--glass);animation:edgeRun 7s linear infinite}
+body.lite .panel{animation:none}
+@keyframes edgeRun{to{background-position:140% 0,0 0}}
+
+/* ---- the reactor: gentle 3D sway + mouse parallax ---- */
+.orb{transform:perspective(900px) rotateX(calc(var(--my,0)*6deg)) rotateY(calc(var(--mx,0)*-8deg));transition:transform .4s ease-out;filter:drop-shadow(0 0 26px rgba(var(--cr),.28))}
+.core::before{content:"";position:absolute;width:min(70vh,640px);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,rgba(var(--cr),.16),transparent 62%);animation:breath 5s ease-in-out infinite;pointer-events:none}
+@keyframes breath{50%{transform:scale(1.08);opacity:.7}}
+body.state-thinking .core::before{animation-duration:1.2s}
+
+/* ---- chat ---- */
+#log{gap:18px;padding:18px 20px}
+.msg{max-width:92%}
+.msg .av{width:34px;height:34px;margin-top:20px;background:radial-gradient(circle at 35% 30%,#fff,var(--a2) 30%,rgba(var(--ar),.5) 60%,transparent 72%);border:0;position:relative;box-shadow:0 0 18px rgba(var(--ar),.55)}
+.msg .av::after{content:"";position:absolute;inset:-5px;border-radius:50%;border:1.5px dashed rgba(var(--ar),.55);animation:spin 9s linear infinite}
+.msg .who{font-size:10.5px}
+.msg .body{font-size:16.5px;line-height:1.55;padding:13px 16px;border:1px solid rgba(var(--ar),.25);border-left:3px solid var(--a);border-radius:2px 14px 14px 14px;
+  background:linear-gradient(135deg,rgba(var(--ar),.13),rgba(var(--ar),.03) 70%);box-shadow:0 8px 24px rgba(0,0,0,.25);position:relative;overflow:hidden}
+.msg .body::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent,rgba(var(--ar),.18),transparent);height:40%;top:-40%;animation:msgScan 1.1s ease-out 1 both;pointer-events:none}
+@keyframes msgScan{to{top:110%}}
+.msg.user .body{border:1px solid rgba(255,255,255,.12);border-right:3px solid rgba(220,240,255,.7);border-radius:14px 2px 14px 14px;background:linear-gradient(225deg,rgba(150,190,230,.18),rgba(150,190,230,.05));text-align:left}
+.msg.user .body::after{display:none}
+.msg .body pre{border-radius:8px;border:1px solid rgba(var(--ar),.2)}
+.typing span{width:4px!important;height:16px!important;border-radius:2px!important;animation:wave 1s ease-in-out infinite!important}
+.typing span:nth-child(2){animation-delay:.12s!important}.typing span:nth-child(3){animation-delay:.24s!important}
+@keyframes wave{0%,100%{transform:scaleY(.3)}50%{transform:scaleY(1)}}
+.cmd{height:56px;border-radius:12px}
+#input{font-size:17px}
+#send{border-radius:12px;min-width:120px}
+
+/* ---- holo cards: ORION popping up on its own ---- */
+.hcard.pro{border-color:var(--amber)!important;box-shadow:0 0 30px rgba(255,179,71,.25)!important}
+.hcard.pro h6::before{content:"◆ ORION · ";color:var(--amber)}
+
+/* ---- header toggle ---- */
+#layoutBtn.on{color:var(--a2);border-color:var(--line2)}
+
+/* =====================================================================
+   AURORA SKIN
+   ===================================================================== */
+body.skin-aurora{--ui:"Outfit","Segoe UI",system-ui,sans-serif;--disp:"Outfit","Segoe UI",sans-serif;--bg:#05070b;--glass:rgba(255,255,255,.045);--glass2:rgba(22,26,36,.92);
+  --line:rgba(255,255,255,.08);--line2:rgba(255,255,255,.16);--text:#eef4ff;--dim:#8e9cb0;--faint:#4a5566}
+body.skin-aurora .grid,body.skin-aurora .sweep,body.skin-aurora #hud,body.skin-aurora::after{display:none!important}
+body.skin-aurora .backdrop{background:radial-gradient(ellipse 60% 55% at 15% 10%,rgba(var(--ar),.28),transparent 65%),radial-gradient(ellipse 55% 50% at 90% 90%,rgba(140,100,255,.24),transparent 65%),radial-gradient(ellipse 40% 40% at 60% 40%,rgba(var(--ar),.08),transparent 70%);animation:aur 24s ease-in-out infinite alternate}
+@keyframes aur{to{filter:hue-rotate(25deg);transform:scale(1.08) translate(1%,1%)}}
+body.skin-aurora .panel,body.skin-aurora .tile,body.skin-aurora .hcard,body.skin-aurora .cmd,body.skin-aurora .hwin{border-radius:22px!important;border:1px solid var(--line)!important;backdrop-filter:blur(20px) saturate(1.3);box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 18px 40px rgba(0,0,0,.35)!important}
+body.skin-aurora .panel{background:var(--glass);animation:none}
+body.skin-aurora .panel::before,body.skin-aurora .panel::after,body.skin-aurora .hwin::before,body.skin-aurora .hwin::after{display:none}
+body.skin-aurora .ph{font:700 12px var(--ui)!important;letter-spacing:.12em!important;color:var(--dim);border-bottom:0}
+body.skin-aurora .tile h5{font:700 12px var(--ui)!important;letter-spacing:.12em!important}
+body.skin-aurora .wtitle h2{font:800 30px var(--ui)!important;letter-spacing:.04em!important;filter:none}
+body.skin-aurora .wtitle::before,body.skin-aurora .wtitle::after{display:none}
+body.skin-aurora .brand h1{font:800 22px var(--ui);letter-spacing:.06em;background:linear-gradient(90deg,#fff,var(--a2));-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:none}
+body.skin-aurora .seg,body.skin-aurora .seg button{border-radius:999px}
+body.skin-aurora .seg button{font:600 13px var(--ui);letter-spacing:0}
+body.skin-aurora .dock{margin:14px 0 14px 12px;border:1px solid var(--line);border-radius:26px;background:rgba(20,24,32,.7);backdrop-filter:blur(20px);height:calc(100vh - 28px)}
+body.skin-aurora .nav{border-radius:16px}body.skin-aurora .nav.on::before{display:none}
+body.skin-aurora .nav.on{background:linear-gradient(135deg,rgba(var(--ar),.35),rgba(140,100,255,.3));color:#fff;border-color:transparent}
+body.skin-aurora .btn,body.skin-aurora .mini,body.skin-aurora .ph button{border-radius:999px!important;letter-spacing:.04em!important;text-transform:none}
+body.skin-aurora #send{background:linear-gradient(135deg,var(--a),#8c64ff);color:#05101a;border:0;font:700 14px var(--ui);letter-spacing:.06em}
+body.skin-aurora .cmd{border-radius:999px!important;background:rgba(255,255,255,.05);height:58px;padding:0 10px 0 22px}
+body.skin-aurora .cmd .pr{display:none}
+body.skin-aurora .msg .av{background:radial-gradient(circle at 32% 28%,#fff,var(--a2) 22%,var(--a) 50%,#6b4dff 85%);box-shadow:0 0 22px rgba(var(--ar),.6)}
+body.skin-aurora .msg .av::after{display:none}
+body.skin-aurora .msg .body{border:1px solid var(--line);border-radius:22px 22px 22px 6px;background:rgba(255,255,255,.06);box-shadow:none}
+body.skin-aurora .msg .body::after{display:none}
+body.skin-aurora .msg.user .body{border:0;border-radius:22px 22px 6px 22px;background:linear-gradient(135deg,var(--a),#8c64ff);color:#05101a;font-weight:500}
+body.skin-aurora .msg .who{letter-spacing:.06em;text-transform:none}
+body.skin-aurora .orb svg{opacity:.35}
+body.skin-aurora .orb::after{content:"";position:absolute;inset:24%;border-radius:50%;background:radial-gradient(circle at 32% 26%,rgba(255,255,255,.95),rgba(var(--cr),.95) 22%,rgba(140,100,255,.9) 60%,rgba(12,10,30,.95) 80%);
+  box-shadow:0 0 80px rgba(var(--cr),.5),0 0 160px rgba(140,100,255,.3),inset -20px -26px 60px rgba(0,0,0,.45);animation:breath 5s ease-in-out infinite}
+body.skin-aurora.state-thinking .orb::after{animation-duration:.9s}
+body.skin-aurora .substatus b,body.skin-aurora .statew{font-family:var(--ui);letter-spacing:.08em}
+body.skin-aurora .tile:hover{transform:translateY(-3px)}
+body.skin-aurora .page .tile{background:rgba(255,255,255,.04)}
+body.skin-aurora .page .tile h5{color:var(--text)!important}
+body.skin-aurora .toast{border-radius:18px}
+body.skin-aurora #liveview{border-radius:22px}
+
 </style>
 </head>
 <body class="state-idle" data-theme="standby">
@@ -821,6 +943,8 @@ body.lite #hud .scanl{display:none}
       </div>
       <div class="clock"><b id="clock">--:--:--</b><small id="date">—</small></div>
       <div class="winbtns">
+        <button class="ib" id="layoutBtn" title="Show/hide the side panel"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/></svg></button>
+        <button class="ib" id="skinBtn" title="Switch style: HUD / Aurora"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 0 0 16z" fill="currentColor"/></svg></button>
         <button class="ib" id="bSpeak" title="Voice on/off"><svg viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4z"/><path id="spkwave" d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12"/></svg></button>
         <button class="ib" id="gamingbtn" title="Gaming Mode"><svg viewBox="0 0 24 24"><path d="M6 9h12a4 4 0 0 1 3.9 4.9l-.6 2.6a2.5 2.5 0 0 1-4.3 1.1L15 15.5H9l-2 2.1a2.5 2.5 0 0 1-4.3-1.1l-.6-2.6A4 4 0 0 1 6 9z"/><path d="M8 11v3M6.5 12.5h3"/></svg></button>
         <button class="ib" id="bBell" title="Notifications"><svg viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15zM10 20a2 2 0 0 0 4 0"/></svg><span class="cnt" id="ncount">0</span></button>
@@ -904,7 +1028,7 @@ body.lite #hud .scanl{display:none}
       <section class="panel pages">
         <!-- COMMS -->
         <div class="page on" id="page-comms">
-          <div class="ph">COMMS <span style="font-family:var(--mono);letter-spacing:0;font-weight:500;color:var(--faint)">UI 3.0</span><i id="brainlabel">AUTO BRAIN</i></div>
+          <div class="ph">COMMS <span style="font-family:var(--mono);letter-spacing:0;font-weight:500;color:var(--faint)">UI 5.0</span><i id="brainlabel">AUTO BRAIN</i></div>
           <div id="log"></div>
           <button id="toBottom" title="Jump to latest">▼ LATEST</button>
           <div class="quick" id="quick">
@@ -1331,6 +1455,10 @@ body.lite #hud .scanl{display:none}
   <div class="field" style="margin-top:6px"><label>MIC SENSITIVITY <a id="sSensV">1.0×</a></label><input type="range" id="sSens" min="0.5" max="2" step="0.1" style="padding:0;accent-color:var(--a)"></div>
   <h3>BEHAVIOUR</h3>
   <label class="tog"><input type="checkbox" id="sSafe"> Safe mode <small>— ask before risky actions (blocklist + backups are always on)</small></label>
+  <div class="voicerow" style="margin:6px 0 10px"><label style="flex:none;margin:0">STYLE</label><select class="inp" id="sSkin" style="width:150px"><option value="hud">Jarvis HUD</option><option value="aurora">Aurora</option></select>
+    <label style="flex:none;margin:0 0 0 10px">TEXT SIZE</label><select class="inp" id="sText" style="width:130px"><option value="s">Small</option><option value="m">Normal</option><option value="l">Large</option><option value="xl">Extra large</option></select></div>
+  <label class="tog"><input type="checkbox" id="sSimple"> Simple layout <small>— hide the telemetry column (the ◧ button in the top bar toggles it)</small></label>
+  <label class="tog"><input type="checkbox" id="sPro"> Let ORION pop things up by itself <small>— events starting soon, homework due, rain, what happened while you were away…</small></label>
   <label class="tog"><input type="checkbox" id="sSaver"> Holographic screensaver when I'm away <small>— <input class="inp" id="sSaverMin" type="number" min="0" style="width:64px;display:inline-block;padding:2px 6px"> min (0 = same as autonomous mode) · never while gaming or watching something</small></label>
   <label class="tog"><input type="checkbox" id="sBreakVoice"> Say break reminders out loud <small>— every <input class="inp" id="sBreakMin" type="number" min="0" style="width:64px;display:inline-block;padding:2px 6px"> min of non-stop PC use (0 = off)</small></label>
   <label class="tog"><input type="checkbox" id="sAutoMode"> Switch modes automatically <small>— CEO for money, Scholar for school, Hacker for code…</small></label>
@@ -1419,6 +1547,7 @@ window.ui={event(e){ switch(e.kind){
   case "live": if(e.src==="browser") hwLive(e); else liveFrame(e); break;
   case "powerdown": powerDown(e.title); break;
   case "saver": if(e.on) svStart(); else svStop(false); break;
+  case "proactive": sfx("card"); break;
   case "ambient": ambient(e.sound,e.minutes); break;
   case "popups": if(e.what!=="cards") HW.list.filter(w=>!w.closed).forEach(w=>e.minimise?hwMin(w):hwClose(w)); if(e.what!=="windows") holoClear(); break;
   case "study": toast(e.text,e.ok?"":"warn"); $("#mkGo").textContent="✦ MAKE FLASHCARDS"; $("#mkGo").disabled=false; if(e.ok){ $("#mkTopic").value=$("#mkNotes").value=""; CARD=null; } if(on("study")) loadStudy(); break;
@@ -1545,7 +1674,7 @@ function paintAfk(on,note){ $("#afkchip").classList.toggle("show",!!on); $("#afk
 $("#afkchip").onclick=()=>go("root");
 
 /* ================= settings / memory ================= */
-$("#nSet").onclick=async()=>{ const s=await api.get_settings(); (async()=>{ try{ const sv=await api.saver_get(); $("#sSaver").checked=sv.enabled; $("#sSaverMin").value=sv.idle_minutes; $("#sBreakMin").value=sv.break_minutes; $("#sBreakVoice").checked=sv.break_voice; }catch(e){} })(); $("#sAutoMode").checked=s.auto_mode!==false; $("#sModeVoice").checked=s.per_mode!==false; $("#sSfx").checked=localStorage.getItem("orion_sfx")!=="0";
+$("#nSet").onclick=async()=>{ const s=await api.get_settings(); $("#sSkin").value=UIP.skin; $("#sText").value=UIP.text; $("#sSimple").checked=!!UIP.simple; $("#sPro").checked=UIP.proactive!==false; (async()=>{ try{ const sv=await api.saver_get(); $("#sSaver").checked=sv.enabled; $("#sSaverMin").value=sv.idle_minutes; $("#sBreakMin").value=sv.break_minutes; $("#sBreakVoice").checked=sv.break_voice; }catch(e){} })(); $("#sAutoMode").checked=s.auto_mode!==false; $("#sModeVoice").checked=s.per_mode!==false; $("#sSfx").checked=localStorage.getItem("orion_sfx")!=="0";
   $("#cmList").textContent=Object.keys(s.custom_modes||{}).length?"Your modes: "+Object.values(s.custom_modes).map(m=>m.label).join(", "):""; try{ $("#sPlace").value=(await api.life_get()).home_place||""; }catch(e){} try{ const v=await api.voice_settings(); $("#sPatience").value=v.patience; $("#sConvo").checked=!!v.conversation; $("#sBarge").checked=!!v.barge_in; $("#sDuck").checked=v.duck!==false; $("#sSens").value=v.mic_sensitivity; $("#sSensV").textContent=(+v.mic_sensitivity).toFixed(1)+"×"; }catch(e){} $("#sName").value=s.name; $("#sTitle").value=s.title; $("#sOwner").value=s.owner||""; $("#sLocal").value=s.local_model; $("#sLocalV").value=s.local_vision||"";
   $("#sKeys").innerHTML=s.providers.map(p=>`<div class="field"><label>${esc(p.label.toUpperCase())} KEY ${p.key_url?`<a data-url="${esc(p.key_url)}">get a free key ↗</a>`:""}</label>
     <input type="password" data-pid="${esc(p.id)}" value="${esc(p.key)}" placeholder="${p.id==="groq"?"gsk_…  (needed for voice + captions)":p.id==="gemini"?"best free vision brain":"optional — extra free allowance"}"></div>`).join("");
@@ -1561,7 +1690,7 @@ $("#sSave").onclick=async()=>{ const keys={}; $$("#sKeys input").forEach(i=>keys
   if($("#sPlace").value.trim()) api.life_action({action:"place",place:$("#sPlace").value.trim()});
   api.voice_settings({patience:$("#sPatience").value,conversation:$("#sConvo").checked,barge_in:$("#sBarge").checked,duck:$("#sDuck").checked,mic_sensitivity:+$("#sSens").value});
   const r=await api.save_settings({name:$("#sName").value,title:$("#sTitle").value,owner:$("#sOwner").value,keys,local_model:$("#sLocal").value,local_vision:$("#sLocalV").value,voice:$("#sVoice").value,engine:$("#sEngine").value,
-    speak:$("#sSpeak").checked,safe_mode:$("#sSafe").checked,auto_mode:(api.saver_set&&api.saver_set({enabled:$("#sSaver").checked,idle_minutes:+$("#sSaverMin").value||0,break_minutes:+$("#sBreakMin").value||0,break_voice:$("#sBreakVoice").checked}),$("#sAutoMode").checked),per_mode:$("#sModeVoice").checked,fullscreen:$("#sFs").checked,skip_boot:$("#sBoot").checked,visuals:$("#sVis").value});
+    speak:$("#sSpeak").checked,safe_mode:$("#sSafe").checked,auto_mode:(saveUi({skin:$("#sSkin").value,text:$("#sText").value,simple:$("#sSimple").checked,proactive:$("#sPro").checked}),api.saver_set&&api.saver_set({enabled:$("#sSaver").checked,idle_minutes:+$("#sSaverMin").value||0,break_minutes:+$("#sBreakMin").value||0,break_voice:$("#sBreakVoice").checked}),$("#sAutoMode").checked),per_mode:$("#sModeVoice").checked,fullscreen:$("#sFs").checked,skip_boot:$("#sBoot").checked,visuals:$("#sVis").value});
   applyCfg(r); $("#vSet").classList.remove("show"); toast("Configuration saved."); paintLinks(await api.status()); pollMeters(); };
 $("#mClose").onclick=()=>$("#vMem").classList.remove("show");
 $("#clearChat").onclick=async()=>{ await api.clear_chat(); $("#log").innerHTML=""; $("#vMem").classList.remove("show"); toast("Chat history cleared."); };
@@ -1851,7 +1980,7 @@ $("#ntText").addEventListener("keydown",e=>{ if(e.key==="Enter") $("#ntAdd").cli
 
 /* ================= v4: holographic cards ================= */
 const HOLO={list:[],slots:[[58,8],[58,36],[58,64],[2,10],[2,40],[2,68]]};
-function holoCard(c){ const el=document.createElement("div"); el.className="hcard"; let body="";
+function holoCard(c){ const el=document.createElement("div"); if(c&&c.proactive) setTimeout(()=>el.classList.add("pro"),0); el.className="hcard"; let body="";
   if(c.kind==="weather"&&c.weather){ const w=c.weather; body=`<div class="hwx"><div class="i">${WXI(w.code)}</div><div><b>${w.temp}°</b><small>${esc(w.sky)} · feels ${w.feels}°</small><small>${w.rain_at?"rain from "+w.rain_at:"no rain soon"} · sunset ${w.sunset}</small></div></div>`; }
   else if(c.kind==="steps") body=`<ol>${(c.items||[]).map((x,i)=>`<li style="animation-delay:${i*.12}s">${esc(x)}</li>`).join("")}</ol>`;
   else if(c.kind==="chart"){ const pts=c.points||[]; const mx=Math.max(1,...pts.map(p=>p[1])); body=pts.map(p=>`<div class="hbar"><b>${esc(p[0])}</b><div><i style="width:${p[1]/mx*100}%"></i></div><span>${p[1]}</span></div>`).join(""); }
@@ -2072,7 +2201,7 @@ function frame(t){ requestAnimationFrame(frame); if(lite&&t-lastFrame<33) return
 function applyCfg(c){ cfg=c; lite=!!c.lite; try{ addCustomDots(c.custom_modes); }catch(e){} document.body.classList.toggle("lite",lite); initBg();
   $("#name").textContent=c.name.toUpperCase(); $("#bootname").textContent=c.name.toUpperCase(); $("#bootver").textContent="v"+(c.version||"2.0"); document.title=c.name;
   $("#ringtext").textContent=`${c.name.toUpperCase()} · PERSONAL INTELLIGENCE SYSTEM · ALL SYSTEMS ONLINE · ${c.name.toUpperCase()} · AT YOUR SERVICE ·`; applyTheme(c.theme||"standby"); paintSpeak(c.speak); }
-async function boot(){ const c=await api.init(); applyCfg(c); const st=api.status();
+async function boot(){ try{ applyUi(await api.ui_prefs()); }catch(e){} const c=await api.init(); applyCfg(c); const st=api.status();
   await bootFX(c);
   paintLinks(await st); $("#boot").classList.add("gone");
   (c.history||[]).forEach(m=>addMsg(m.role,m.content));
@@ -2187,6 +2316,21 @@ $$("#ambBtns button").forEach(b=>b.onclick=()=>ambient(b.dataset.s,0));
 $("#svNowBtn").onclick=()=>{ api.saver_show(); };
 $("#habAdd").onclick=async()=>{ const n=$("#habNew").value.trim(); if(!n) return; await api.pc_tool("habit",{action:"add",name:n}); $("#habNew").value=""; loadHabits(); };
 $("#habNew").addEventListener("keydown",e=>{ if(e.key==="Enter") $("#habAdd").click(); });
+
+
+/* ================= 5.0 interface ================= */
+let UIP={skin:"hud",text:"m",simple:true,proactive:true};
+function applyUi(u){ UIP={...UIP,...(u||{})}; const b=document.body; b.classList.toggle("skin-aurora",UIP.skin==="aurora");
+  ["ts-s","ts-l","ts-xl"].forEach(c=>b.classList.remove(c)); if(UIP.text&&UIP.text!=="m") b.classList.add("ts-"+UIP.text);
+  b.classList.toggle("simple",!!UIP.simple); $("#layoutBtn")&&$("#layoutBtn").classList.toggle("on",!UIP.simple); }
+async function saveUi(p){ applyUi(p); try{ await api.ui_prefs(p); }catch(e){} }
+$("#layoutBtn").onclick=()=>{ saveUi({simple:!UIP.simple}); sfx("open"); };
+$("#skinBtn").onclick=()=>{ saveUi({skin:UIP.skin==="aurora"?"hud":"aurora"}); toast(UIP.skin==="aurora"?"Aurora style":"Jarvis HUD style"); sfx("card"); };
+// stagger tiles + remember page
+const _go5=go; go=(p)=>{ _go5(p); document.body.dataset.page=p; const pg=$("#page-"+p); if(pg) [...pg.querySelectorAll(".tile")].forEach((t,i)=>t.style.setProperty("--i",Math.min(i,14))); };
+// reactor follows the mouse a little
+(()=>{ let raf=0, mx=0, my=0; addEventListener("mousemove",e=>{ mx=e.clientX/innerWidth-.5; my=e.clientY/innerHeight-.5; if(raf) return;
+  raf=requestAnimationFrame(()=>{ raf=0; const o=document.querySelector(".orb"); if(o){ o.style.setProperty("--mx",mx.toFixed(3)); o.style.setProperty("--my",my.toFixed(3)); } }); },{passive:true}); })();
 
 /* ================= skill library ================= */
 let SL=null, SLC="", SLS=null;
@@ -2357,6 +2501,7 @@ setTimeout(()=>{ if(api) return; const wait=ms=>new Promise(r=>setTimeout(r,ms))
       for(const w of "You have 2 messages waiting, sir. **Adrian** asked for help and **Responeded** said “Now?”.".split(" ")){ ui.event({kind:"delta",id:"p",text:w+" "}); await wait(50); }
       ui.event({kind:"stream_end",id:"p",text:"You have 2 messages waiting, sir. **Adrian** asked for help and **Responeded** said “Now?”.",tier:"cloud",model:"Groq gpt-oss-20b"}); ui.event({kind:"state",state:"idle"}); },
     stop:()=>A(true),set_brain:m=>A({brain:m,cloud:{ok:true,count:2,labels:[]},local:{ok:false}}),set_theme:()=>A(),mic_start:()=>A(true),mic_stop:()=>A(""),mic_level:()=>A(Math.random()),ask_claude:()=>A(true),confirm_reply:()=>A(true),
+    ui_prefs:p=>A({skin:(p&&p.skin)||localStorage.getItem('mskin')||'hud',text:'m',simple:true,proactive:true}),
     saver_data:()=>A({log:[{t:"2026-11-03 16:02",text:"Built tomorrow's revision plan: Physics electricity (red) + Maths vectors"},{t:"2026-11-03 16:10",text:"Drafted 3 cold emails to Desford cafés for the booking-bot offer (waiting for you)"},{t:"2026-11-03 16:18",text:"Tidied Downloads: 41 files into folders"}],weather:{temp:11,sky:"cloudy",place:"Desford",rain_at:"18:00",code:3},next:[{at:"Tue 17:00",title:"Money meeting"},{at:"Wed 08:40",title:"School"}],job:"Researching automation leads in Leicester",queued:2,money:168,homework:2,autonomy:true}),
     saver_show:()=>{ setTimeout(()=>ui.event({kind:"saver",on:true}),300); return A(true); },saver_exit:()=>A(true),saver_get:()=>A({enabled:true,idle_minutes:0,break_minutes:50,break_voice:false}),saver_set:b=>A(b),
     pc_tool:async(n,a)=>{ await wait(400); return {ok:true,result:n==="speed_test"?"Download 54.2 Mbps, ping 18 ms — great for gaming and streaming.":"Done."}; },
