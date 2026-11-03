@@ -1351,7 +1351,7 @@ const _sm42=scheduleMorning; scheduleMorning=async()=>{ await _sm42(); try{ if(!
 checkLaunch=async()=>{ try{ if(Native){ const r=await Native.consumeLaunchAction();
   if(r.action==="ride"){ go("home"); startRide(); return; }
   if(r.action==="listen"){ go("chat"); setTimeout(()=>$("#mic").click(),250); return; }
-  if(r.action==="call"){ incoming(r.reason||""); setTimeout(acceptCall,350); return; }
+  if(r.action==="call"){ try{ Native.stopRing&&Native.stopRing(); }catch(e){} incoming(r.reason||""); setTimeout(acceptCall,350); return; }
   if(r.action==="ring"){ Native.stopRing&&Native.stopRing(); toast("📢 Found it!"); return; } } }catch(e){} };
 const _paintHome42=paintHome; paintHome=()=>{ _paintHome42(); paintToday(); try{ paintRide(); }catch(e){} };
 

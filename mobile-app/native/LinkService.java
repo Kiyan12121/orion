@@ -64,8 +64,8 @@ public class LinkService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if (intent != null && STOP_RING.equals(intent.getAction())) stopRing();
-        if (intent != null && WAKE_CALL.equals(intent.getAction())) incomingCall("__morning__");
+        if (intent != null && STOP_RING.equals(intent.getAction())) { wakeDone = true; stopRing(); }
+        if (intent != null && WAKE_CALL.equals(intent.getAction())) { wakeDone = false; wakeTries = 0; wakeRing(); }
         return START_STICKY;
     }
 
@@ -239,6 +239,49 @@ public class LinkService extends Service {
                 .build();
         ((NotificationManager) getSystemService(NOTIFICATION_SERVICE)).notify(21, n);
         vibrate(new long[]{0, 800, 600, 800, 600, 800});
+    }
+
+    // ---------------------------------------------------------------- wake-up call: rings through the ALARM channel,
+    // so it sounds even when the phone is on mute/vibrate (like the clock app). Re-rings twice if you don't answer.
+    private boolean wakeDone = false;
+    private int wakeTries = 0;
+
+    private void wakeRing() {
+        if (wakeDone) return;
+        wakeTries++;
+        incomingCall("__morning__");
+        try {
+            stopPlayer();
+            AudioManager am = (AudioManager) getSystemService(AUDIO_SERVICE);
+            savedVolume = am.getStreamVolume(AudioManager.STREAM_ALARM);
+            int max = am.getStreamMaxVolume(AudioManager.STREAM_ALARM);
+            int want = Math.max(savedVolume, (int) Math.ceil(max * (0.5 + 0.2 * (wakeTries - 1))));   // a bit louder each time
+            am.setStreamVolume(AudioManager.STREAM_ALARM, Math.min(max, want), 0);
+            Uri tone = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
+            if (tone == null) tone = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
+            player = new MediaPlayer();
+            player.setAudioAttributes(new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_ALARM)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION).build());
+            player.setDataSource(this, tone);
+            player.setLooping(true);
+            player.prepare();
+            player.start();
+        } catch (Exception ignored) { }
+        handler.postDelayed(() -> {
+            if (wakeDone) return;
+            stopPlayer();
+            if (wakeTries < 3) handler.postDelayed(this::wakeRing, 4 * 60000L);   // snooze-style: again in 4 min
+        }, 60000);
+    }
+
+    private void stopPlayer() {
+        try {
+            if (player != null) { player.stop(); player.release(); }
+        } catch (Exception ignored) { }
+        player = null;
+        try {
+            if (savedVolume >= 0) ((AudioManager) getSystemService(AUDIO_SERVICE)).setStreamVolume(AudioManager.STREAM_ALARM, savedVolume, 0);
+        } catch (Exception ignored) { }
     }
 
     private void ring() {
