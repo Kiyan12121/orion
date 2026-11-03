@@ -789,11 +789,18 @@ J("pending",[]).filter(x=>x.chat).forEach(x=>typing(x.id));
 
 const PC_WORDS=/\b(open|close|launch|lock|shut ?down|restart|volume|pause|play|skip|screenshot|type|click|file|folder|desktop|root|dm|message|afk|gaming|render|video|shorts|code|build|autopilot|queue)\b/i;
 async function solo(text){
-  const key=store.get("key"); if(!key) return "I'm in solo mode without a brain key — tap ⚙ and add a free Groq key.";
+  const key=(store.get("key")||"").replace(/[\s"'`]/g,""); if(!key) return "I'm in solo mode without a brain key — tap ⚙ and add a free Groq key (console.groq.com/keys).";
+  const gem=key.startsWith("AIza");                      // a Gemini key works too
+  if(!gem&&!key.startsWith("gsk_")) return `That key in ⚙ isn't a Groq key, ${title()} — Groq keys start with “gsk_”. Paste a fresh one from console.groq.com/keys (a Gemini key starting “AIza” works too).`;
   history.push({role:"user",content:text}); history=history.slice(-14);
-  const r=await fetch("https://api.groq.com/openai/v1/chat/completions",{method:"POST",headers:{"Authorization":"Bearer "+key,"Content-Type":"application/json"},
-    body:JSON.stringify({model:"openai/gpt-oss-20b",temperature:.5,messages:[{role:"system",content:`You are ORION, a calm, witty British AI butler on ${title()}'s phone. Address them as "${title()}". Keep replies short. Their PC is offline so you can't control it right now. Today is ${new Date().toDateString()}.`},...history]})});
-  if(!r.ok) throw new Error(r.status===429?"Free allowance used up — try again soon.":"Brain error "+r.status);
+  const url=gem?"https://generativelanguage.googleapis.com/v1beta/openai/chat/completions":"https://api.groq.com/openai/v1/chat/completions";
+  const model=gem?"gemini-2.5-flash":"openai/gpt-oss-20b";
+  const sys=`You are ORION, a calm, witty British AI butler on ${title()}'s phone. Address them as "${title()}". Keep replies short. Their PC is offline so you can't control it right now — say so if asked, and offer to queue the task for when it's back. Today is ${new Date().toDateString()}, time ${new Date().toTimeString().slice(0,5)}.`;
+  const r=await fetch(url,{method:"POST",headers:{"Authorization":"Bearer "+key,"Content-Type":"application/json"},
+    body:JSON.stringify({model,temperature:.5,messages:[{role:"system",content:sys},...history]})});
+  if(!r.ok){ history.pop();
+    if(r.status===401||r.status===403) throw new Error(`${gem?"Gemini":"Groq"} rejected the brain key (${r.status}). Make a new free key at ${gem?"aistudio.google.com/apikey":"console.groq.com/keys"} and paste it in ⚙.`);
+    throw new Error(r.status===429?"Free allowance used up — try again in a minute.":"Brain error "+r.status); }
   const out=(await r.json()).choices[0].message.content||"…"; history.push({role:"assistant",content:out}); SJ("hist",history.slice(-14)); return out; }
 async function flushQueue(){ const q=J("queue",[]); if(!q.length) return; SJ("queue",[]);
   for(const t of q){ try{ const j=await api("/api/jobs",{text:t,autopilot:true}); const p=J("pending",[]); p.push({id:j.id,text:t,chat:false}); SJ("pending",p); }catch(e){ const r=J("queue",[]); r.push(t); SJ("queue",r); } }
@@ -1409,7 +1416,7 @@ $$("nav.tabs button").forEach(b=>b.onclick=()=>go(b.dataset.tab));
 $("#setBtn").onclick=()=>{ const L=addrs(); $("#sAddr").value=L.find(a=>!isLan(a))||""; $("#sAddr2").value=L.find(isLan)||""; $("#sAddrNow").textContent=addr()?`Using: ${addr().replace(/^https?:\/\//,"")}${isLan(addr())?" (home Wi-Fi)":" (anywhere)"}`:""; $("#sPin").value=store.get("pin"); $("#sKey").value=store.get("key"); $("#sTitle").value=title(); $("#sMute").checked=store.get("mute")==="1"; $("#sLink").checked=store.get("link","1")==="1"; $("#sPat").value=store.get("patience","normal"); $("#sHot").checked=store.get("hot")==="1"; $("#sWake").checked=store.get("wakecall","1")==="1"; { const n=+store.get("wakeNext","0"); $("#sWakeNext").textContent=n?"— next: "+new Date(n).toLocaleString("en-GB",{weekday:"short",hour:"2-digit",minute:"2-digit"}):""; } $("#sName").checked=store.get("needName","1")==="1"; $("#sLoc").checked=store.get("loc")==="1"; loadCalls(); $("#vSet").classList.add("show"); };
 $("#sClose").onclick=()=>$("#vSet").classList.remove("show");
 $("#sSave").onclick=()=>{ const both=[$("#sAddr").value,$("#sAddr2").value].join(",").split(/[,\s]+/).map(normAddr).filter(Boolean); SJ("addrs",[...new Set(both)]);
-  let a=both.find(isLan)||both[0]||""; store.set("addr",a); store.set("pin",$("#sPin").value.trim()); store.set("key",$("#sKey").value.trim()); store.set("title",$("#sTitle").value.trim()||"sir"); store.set("mute",$("#sMute").checked?"1":"0");
+  let a=both.find(isLan)||both[0]||""; store.set("addr",a); store.set("pin",$("#sPin").value.trim()); store.set("key",$("#sKey").value.replace(/[\s"'`]/g,"")); store.set("title",$("#sTitle").value.trim()||"sir"); store.set("mute",$("#sMute").checked?"1":"0");
   store.set("link",$("#sLink").checked?"1":"0"); store.set("patience",$("#sPat").value); syncLink(); saveCalls();
   $("#vSet").classList.remove("show"); toast("Saved."); refresh(); };
 $("#clipUp").onclick=async()=>{ try{ const t=await readClip(); if(!t) return toast("Your clipboard is empty."); await api("/api/clip",{text:t}); toast("Sent to your PC's clipboard."); }catch(e){ toast(e.message); } };
