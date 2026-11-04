@@ -1,5 +1,8 @@
 # ORION 5.3 — Personal Intelligence System
 
+## 5.3.1
+- **Hand gestures now work with phone-as-webcam apps** (Iriun, DroidCam, OBS Virtual Camera). ORION tries every camera and Windows camera driver until one gives a real picture, then remembers it. Large phone video is shrunk first so it stays fast.
+
 ## New in 5.3: Stark Protocols
 - **Globe mode:** a full-screen holographic Earth.
   - Live day and night, with your home pinned.

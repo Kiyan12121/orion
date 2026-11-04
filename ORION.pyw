@@ -1749,7 +1749,7 @@ class Api:
     # ---------------------------------------------------------------- hand gestures (opt-in)
     def gestures_get(self):
         g = self._gestures
-        return {"enabled": bool(g.gc.get("enabled")), "on": g.on, "mode": g.mode, "err": g.err, "have": gestures.available()}
+        return {"enabled": bool(g.gc.get("enabled")), "on": g.on, "mode": g.mode, "err": g.err, "cam": g.cam, "have": gestures.available()}
 
     def gestures_set(self, on):
         g = self._gestures

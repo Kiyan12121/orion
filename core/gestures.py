@@ -72,6 +72,7 @@ class Gestures:
         self.on = False
         self.mode = ""
         self.err = ""
+        self.cam = None
         self._stop = threading.Event()
         self._t = None
         self._last = 0
@@ -86,6 +87,7 @@ class Gestures:
     def start(self):
         if self.on:
             return True
+        self.err = ""
         av = available()
         if not av["cv2"]:
             self.err = "Needs OpenCV — press INSTALL on the gestures card."
@@ -111,13 +113,50 @@ class Gestures:
         self.emit("gesture", g=g, **d)
 
     # ------------------------------------------------------------------ camera loop
+    def _open(self, cv2):
+        """Finds a camera that actually gives frames: tries the saved one first, then cameras 0-5 on every
+        Windows backend (virtual cameras like Iriun, DroidCam and OBS often sit on 1 or 2, or only work on one backend)."""
+        backs = [b for b in (getattr(cv2, "CAP_DSHOW", None), getattr(cv2, "CAP_MSMF", None), getattr(cv2, "CAP_ANY", 0)) if b is not None]
+        saved = (int(self.gc.get("camera", 0)), self.gc.get("backend"))
+        tries = ([saved] if saved[1] is not None else []) + [(i, b) for i in range(6) for b in backs]
+        seen = set()
+        for i, b in tries:
+            if (i, b) in seen or self._stop.is_set():
+                continue
+            seen.add((i, b))
+            try:
+                cap = cv2.VideoCapture(i, b)
+                if not cap or not cap.isOpened():
+                    continue
+                ok = False
+                for _ in range(15):                  # virtual cams can take a moment to send the first frame
+                    ok, f = cap.read()
+                    if ok and f is not None and f.size:
+                        break
+                    time.sleep(.1)
+                if ok:
+                    self.gc["camera"], self.gc["backend"] = i, b
+                    log.info("gestures: camera %s backend %s", i, b)
+                    try:
+                        from . import config
+                        config.save(self.cfg)
+                    except Exception:
+                        pass
+                    return cap, i
+                cap.release()
+            except Exception:
+                continue
+        return None, None
+
     def _run(self, use_mp):
         import cv2
-        cap = cv2.VideoCapture(int(self.gc.get("camera", 0)), cv2.CAP_DSHOW if hasattr(cv2, "CAP_DSHOW") else 0)
-        if not cap or not cap.isOpened():
-            self.err = "Couldn't open the webcam."
+        cap, idx = self._open(cv2)
+        if cap is None:
+            self.err = ("No camera gave a picture. If you use Iriun, open Iriun Webcam on the PC AND the app on your phone "
+                        "(same Wi-Fi) until you see the picture, then switch gestures off and on.")
             self.emit("gesture_state", on=False, err=self.err)
             return
+        self.cam = idx
         cap.set(cv2.CAP_PROP_FRAME_WIDTH, 320)
         cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 240)
         self.on, self.err = True, ""
@@ -142,6 +181,8 @@ class Gestures:
             if not ok:
                 time.sleep(.2)
                 continue
+            if frame.shape[1] > 480:
+                frame = cv2.resize(frame, (320, int(320 * frame.shape[0] / frame.shape[1])))
             lm = detect(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
             now = time.time()
             if not lm:
@@ -174,6 +215,8 @@ class Gestures:
             if not ok:
                 time.sleep(.2)
                 continue
+            if frame.shape[1] > 480:
+                frame = cv2.resize(frame, (320, int(320 * frame.shape[0] / frame.shape[1])))
             g = cv2.GaussianBlur(cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY), (21, 21), 0)
             now = time.time()
             if prev is not None:
