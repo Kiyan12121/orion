@@ -200,7 +200,17 @@ class GamingMode:
         if getattr(self, "doctor_notes", None):
             bits.append("performance: " + "; ".join(self.doctor_notes[:2]))
         self.notify(". ".join(bits) + ".", bool(self.held))
-        CTX.get("emit", lambda *a, **k: None)("gaming_wrap", text=". ".join(bits))
+        rep = {"game": nice_name(self.game), "mins": mins, "clips": clips, "held": self.held[:6],
+               "notes": list(getattr(self, "doctor_notes", []) or [])[:3]}
+        try:
+            st = game_stats(30)
+            same = [m for g, m in st["by_game"] if g == rep["game"]]
+            rep["month_hours"] = round((same[0] if same else 0) / 60, 1)
+            rep["sessions_week"] = game_stats(7)["sessions"]
+            rep["longest"] = st["longest"]
+        except Exception:
+            pass
+        CTX.get("emit", lambda *a, **k: None)("gaming_wrap", text=". ".join(bits), report=rep)
         self.held = []
 
     def hold(self, text):

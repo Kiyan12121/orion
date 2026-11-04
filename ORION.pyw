@@ -34,7 +34,7 @@ from core import money                                      # noqa: E402
 from core import holo                                       # noqa: E402,F401
 from core import plus                                       # noqa: E402
 from core import skillbook                                  # noqa: E402
-from core import saver, pctools, proactive                  # noqa: E402
+from core import saver, pctools, proactive, ironman, gestures         # noqa: E402
 from core.autonomy import Autonomy                          # noqa: E402
 from core import gaming as gaming_mod                        # noqa: E402
 from core.routines import NightShift                        # noqa: E402
@@ -109,6 +109,7 @@ class Api:
         self._autonomy = Autonomy(self._cfg, self._jobs, self._emit)
         self._proactive = proactive.Proactive(self._cfg, self._emit)
         self._saver = saver.Saver(self._cfg, self._emit, lambda: self._window)
+        self._gestures = gestures.Gestures(self._cfg, self._emit)
         self._breaks = pctools.Breaks(self._cfg, lambda t: self._speaker.say(t), lambda t: self._emit("toast", text="🧘 " + t))
         self._bedtime = plus.Bedtime(self._cfg, lambda t: self._speaker.say(t),
                                      lambda t: self._emit("toast", text="🌙 " + t),
@@ -1708,6 +1709,29 @@ class Api:
         self._saver.hide()
         return True
 
+    # ---------------------------------------------------------------- iron man moments
+    def threat_scan(self):
+        return ironman.threat_scan()
+
+    def globe_feeds(self):
+        return ironman.globe_feeds()
+
+    def globe_find(self, place):
+        try:
+            return ironman.geocode(place)
+        except Exception as e:
+            return {"error": str(e)}
+
+    def suit_up(self):
+        threading.Thread(target=lambda: self._speaker.say(ironman.suit_up()), daemon=True).start()
+        return True
+
+    def suitup_apps(self, apps=None):
+        if apps is not None:
+            self._cfg["suitup_apps"] = [a.strip() for a in apps if a and a.strip()][:6]
+            config_mod.save(self._cfg)
+        return self._cfg.get("suitup_apps", [])
+
     def ui_prefs(self, b=None):
         """Interface style: skin (hud/aurora), text size, simple layout, proactive pop-ups."""
         u = self._cfg.setdefault("ui", {"skin": "hud", "text": "m", "simple": True})
@@ -1721,6 +1745,43 @@ class Api:
                 self._cfg["proactive"] = bool(b["proactive"])
             config_mod.save(self._cfg)
         return {**u, "proactive": self._cfg.get("proactive", True)}
+
+    # ---------------------------------------------------------------- hand gestures (opt-in)
+    def gestures_get(self):
+        g = self._gestures
+        return {"enabled": bool(g.gc.get("enabled")), "on": g.on, "mode": g.mode, "err": g.err, "have": gestures.available()}
+
+    def gestures_set(self, on):
+        g = self._gestures
+        g.gc["enabled"] = bool(on)
+        config_mod.save(self._cfg)
+        if on:
+            g.start()
+        else:
+            g.stop()
+        return self.gestures_get()
+
+    def gestures_install(self):
+        import subprocess
+        py = sys.executable.replace("pythonw.exe", "python.exe")
+
+        def run():
+            self._emit("toast", level="info", text="Installing hand-gesture support… (a minute or two)")
+            r = subprocess.run([py, "-m", "pip", "install", "opencv-python"], capture_output=True, text=True,
+                               creationflags=0x08000000 if os.name == "nt" else 0)
+            if r.returncode != 0:
+                self._emit("toast", level="warn", text="OpenCV install failed — details in data/orion.log")
+                log.error("gestures install: %s", (r.stdout + r.stderr)[-1500:])
+                return
+            r2 = subprocess.run([py, "-m", "pip", "install", "mediapipe"], capture_output=True, text=True,
+                                creationflags=0x08000000 if os.name == "nt" else 0)
+            import importlib
+            importlib.invalidate_caches()
+            self._emit("toast", level="info", text="Gestures installed ✓" + ("" if r2.returncode == 0 else
+                       " (basic mode — MediaPipe isn't available for your Python yet, so palm and pinch are off)"))
+            self._emit("gesture_state", on=self._gestures.on)
+        threading.Thread(target=run, daemon=True).start()
+        return True
 
     def saver_get(self):
         return {**self._saver.sc, "autonomy_idle": self._cfg.get("autonomy", {}).get("idle_minutes", 30),

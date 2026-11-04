@@ -1,4 +1,28 @@
-# ORION 5.2 — Personal Intelligence System
+# ORION 5.3 — Personal Intelligence System
+
+## New in 5.3: Stark Protocols
+- **Globe mode:** a full-screen holographic Earth.
+  - Live day and night, with your home pinned.
+  - Earthquakes from the last day as pulsing rings, sized by magnitude.
+  - The International Space Station live, with its orbit.
+  - Drag to spin, scroll to zoom, or type any place to fly there. Say "show me Tokyo on the globe".
+- **Holograms:** rotating 3D wireframes ORION puts up to explain things.
+  - Atoms with the right number of electrons in each shell.
+  - Molecules: water, CO₂, methane, ammonia, ethanol, salt and more.
+  - DNA, a cell, the heart, the brain, a galaxy, the Sun, a ringed planet, a rocket and 3D shapes.
+  - Ask "show me a carbon atom" or "hologram of DNA".
+- **Threat scan:** a full-screen radar sweep with real checks.
+  - Windows Defender, the firewall, drive health, disk space, memory and CPU.
+  - Programs running from Temp or Downloads, open network ports, startup apps and uptime.
+  - Ends with a verdict. Say "run a threat scan".
+- **Suit up:** a cinematic power-up sequence. Systems come online, ORION reads a spoken status report, and it opens your suit-up apps (set them in ⚙). Say "suit up".
+- **Hand gestures (opt-in, off by default):**
+  - Wave to make ORION listen.
+  - Swipe to change page.
+  - Open palm to stop.
+  - Pinch to close a pop-up.
+  - Turn it on in the new **Stark Protocols** tile on the Dashboard. A red CAMERA light shows whenever the webcam is on, and no frames are ever saved.
+  - It needs a one-time INSTALL (OpenCV + MediaPipe) and is paused while gaming.
 
 ## New in 5.2
 - **Fixed:** the same pop-up showing several times, such as one search popping up 6 times. Identical pop-ups are never repeated within 3 minutes, and repeats refresh the card that's already up instead of stacking.

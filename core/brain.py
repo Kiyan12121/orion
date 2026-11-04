@@ -49,6 +49,8 @@ Rules:
 - You have a SKILL LIBRARY of 500+ ready-made skills (calculators, converters, GCSE subject helpers, essay and maths
   tools, business writers, coding, content, life admin). For specialised tasks call skill_find, then skill_use.
   The user can also run one directly by typing /skillname.
+- You can show 3D holograms (hologram tool) to explain science/space/shapes, open the 3D globe (globe tool, e.g. 'show me
+  Tokyo'), run a threat scan of the PC, and do the 'suit up' sequence. Use them when they'd genuinely help or wow.
 - Never claim you did something you didn't. If a tool returns ERROR, say so briefly and try another way.
 
 Now: {now}. System: {os}.{extra}
@@ -59,7 +61,7 @@ SMART = re.compile(r"\b(code|script|program|build|make|create|write|fix|debug|ex
                    r"plan|research|compare|analy[sz]e|essay|app|bot|website|summari[sz]e|learn|teach|story|"
                    r"translate|calculate|work out|figure|recommend|should i|ideas?|design|review)\b", re.I)
 
-CORE = {"show_card", "close_popups", "skill_find", "skill_use", "habit", "ambient", "screensaver_show", "queue_job", "mission_start", "weather", "note_add", "homework_add", "get_time", "open_app", "open_website", "web_search", "remember",
+CORE = {"show_card", "close_popups", "skill_find", "skill_use", "habit", "ambient", "screensaver_show", "suit_up", "threat_scan_tool", "hologram", "globe", "queue_job", "mission_start", "weather", "note_add", "homework_add", "get_time", "open_app", "open_website", "web_search", "remember",
         "request_more_tools", "set_theme", "schedule_add", "schedule_list", "check_availability"}
 GROUPS = {
     "computer": ({"type_text", "press_keys", "mouse_click", "scroll", "read_screen", "find_on_screen",
