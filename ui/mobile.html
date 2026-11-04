@@ -254,6 +254,36 @@ body.busy .horb u{animation-duration:.9s}body.busy .horb i{animation-duration:1.
 .slm b{display:block;font:600 15.5px var(--ui)}.slm small{display:block;color:var(--dim);font-size:13px;margin-top:3px;line-height:1.35}
 .slm code{float:right;font:11px var(--mono);color:var(--a2);opacity:.8}.slm .k{color:var(--green);font:600 11px var(--ui);margin-top:5px;display:inline-block}
 
+/* ---- 5.2 phone cards ---- */
+.mc{--hk:var(--ar);align-self:stretch!important;max-width:100%!important;border-radius:22px!important;padding:0!important;overflow:hidden;border:1px solid rgba(var(--hk),.4)!important;
+  background:linear-gradient(160deg,rgba(var(--hk),.2),rgba(10,14,22,.92) 60%)!important;box-shadow:0 10px 30px rgba(0,0,0,.4),0 0 24px rgba(var(--hk),.15);animation:mcIn .55s cubic-bezier(.2,1.2,.3,1) both!important}
+@keyframes mcIn{from{opacity:0;transform:translateY(16px) scale(.94);filter:blur(4px)}}
+.mc.k-weather{--hk:110,190,255}.mc.k-results{--hk:63,216,255}.mc.k-event{--hk:255,190,85}.mc.k-ring{--hk:77,255,166}.mc.k-stat{--hk:190,140,255}.mc.k-checklist{--hk:255,120,190}.mc.k-code{--hk:43,255,136}
+.mc.pro{box-shadow:0 10px 30px rgba(0,0,0,.4),0 0 26px rgba(255,190,85,.25)}
+.mch{display:flex;align-items:center;gap:11px;padding:12px 14px 10px;border-bottom:1px solid rgba(var(--hk),.18)}
+.mch>i{font-style:normal;width:38px;height:38px;border-radius:12px;display:grid;place-items:center;font-size:19px;background:radial-gradient(circle at 30% 25%,rgba(255,255,255,.3),rgba(var(--hk),.35) 60%,rgba(var(--hk),.1));box-shadow:0 0 14px rgba(var(--hk),.4);flex:none}
+.mch small{display:block;font:600 10.5px var(--ui);letter-spacing:.12em;color:var(--dim);text-transform:uppercase}.mc.pro .mch small{color:var(--amber)}
+.mch b{display:block;font:700 16px var(--ui);color:#fff}
+.mcb{padding:12px 14px 14px;font-size:15px;line-height:1.45}.mcb ul,.mcb ol{margin-left:18px}.mcb li{margin:3px 0}.mcb pre{font:12px var(--mono);white-space:pre-wrap;max-height:220px;overflow:auto}
+.mca{display:flex;gap:8px;padding:0 14px 14px}.mca button{flex:1;border:0;border-radius:14px;padding:11px 8px;font:600 14px var(--ui);color:#fff;background:rgba(var(--hk),.25)}
+.mca button:first-child{background:linear-gradient(135deg,rgba(var(--hk),.85),rgba(var(--hk),.45));color:#061018}
+.mw{display:flex;align-items:center;gap:12px}.mw em{font-style:normal;font-size:44px}.mw b{font:300 40px var(--ui);color:#fff;display:block;line-height:1}.mw small{color:var(--dim)}
+.mwd{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px}.mwd div{text-align:center;background:rgba(var(--hk),.1);border-radius:12px;padding:6px;font-size:18px}.mwd small{display:block;font-size:11px;color:var(--dim)}.mwd b{display:block;font-size:14px}
+.mr{display:block;padding:8px 0;border-bottom:1px solid rgba(var(--hk),.12);color:inherit;text-decoration:none}.mr:last-child{border:0}.mr b{display:block;font-size:14.5px;color:#fff}.mr small{color:rgb(var(--hk));font-size:12px}
+.mev{display:flex;align-items:center;gap:14px}.mev span{width:74px;height:74px;border-radius:50%;flex:none;display:flex;flex-direction:column;align-items:center;justify-content:center;border:3px solid rgb(var(--hk));box-shadow:0 0 18px rgba(var(--hk),.45)}
+.mev span b{font:300 28px var(--ui);color:#fff;line-height:1}.mev span small{font-size:10px;color:var(--dim)}.mev div b{font:700 20px var(--mono);color:rgb(var(--hk))}.mev p{color:var(--text)}
+.mring{width:130px;height:130px;margin:4px auto;border-radius:50%;display:grid;place-items:center;background:conic-gradient(rgb(var(--hk)) calc(var(--p)*1%),rgba(var(--hk),.14) 0);position:relative}
+.mring::before{content:"";position:absolute;inset:10px;border-radius:50%;background:#0b0f16}.mring b{position:relative;font:300 32px var(--ui);color:#fff}
+.mstat{font:200 46px var(--ui);color:#fff;text-shadow:0 0 22px rgba(var(--hk),.55)}.mcb .cap{color:var(--dim);font-size:13.5px;text-align:center}.k-stat .cap{text-align:left}
+.mchk{display:flex;align-items:center;gap:11px;padding:8px 0;border-bottom:1px solid rgba(var(--hk),.12)}.mchk:last-child{border:0}.mchk input{display:none}
+.mchk i{width:24px;height:24px;border-radius:8px;border:2px solid rgba(var(--hk),.7);flex:none;display:grid;place-items:center;transition:.2s}
+.mchk.done i{background:rgb(var(--hk))}.mchk.done i::after{content:"✓";color:#120612;font-weight:900}.mchk.done span{text-decoration:line-through;color:var(--dim)}
+.mpop{position:fixed;left:12px;right:12px;top:calc(env(safe-area-inset-top) + 10px);z-index:45;animation:popDown .55s cubic-bezier(.2,1.2,.3,1)}
+.mpop.out{animation:popUp .4s ease forwards}@keyframes popDown{from{transform:translateY(-120%);opacity:0}}@keyframes popUp{to{transform:translateY(-120%);opacity:0}}
+.mpop .mc{box-shadow:0 20px 50px rgba(0,0,0,.7),0 0 30px rgba(var(--hk),.3);background:linear-gradient(160deg,rgba(var(--hk),.22),rgba(11,15,23,0) 60%),#0b0f17!important}
+#feedM .mring{width:96px;height:96px}#feedM .mring b{font-size:24px}#feedM .mev span{width:60px;height:60px}
+#feedM .mc{margin-bottom:10px;animation:none!important}#feedM .mc .mcb{font-size:14px}
+
 /* =====================================================================
    LANDSCAPE · COCKPIT
    ===================================================================== */
@@ -389,7 +419,8 @@ body.busy .horb u{animation-duration:.9s}body.busy .horb i{animation-duration:1.
         <button data-mode="executive" style="--m:#e9b949">CEO</button><button data-mode="scholar" style="--m:#b48cff">Scholar</button>
         <button data-mode="hacker" style="--m:#2bff88">Hacker</button><button data-mode="stealth" style="--m:#b9c4cc">Stealth</button>
       </div>
-      <div class="ride" id="rideCard"><div><b id="rideT">Ride mode</b><small id="rideS">Hands-free chat on the way · timing your ride</small></div><button class="btn sm" id="rideGo">START</button></div>
+      <div class="card" id="feedCard"><h3>FROM ORION <button class="btn sm ghost" id="feedClr" style="border:0;padding:0">CLEAR</button></h3><div id="feedM"></div></div>
+      <div class="ride" id="rideCard" style="display:none!important"><div><b id="rideT">Ride mode</b><small id="rideS">Hands-free chat on the way · timing your ride</small></div><button class="btn sm" id="rideGo">START</button></div>
       <div class="card"><h3>QUICK</h3>
         <div class="grid">
           <button class="qa" data-q="check my messages"><em>✉️</em>DMs</button>
@@ -608,9 +639,9 @@ body.busy .horb u{animation-duration:.9s}body.busy .horb i{animation-duration:1.
   <p style="font-size:12.5px">Runs on the phone itself, so the PC and laptop can be off. Change the time on the PC (Devices › My Day) or say “wake me at 7:45”.</p>
   <h4>HANDS-FREE</h4>
   <label style="display:flex;gap:10px;align-items:center;letter-spacing:0;font-size:15px;color:var(--text)"><input type="checkbox" id="sHot" style="accent-color:var(--a)"> “Hey ORION” <small style="color:var(--dim)">— beta · offline · pauses at school &amp; low battery</small></label>
-  <label style="display:flex;gap:10px;align-items:center;letter-spacing:0;font-size:15px;color:var(--text)"><input type="checkbox" id="sName" style="accent-color:var(--a)"> On calls, only answer when I say “ORION” <small style="color:var(--dim)">— always on in Ride mode</small></label>
+  <label style="display:flex;gap:10px;align-items:center;letter-spacing:0;font-size:15px;color:var(--text)"><input type="checkbox" id="sName" style="accent-color:var(--a)"> On calls, only answer when I say “ORION” <small style="color:var(--dim)">— so your mates' chat doesn't set it off</small></label>
   <button class="btn ghost" id="sAssist">🎧 USE ORION AS MY ASSISTANT (EARBUD HOLD)</button>
-  <label style="display:flex;gap:10px;align-items:center;letter-spacing:0;font-size:15px;color:var(--text)"><input type="checkbox" id="sMsgs" style="accent-color:var(--a)"> Read my messages out on rides <small style="color:var(--dim)">— Snapchat, WhatsApp, Insta, Discord, texts · reply by voice</small></label>
+  <label style="display:flex;gap:10px;align-items:center;letter-spacing:0;font-size:15px;color:var(--text)"><input type="checkbox" id="sMsgs" style="accent-color:var(--a)"> Read my messages out during calls with ORION <small style="color:var(--dim)">— Snapchat, WhatsApp, Insta, Discord, texts · reply by voice</small></label>
   <button class="btn ghost" id="sMsgAccess">✉️ ALLOW ORION TO SEE MESSAGE NOTIFICATIONS</button>
   <label style="display:flex;gap:10px;align-items:center;letter-spacing:0;font-size:15px;color:var(--text);margin-top:10px"><input type="checkbox" id="sLoc" style="accent-color:var(--a)"> Use my location <small style="color:var(--dim)">— ride timing, ETAs, auto modes · stays on your devices</small></label>
   <button class="btn ghost" id="sBatt">🔋 STOP SAMSUNG PUTTING ORION TO SLEEP</button>
@@ -722,7 +753,7 @@ async function api1(path,body,timeout=20000){
 setInterval(()=>{ const a=addr(); if(a&&!isLan(a)&&addrs().some(isLan)) switchAddr(true); },60000);
 async function refresh(){
   if(!addr()){ setConn(false); paintHome(); return; }
-  try{ state=await api("/api/state",undefined,6000); setConn(true); paintHome(); paintModes(); if(!window._gl||Date.now()-window._gl>60000){ window._gl=Date.now(); glance(); shareSolo(); pullMorning(); syncRides(); learnPlaces(); } runPhoneActions(state.phone_actions); flushQueue(); pollPending(); if($("#v-jobs").classList.contains("on")) loadJobs(); }
+  try{ state=await api("/api/state",undefined,6000); setConn(true); paintHome(); paintModes(); if(!window._gl||Date.now()-window._gl>60000){ window._gl=Date.now(); glance(); shareSolo(); pullMorning(); syncRides(); learnPlaces(); } runPhoneActions(state.phone_actions); try{ phonePops(state.cards); }catch(e){} flushQueue(); pollPending(); if($("#v-jobs").classList.contains("on")) loadJobs(); }
   catch(e){ setConn(false); paintHome(); }
 }
 function setConn(on){ const was=pcOnline; pcOnline=on; $("#dot").className="dot "+(on?"ok":"solo");
@@ -953,7 +984,7 @@ function orbLoop(){ if(!Call.on) return; let l=0; if(Call.speaking){ l=.35+.3*Ma
 async function listenLoop(){
   while(Call.live){
     if(Call.paused||Call.muted){ cSet(Call.muted?"MUTED":"PAUSED","Tap again to carry on."); await new Promise(r=>setTimeout(r,300)); continue; }
-    if(Call.ride&&(Call.inbox||[]).length&&!Call.quiz&&!Call.pendingReply){ await readInbox(); continue; }
+    if((Call.inbox||[]).length&&!Call.quiz&&!Call.pendingReply){ await readInbox(); continue; }
     cSet("LISTENING…",Call.quiz?"Answer out loud…":"Go ahead — I'm listening.");
     const got=await smartListen(Call.stream,{isLive:()=>Call.live&&!Call.muted&&!Call.paused,startTimeout:Call.ride?7000:15000,onPartial:t=>$("#cSub").textContent=`“${t}”`});
     if(!Call.live) return; if(!got.blob){ continue; }
@@ -1091,12 +1122,44 @@ async function glance(){ loadLifeM(); if(!pcOnline) return; try{ loadPlusM(); }c
 
 
 /* ================= ORION 4.0 phone ================= */
-function mcard(c){ if(!c) return; const d=document.createElement("div"); d.className="mc"; let h=`<b>${esc(c.title||"")}</b>`;
-  if(c.kind==="weather"&&c.weather) h+=`<p>${WXI(c.weather.code)} ${c.weather.temp}° · ${esc(c.weather.sky)}${c.weather.rain_at?" · rain from "+c.weather.rain_at:""}</p>`;
-  else if(c.kind==="code") h+=`<pre>${esc(c.text||"")}</pre>`; else if(c.kind==="text") h+=`<p>${esc(c.text||"")}</p>`;
-  else if(c.kind==="chart") h+=(c.points||[]).map(p=>`<div class="hb2"><b>${esc(p[0])}</b><div><i style="width:${p[1]/Math.max(...c.points.map(x=>x[1]),1)*100}%"></i></div><span>${p[1]}</span></div>`).join("");
-  else h+=`<${c.kind==="steps"?"ol":"ul"}>${(c.items||[]).map(x=>`<li>${esc(x)}</li>`).join("")}</${c.kind==="steps"?"ol":"ul"}>`;
-  d.innerHTML=h; $("#log").appendChild(d); $("#log").scrollTop=1e9; }
+const MC_ICON={weather:"☁️",points:"💠",steps:"🧭",chart:"📊",code:"⌨️",text:"💬",list:"📰",results:"🔎",event:"⏰",ring:"🎯",stat:"📈",checklist:"✅"};
+function mcBody(c){ const k=c.kind;
+  if(k==="weather"&&c.weather){ const w=c.weather; return `<div class="mw"><em>${WXI(w.code)}</em><div><b>${w.temp}°</b><small>${esc(w.sky)}${w.rain_at?" · rain from "+esc(w.rain_at):""}</small></div></div>`+
+    ((w.days||[]).length?`<div class="mwd">${w.days.slice(0,3).map(d=>`<div><small>${new Date(d.date).toLocaleDateString("en-GB",{weekday:"short"})}</small>${WXI(d.code??3)}<b>${d.max}°</b></div>`).join("")}</div>`:""); }
+  if(k==="results") return (c.results||[]).map(r=>{ let h=""; try{ h=new URL(r.u).hostname.replace(/^www\./,""); }catch(e){} return `<a class="mr" href="${esc(r.u)}" target="_blank"><b>${esc(r.t)}</b><small>${esc(h)}</small></a>`; }).join("");
+  if(k==="event"){ const m=c.ts?Math.max(0,Math.round((c.ts*1000-Date.now())/60000)):null; return `<div class="mev"><span><b>${m??"–"}</b><small>min</small></span><div><b>${esc(c.at||"")}</b><p>${esc(c.text||c.title||"")}</p></div></div>`; }
+  if(k==="ring"){ const v=Math.max(0,Math.min(100,parseFloat(c.value)||0)); return `<div class="mring" style="--p:${v}"><b>${Math.round(v)}%</b></div>${c.text?`<p class="cap">${esc(c.text)}</p>`:""}`; }
+  if(k==="stat") return `<div class="mstat">${esc(String(c.value??""))}</div>${c.text?`<p class="cap">${esc(c.text)}</p>`:""}`;
+  if(k==="checklist") return (c.items||[]).map(x=>`<label class="mchk"><input type="checkbox"><i></i><span>${esc(x)}</span></label>`).join("");
+  if(k==="code") return `<pre>${esc(c.text||"")}</pre>`;
+  if(k==="text") return `<p>${esc(c.text||"")}</p>`;
+  if(k==="chart"){ const mx=Math.max(1,...(c.points||[]).map(x=>x[1])); return (c.points||[]).map(p=>`<div class="hb2"><b>${esc(p[0])}</b><div><i style="width:${p[1]/mx*100}%"></i></div><span>${p[1]}</span></div>`).join(""); }
+  if(k==="steps") return `<ol>${(c.items||[]).map(x=>`<li>${esc(x)}</li>`).join("")}</ol>`;
+  return `<ul>${(c.items||[]).map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`; }
+function mcEl(c,cls){ const d=document.createElement("div"); d.className=(cls||"mc")+" k-"+(c.kind||"points")+(c.proactive?" pro":"");
+  const acts=(c.actions||[]).slice(0,3).map((a,i)=>`<button data-i="${i}">${esc(typeof a==="string"?a:a.label)}</button>`).join("");
+  d.innerHTML=`<div class="mch"><i>${c.icon||MC_ICON[c.kind]||"💠"}</i><div><small>${c.proactive?"ORION · on its own":"ORION"}</small><b>${esc(c.title||"")}</b></div></div><div class="mcb">${mcBody(c)}</div>${acts?`<div class="mca">${acts}</div>`:""}`;
+  d.querySelectorAll(".mca button").forEach(b=>b.onclick=e=>{ e.stopPropagation(); const a=(c.actions||[])[+b.dataset.i]; if(!a) return;
+    if(typeof a==="string"||a.say){ go("chat"); send(typeof a==="string"?a:a.say); } else if(a.page){ const map={dash:"home",sched:"sched",study:["more","study"],ventures:["more","money"]}; const t=map[a.page]; if(Array.isArray(t)){ go(t[0]); goSub(t[1]); } else if(t) go(t); }
+    buzz(15); d.closest(".mpop")&&d.closest(".mpop").remove(); });
+  d.querySelectorAll(".mchk input").forEach(cb=>cb.onchange=()=>{ cb.closest("label").classList.toggle("done",cb.checked); buzz(10); });
+  return d; }
+let MC_LAST="";
+function mcard(c){ if(!c) return; const sig=(c.kind||"")+"|"+(c.title||"")+"|"+JSON.stringify(c.items||c.results||c.text||c.value||""); if(sig===MC_LAST) return; MC_LAST=sig;
+  $("#log").appendChild(mcEl(c)); $("#log").scrollTop=1e9; }
+/* pop-ups from the PC appear on the phone too (and in the Home feed) */
+let MPOP_T=+store.get("popT","0")||0;
+function phonePops(cards){ if(!cards||!cards.length) return; const fresh=cards.filter(c=>c.t>MPOP_T); if(!fresh.length) return;
+  MPOP_T=Math.max(...cards.map(c=>c.t)); store.set("popT",String(MPOP_T));
+  const feed=J("feedM",[]); fresh.forEach(c=>{ if(!feed.some(f=>f.title===c.title&&f.kind===c.kind&&Math.abs(f.t-c.t)<300)) feed.unshift(c); }); SJ("feedM",feed.slice(0,12)); paintFeedM();
+  if(atSchool()||document.hidden) return;
+  const c=fresh[fresh.length-1]; document.querySelectorAll(".mpop").forEach(x=>x.remove());
+  const wrap=document.createElement("div"); wrap.className="mpop"; wrap.appendChild(mcEl(c,"mc pop")); document.body.appendChild(wrap); buzz(20);
+  let y0=null; wrap.addEventListener("touchstart",e=>{ y0=e.touches[0].clientY; },{passive:true}); wrap.addEventListener("touchend",e=>{ if(y0!=null&&e.changedTouches[0].clientY-y0<-30) wrap.remove(); },{passive:true});
+  setTimeout(()=>{ wrap.classList.add("out"); setTimeout(()=>wrap.remove(),400); },9000); }
+function paintFeedM(){ const el=$("#feedM"); if(!el) return; const f=J("feedM",[]); el.innerHTML=f.length?"":'<p class="empty">Things ORION spots — events, homework, rain, what it did while you were away — show up here.</p>';
+  f.slice(0,5).forEach(c=>el.appendChild(mcEl(c,"mc feed"))); }
+
 
 /* modes */
 function paintModes(){ $$("#modes button").forEach(b=>b.classList.toggle("on",b.dataset.mode===(state.theme||"standby"))); }
@@ -1125,7 +1188,7 @@ const _reflex=phoneReflex; phoneReflex=t=>{ const x=t.toLowerCase().trim().repla
   if(/^(play|resume)( (the )?(music|song))?$/.test(x)) return {kind:"media",action:"play"};
   if(/^(louder|turn it up|volume up)$/.test(x)) return {kind:"media",action:"louder"};
   if(/^(quieter|turn it down|volume down)$/.test(x)) return {kind:"media",action:"quieter"};
-  if(/^(ride mode|i'?m leaving|start (my )?ride|ride)$/.test(x)) return {kind:"ride"};
+
   if(/^(i'?m|we'?re) (at|in) school$|^this is (my )?school$|^(i'?m|we'?re) at the bike shed/.test(x)) return {kind:"place",name:"school"};
   if(/^(i'?m|we'?re) (at )?home$|^this is (my )?home$/.test(x)) return {kind:"place",name:"home"};
   if(/(get|be|arrive|reach|make it)\b.{0,20}\b(school|home)|how (long|far)\b.{0,25}\b(school|home)|(am i|are we) (gonna|going to) be late|\beta\b|will i make it/.test(x)) return {kind:"eta",to:/home/.test(x)?"home":"school"};
@@ -1244,8 +1307,7 @@ async function paintToday(){ const el=$("#today"); if(!el) return; const chips=[
   const hw=(J("lifeCache",{}).homework||[]).filter(h=>!h.done); if(hw.length){ const soon=hw.filter(h=>h.days<=1).length; chips.push(`<div class="tc ${soon?"warn":""}" data-tab="more" data-sub="study"><em>📝</em><div><b>${hw.length} homework</b><small>${soon?soon+" due tomorrow":"none urgent"}</small></div></div>`); }
   const w=await homeWeather(); if(w){ const d=now.toISOString().slice(0,10); const endH=+((DAY.school_end||"15:10").slice(0,2)); const r=atSchoolDay()&&now.getHours()<endH+1?rainAt(w,d,endH):rainAt(w,d,Math.min(23,now.getHours()+1));
     if(r) chips.push(`<div class="tc ${r.p>=50?"warn":""}"><em>${r.p>=50?"🌧️":"🌤️"}</em><div><b>${r.p}% rain</b><small>${atSchoolDay()&&now.getHours()<endH+1?"at home time":"next hour"} · ${r.t}°</small></div></div>`); }
-  const a=avgRide("school"); if(a) chips.push(`<div class="tc"><em>🚲</em><div><b>${Math.round(a/60)} min</b><small>usual ride</small></div></div>`);
-  const sv=J("rideLog",[]).length; if(!a&&sv===0) chips.push(`<div class="tc" id="tcRide"><em>🚲</em><div><b>Ride mode</b><small>time your ride</small></div></div>`);
+
   el.innerHTML=chips.join(""); const tr=$("#tcRide"); if(tr) tr.onclick=()=>startRide(); }
 
 /* pull to refresh + swipe between tabs */
@@ -1313,11 +1375,12 @@ const _callReply42=callReply; callReply=async(text,first)=>{
   return _callReply42(text,first); };
 // let quiz answers / replies through without the name, and read new messages between turns
 const _needName=needName; needName=()=>(Call.quiz||Call.pendingReply)?false:_needName();
-const _say42=say; say=async(t,b)=>{ await _say42(t,b); if(Call.live&&Call.ride&&(Call.inbox||[]).length&&!Call.speaking&&!Call.pendingReply&&!Call.quiz) await readInbox(); };
+const _say42=say; say=async(t,b)=>{ await _say42(t,b); if(Call.live&&(Call.inbox||[]).length&&!Call.speaking&&!Call.pendingReply&&!Call.quiz) await readInbox(); };
 const _startRide42=startRide; startRide=async()=>{ msgWatch(true); return _startRide42(); };
 const _endCall42=endCall; endCall=(m)=>{ msgWatch(false); Call.quiz=null; Call.pendingReply=null; return _endCall42(m); };
 
 $("#sMsgs").checked=store.get("msgs","0")==="1";
+$("#feedClr").onclick=()=>{ SJ("feedM",[]); paintFeedM(); }; setTimeout(paintFeedM,300);
 $("#sWake").onchange=()=>{ store.set("wakecall",$("#sWake").checked?"1":"0"); scheduleMorning(); toast($("#sWake").checked?"Wake-up call on.":"Wake-up call off."); };
 setTimeout(()=>{ try{ scheduleMorning(); }catch(e){} },2500);   // keep the alarm set even if the PC never comes online
 $("#sMsgs").onchange=async()=>{ store.set("msgs",$("#sMsgs").checked?"1":"0"); if($("#sMsgs").checked&&Native&&Native.notifStatus){ const s=await Native.notifStatus(); if(!s.enabled){ toast("Turn on ORION in the list, then come back."); Native.notifAccess(); } } };
@@ -1356,7 +1419,7 @@ const _sm42=scheduleMorning; scheduleMorning=async()=>{ await _sm42(); try{ if(!
   const at=new Date(d+"T"+DAY.school_end); at.setMinutes(at.getMinutes()-20); if(at<new Date()) return;
   await LN.schedule({notifications:[{id:7104,title:`🌧️ ${r.p}% chance of rain at home time`,body:"Jacket on for the ride, sir.",schedule:{at,allowWhileIdle:true}}]}); }catch(e){} };
 checkLaunch=async()=>{ try{ if(Native){ const r=await Native.consumeLaunchAction();
-  if(r.action==="ride"){ go("home"); startRide(); return; }
+
   if(r.action==="listen"){ go("chat"); setTimeout(()=>$("#mic").click(),250); return; }
   if(r.action==="call"){ try{ Native.stopRing&&Native.stopRing(); }catch(e){} incoming(r.reason||""); setTimeout(acceptCall,350); return; }
   if(r.action==="ring"){ Native.stopRing&&Native.stopRing(); toast("📢 Found it!"); return; } } }catch(e){} };
@@ -1380,14 +1443,14 @@ function paintCluster(){ if(!$("#cluster")||getComputedStyle($("#cluster")).disp
   if(BATT){ gauge("ggBat",BATT.level,true); $("#ggBatT").textContent=BATT.level+"%"+(BATT.charging?"⚡":""); }
   const L=[]; const ev=(state.today||[]).find(e=>e.time>=d.toTimeString().slice(0,5)); L.push(["Next",ev?`${ev.time} ${ev.title}`:"clear"]);
   const hw=(J("lifeCache",{}).homework||[]).filter(h=>!h.done); L.push(["Homework",hw.length?`${hw.length} due`:"none",hw.some(h=>h.days<=1)]);
-  const a=avgRide("school"); L.push(["Ride",state.riding?"riding…":(a?`${Math.round(a/60)} min usual`:"not timed")]);
+
   if(atSchool()) L.push(["Mode","school · silent",true]); else L.push(["Mode",(state.theme||"standby").replace("standby","butler").replace("executive","CEO")]);
   L.push(["Jobs",String((state.jobs_active||0)+J("queue",[]).length)]);
   $("#ckLines").innerHTML=L.map(x=>`<div class="ln ${x[2]?"warn":""}"><span>${esc(x[0])}</span><b>${esc(x[1])}</b></div>`).join("");
   $("#ckDot").className="dot "+(pcOnline?"ok":"solo"); $("#ckConn").textContent=pcOnline?"PC LINKED":"SOLO BRAIN"; }
 setInterval(paintCluster,1000); setInterval(battRead,60000); battRead();
 /* Now Bar / Live Updates: on calls and rides */
-const _accept5=acceptCall; acceptCall=async(...a)=>{ try{ if(Native&&Native.nowBar&&!Call.ride) Native.nowBar({title:"Talking to ORION",text:"Tap to go back to the call",chip:"LIVE"}); }catch(e){} return _accept5(...a); };
+const _accept5=acceptCall; acceptCall=async(...a)=>{ try{ msgWatch(true); }catch(e){} try{ if(Native&&Native.nowBar&&!Call.ride) Native.nowBar({title:"Talking to ORION",text:"Tap to go back to the call",chip:"LIVE"}); }catch(e){} return _accept5(...a); };
 const _end5=endCall; endCall=(m)=>{ try{ if(Native&&Native.nowBarClear&&!state.riding) Native.nowBarClear(); }catch(e){} return _end5(m); };
 const _ride5=startRide; startRide=async()=>{ try{ if(Native&&Native.nowBar){ const a=avgRide(new Date().getHours()<12?"school":"home"); Native.nowBar({title:"Ride mode on",text:a?`Usually ${Math.round(a/60)} min · ORION's listening for its name`:"Timing your ride · ORION's listening for its name",chip:"🚲",action:"ride"}); } }catch(e){} return _ride5(); };
 

@@ -45,8 +45,7 @@ service = ('        <service android:name=".BubbleService" android:exported="fal
                      f'android:icon="@android:drawable/{ic}" android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">\n'
                      '            <intent-filter><action android:name="android.service.quicksettings.action.QS_TILE" /></intent-filter>\n'
                      '        </service>\n'
-                     for n, lbl, ic in (("Ask", "Ask ORION", "ic_btn_speak_now"), ("Ride", "Ride mode", "ic_menu_directions"),
-                                        ("Skip", "Skip song", "ic_media_next"))) +
+                     for n, lbl, ic in (("Ask", "Ask ORION", "ic_btn_speak_now"), ("Skip", "Skip song", "ic_media_next"))) +
            '        <receiver android:name=".WakeAlarm" android:exported="false" />\n'
            '        <receiver android:name=".BootReceiver" android:exported="true">\n'
            '            <intent-filter><action android:name="android.intent.action.BOOT_COMPLETED" /></intent-filter>\n'

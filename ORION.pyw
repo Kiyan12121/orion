@@ -1094,7 +1094,8 @@ class Api:
         b = schedule.busy_now()
         today = [o for o in schedule.upcoming(1) if o["at"].strftime("%Y-%m-%d") == time.strftime("%Y-%m-%d")]
         nxt = schedule.upcoming(7)[:1]
-        return {"name": self._cfg["assistant_name"], "theme": self._cfg["theme"], "brain": self._cfg["brain"],
+        cards = [{**c, "t": t} for t, c in getattr(self, "_cards", [])[-6:] if c and c.get("kind") not in ("image",)]
+        return {"cards": cards, "name": self._cfg["assistant_name"], "theme": self._cfg["theme"], "brain": self._cfg["brain"],
                 "busy": self._busy.locked(), "gaming": self._gaming.active, "game": self._gaming.game,
                 "afk": self._root.afk, "busy_now": b["title"] if b else None,
                 "next": f"{nxt[0]['title']} · {nxt[0]['at']:%a %H:%M}" if nxt else None,

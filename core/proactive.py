@@ -121,7 +121,8 @@ class Proactive:
             for o in upcoming(1):
                 mins = (o["at"] - now).total_seconds() / 60
                 if 0 < mins <= 15:
-                    self._card(f"ev-{o['title']}-{o['at']:%H%M}", "text", f"In {int(mins) + 1} min: {o['title']}", icon="⏰",
+                    self._card(f"ev-{o['title']}-{o['at']:%H%M}", "event", o["title"], icon="⏰", at=o["at"].strftime("%H:%M"),
+                               ts=o["at"].timestamp(),
                                text=f"{o['at']:%H:%M} — {o['title']}" + (f"\n{o.get('notes', '')}" if o.get("notes") else ""),
                                actions=[{"label": "Snooze 10 min", "say": f"remind me about {o['title']} in 10 minutes"}, {"label": "Open plan", "page": "sched"}])
         except Exception:
@@ -131,7 +132,7 @@ class Proactive:
                 from .life import homework
                 due = [h for h in homework() if not h.get("done") and h["days"] == 1]
                 if due:
-                    self._card("hw-tomorrow", "points", "Due tomorrow", items=[f"{h['subject']} — {h['task']}" for h in due[:5]], icon="📝",
+                    self._card("hw-tomorrow", "checklist", "Due tomorrow", items=[f"{h['subject']} — {h['task']}" for h in due[:5]], icon="📝",
                                actions=[{"label": "Plan tonight", "say": "plan my homework for tonight around my schedule"}, {"label": "Open homework", "page": "study"}])
         except Exception:
             pass
@@ -167,8 +168,8 @@ class Proactive:
                     self.once.discard(f"{key}@{prev}")
                     self.once.add(f"{key}@{top}")
                     m = top
-                    self._card(f"goal-{g['name']}-{m}", "chart", f"🎯 {g['name']}: {g['pct']}%",
-                                   points=[["Got", g["got"]], ["Target", g["target"]]], sound=m == 100, icon="🎯",
+                    self._card(f"goal-{g['name']}-{m}", "ring", g["name"], value=g["pct"],
+                                   text=f"£{g['got']:.0f} of £{g['target']:.0f} · £{g['per_week']}/week to go", sound=m == 100, icon="🎯",
                                    actions=[{"label": "CEO page", "page": "ventures"}])
         except Exception:
             pass

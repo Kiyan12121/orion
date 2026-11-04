@@ -942,6 +942,59 @@ body.skin-aurora .hc2{border-radius:22px!important;background:rgba(22,26,36,.88)
 body.skin-aurora .hc2::before{display:none}body.skin-aurora .hc2 .hc-acts button{border-radius:999px}
 body.skin-aurora .toast.t2{border-radius:18px!important;background:rgba(22,26,36,.92)!important;border:1px solid rgba(255,255,255,.12)!important}
 
+/* ===== 5.2 pop-up kinds ===== */
+.hc2{--hk:var(--ar)}
+.hc2.kind-weather{--hk:110,190,255}.hc2.kind-results{--hk:63,216,255}.hc2.kind-event{--hk:255,190,85}.hc2.kind-ring{--hk:93,255,176}
+.hc2.kind-stat{--hk:190,140,255}.hc2.kind-checklist{--hk:255,120,190}.hc2.kind-code{--hk:43,255,136}.hc2.kind-steps{--hk:120,220,255}.hc2.kind-chart{--hk:120,200,255}
+.hc2{border-color:rgba(var(--hk),.5)!important;background:linear-gradient(160deg,rgba(var(--hk),.2),rgba(4,10,20,.93) 55%)!important}
+.hc2 .hc-ic{background:radial-gradient(circle at 30% 25%,rgba(255,255,255,.3),rgba(var(--hk),.35) 60%,rgba(var(--hk),.1))!important;box-shadow:0 0 18px rgba(var(--hk),.45),inset 0 0 0 1px rgba(var(--hk),.6)!important}
+.hc2 .hc-top{border-bottom-color:rgba(var(--hk),.2)}
+.hc2 .hc-life i{background:linear-gradient(90deg,rgb(var(--hk)),#fff)!important;box-shadow:0 0 8px rgb(var(--hk))!important}
+/* animated border light */
+.hc2>.hc-top::after{content:"";position:absolute;left:0;right:0;top:-1px;height:1px;background:linear-gradient(90deg,transparent,rgb(var(--hk)),transparent);background-size:40% 100%;background-repeat:no-repeat;animation:hcEdge 3.2s linear infinite}
+@keyframes hcEdge{from{background-position:-40% 0}to{background-position:140% 0}}
+/* holo shimmer */
+.hc2 .hc-body{position:relative}
+.hc2.flash{animation:hcFlash .6s ease!important}@keyframes hcFlash{30%{box-shadow:0 0 0 2px rgb(var(--hk)),0 0 40px rgba(var(--hk),.6)}}
+.hc2.kind-results{animation-name:hcSlide!important}@keyframes hcSlide{from{opacity:0;transform:translateX(60px) skewX(-6deg);filter:blur(6px)}}
+.hc2.kind-ring,.hc2.kind-stat{animation-name:hcZoom!important}@keyframes hcZoom{from{opacity:0;transform:scale(.4) rotate(-8deg);filter:blur(8px) brightness(2)}}
+.hc2.kind-event{animation-name:hcDrop!important}@keyframes hcDrop{0%{opacity:0;transform:translateY(-50px)}60%{opacity:1;transform:translateY(6px)}100%{transform:none}}
+/* weather */
+.hwx3{display:flex;align-items:center;gap:14px}.hwx3 .i{font-size:46px;filter:drop-shadow(0 0 12px rgba(var(--hk),.6));animation:float 4s ease-in-out infinite}
+@keyframes float{50%{transform:translateY(-4px)}}
+.hwx3 b{font:300 40px var(--ui);color:#fff;line-height:1}.hwx3 small{display:block;color:var(--dim);font-size:12.5px;margin-top:3px}
+.wdays{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:12px}.wdays div{text-align:center;background:rgba(var(--hk),.08);border:1px solid rgba(var(--hk),.18);border-radius:10px;padding:6px 4px;position:relative;overflow:hidden}
+.wdays small{display:block;font:700 10px var(--ui);letter-spacing:.14em;color:var(--dim)}.wdays em{font-style:normal;font-size:20px}.wdays b{font-size:14px;margin-right:4px}.wdays i{font-style:normal;color:var(--dim);font-size:12px}
+.wdays u{position:absolute;left:0;bottom:0;height:3px;width:var(--r);background:#6fb7ff}
+/* search results */
+.res3 a{display:flex;gap:10px;padding:8px;border-radius:10px;cursor:pointer;animation:rise .4s both;transition:.15s;text-decoration:none;color:inherit}
+.res3 a:hover{background:rgba(var(--hk),.12)}.res3 img{width:18px;height:18px;border-radius:4px;margin-top:2px;flex:none;background:rgba(255,255,255,.1)}
+.res3 b{display:block;font-size:13.5px;color:#fff;line-height:1.3}.res3 small{color:rgb(var(--hk));font-size:11.5px}.res3 p{font-size:12.5px;color:var(--dim);line-height:1.35;margin-top:2px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+/* event countdown */
+.ev3{display:flex;align-items:center;gap:14px;position:relative}.ev3 svg{width:84px;height:84px;flex:none;transform:rotate(-90deg)}
+.ev3 circle{fill:none;stroke-width:6}.ev3 .bg{stroke:rgba(var(--hk),.15)}.ev3 .fg{stroke:rgb(var(--hk));stroke-linecap:round;stroke-dasharray:213.6;stroke-dashoffset:calc(213.6 - 213.6*var(--p)/100);transition:stroke-dashoffset 1s;filter:drop-shadow(0 0 6px rgb(var(--hk)))}
+.ev3 .evn{position:absolute;left:0;width:84px;text-align:center}.ev3 .evn b{display:block;font:300 28px var(--ui);color:#fff;line-height:1}.ev3 .evn small{font:700 9px var(--ui);letter-spacing:.2em;color:var(--dim)}
+.ev3 .evt b{display:block;font:700 22px var(--mono);color:rgb(var(--hk))}.ev3 .evt span{font-size:14px;color:var(--text)}
+/* ring */
+.ring3{position:relative;width:130px;height:130px;margin:2px auto 6px}.ring3 svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring3 circle{fill:none;stroke-width:9}.ring3 .bg{stroke:rgba(var(--hk),.14)}.ring3 .fg{stroke:rgb(var(--hk));stroke-linecap:round;stroke-dasharray:314;stroke-dashoffset:314;animation:ringIn 1.4s .3s cubic-bezier(.2,.9,.2,1) forwards;filter:drop-shadow(0 0 8px rgb(var(--hk)))}
+@keyframes ringIn{to{stroke-dashoffset:calc(314 - 314*var(--p)/100)}}
+.ring3 b{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:2px;font:300 34px var(--ui);color:#fff}.ring3 b small{font-size:15px;color:var(--dim)}
+.hc2 .cap{text-align:center;color:var(--dim);font-size:13px}
+/* stat */
+.stat3 b{display:block;font:200 48px var(--ui);color:#fff;letter-spacing:-.01em;text-shadow:0 0 24px rgba(var(--hk),.6);animation:statIn .8s .2s both}
+@keyframes statIn{from{opacity:0;transform:translateY(10px);letter-spacing:.3em}}.stat3 p{color:var(--dim);font-size:13.5px}
+/* checklist */
+.chk3 label{display:flex;align-items:center;gap:10px;padding:7px 4px;cursor:pointer;animation:rise .4s both;font-size:14px;border-bottom:1px solid rgba(var(--hk),.1)}
+.chk3 input{display:none}.chk3 i{width:20px;height:20px;border-radius:6px;border:1.5px solid rgba(var(--hk),.6);flex:none;display:grid;place-items:center;transition:.2s}
+.chk3 label.done i{background:rgb(var(--hk));box-shadow:0 0 10px rgb(var(--hk))}.chk3 label.done i::after{content:"✓";color:#110611;font-weight:900;font-size:13px}
+.chk3 label.done span{text-decoration:line-through;color:var(--dim)}
+/* steps */
+.steps3{list-style:none;padding:0!important}.steps3 li{display:flex;gap:10px;align-items:flex-start;padding:6px 0;animation:rise .4s both;font-size:14px}
+.steps3 em{font-style:normal;width:22px;height:22px;border-radius:50%;flex:none;display:grid;place-items:center;font:700 11px var(--mono);background:rgba(var(--hk),.2);color:#fff;border:1px solid rgba(var(--hk),.6)}
+.pts3 li::before{content:"◆"!important;color:rgb(var(--hk))!important;font-size:9px;top:6px}
+body.skin-aurora .hc2{border-color:rgba(var(--hk),.35)!important;background:linear-gradient(160deg,rgba(var(--hk),.16),rgba(22,26,36,.92) 55%)!important}
+
 </style>
 </head>
 <body class="state-idle" data-theme="standby">
@@ -2041,15 +2094,35 @@ $("#ntText").addEventListener("keydown",e=>{ if(e.key==="Enter") $("#ntAdd").cli
 
 /* ================= v4: holographic cards ================= */
 const HOLO={list:[],slots:[[58,8],[58,36],[58,64],[2,10],[2,40],[2,68]]};
-const HC_ICON={weather:"",points:"💠",steps:"🧭",chart:"📊",code:"⌨️",text:"💬",image:"🖼️",list:"📰"};
-function holoCard(c){ c=c||{}; const el=document.createElement("div"); el.className="hcard hc2 kind-"+(c.kind||"points")+(c.proactive?" pro":""); let body="";
-  if(c.kind==="weather"&&c.weather){ const w=c.weather; body=`<div class="hwx"><div class="i">${WXI(w.code)}</div><div><b>${w.temp}°</b><small>${esc(w.sky)}${w.feels!=null?` · feels ${w.feels}°`:""}</small><small>${w.rain_at?"rain from "+esc(w.rain_at):"no rain soon"}${w.sunset?` · sunset ${esc(w.sunset)}`:""}</small></div></div>`; }
-  else if(c.kind==="steps") body=`<ol>${(c.items||[]).map((x,i)=>`<li style="animation-delay:${.25+i*.1}s">${esc(x)}</li>`).join("")}</ol>`;
+const HC_ICON={weather:"",points:"💠",steps:"🧭",chart:"📊",code:"⌨️",text:"💬",image:"🖼️",list:"📰",results:"🔎",event:"⏰",ring:"🎯",stat:"📈",checklist:"✅"};
+function hcBody(c){ let body="";
+  if(c.kind==="weather"&&c.weather){ const w=c.weather; const days=(w.days||[]).slice(0,3);
+    body=`<div class="hwx3"><div class="i">${WXI(w.code)}</div><div><b>${w.temp}°</b><small>${esc(w.sky)}${w.feels!=null?` · feels ${w.feels}°`:""}</small><small>${w.rain_at?"🌧 rain from "+esc(w.rain_at):"no rain soon"}${w.sunset?` · 🌇 ${esc(w.sunset)}`:""}</small></div></div>`+
+      (days.length?`<div class="wdays">${days.map(d=>`<div><small>${new Date(d.date).toLocaleDateString("en-GB",{weekday:"short"})}</small><em>${WXI(d.code??3)}</em><b>${d.max}°</b><i>${d.min}°</i><u style="--r:${d.rain||0}%"></u></div>`).join("")}</div>`:""); }
+  else if(c.kind==="results") body=`<div class="res3">${(c.results||[]).map((r,i)=>{ let host=""; try{ host=new URL(r.u).hostname.replace(/^www\./,""); }catch(e){}
+    return `<a data-u="${esc(r.u)}" style="animation-delay:${.15+i*.07}s"><img src="https://www.google.com/s2/favicons?sz=32&domain=${encodeURIComponent(host)}" alt=""><div><b>${esc(r.t)}</b><small>${esc(host)}</small>${r.s?`<p>${esc(r.s)}</p>`:""}</div></a>`; }).join("")}</div>`;
+  else if(c.kind==="event"){ const mins=c.ts?Math.max(0,Math.round((c.ts*1000-Date.now())/60000)):null;
+    body=`<div class="ev3"><svg viewBox="0 0 80 80"><circle cx="40" cy="40" r="34" class="bg"/><circle cx="40" cy="40" r="34" class="fg" style="--p:${mins==null?100:Math.min(100,mins/15*100)}"/></svg><div class="evn"><b data-ts="${c.ts||""}">${mins==null?"soon":mins}</b><small>${mins==null?"":"min"}</small></div><div class="evt"><b>${esc(c.at||"")}</b><span>${esc(c.text||c.title||"")}</span></div></div>`; }
+  else if(c.kind==="ring"){ const v=Math.max(0,Math.min(100,parseFloat(c.value)||0));
+    body=`<div class="ring3"><svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="50" class="bg"/><circle cx="60" cy="60" r="50" class="fg" style="--p:${v}"/></svg><b>${Math.round(v)}<small>%</small></b></div>${c.text?`<p class="cap">${esc(c.text)}</p>`:""}`; }
+  else if(c.kind==="stat") body=`<div class="stat3"><b>${esc(String(c.value??""))}</b>${c.text?`<p>${esc(c.text)}</p>`:""}</div>`;
+  else if(c.kind==="checklist") body=`<div class="chk3">${(c.items||[]).map((x,i)=>`<label style="animation-delay:${.2+i*.08}s"><input type="checkbox"><i></i><span>${esc(x)}</span></label>`).join("")}</div>`;
+  else if(c.kind==="steps") body=`<ol class="steps3">${(c.items||[]).map((x,i)=>`<li style="animation-delay:${.2+i*.1}s"><em>${i+1}</em><span>${esc(x)}</span></li>`).join("")}</ol>`;
   else if(c.kind==="chart"){ const pts=c.points||[]; const mx=Math.max(1,...pts.map(p=>p[1])); body=pts.map((p,i)=>`<div class="hbar"><b>${esc(p[0])}</b><div><i style="--w:${p[1]/mx*100}%;animation-delay:${.2+i*.08}s"></i></div><span>${p[1]}</span></div>`).join(""); }
   else if(c.kind==="code") body=`<pre>${esc(c.text||"")}</pre>`;
-  else if(c.kind==="image") body=`<img src="${c.src}" style="width:100%;border-radius:8px">`;
+  else if(c.kind==="image") body=`<img src="${c.src}" style="width:100%;border-radius:10px">`;
   else if(c.kind==="text") body=`<p>${esc(c.text||"")}</p>`;
-  else body=`<ul>${(c.items||[]).map((x,i)=>`<li style="animation-delay:${.25+i*.08}s">${esc(x)}</li>`).join("")}</ul>`;
+  else body=`<ul class="pts3">${(c.items||[]).map((x,i)=>`<li style="animation-delay:${.2+i*.08}s">${esc(x)}</li>`).join("")}</ul>`;
+  return body; }
+function hcWire(el,c){ el.querySelectorAll(".res3 a").forEach(a=>a.onclick=e=>{ e.stopPropagation(); const u=a.dataset.u; if(api.browser_go){ const w=hwOpen("browser"); hwAct(w,()=>api.browser_go(u)); } });
+  el.querySelectorAll(".chk3 input").forEach(cb=>cb.onchange=()=>{ cb.closest("label").classList.toggle("done",cb.checked); if(cb.checked) sfx("ok"); }); }
+setInterval(()=>$$(".ev3 b[data-ts]").forEach(b=>{ const ts=+b.dataset.ts; if(!ts) return; const m=Math.max(0,Math.round((ts*1000-Date.now())/60000)); b.textContent=m; const r=b.closest(".ev3").querySelector(".fg"); r&&r.style.setProperty("--p",Math.min(100,m/15*100)); }),20000);
+function holoCard(c){ c=c||{};
+  // never stack duplicates: same id (or same title+kind) → refresh the card that's already up
+  const dup=HOLO.list.find(h=>(c.id&&h.card.id===c.id)||(h.card.title===c.title&&h.card.kind===c.kind));
+  if(dup){ dup.card=c; const bd=dup.el.querySelector(".hc-body"); bd.innerHTML=hcBody(c); const tb=dup.el.querySelector(".hc-t b"); if(tb) tb.textContent=c.title||""; hcWire(dup.el,c);
+    dup.el.classList.remove("flash"); void dup.el.offsetWidth; dup.el.classList.add("flash"); clearTimeout(dup.timer); if(!dup.pinned) dup.timer=setTimeout(()=>{ if(!dup.pinned) holoKill(dup); },32000); return; }
+  const el=document.createElement("div"); el.className="hcard hc2 kind-"+(c.kind||"points")+(c.proactive?" pro":""); const body=hcBody(c);
   const icon=c.icon||(c.kind==="weather"&&c.weather?WXI(c.weather.code):HC_ICON[c.kind]||"💠");
   const acts=(c.actions||[]).slice(0,3).map((a,i)=>`<button data-i="${i}">${esc(typeof a==="string"?a:a.label)}</button>`).join("");
   const life=c.pinned?0:(c.proactive?45:32);
@@ -2059,7 +2132,7 @@ function holoCard(c){ c=c||{}; const el=document.createElement("div"); el.classN
   const nR=HOLO.list.filter(h=>h.col==="r").length, nL=HOLO.list.filter(h=>h.col==="l").length;
   if(nR>=3&&nL>=3){ const old=HOLO.list.find(h=>!h.pinned); if(old) holoKill(old); }
   const col=(nR<=nL||nL>=3)&&nR<3?"r":"l";
-  const h={el,col,pinned:false,card:c}; HOLO.list.push(h); $("#holo .hcol."+col).prepend(el); sfx(c.proactive?"done":"card"); holoBeam(el);
+  const h={el,col,pinned:false,card:c}; HOLO.list.push(h); $("#holo .hcol."+col).prepend(el); sfx(c.proactive?"done":"card"); holoBeam(el); hcWire(el,c);
   const [pin,close]=el.querySelectorAll(".hc-btns button");
   pin.onclick=e=>{ e.stopPropagation(); h.pinned=!h.pinned; el.classList.toggle("pinned",h.pinned); };
   close.onclick=e=>{ e.stopPropagation(); holoKill(h); };
@@ -2070,7 +2143,7 @@ function holoCard(c){ c=c||{}; const el=document.createElement("div"); el.classN
   if(life) h.timer=setTimeout(()=>{ if(!h.pinned) holoKill(h); },life*1000);
   el.addEventListener("mouseenter",()=>{ clearTimeout(h.timer); el.classList.add("hold"); });
   el.addEventListener("mouseleave",()=>{ el.classList.remove("hold"); if(!h.pinned&&life) h.timer=setTimeout(()=>{ if(!h.pinned) holoKill(h); },8000); });
-  FEED.unshift({t:hhmm(),c}); FEED=FEED.slice(0,60); renderFeed(); }
+  if(!FEED.length||FEED[0].c.title!==c.title) FEED.unshift({t:hhmm(),c}); FEED=FEED.slice(0,60); renderFeed(); }
 let FEED=[];
 function holoBeam(el){ const core=document.querySelector(".orb"); if(!core||document.body.classList.contains("lite")) return; const a=core.getBoundingClientRect(), b=el.getBoundingClientRect();
   const sv=document.createElementNS("http://www.w3.org/2000/svg","svg"); sv.setAttribute("class","hbeam"); const x1=a.left+a.width/2, y1=a.top+a.height/2, x2=b.left+(b.left>x1?0:b.width), y2=b.top+20;

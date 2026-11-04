@@ -1,4 +1,20 @@
-# ORION 5.1 — Personal Intelligence System
+# ORION 5.2 — Personal Intelligence System
+
+## New in 5.2
+- **Fixed:** the same pop-up showing several times, such as one search popping up 6 times. Identical pop-ups are never repeated within 3 minutes, and repeats refresh the card that's already up instead of stacking.
+- **New pop-up types, each with its own colour and entrance:**
+  - **Search results** with site icons. Click one to open it in ORION's browser window.
+  - **Countdown** for events, with a live minutes ring.
+  - **Weather** with a 3-day strip.
+  - **Progress ring** for goals.
+  - **Big number** for stats.
+  - **Tickable checklists** and **numbered steps**.
+  - ORION can use all of these when it talks to you.
+- **Phone:**
+  - **Pop-ups from the PC now appear on your phone too.** They slide down from the top (swipe up to dismiss) and collect in a new **From ORION** feed on Home.
+  - All cards in chat are redesigned with the new types and buttons.
+  - Repeat cards are skipped.
+- **Ride mode removed:** the card, the quick-settings tile and the "ride mode" command. Reading messages and replying by voice now works during any call with ORION. "When will I get to school?" still works.
 
 ## New in 5.1: pop-ups, rebuilt
 - **New holographic pop-ups:**
