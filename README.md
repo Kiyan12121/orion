@@ -1,4 +1,12 @@
-# ORION 5.3 — Personal Intelligence System
+# ORION 5.4 — Personal Intelligence System
+
+## New in 5.4: ORION's Eyes
+- **Your phone is now ORION's webcam. No Iriun needed.**
+  1. On the phone, open **PC › ORION'S EYES** and tap **START CAMERA** (allow the camera once).
+  2. Prop the phone up facing you.
+  - Frames go straight to your PC over your own link and are never saved.
+  - The screen stays on while it's running, and the camera stops the moment you leave the app.
+- With Hand gestures switched on, the PC now **waits for a camera** instead of giving up. It uses the phone the moment it starts streaming, falls back to a webcam or Iriun if you have one, and your phone gives you a nudge when the PC is waiting for it.
 
 ## 5.3.1
 - **Hand gestures now work with phone-as-webcam apps** (Iriun, DroidCam, OBS Virtual Camera). ORION tries every camera and Windows camera driver until one gives a real picture, then remembers it. Large phone video is shrunk first so it stays fast.

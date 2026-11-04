@@ -64,6 +64,50 @@ def _hand_detector():
     return new
 
 
+class CamLost(Exception):
+    pass
+
+
+class PhoneCam:
+    """Frames pushed by the phone app ("ORION's eyes") look like a normal OpenCV camera."""
+    def __init__(self):
+        self.jpg, self.t, self.seq, self.used = None, 0, 0, 0
+        self.cv = threading.Condition()
+
+    def push(self, raw):
+        with self.cv:
+            self.jpg, self.t, self.seq = raw, time.time(), self.seq + 1
+            self.cv.notify_all()
+
+    def live(self):
+        return time.time() - self.t < 3
+
+    def isOpened(self):
+        return True
+
+    def set(self, *a):
+        return True
+
+    def release(self):
+        pass
+
+    def read(self):
+        import cv2
+        import numpy as np
+        with self.cv:
+            self.cv.wait_for(lambda: self.seq != self.used, timeout=1.5)
+            if time.time() - self.t > 5:
+                raise CamLost("phone camera stopped")
+            if self.seq == self.used:
+                return False, None
+            self.used, raw = self.seq, self.jpg
+        f = cv2.imdecode(np.frombuffer(raw, np.uint8), cv2.IMREAD_COLOR)
+        return f is not None, f
+
+
+PHONE = PhoneCam()
+
+
 class Gestures:
     COOLDOWN = 1.4
 
@@ -85,7 +129,7 @@ class Gestures:
 
     # ------------------------------------------------------------------ control
     def start(self):
-        if self.on:
+        if self._t and self._t.is_alive():
             return True
         self.err = ""
         av = available()
@@ -148,39 +192,68 @@ class Gestures:
                 continue
         return None, None
 
+    def waiting(self):
+        return bool(self._t and self._t.is_alive() and not self.on)
+
     def _run(self, use_mp):
+        """Runs until switched off. Uses the phone's camera whenever it's streaming, otherwise a webcam;
+        with neither it waits (re-scanning webcams every 30s) instead of giving up."""
         import cv2
-        cap, idx = self._open(cv2)
-        if cap is None:
-            self.err = ("No camera gave a picture. If you use Iriun, open Iriun Webcam on the PC AND the app on your phone "
-                        "(same Wi-Fi) until you see the picture, then switch gestures off and on.")
-            self.emit("gesture_state", on=False, err=self.err)
-            return
-        self.cam = idx
-        cap.set(cv2.CAP_PROP_FRAME_WIDTH, 320)
-        cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 240)
-        self.on, self.err = True, ""
-        self.mode = "mediapipe" if use_mp else "motion"
-        self.emit("gesture_state", on=True, mode=self.mode)
-        try:
-            (self._loop_mp if use_mp else self._loop_motion)(cap, cv2)
-        except Exception as e:
-            self.err = str(e)
-            log.exception("gestures")
-        finally:
-            cap.release()
-            self.on = False
-            self.emit("gesture_state", on=False, err=self.err)
+        scanned = 0
+        told = False
+        while not self._stop.is_set():
+            cap, idx = None, None
+            if PHONE.live():
+                cap, idx = PHONE, "phone"
+            elif time.time() - scanned > 30:
+                scanned = time.time()
+                cap, idx = self._open(cv2)
+            if cap is None:
+                if not told:
+                    self.err = ("Waiting for a camera — on your phone open PC › ORION'S EYES and tap START CAMERA "
+                                "(or start Iriun / plug in a webcam).")
+                    self.emit("gesture_state", on=False, err=self.err)
+                    told = True
+                self._stop.wait(1)
+                continue
+            told = False
+            self.cam = idx
+            if cap is not PHONE:
+                cap.set(cv2.CAP_PROP_FRAME_WIDTH, 320)
+                cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 240)
+            self.on, self.err = True, ""
+            self.mode = "mediapipe" if use_mp else "motion"
+            self.emit("gesture_state", on=True, mode=self.mode)
+            try:
+                (self._loop_mp if use_mp else self._loop_motion)(cap, cv2)
+            except CamLost:
+                scanned = 0
+            except Exception as e:
+                self.err = str(e)
+                log.exception("gestures")
+                self._stop.wait(5)
+            finally:
+                cap.release()
+                self.on = False
+                self.emit("gesture_state", on=False, err=self.err)
+        self.on = False
 
     def _loop_mp(self, cap, cv2):
         detect = _hand_detector()
         track = []                                   # (t, x) of the wrist
         palm_since = None
+        bad = 0
         while not self._stop.is_set():
             ok, frame = cap.read()
+            if cap is not PHONE and PHONE.live():
+                raise CamLost("phone camera took over")
             if not ok:
+                bad += 1
+                if bad > 25:
+                    raise CamLost("camera stopped")
                 time.sleep(.2)
                 continue
+            bad = 0
             if frame.shape[1] > 480:
                 frame = cv2.resize(frame, (320, int(320 * frame.shape[0] / frame.shape[1])))
             lm = detect(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
@@ -210,11 +283,18 @@ class Gestures:
 
     def _loop_motion(self, cap, cv2):
         prev, track = None, []
+        bad = 0
         while not self._stop.is_set():
             ok, frame = cap.read()
+            if cap is not PHONE and PHONE.live():
+                raise CamLost("phone camera took over")
             if not ok:
+                bad += 1
+                if bad > 25:
+                    raise CamLost("camera stopped")
                 time.sleep(.2)
                 continue
+            bad = 0
             if frame.shape[1] > 480:
                 frame = cv2.resize(frame, (320, int(320 * frame.shape[0] / frame.shape[1])))
             g = cv2.GaussianBlur(cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY), (21, 21), 0)

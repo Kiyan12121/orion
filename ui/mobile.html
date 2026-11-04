@@ -489,6 +489,11 @@ body.busy .horb u{animation-duration:.9s}body.busy .horb i{animation-duration:1.
         <input type="file" id="fileIn" multiple style="display:none">
         <p class="empty" id="shareNote" style="font-size:12.5px;margin-top:8px">Files land in Downloads › ORION Drop on your PC. Say "send this file to my phone" on the PC for the other way.</p>
       </div>
+      <div class="card" id="camCard"><h3>ORION'S EYES <span id="camSt" style="font-size:11px;letter-spacing:.1em">OFF</span></h3>
+        <p class="empty" style="font-size:12.5px;margin:0 0 8px">Turns this phone into ORION's webcam for hand gestures — no Iriun needed. Prop the phone up facing you. Frames go straight to your PC and are never saved.</p>
+        <video id="camV" playsinline muted style="display:none;width:100%;border-radius:14px;transform:scaleX(-1);max-height:220px;object-fit:cover"></video>
+        <button class="btn" id="camGo">📷 START CAMERA</button>
+      </div>
       <div class="card"><h3>LIVE SCREEN <span><label style="font-size:11px;letter-spacing:.1em;display:inline-flex;gap:5px;align-items:center"><input type="checkbox" id="live" style="accent-color:var(--a)"> LIVE</label></span></h3>
         <img class="screen" id="screen" alt="">
         <button class="btn" id="snap">↻ REFRESH</button>
@@ -750,10 +755,31 @@ async function api1(path,body,timeout=20000){
     if(r.status===401) throw new Error("Wrong PIN — check ⚙ settings."); if(r.status===429) throw new Error("Locked out after wrong PINs — wait 10 min.");
     return await r.json(); } finally{ clearTimeout(t); } }
 
+
+/* ---------- ORION's eyes: phone as the PC's gesture camera ---------- */
+const CAM={on:false,stream:null,timer:0,lock:null,busy:false,sent:0,asked:0};
+async function camStart(){
+  if(!pcOnline){ toast("Link to your PC first."); return; }
+  try{ CAM.stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:"user",width:{ideal:640},height:{ideal:480}},audio:false}); }
+  catch(e){ toast("Camera blocked — allow ORION to use the camera in Android settings."); return; }
+  const v=$("#camV"); v.srcObject=CAM.stream; v.style.display="block"; await v.play().catch(()=>{});
+  CAM.on=true; $("#camGo").textContent="■ STOP CAMERA"; $("#camSt").textContent="● LIVE"; $("#camSt").style.color="#ff5a6e";
+  try{ CAM.lock=await navigator.wakeLock.request("screen"); }catch(e){}
+  const c=document.createElement("canvas"); c.width=320; c.height=240; const x=c.getContext("2d");
+  CAM.timer=setInterval(()=>{ if(CAM.busy||!v.videoWidth) return; CAM.busy=true;
+    x.drawImage(v,0,0,320,240); c.toBlob(async b=>{ try{ const r=await api1("/api/cam",b,4000); CAM.sent++; if(r&&r.want===false){ camStop(); toast("Switch on Hand gestures on the PC (Dashboard › Stark Protocols) first."); } }catch(e){} CAM.busy=false; },"image/jpeg",.6); },110);
+  toast("📷 ORION can see you — wave to make it listen.");
+}
+function camStop(){ clearInterval(CAM.timer); CAM.on=false; if(CAM.stream) CAM.stream.getTracks().forEach(t=>t.stop()); CAM.stream=null;
+  try{ CAM.lock&&CAM.lock.release(); }catch(e){} CAM.lock=null; $("#camV").style.display="none"; $("#camGo").textContent="📷 START CAMERA"; $("#camSt").textContent="OFF"; $("#camSt").style.color=""; }
+$("#camGo").onclick=()=>CAM.on?camStop():camStart();
+document.addEventListener("visibilitychange",()=>{ if(document.hidden&&CAM.on) camStop(); });
+function camAsk(want){ if(!want||CAM.on||Date.now()-CAM.asked<120000) return; CAM.asked=Date.now();
+  toast("🖐 Your PC wants this phone as its gesture camera — open PC › ORION'S EYES."); }
 setInterval(()=>{ const a=addr(); if(a&&!isLan(a)&&addrs().some(isLan)) switchAddr(true); },60000);
 async function refresh(){
   if(!addr()){ setConn(false); paintHome(); return; }
-  try{ state=await api("/api/state",undefined,6000); setConn(true); paintHome(); paintModes(); if(!window._gl||Date.now()-window._gl>60000){ window._gl=Date.now(); glance(); shareSolo(); pullMorning(); syncRides(); learnPlaces(); } runPhoneActions(state.phone_actions); try{ phonePops(state.cards); }catch(e){} flushQueue(); pollPending(); if($("#v-jobs").classList.contains("on")) loadJobs(); }
+  try{ state=await api("/api/state",undefined,6000); setConn(true); paintHome(); paintModes(); if(!window._gl||Date.now()-window._gl>60000){ window._gl=Date.now(); glance(); shareSolo(); pullMorning(); syncRides(); learnPlaces(); } runPhoneActions(state.phone_actions); camAsk(state.want_cam); try{ phonePops(state.cards); }catch(e){} flushQueue(); pollPending(); if($("#v-jobs").classList.contains("on")) loadJobs(); }
   catch(e){ setConn(false); paintHome(); }
 }
 function setConn(on){ const was=pcOnline; pcOnline=on; $("#dot").className="dot "+(on?"ok":"solo");

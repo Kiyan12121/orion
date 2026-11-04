@@ -188,6 +188,9 @@ class Remote:
                     return
                 n = int(self.headers.get("Content-Length", 0) or 0)
                 raw = self.rfile.read(n) if n else b""
+                if self.path == "/api/cam":
+                    self._json(200, remote.api.cam_frame(raw))
+                    return
                 if self.path == "/api/transcribe":
                     self._json(200, {"text": remote.api.transcribe_bytes(raw)})
                     return

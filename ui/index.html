@@ -2912,7 +2912,7 @@ function suitUp(e){ const lines=(e.report||"").split(/(?<=[.!?])\s+/).filter(Boo
 
 /* ---------- HAND GESTURES ---------- */
 async function gesPaint(){ try{ const g=await api.gestures_get(); $("#gesOn").checked=g.enabled; $("#camLight").classList.toggle("on",!!g.on);
-  $("#gesInst").hidden=g.have.cv2; $("#gesInfo").textContent=g.err?("⚠ "+g.err):g.on?(g.mode==="motion"?"Basic mode — wave and swipe work (install MediaPipe for palm + pinch).":`📷 Camera ${g.cam??0} · watching for wave · swipe · open palm · pinch`):"Wave = listen · swipe = change page · open palm = stop · pinch = close pop-up"; }catch(e){} }
+  $("#gesInst").hidden=g.have.cv2; $("#gesInfo").textContent=g.err?("⚠ "+g.err):g.on?(g.mode==="motion"?"Basic mode — wave and swipe work (install MediaPipe for palm + pinch).":`${g.cam==="phone"?"📱 Phone camera":"📷 Camera "+(g.cam??0)} · watching for wave · swipe · open palm · pinch`):"Wave = listen · swipe = change page · open palm = stop · pinch = close pop-up"; }catch(e){} }
 function onGesture(g){ const f=document.createElement("div"); f.className="gflash"; f.textContent={wave:"👋 LISTENING",swipe_left:"◀ PREVIOUS",swipe_right:"NEXT ▶",palm:"✋ STOP",pinch:"🤏 CLOSE"}[g]||g; document.body.appendChild(f); setTimeout(()=>f.remove(),950);
   const open=["globe3d","holo3d","scanov","suitov"].find(id=>{ const o=$("#"+id); return o&&o.classList.contains("show"); });
   if(g==="wave"){ if(!micOn) toggleMic(); }

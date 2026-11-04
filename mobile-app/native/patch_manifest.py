@@ -2,7 +2,7 @@
 import re, sys
 p = sys.argv[1]
 s = open(p, encoding="utf-8").read()
-perms = ["android.permission.RECORD_AUDIO", "android.permission.MODIFY_AUDIO_SETTINGS",
+perms = ["android.permission.RECORD_AUDIO", "android.permission.CAMERA", "android.permission.MODIFY_AUDIO_SETTINGS",
          "android.permission.POST_NOTIFICATIONS", "android.permission.SYSTEM_ALERT_WINDOW",
          "com.android.alarm.permission.SET_ALARM", "android.permission.VIBRATE",
          "android.permission.FOREGROUND_SERVICE", "android.permission.FOREGROUND_SERVICE_SPECIAL_USE",

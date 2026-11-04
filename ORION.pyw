@@ -1105,6 +1105,7 @@ class Api:
                 "jobs_active": sum(1 for j in self._jobs.jobs if j["status"] in ("queued", "running", "waiting")),
                 "job_running": (self._jobs.current or {}).get("title"),
                 "phone_actions": phone.take(),
+                "want_cam": bool(self._gestures.gc.get("enabled")) and not self._gestures.on,
                 "stats": self.stats(), "root_unread": sum(1 for e in root.recent_log(20) if e["kind"] == "received")}
 
     def remote_action(self, action, value=None):
@@ -1749,7 +1750,7 @@ class Api:
     # ---------------------------------------------------------------- hand gestures (opt-in)
     def gestures_get(self):
         g = self._gestures
-        return {"enabled": bool(g.gc.get("enabled")), "on": g.on, "mode": g.mode, "err": g.err, "cam": g.cam, "have": gestures.available()}
+        return {"enabled": bool(g.gc.get("enabled")), "on": g.on, "mode": g.mode, "err": g.err, "cam": g.cam, "waiting": g.waiting(), "have": gestures.available()}
 
     def gestures_set(self, on):
         g = self._gestures
@@ -1760,6 +1761,13 @@ class Api:
         else:
             g.stop()
         return self.gestures_get()
+
+    def cam_frame(self, raw):
+        """A frame from the phone's 'ORION's eyes' camera (JPEG). Only used for gestures; never saved."""
+        if not self._gestures.gc.get("enabled") or not raw or len(raw) > 400_000:
+            return {"ok": False, "want": False}
+        gestures.PHONE.push(raw)
+        return {"ok": True, "want": True}
 
     def gestures_install(self):
         import subprocess
