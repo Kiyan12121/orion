@@ -34,7 +34,7 @@ from core import money                                      # noqa: E402
 from core import holo                                       # noqa: E402,F401
 from core import plus                                       # noqa: E402
 from core import skillbook                                  # noqa: E402
-from core import saver, pctools, proactive, ironman, gestures         # noqa: E402
+from core import saver, pctools, proactive, ironman, gestures, localintel         # noqa: E402
 from core.autonomy import Autonomy                          # noqa: E402
 from core import gaming as gaming_mod                        # noqa: E402
 from core.routines import NightShift                        # noqa: E402
@@ -1716,6 +1716,21 @@ class Api:
 
     def globe_feeds(self):
         return ironman.globe_feeds()
+
+    def globe_events(self):
+        return localintel.world_events()
+
+    def globe_local(self):
+        return localintel.local_all()
+
+    def globe_local_map(self, force=False):
+        try:
+            return localintel.local_map(force=bool(force))
+        except Exception as e:
+            return {"error": str(e)}
+
+    def globe_flights(self):
+        return localintel.flights()
 
     def globe_find(self, place):
         try:

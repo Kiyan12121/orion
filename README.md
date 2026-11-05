@@ -1,4 +1,20 @@
-# ORION 5.4 — Personal Intelligence System
+# ORION 5.5 — Personal Intelligence System
+
+## New in 5.5: Globe mode, levelled up
+- **◎ LOCAL INTEL:** click HOME on the globe (or say "how much crime is there in Desford?") and ORION dives in to a holographic map of your village. It's built from real OpenStreetMap roads, buildings, rivers, railways and places.
+  - **Crime (police.uk):** every reported crime within 1 mile, as glowing dots coloured by type. Hover a dot for the street, crime type and outcome so far.
+    - Latest month or the last 6 months, plus a heatmap.
+    - A 6-month trend and how many crimes of each type (click a type to hide or show it).
+    - The hotspot streets, outcomes so far, and your neighbourhood police team's current priorities.
+    - Police data runs about 2 months behind, and locations are anonymised to nearby streets.
+  - **Area:** temperature, air quality, UV and pollen, sunrise and sunset, moon phase, aurora chance (live Kp), and Environment Agency flood warnings within 20 km.
+  - **Sky:** live aircraft overhead with callsign, height and speed, drawn moving on the map. Click one to track it.
+  - Drag to pan, scroll from street level out to the whole county, and press Esc to go back to the globe.
+- **The globe itself:**
+  - NASA world events: wildfires, storms with their tracks, volcanoes and icebergs.
+  - Aurora ovals sized by the live Kp, and city lights on the night side.
+  - Hover tooltips and click-to-fly on every marker.
+  - Layer switches to show or hide each layer.
 
 ## New in 5.4: ORION's Eyes
 - **Your phone is now ORION's webcam. No Iriun needed.**
