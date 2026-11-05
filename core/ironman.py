@@ -194,7 +194,8 @@ def geocode(place):
 def globe_feeds():
     out = {"quakes": [], "iss": None, "home": None}
     try:
-        out["home"] = geocode("")
+        from .localintel import home
+        out["home"] = home()
     except Exception:
         pass
     try:

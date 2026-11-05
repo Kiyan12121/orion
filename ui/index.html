@@ -1093,8 +1093,8 @@ body.reveal .shell{animation:reveal 1.4s}
 .lc-hd{position:absolute;top:0;left:0;padding:24px 60px 70px 30px;z-index:5;pointer-events:none;background:radial-gradient(ellipse at 0 0,rgba(1,5,11,.92) 30%,transparent 72%)}
 .lc-hd small{font:700 11px var(--ui);letter-spacing:.4em;color:#5dffb0}
 .lc-hd h1{margin:2px 0;font:800 38px var(--disp);letter-spacing:.25em;color:var(--a2);text-shadow:0 0 22px rgba(var(--ar),.7);text-transform:uppercase}
-.lc-hd div{font:500 15px var(--ui);color:var(--text)}
-.lc-chips{position:absolute;top:118px;left:30px;z-index:5;display:flex;gap:6px;flex-wrap:wrap}
+.lc-hd div{font:500 15px var(--ui);color:var(--text)}.lc-area{pointer-events:auto;margin-top:8px;font:600 12px var(--ui);color:var(--dim);background:none;border:1px dashed rgba(var(--ar),.35);border-radius:14px;padding:4px 10px;cursor:pointer}.lc-area:hover{color:var(--a2);border-color:var(--a)}
+.lc-chips{position:absolute;top:150px;left:30px;z-index:5;display:flex;gap:6px;flex-wrap:wrap}
 .lc-chips button{font:600 12px var(--ui);padding:6px 12px;border-radius:20px;border:1px solid rgba(var(--ar),.3);background:rgba(2,12,22,.6);color:var(--dim);cursor:pointer}
 .lc-chips button.on{background:rgba(var(--ar),.2);color:var(--a2);border-color:var(--a)}
 .lc-pn{position:absolute;top:70px;right:22px;bottom:50px;width:360px;z-index:5;display:flex;flex-direction:column;border:1px solid rgba(var(--ar),.3);border-radius:12px;background:rgba(3,14,25,.78);backdrop-filter:blur(10px);overflow:hidden;animation:tgIn .6s .3s both}
@@ -2920,9 +2920,9 @@ function globeFrame(ts){ if(!GL.on) return; const c=$("#glC"); if(!c) return; if
 const CRC={"anti-social-behaviour":"#ffbe55","bicycle-theft":"#9fe8ff","burglary":"#ff5a6e","criminal-damage-arson":"#ff8a3d","drugs":"#c9a0ff","other-theft":"#7fd4ff","possession-of-weapons":"#ff2e63","public-order":"#f3e37c","robbery":"#ff4dbe","shoplifting":"#5dffb0","theft-from-the-person":"#4da3ff","vehicle-crime":"#ffd27f","violent-crime":"#ff6b6b","other-crime":"#b8c4cc"};
 const LC={on:false,map:null,data:null,zoom:.32,px:0,py:0,drag:null,raf:0,t0:0,hide:{},span:"month",tab:"crime",geo:null,mouse:null,hover:null,flTs:0,sel:null};
 function lcProj(h){ const c=Math.cos(h.lat*Math.PI/180); return (la,lo)=>[(lo-h.lon)*111320*c,(la-h.lat)*110540]; }
-async function localOpen(){ LC.on=true; LC.t0=performance.now(); LC.zoom=.32; LC.px=LC.py=0; LC.sel=null;
+async function localOpen(){ LC.on=true; LC.t0=performance.now(); LC.zoom=.32; LC.px=LC.py=0; LC.sel=null; LC.bound=null;
   $("#lcWrap").innerHTML=`<div class="lc"><canvas id="lcC"></canvas>
-    <div class="lc-hd"><small>LOCAL INTEL</small><h1 id="lcName">${esc((GL.feeds.home||{}).name||"HOME")}</h1><div id="lcSub">Scanning area…</div></div>
+    <div class="lc-hd"><small>LOCAL INTEL</small><h1 id="lcName">${esc((GL.feeds.home||{}).name||"HOME")}</h1><div id="lcSub">Scanning area…</div><button class="lc-area" id="lcArea">📍 change area</button></div>
     <div class="lc-chips" id="lcChips"><button data-s="month" class="on">Latest month</button><button data-s="six">6 months</button><button data-s="heat">Heatmap</button><button data-s="fl" class="on">Aircraft</button><button data-s="poi" class="on">Places</button></div>
     <div class="lc-pn"><div class="lc-tabs"><button data-t="crime" class="on">CRIME</button><button data-t="area">AREA</button><button data-t="sky">SKY</button></div><div id="lcBody"><div class="lc-load">◌ Pulling police.uk, air quality, flood and flight data…</div></div></div>
     <button class="lc-back" id="lcBack">◀ GLOBE</button><div class="lc-scale" id="lcScale"></div><div class="gl-tip" id="lcTip"></div></div>`;
@@ -2935,13 +2935,18 @@ async function localOpen(){ LC.on=true; LC.t0=performance.now(); LC.zoom=.32; LC
   const c=$("#lcC"); const fit=()=>{ c.width=innerWidth*devicePixelRatio; c.height=innerHeight*devicePixelRatio; }; fit(); addEventListener("resize",fit);
   c.onmousedown=e=>{ LC.drag=[e.clientX,e.clientY,LC.px,LC.py,0]; }; addEventListener("mouseup",()=>{ if(LC.drag&&LC.drag[4]<4&&LC.hover&&LC.hover.fl){ LC.sel=LC.hover.fl.cs; } LC.drag=null; });
   c.onmousemove=e=>{ LC.mouse=[e.clientX*devicePixelRatio,e.clientY*devicePixelRatio]; if(!LC.drag) return; LC.drag[4]+=Math.abs(e.movementX)+Math.abs(e.movementY); LC.px=LC.drag[2]+(e.clientX-LC.drag[0])/LC.zoom; LC.py=LC.drag[3]-(e.clientY-LC.drag[1])/LC.zoom; };
-  c.onwheel=e=>{ LC.zoom=Math.max(.008,Math.min(3,LC.zoom*(e.deltaY<0?1.15:.87))); };
+  c.onwheel=e=>{ LC.zoom=Math.max(.04,Math.min(3,LC.zoom*(e.deltaY<0?1.15:.87))); };
+  $("#lcArea").onclick=async()=>{ const cur=await api.local_place(); const v=prompt("Which village or town should Local Intel cover?",cur); if(!v||v.trim()===cur) return; await api.local_place(v.trim()); toast("📍 Local Intel now covers "+v.trim()); GL.feeds.home=null; LC.map=null; LC.geo=null; LC.data=null; globeData(); localOpen(); };
   cancelAnimationFrame(LC.raf); LC.raf=requestAnimationFrame(localFrame);
   api.globe_local_map().then(m=>{ if(m&&!m.error){ LC.map=m; lcPrep(); } else $("#lcSub").textContent="Map unavailable right now — data still loads"; });
   lcLoad(); }
 async function lcLoad(){ try{ LC.data=await api.globe_local(); }catch(e){ LC.data={}; } const D=LC.data; LC.flTs=performance.now();
   if(D.area&&D.area.kp) GL.kp=D.area.kp.kp;
-  const cr=D.crime||{}; $("#lcSub").textContent=cr.month?`${cr.total} crimes reported within ${cr.radius} · ${new Date(cr.month+"-01").toLocaleString("en-GB",{month:"long",year:"numeric"})}`:(cr.error?"Police data unavailable: "+cr.error:"");
+  if(D.home){ $("#lcName").textContent=D.home.name; }
+  if(D.home&&D.boundary&&D.boundary.ring){ const pr=lcProj(D.home); LC.bound=D.boundary.ring.map(q=>pr(q[0],q[1])); const xs=LC.bound.map(m=>m[0]), ys=LC.bound.map(m=>m[1]);
+    const w=Math.max(...xs)-Math.min(...xs), hh=Math.max(...ys)-Math.min(...ys); LC.px=-(Math.max(...xs)+Math.min(...xs))/2; LC.py=-(Math.max(...ys)+Math.min(...ys))/2;
+    LC.zoom=Math.max(.06,Math.min(.8,Math.min((innerWidth-480)/w,(innerHeight-160)/hh)*.85)); } else LC.bound=null;
+  const cr=D.crime||{}; $("#lcSub").textContent=cr.month?`${cr.total} crimes reported ${cr.area?"inside "+cr.area:"within "+cr.radius} · ${new Date(cr.month+"-01").toLocaleString("en-GB",{month:"long",year:"numeric"})}`:(cr.error?"Police data unavailable: "+cr.error:"");
   lcPanel(); clearTimeout(LC.flT); LC.flT=setTimeout(lcFlights,20000); }
 async function lcFlights(){ if(!LC.on||!GL.on) return; try{ LC.data.flights=await api.globe_flights(); LC.flTs=performance.now(); if(LC.tab==="sky") lcPanel(); }catch(e){} LC.flT=setTimeout(lcFlights,20000); }
 function lcPrep(){ const h=LC.data&&LC.data.home||GL.feeds.home; if(!h) return setTimeout(lcPrep,500); const pr=lcProj(h); const M=LC.map;
@@ -2969,11 +2974,16 @@ function localFrame(ts){ if(!LC.on||!GL.on) return; const c=$("#lcC"); if(!c) re
       else { x.strokeStyle=minor?"rgba(140,200,240,.28)":w>=2.6?"rgba(150,235,255,.95)":"rgba(110,200,245,.7)"; x.lineWidth=Math.max(.6,w*k*Math.min(1.8,z/(.3*k)+.3)); if(minor) x.setLineDash([3*k,3*k]); x.stroke(); x.setLineDash([]); } }
     if(z>.45*k){ x.font=`600 ${10.5*k}px Rajdhani,sans-serif`; x.fillStyle="rgba(190,235,255,.75)"; const done={}; for(const r of G.roads){ if(!r.n||done[r.n]||(RW[r.k]||0)<1.2) continue; done[r.n]=1; const m=r.g[Math.floor(r.g.length/2)]; const p=S(m); if(p[0]<0||p[0]>W||p[1]<0||p[1]>H) continue; x.fillText(r.n,p[0]+3*k,p[1]-3*k); } }
     if(!LC.hide.poi&&z>.22*k){ x.font=`600 ${11*k}px Rajdhani,sans-serif`; for(const p of G.poi){ const q=S(p.m); if(q[0]<0||q[0]>W||q[1]<0||q[1]>H) continue; x.fillStyle="#ffd27f"; x.save(); x.translate(q[0],q[1]); x.rotate(Math.PI/4); x.fillRect(-3*k,-3*k,6*k,6*k); x.restore(); if(z>.4*k){ x.fillStyle="rgba(255,226,170,.85)"; x.fillText(p.n,q[0]+7*k,q[1]+4*k); } } }
-    if(z<.1*k){ x.font=`700 ${12*k}px Rajdhani,sans-serif`; for(const p of G.places){ const q=S(p.m); x.fillStyle=p.k==="village"?"rgba(190,235,255,.6)":"#e8f6ff"; x.beginPath(); x.arc(q[0],q[1],(p.k==="city"?5:p.k==="town"?3.5:2)*k,0,7); x.fill(); if(p.k!=="village"||z>.03*k) x.fillText(p.n.toUpperCase(),q[0]+7*k,q[1]+4*k); } } }
-  // range rings + sweep
-  const ctr=S([0,0]); x.strokeStyle="rgba(93,255,176,.35)"; x.lineWidth=1*k; x.setLineDash([2*k,6*k]); x.font=`700 ${10*k}px Rajdhani,sans-serif`; x.fillStyle="rgba(93,255,176,.7)";
-  for(const [m,l] of [[804.7,"½ MILE"],[1609.3,"1 MILE · CRIME RADIUS"]]){ x.beginPath(); x.arc(ctr[0],ctr[1],m*z,0,7); x.stroke(); x.fillText(l,ctr[0]+m*z*.71+4*k,ctr[1]-m*z*.71); } x.setLineDash([]);
-  const sw=(t*.9)%(2*Math.PI); const gr=x.createConicGradient?x.createConicGradient(sw,ctr[0],ctr[1]):null; if(gr){ gr.addColorStop(0,"rgba(93,255,176,.16)"); gr.addColorStop(.08,"rgba(93,255,176,0)"); gr.addColorStop(1,"rgba(93,255,176,0)"); x.fillStyle=gr; x.beginPath(); x.arc(ctr[0],ctr[1],1609.3*z,0,7); x.fill(); }
+    if(z<.16*k){ x.font=`700 ${12*k}px Rajdhani,sans-serif`; for(const p of G.places){ if(LC.data&&LC.data.home&&p.n===LC.data.home.name) continue; const q=S(p.m); x.fillStyle=p.k==="village"?"rgba(190,235,255,.6)":"#e8f6ff"; x.beginPath(); x.arc(q[0],q[1],(p.k==="city"?5:p.k==="town"?3.5:2)*k,0,7); x.fill(); x.fillText(p.n.toUpperCase(),q[0]+7*k,q[1]+4*k); } } }
+  // boundary (just your village) — or range rings if there isn't one
+  const ctr=S([0,0]); const sw=(t*.9)%(2*Math.PI); let sweepR=1609.3*z;
+  if(LC.bound){ x.save(); x.beginPath(); x.rect(0,0,W,H); LC.bound.forEach((m,i)=>{ const p=S(m); i?x.lineTo(p[0],p[1]):x.moveTo(p[0],p[1]); }); x.closePath(); x.fillStyle="rgba(1,5,11,.72)"; x.fill("evenodd"); x.restore();
+    poly(LC.bound,1); x.strokeStyle="rgba(93,255,176,.25)"; x.lineWidth=9*k; x.stroke(); x.strokeStyle="#5dffb0"; x.lineWidth=2*k; x.setLineDash([10*k,5*k]); x.lineDashOffset=-t*20*k; x.stroke(); x.setLineDash([]);
+    const top=LC.bound.reduce((a,m)=>m[1]>a[1]?m:a,LC.bound[0]); const tp=S(top); x.font=`800 ${12*k}px Rajdhani,sans-serif`; x.fillStyle="#5dffb0"; x.fillText(((LC.data&&LC.data.boundary&&LC.data.boundary.name)||"").toUpperCase()+" BOUNDARY",tp[0]+8*k,tp[1]-8*k);
+    sweepR=Math.max(...LC.bound.map(m=>Math.hypot(m[0],m[1])))*z; }
+  else { x.strokeStyle="rgba(93,255,176,.35)"; x.lineWidth=1*k; x.setLineDash([2*k,6*k]); x.font=`700 ${10*k}px Rajdhani,sans-serif`; x.fillStyle="rgba(93,255,176,.7)";
+    for(const [m,l] of [[804.7,"½ MILE"],[1609.3,"1 MILE · CRIME RADIUS"]]){ x.beginPath(); x.arc(ctr[0],ctr[1],m*z,0,7); x.stroke(); x.fillText(l,ctr[0]+m*z*.71+4*k,ctr[1]-m*z*.71); } x.setLineDash([]); }
+  const gr=x.createConicGradient?x.createConicGradient(sw,ctr[0],ctr[1]):null; if(gr){ gr.addColorStop(0,"rgba(93,255,176,.16)"); gr.addColorStop(.08,"rgba(93,255,176,0)"); gr.addColorStop(1,"rgba(93,255,176,0)"); x.fillStyle=gr; x.beginPath(); x.arc(ctr[0],ctr[1],sweepR,0,7); x.fill(); }
   // crime
   const hits=[]; const D=LC.data||{}; const cr=D.crime||{}; const pr=D.home?lcProj(D.home):null;
   if(pr&&cr.items){ const rows=(LC.span==="six"?cr.six:cr.items)||[];
@@ -3014,7 +3024,7 @@ function lcPanel(){ const D=LC.data; const b=$("#lcBody"); if(!b||!D) return; co
       ${cr.streets&&cr.streets.length?`<h6>HOTSPOTS · ${new Date(cr.month+"-01").toLocaleString("en-GB",{month:"short"})}</h6>${cr.streets.slice(0,5).map(([s,n])=>`<div class="lc-row"><span>${esc(s)}</span><b>${n}</b></div>`).join("")}`:""}
       ${cr.outcomes&&cr.outcomes.length?`<h6>OUTCOMES SO FAR</h6>${cr.outcomes.map(([s,n])=>`<div class="lc-row"><span>${esc(s)}</span><b>${n}</b></div>`).join("")}`:""}
       ${cr.hood&&cr.hood.name?`<h6>YOUR NEIGHBOURHOOD TEAM</h6><div class="lc-hood"><b>${esc(cr.hood.name)}</b> · ${esc(cr.hood.force||"")}${(cr.hood.priorities||[]).map(p=>`<p>⚑ ${esc(p)}</p>`).join("")}</div>`:""}
-      <p class="lc-note">police.uk open data · within ${esc(cr.radius||"1 mile")} of the village centre · locations are anonymised to nearby streets · runs ~2 months behind</p>`;
+      <p class="lc-note">police.uk open data · ${cr.area?"only crimes inside the "+esc(cr.area)+" boundary":"within "+esc(cr.radius||"1 mile")+" of the village centre"} · locations are anonymised to nearby streets · runs ~2 months behind</p>`;
     $$(".lc-cat").forEach(d=>d.onclick=()=>{ LC.hide[d.dataset.k]=!LC.hide[d.dataset.k]; d.classList.toggle("off"); sfx("tick"); }); }
   else if(LC.tab==="area"){ const w=ar.weather||{}, a=ar.air, m=ar.moon||{}, kp=ar.kp; const fl=ar.floods;
     const aqc=a?(a.aqi<=20?"#5dffb0":a.aqi<=40?"#9fe8ff":a.aqi<=60?"#ffbe55":"#ff5a6e"):"#9fe8ff";
@@ -3195,6 +3205,7 @@ setTimeout(()=>{ if(api) return; const wait=ms=>new Promise(r=>setTimeout(r,ms))
     globe_feeds:()=>A({home:{lat:52.62,lon:-1.28,name:"Desford"},iss:{lat:38.2,lon:-42.5,alt:418,vel:27580},quakes:[{lat:35.6,lon:139.7,mag:4.9,place:"near Tokyo, Japan"},{lat:-33.4,lon:-70.6,mag:5.6,place:"Santiago, Chile"},{lat:61.2,lon:-150,mag:3.1,place:"Anchorage, Alaska"},{lat:38.4,lon:-122.8,mag:2.7,place:"N California"},{lat:-6.2,lon:130.5,mag:6.1,place:"Banda Sea"}]}),
     globe_events:()=>A([{t:"Wildfire — Northern Territory",c:"wildfires",lat:-13.4,lon:132.2},{t:"Wildfire — California",c:"wildfires",lat:38.9,lon:-121.3},{t:"Typhoon Kalmaegi",c:"severeStorms",lat:17.2,lon:128.4,track:[[12,138],[13.5,135],[15,132],[16.2,130],[17.2,128.4]]},{t:"Etna, Italy",c:"volcanoes",lat:37.75,lon:14.99},{t:"Sakurajima",c:"volcanoes",lat:31.58,lon:130.66},{t:"Iceberg A23A",c:"seaLakeIce",lat:-54,lon:-38}]),
     globe_flights:()=>A(mockFlights()),
+    local_place:n=>A(n||"Desford"),
     globe_local_map:()=>A(mockMap()),
     globe_local:async()=>{ await wait(900); const h={lat:52.6267,lon:-1.2903,name:"Desford"}; const C=["violent-crime","anti-social-behaviour","shoplifting","burglary","public-order","vehicle-crime","criminal-damage-arson","other-theft"]; const ST=["High Street","Main Street","Station Road","Cortanis Lane","Peckleton Lane","Kirkby Road","Manor Road","Lancaster Avenue"];
       const spots=Array.from({length:22},(_,i)=>[h.lat+Math.sin(i*2.4)*.009*Math.random(),h.lon+Math.cos(i*1.7)*.014*Math.random(),ST[i%8]]);
@@ -3202,7 +3213,8 @@ setTimeout(()=>{ if(api) return; const wait=ms=>new Promise(r=>setTimeout(r,ms))
       const ms=["2026-04","2026-05","2026-06","2026-07","2026-08","2026-09"]; const per=ms.map((m,i)=>mk([24,19,27,22,18,21][i])); const cur=per[5];
       const by={}; cur.forEach(r=>by[r[2]]=(by[r[2]]||0)+1); const st={}; cur.forEach(r=>st[r[3]]=(st[r[3]]||0)+1); const oc={}; cur.forEach(r=>{ const k=r[4]||"No outcome recorded yet"; oc[k]=(oc[k]||0)+1; });
       const names={"anti-social-behaviour":"Anti-social behaviour","burglary":"Burglary","criminal-damage-arson":"Criminal damage & arson","other-theft":"Other theft","public-order":"Public order","shoplifting":"Shoplifting","vehicle-crime":"Vehicle crime","violent-crime":"Violence & sexual offences"};
-      return {home:h,crime:{month:"2026-09",radius:"1 mile",items:cur,six:per.flat(),total:cur.length,by_cat:Object.entries(by).map(([k,v])=>[k,names[k],v]),streets:Object.entries(st).sort((a,b)=>b[1]-a[1]),outcomes:Object.entries(oc).sort((a,b)=>b[1]-a[1]),trend:ms.map((m,i)=>({m,n:per[i].length})),names,hood:{name:"Desford & Peckleton",force:"Leicestershire",priorities:["Anti-social behaviour around the village centre in the evenings.","Speeding on Peckleton Lane and Kirkby Road."]}},
+      const ring=Array.from({length:40},(_,i)=>{ const a=i/40*2*Math.PI, r=1500+420*Math.sin(a*3)+260*Math.cos(a*5); return [+(h.lat+Math.sin(a)*r/110540).toFixed(5),+(h.lon+Math.cos(a)*r*1.4/(111320*.607)).toFixed(5)]; }); ring.push(ring[0]);
+      return {home:h,boundary:{name:"Desford",ring},crime:{month:"2026-09",radius:"the Desford boundary",area:"Desford",items:cur,six:per.flat(),total:cur.length,by_cat:Object.entries(by).map(([k,v])=>[k,names[k],v]),streets:Object.entries(st).sort((a,b)=>b[1]-a[1]),outcomes:Object.entries(oc).sort((a,b)=>b[1]-a[1]),trend:ms.map((m,i)=>({m,n:per[i].length})),names,hood:{name:"Desford & Peckleton",force:"Leicestershire",priorities:["Anti-social behaviour around the village centre in the evenings.","Speeding on Peckleton Lane and Kirkby Road."]}},
         area:{home:h,sunrise:"07:02",sunset:"16:24",moon:{age:15.1,name:"Full moon",lit:99},weather:{temp:9,sky:"cloudy",rain_at:"21:00"},air:{aqi:18,label:"Good",pm25:4.2,uv:.6,pollen:2},kp:{kp:3.3,chance:"Very unlikely"},floods:[]},flights:mockFlights()}; },
     globe_find:p=>A({lat:35.68,lon:139.69,name:p}),
     suitup_apps:a=>A(a||["Spotify","Discord"]),

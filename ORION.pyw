@@ -1729,6 +1729,12 @@ class Api:
         except Exception as e:
             return {"error": str(e)}
 
+    def local_place(self, name=None):
+        if name is not None:
+            self._cfg["local_place"] = str(name).strip()[:60]
+            config_mod.save(self._cfg)
+        return localintel.place_name()
+
     def globe_flights(self):
         return localintel.flights()
 

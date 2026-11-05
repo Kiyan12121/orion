@@ -49,10 +49,115 @@ def _save(c):
         write_json(CACHE, c)
 
 
+def place_name():
+    cfg = CTX.get("config", {})
+    p = (cfg.get("local_place") or "").strip()
+    if not p:
+        hp = (cfg.get("home_place") or "").strip()
+        p = hp if hp and hp.lower() != "leicester" else "Desford"
+    return p
+
+
 def home():
     from .life import _geo
-    lat, lon, name = _geo("")
+    lat, lon, name = _geo(place_name())
     return {"lat": lat, "lon": lon, "name": name}
+
+
+# ------------------------------------------------------------------ the village boundary (so it's just YOUR area)
+OVERPASS = ("https://overpass-api.de/api/interpreter", "https://overpass.kumi.systems/api/interpreter")
+
+
+def _overpass(q, timeout=90):
+    last = None
+    for ep in OVERPASS:
+        try:
+            r = requests.post(ep, data={"data": q}, headers=UA, timeout=timeout)
+            r.raise_for_status()
+            return r.json()
+        except Exception as e:
+            last = e
+            log.warning("overpass %s: %s", ep, e)
+    raise RuntimeError(f"OpenStreetMap unreachable: {last}")
+
+
+def _stitch(ways):
+    """Joins boundary way pieces into closed rings."""
+    ways = [w[:] for w in ways if len(w) > 1]
+    rings = []
+    while ways:
+        ring = ways.pop(0)
+        changed = True
+        while changed and ring[0] != ring[-1]:
+            changed = False
+            for i, w in enumerate(ways):
+                if w[0] == ring[-1]:
+                    ring += w[1:]
+                elif w[-1] == ring[-1]:
+                    ring += w[::-1][1:]
+                elif w[-1] == ring[0]:
+                    ring = w[:-1] + ring
+                elif w[0] == ring[0]:
+                    ring = w[::-1][:-1] + ring
+                else:
+                    continue
+                ways.pop(i)
+                changed = True
+                break
+        rings.append(ring)
+    return rings
+
+
+def _simplify(ring, n=90):
+    if len(ring) <= n:
+        return ring
+    step = len(ring) / n
+    return [ring[int(i * step)] for i in range(n)] + [ring[0]]
+
+
+def boundary(h=None):
+    """The parish/village boundary polygon around home from OpenStreetMap (cached), or None."""
+    h = h or home()
+    c = _cache()
+    key = f"bound:{h['name']}:{h['lat']:.3f},{h['lon']:.3f}"
+    if c.get(key):
+        return c[key]
+    q = f"""[out:json][timeout:40];
+is_in({h['lat']},{h['lon']})->.a;
+rel(pivot.a)[boundary=administrative][admin_level~"^(8|9|10)$"];
+out geom;"""
+    try:
+        d = _overpass(q, 60)
+    except Exception:
+        return None
+    best = None
+    for rel in d.get("elements", []):
+        nm = rel.get("tags", {}).get("name", "")
+        ways = [[[round(p["lat"], 5), round(p["lon"], 5)] for p in m.get("geometry", [])]
+                for m in rel.get("members", []) if m.get("type") == "way" and m.get("role") in ("outer", "")]
+        rings = [r for r in _stitch(ways) if len(r) > 3]
+        if not rings:
+            continue
+        ring = max(rings, key=len)
+        score = (nm.lower() == h["name"].lower(), int(rel["tags"].get("admin_level", 0)))
+        if best is None or score > best[0]:
+            best = (score, {"name": nm, "ring": ring})
+    out = best[1] if best else None
+    if out:
+        c[key] = out
+        _save(c)
+    return out
+
+
+def _inside(pt, ring):
+    y, x = pt
+    ins = False
+    for i in range(len(ring) - 1):
+        y1, x1 = ring[i]
+        y2, x2 = ring[i + 1]
+        if (y1 > y) != (y2 > y) and x < (x2 - x1) * (y - y1) / (y2 - y1) + x1:
+            ins = not ins
+    return ins
 
 
 def _get(url, timeout=20, **params):
@@ -65,35 +170,36 @@ def _get(url, timeout=20, **params):
 def local_map(h=None, force=False):
     h = h or home()
     c = _cache()
-    key = f"map:{h['lat']:.3f},{h['lon']:.3f}"
+    key = f"map2:{h['lat']:.3f},{h['lon']:.3f}"
     hit = c.get(key)
     if hit and not force and time.time() - hit.get("ts", 0) < 7 * 86400:
         return hit["data"]
     la, lo = h["lat"], h["lon"]
-    q = f"""[out:json][timeout:60];
+    rad = 2600
+    try:
+        b = boundary(h)
+        if b:
+            cl = math.cos(math.radians(la))
+            rad = int(min(5000, max(1500, max(math.hypot((p[0] - la) * 110540, (p[1] - lo) * 111320 * cl) for p in b["ring"]) + 250)))
+    except Exception:
+        pass
+    q = f"""[out:json][timeout:90];
 (
-  way(around:2600,{la},{lo})[highway~"^(motorway|trunk|primary|secondary|tertiary|unclassified|residential|living_street|service|track|footway|path|cycleway|bridleway)$"];
-  way(around:1600,{la},{lo})[building];
-  way(around:2600,{la},{lo})[natural=water];
-  way(around:2600,{la},{lo})[waterway];
-  way(around:2600,{la},{lo})[railway~"^(rail|disused|abandoned)$"];
-  way(around:2600,{la},{lo})[landuse~"^(forest|meadow|recreation_ground|cemetery)$"];
-  way(around:2600,{la},{lo})[leisure~"^(park|pitch|golf_course|playground)$"];
-  node(around:2600,{la},{lo})[amenity~"^(school|pub|cafe|restaurant|fast_food|pharmacy|doctors|place_of_worship|library|post_office|fuel|police|fire_station)$"];
-  node(around:2600,{la},{lo})[shop];
-  node(around:30000,{la},{lo})[place~"^(city|town|village)$"];
+  way(around:{rad},{la},{lo})[highway~"^(motorway|trunk|primary|secondary|tertiary|unclassified|residential|living_street|service|track|footway|path|cycleway|bridleway)$"];
+  way(around:{rad},{la},{lo})[building];
+  way(around:{rad},{la},{lo})[natural=water];
+  way(around:{rad},{la},{lo})[waterway];
+  way(around:{rad},{la},{lo})[railway~"^(rail|disused|abandoned)$"];
+  way(around:{rad},{la},{lo})[landuse~"^(forest|meadow|recreation_ground|cemetery)$"];
+  way(around:{rad},{la},{lo})[leisure~"^(park|pitch|golf_course|playground)$"];
+  node(around:{rad},{la},{lo})[amenity~"^(school|pub|cafe|restaurant|fast_food|pharmacy|doctors|place_of_worship|library|post_office|fuel|police|fire_station)$"];
+  node(around:{rad},{la},{lo})[shop];
+  node(around:9000,{la},{lo})[place~"^(town|village|hamlet)$"];
 );
 out geom qt;"""
-    data = None
-    for ep in ("https://overpass-api.de/api/interpreter", "https://overpass.kumi.systems/api/interpreter"):
-        try:
-            r = requests.post(ep, data={"data": q}, headers=UA, timeout=90)
-            r.raise_for_status()
-            data = r.json()
-            break
-        except Exception as e:
-            log.warning("overpass %s: %s", ep, e)
-    if data is None:
+    try:
+        data = _overpass(q)
+    except Exception:
         if hit:
             return hit["data"]
         raise RuntimeError("Couldn't reach OpenStreetMap right now.")
@@ -139,11 +245,17 @@ def _month_list(latest, n):
     return out
 
 
-def _crimes(la, lo, month, c):
-    key = f"crime:{la:.3f},{lo:.3f}:{month}"
+def _crimes(la, lo, month, c, poly=None):
+    key = f"crime:{'poly' + str(len(poly)) if poly else ''}{la:.3f},{lo:.3f}:{month}"
     if key in c:                                  # past months never change
         return c[key]
-    rows = _get(f"{POLICE}/crimes-street/all-crime", lat=la, lng=lo, date=month, timeout=30)
+    if poly:
+        r = requests.post(f"{POLICE}/crimes-street/all-crime", headers=UA, timeout=30,
+                          data={"poly": ":".join(f"{a},{b}" for a, b in poly), "date": month})
+        r.raise_for_status()
+        rows = r.json()
+    else:
+        rows = _get(f"{POLICE}/crimes-street/all-crime", lat=la, lng=lo, date=month, timeout=30)
     slim = [[round(float(r["location"]["latitude"]), 5), round(float(r["location"]["longitude"]), 5), r["category"],
              (r["location"].get("street") or {}).get("name", "").replace("On or near ", ""),
              (r.get("outcome_status") or {}).get("category", "")] for r in rows]
@@ -156,10 +268,12 @@ def crime(h=None, months=6):
     c = _cache()
     latest = _get(f"{POLICE}/crime-last-updated")["date"][:7]
     ms = _month_list(latest, months)
+    b = boundary(h)
+    poly = _simplify(b["ring"]) if b else None
     per = {}
     for m in ms:
         try:
-            per[m] = _crimes(h["lat"], h["lon"], m, c)
+            per[m] = _crimes(h["lat"], h["lon"], m, c, poly)
         except Exception as e:
             log.warning("police %s: %s", m, e)
     _save(c)
@@ -187,7 +301,8 @@ def crime(h=None, months=6):
                 "priorities": [clean(p.get("issue"))[:220] for p in pri[:4] if p.get("issue")]}
     except Exception as e:
         log.warning("police neighbourhood: %s", e)
-    return {"month": latest, "radius": "1 mile", "items": cur, "six": six, "total": len(cur),
+    return {"month": latest, "radius": f"the {b['name']} boundary" if b else "1 mile", "area": b["name"] if b else "",
+            "items": cur, "six": six, "total": len(cur),
             "by_cat": sorted(([k, CRIME_NAMES.get(k, k), v] for k, v in by_cat.items()), key=lambda x: -x[2]),
             "streets": sorted(streets.items(), key=lambda x: -x[1])[:6],
             "outcomes": sorted(outcomes.items(), key=lambda x: -x[1])[:5],
@@ -296,7 +411,7 @@ def world_events():
 
 def local_all():
     h = home()
-    out = {"home": h}
+    out = {"home": h, "boundary": boundary(h)}
     jobs = {"crime": lambda: crime(h), "area": lambda: area(h), "flights": lambda: flights(h)}
     res = {}
 
@@ -327,7 +442,7 @@ def local_intel():
     prev = trend[-2]["n"] if len(trend) > 1 else None
     top = ", ".join(f"{n.lower()} {v}" for _, n, v in c["by_cat"][:4])
     avg = round(sum(t["n"] for t in trend) / max(1, len(trend)))
-    s = (f"{c['total']} crimes reported within a mile of {home()['name']} in {dt.datetime.strptime(c['month'], '%Y-%m'):%B %Y} "
+    s = (f"{c['total']} crimes reported {'inside ' + c['area'] if c.get('area') else 'within a mile of ' + home()['name']} in {dt.datetime.strptime(c['month'], '%Y-%m'):%B %Y} "
          f"(police data runs about two months behind). Biggest: {top}. ")
     if prev is not None:
         s += f"That's {'up' if c['total'] > prev else 'down' if c['total'] < prev else 'level'} from {prev} the month before; 6-month average {avg}. "

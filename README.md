@@ -1,5 +1,12 @@
 # ORION 5.5 — Personal Intelligence System
 
+## 5.5.1
+- **Local Intel is now just Desford, not Leicester.**
+  - It was falling back to Leicester city centre because no home place was set; it now defaults to Desford.
+  - It pulls Desford's actual parish boundary from OpenStreetMap, draws it, darkens everything outside it, and asks police.uk only for crimes inside it.
+  - The map fits the village.
+  - Press "📍 change area" to point it somewhere else.
+
 ## New in 5.5: Globe mode, levelled up
 - **◎ LOCAL INTEL:** click HOME on the globe (or say "how much crime is there in Desford?") and ORION dives in to a holographic map of your village. It's built from real OpenStreetMap roads, buildings, rivers, railways and places.
   - **Crime (police.uk):** every reported crime within 1 mile, as glowing dots coloured by type. Hover a dot for the street, crime type and outcome so far.
