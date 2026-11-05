@@ -1735,6 +1735,15 @@ class Api:
             config_mod.save(self._cfg)
         return localintel.place_name()
 
+    def local_home(self, address=None):
+        """Your house for Local Intel — stored only in your local config.json (never uploaded)."""
+        if address is None:
+            return {"address": self._cfg.get("home_address", ""), "you": self._cfg.get("home_ll")}
+        self._cfg["home_address"] = str(address).strip()[:120]
+        self._cfg.pop("home_ll", None)
+        config_mod.save(self._cfg)
+        return {"address": self._cfg["home_address"], "you": localintel.your_home() if self._cfg["home_address"] else None}
+
     def globe_flights(self):
         return localintel.flights()
 

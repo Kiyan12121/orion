@@ -1,5 +1,18 @@
 # ORION 5.5 — Personal Intelligence System
 
+## 5.7: Local Intel — smoother, smarter, and centred on you
+- **Much smoother on laptops:**
+  - The map is now drawn in two layers. The heavy part (roads and buildings) is only redrawn when you move the camera, and it uses a lighter version while you're dragging.
+  - Orbit is now off by default.
+  - There's a quality switch (⚙ Fast, Balanced, Max), and ORION drops the quality itself if your machine struggles.
+- **🏠 Your house:** press "your house" and type your address. It's saved only on your PC, never uploaded.
+  - You get a glowing YOU beacon with a 250 m ring.
+  - Every crime shows its distance from you.
+  - ORION's brief tells you what happened near you.
+- **BRIEF tab:** a plain-English summary first (quieter or busier than usual, what kind of crime, anything near you). Then how many cases were charged, closed with no suspect, or still open, plus clickable hotspots that fly the camera there.
+- **LOG tab:** every crime as a list, sorted by nearest to you or newest. Each one shows the type, street, distance, month, and the latest outcome with the month it was updated. Click one to fly to it on the map.
+- **Dates and times:** the police only publish crimes by month (never the day or time) to protect victims, and the app now explains that. **Stop & search** records do have exact dates and times, so they're shown as a new layer and in the log.
+
 ## 5.6: Local Intel in 3D
 - **It actually looks like Desford.** The map uses real OpenStreetMap data: every road and close with its name, all ~1,500 buildings at their real size and height, plus fields, woods, rivers, the old railway line, and places like Bosworth Academy, the library, the post office and the pubs.
 - **Holographic 3D city view:**

@@ -1131,6 +1131,25 @@ body.reveal .shell{animation:reveal 1.4s}
 .lc-cmp{position:absolute;left:30px;bottom:96px;z-index:5;width:44px;height:44px;border-radius:50%;border:1px solid rgba(var(--ar),.45);background:rgba(2,12,22,.7);display:grid;place-items:center}.lc-cmp i{font:800 13px var(--disp);color:#ff8a8a;font-style:normal;display:block;transition:transform .1s}.lc-cmp i::before{content:'▲';display:block;font-size:9px;text-align:center;margin-bottom:-3px}
 .lc-scale{position:absolute;left:170px;bottom:52px;z-index:5;height:6px;border:1px solid var(--a2);border-top:0;font:600 11px var(--ui);color:var(--a2);text-align:center;line-height:0;padding-bottom:12px}
 @media (max-width:1000px){.lc-pn{width:300px}}
+.lc-hbtns{display:flex;gap:6px;margin-top:8px}.lc-hbtns .lc-area{margin-top:0}
+.lc-fps{display:none}
+.lc-ai{padding:12px 14px;border-radius:10px;background:linear-gradient(135deg,rgba(var(--ar),.14),rgba(93,255,176,.06));border:1px solid rgba(var(--ar),.3);font:500 14px var(--ui);line-height:1.5;color:var(--text);margin-bottom:12px}
+.lc-ai b{display:block;font:800 10px var(--disp);letter-spacing:.3em;color:var(--a2);margin-bottom:4px}
+.lc-sethome{width:100%;padding:10px;margin-bottom:12px;border-radius:8px;border:1px dashed #ffbe55;background:rgba(255,190,85,.08);color:#ffbe55;font:700 13px var(--ui);cursor:pointer}
+.lc-mini{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:12px}.lc-mini div{padding:8px;border-radius:7px;background:rgba(var(--ar),.06);text-align:center}
+.lc-mini b{display:block;font:800 20px var(--disp);color:var(--a2)}.lc-mini small{font:500 10.5px var(--ui);color:var(--dim);line-height:1.2;display:block}
+.lc-explain{font:500 12.5px var(--ui);line-height:1.5;color:var(--dim);padding:10px 12px;border-radius:8px;background:rgba(255,190,85,.07);border-left:2px solid #ffbe55;margin-bottom:10px}.lc-explain b{color:var(--text)}
+.lc-sort{display:flex;align-items:center;gap:6px;margin-bottom:8px;font:600 12px var(--ui);color:var(--dim)}.lc-sort span{flex:1}
+.lc-sort button{font:600 11px var(--ui);padding:4px 9px;border-radius:12px;border:1px solid rgba(var(--ar),.3);background:none;color:var(--dim);cursor:pointer}.lc-sort button.on{background:rgba(var(--ar),.2);color:var(--a2)}.lc-sort button:disabled{opacity:.4}
+.lc-log{display:flex;gap:10px;padding:8px 8px;border-radius:7px;cursor:pointer;border-bottom:1px solid rgba(var(--ar),.07)}.lc-log:hover{background:rgba(var(--ar),.07)}.lc-log.sel{background:rgba(255,190,85,.12);outline:1px solid rgba(255,190,85,.5)}
+.lc-log>i{width:9px;height:9px;border-radius:50%;flex:none;margin-top:5px}.lc-log b{display:block;font:700 13.5px var(--ui)}.lc-log span{display:block;font:500 12.5px var(--ui);color:var(--text)}.lc-log span em{font-style:normal;color:#ffbe55}
+.lc-log small{display:block;font:500 11.5px var(--ui);color:var(--dim);margin-top:1px}.lc-log.st{cursor:default}
+.lc-go{cursor:pointer}.lc-go:hover span{color:var(--a2)}
+.lc-ask{position:absolute;inset:0;z-index:20;display:grid;place-items:center;background:rgba(1,5,11,.6);backdrop-filter:blur(3px)}
+.lc-ask>div{width:min(420px,90vw);padding:20px;border-radius:12px;border:1px solid var(--a);background:rgba(3,14,25,.96);box-shadow:0 0 40px rgba(var(--ar),.25)}
+.lc-ask b{font:700 16px var(--ui);display:block;margin-bottom:10px}.lc-ask input{width:100%;box-sizing:border-box;padding:10px 12px;border-radius:8px;border:1px solid rgba(var(--ar),.4);background:rgba(var(--ar),.07);color:var(--text);font:500 15px var(--ui);outline:none}
+.lc-ask small{display:block;margin-top:6px;color:var(--dim);font:500 12px var(--ui)}.lc-ask p{display:flex;justify-content:flex-end;gap:8px;margin:14px 0 0}
+.lc-ask button{padding:8px 16px;border-radius:8px;border:1px solid rgba(var(--ar),.4);background:none;color:var(--text);font:700 13px var(--ui);cursor:pointer}.lc-ask .ok{background:var(--a);color:#021018;border:0}
 </style>
 </head>
 <body class="state-idle" data-theme="standby">
@@ -2919,156 +2938,211 @@ function globeFrame(ts){ if(!GL.on) return; const c=$("#glC"); if(!c) return; if
 
 /* ---------- LOCAL INTEL: holographic map of home ---------- */
 const CRC={"anti-social-behaviour":"#ffbe55","bicycle-theft":"#9fe8ff","burglary":"#ff5a6e","criminal-damage-arson":"#ff8a3d","drugs":"#c9a0ff","other-theft":"#7fd4ff","possession-of-weapons":"#ff2e63","public-order":"#f3e37c","robbery":"#ff4dbe","shoplifting":"#5dffb0","theft-from-the-person":"#4da3ff","vehicle-crime":"#ffd27f","violent-crime":"#ff6b6b","other-crime":"#b8c4cc"};
-const LC={on:false,map:null,data:null,zoom:.32,px:0,py:0,rot:0,pitch:0,pitchT:.95,orbit:true,night:false,rain:false,drag:null,raf:0,t0:0,hide:{},span:"month",tab:"crime",geo:null,mouse:null,hover:null,flTs:0,sel:null};
+const LC={on:false,map:null,data:null,zoom:.32,px:0,py:0,rot:0,pitch:0,pitchT:.95,orbit:false,night:false,rain:false,drag:null,raf:0,t0:0,hide:{},span:"month",tab:"brief",geo:null,mouse:null,hover:null,flTs:0,sel:null,
+  q:1,camKey:"",lastBase:0,dirty:true,lastMove:0,fly:null,focus:null,logSort:"near",baseMs:[]};
 function lcProj(h){ const c=Math.cos(h.lat*Math.PI/180); return (la,lo)=>[(lo-h.lon)*111320*c,(la-h.lat)*110540]; }
-async function localOpen(){ LC.on=true; LC.t0=performance.now(); LC.zoom=.32; LC.px=LC.py=0; LC.sel=null; LC.bound=null; LC.rot=-.35; LC.pitch=0; LC.pitchT=LC.pitchT||.95;
-  $("#lcWrap").innerHTML=`<div class="lc"><canvas id="lcC"></canvas>
-    <div class="lc-hd"><small>LOCAL INTEL</small><h1 id="lcName">${esc((GL.feeds.home||{}).name||"HOME")}</h1><div id="lcSub">Scanning area…</div><button class="lc-area" id="lcArea">📍 change area</button></div>
-    <div class="lc-chips" id="lcChips"><button data-s="month" class="on">Latest month</button><button data-s="six">6 months</button><button data-s="heat">Heatmap</button><button data-s="fl" class="on">Aircraft</button><button data-s="poi" class="on">Places</button><button data-s="d3" class="on">3D</button><button data-s="orbit" class="on">Orbit</button></div>
-    <div class="lc-cmp" title="North"><i id="lcCmp">N</i></div>
-    <div class="lc-pn"><div class="lc-tabs"><button data-t="crime" class="on">CRIME</button><button data-t="area">AREA</button><button data-t="sky">SKY</button></div><div id="lcBody"><div class="lc-load">◌ Pulling police.uk, air quality, flood and flight data…</div></div></div>
-    <button class="lc-back" id="lcBack">◀ GLOBE</button><div class="lc-scale" id="lcScale"></div><div class="gl-tip" id="lcTip"></div></div>`;
-  $("#glHint").textContent="DRAG TO PAN · RIGHT-DRAG TO ROTATE & TILT · SCROLL TO ZOOM · HOVER A DOT";
+const MONTH=m=>m?new Date(m+"-01").toLocaleString("en-GB",{month:"short",year:"numeric"}):"";
+const FMTD=m=>m>=1000?(m/1000).toFixed(1)+" km":Math.round(m/10)*10+" m";
+function lcYou(){ const D=LC.data||{}; return D.you&&D.home?lcProj(D.home)(D.you.lat,D.you.lon):null; }
+async function localOpen(){ LC.on=true; LC.t0=performance.now(); LC.zoom=.32; LC.px=LC.py=0; LC.sel=null; LC.bound=null; LC.rot=-.35; LC.pitch=0; LC.pitchT=.95; LC.focus=null; LC.dirty=true; LC.baseMs=[];
+  try{ const q=localStorage.getItem("orion.lcq"); if(q!=null) LC.q=+q; }catch(e){}
+  $("#lcWrap").innerHTML=`<div class="lc"><canvas id="lcB"></canvas><canvas id="lcC"></canvas>
+    <div class="lc-hd"><small>LOCAL INTEL</small><h1 id="lcName">${esc((GL.feeds.home||{}).name||"HOME")}</h1><div id="lcSub">Scanning area…</div>
+      <div class="lc-hbtns"><button class="lc-area" id="lcArea">📍 change area</button><button class="lc-area" id="lcHome">🏠 your house</button></div></div>
+    <div class="lc-chips" id="lcChips"><button data-s="month" class="on">Latest month</button><button data-s="six">6 months</button><button data-s="heat">Heatmap</button><button data-s="stops">Stop &amp; search</button><button data-s="fl" class="on">Aircraft</button><button data-s="poi" class="on">Places</button><button data-s="d3" class="on">3D</button><button data-s="orbit">Orbit</button><button data-s="q" title="Graphics quality">⚙ ${["Fast","Balanced","Max"][LC.q]}</button></div>
+    <div class="lc-cmp" title="North — click to reset"><i id="lcCmp">N</i></div>
+    <div class="lc-pn"><div class="lc-tabs"><button data-t="brief" class="on">BRIEF</button><button data-t="log">LOG</button><button data-t="area">AREA</button><button data-t="sky">SKY</button></div><div id="lcBody"><div class="lc-load">◌ Pulling police.uk, air quality, flood and flight data…</div></div></div>
+    <button class="lc-back" id="lcBack">◀ GLOBE</button><div class="lc-scale" id="lcScale"></div><div class="gl-tip" id="lcTip"></div><div class="lc-fps" id="lcFps"></div></div>`;
+  $("#glHint").textContent="DRAG TO PAN · RIGHT-DRAG TO ROTATE & TILT · SCROLL TO ZOOM · CLICK A PILLAR";
   $$("#glLayers,.gl-tl,.gl-tr,#glTarget").forEach(e=>e.style.display="none");
   $("#lcBack").onclick=()=>{ LC.on=false; $("#lcWrap").innerHTML=""; GL.dive=0; GL.zoom=1.3; $$(".gl-tl,.gl-tr,#glTarget").forEach(e=>e.style.display=""); $("#glHint").textContent="DRAG TO SPIN · SCROLL TO ZOOM · CLICK A MARKER · ESC TO CLOSE"; };
-  $$(".lc-tabs button").forEach(b=>b.onclick=()=>{ LC.tab=b.dataset.t; $$(".lc-tabs button").forEach(x=>x.classList.toggle("on",x===b)); lcPanel(); sfx("tick"); });
-  $$("#lcChips button").forEach(b=>b.onclick=()=>{ const s=b.dataset.s; if(s==="month"||s==="six"){ LC.span=s; $$('#lcChips [data-s="month"],#lcChips [data-s="six"]').forEach(x=>x.classList.toggle("on",x.dataset.s===s)); lcPanel(); }
+  $$(".lc-tabs button").forEach(b=>b.onclick=()=>lcTab(b.dataset.t));
+  $(".lc-cmp").onclick=()=>{ LC.rot=0; LC.dirty=true; };
+  $$("#lcChips button").forEach(b=>b.onclick=()=>{ const s=b.dataset.s; LC.dirty=true;
+    if(s==="month"||s==="six"){ LC.span=s; $$('#lcChips [data-s="month"],#lcChips [data-s="six"]').forEach(x=>x.classList.toggle("on",x.dataset.s===s)); lcPanel(); }
     else if(s==="d3"){ LC.pitchT=LC.pitchT>.1?0:.95; b.classList.toggle("on",LC.pitchT>.1); }
     else if(s==="orbit"){ LC.orbit=!LC.orbit; b.classList.toggle("on",LC.orbit); }
-    else { LC.hide[s]=!LC.hide[s]; b.classList.toggle("on",s==="heat"?!!LC.hide[s]:!LC.hide[s]); } sfx("tick"); });
-  const c=$("#lcC"); const fit=()=>{ c.width=innerWidth*devicePixelRatio; c.height=innerHeight*devicePixelRatio; }; fit(); addEventListener("resize",fit);
+    else if(s==="q"){ LC.q=(LC.q+2)%3; b.textContent="⚙ "+["Fast","Balanced","Max"][LC.q]; try{ localStorage.setItem("orion.lcq",LC.q); }catch(e){} lcFit(); }
+    else if(s==="heat"||s==="stops"){ LC.hide[s]=!LC.hide[s]; b.classList.toggle("on",!!LC.hide[s]); }
+    else { LC.hide[s]=!LC.hide[s]; b.classList.toggle("on",!LC.hide[s]); } sfx("tick"); });
+  const c=$("#lcC"); lcFit(); addEventListener("resize",lcFit);
+  const moved=()=>{ LC.lastMove=performance.now(); };
   c.oncontextmenu=e=>e.preventDefault();
-  c.onmousedown=e=>{ LC.drag=[e.clientX,e.clientY,LC.px,LC.py,0,e.button===2||e.shiftKey,LC.rot,LC.pitchT]; if(LC.drag[5]){ LC.orbit=false; const o=$('#lcChips [data-s="orbit"]'); o&&o.classList.remove("on"); } }; addEventListener("mouseup",()=>{ if(LC.drag&&LC.drag[4]<4&&LC.hover&&LC.hover.fl){ LC.sel=LC.hover.fl.cs; } LC.drag=null; });
-  c.onmousemove=e=>{ LC.mouse=[e.clientX*devicePixelRatio,e.clientY*devicePixelRatio]; if(!LC.drag) return; LC.drag[4]+=Math.abs(e.movementX)+Math.abs(e.movementY);
+  c.onmousedown=e=>{ LC.fly=null; LC.drag=[e.clientX,e.clientY,LC.px,LC.py,0,e.button===2||e.shiftKey,LC.rot,LC.pitchT]; if(LC.drag[5]){ LC.orbit=false; const o=$('#lcChips [data-s="orbit"]'); o&&o.classList.remove("on"); } };
+  addEventListener("mouseup",()=>{ if(LC.drag&&LC.drag[4]<4&&LC.hover){ if(LC.hover.fl) LC.sel=LC.hover.fl.cs; else if(LC.hover.L){ LC.focus=LC.hover.key; lcTab("log"); } else if(LC.hover.st){ LC.focus="s:"+LC.hover.st.at; lcTab("log"); } } LC.drag=null; });
+  c.onmousemove=e=>{ LC.mouse=[e.clientX*LC.k,e.clientY*LC.k]; if(!LC.drag) return; LC.drag[4]+=Math.abs(e.movementX)+Math.abs(e.movementY); moved();
     const dx=e.clientX-LC.drag[0], dy=e.clientY-LC.drag[1];
     if(LC.drag[5]){ LC.rot=LC.drag[6]+dx*.006; LC.pitchT=LC.pitch=Math.max(0,Math.min(1.25,LC.drag[7]-dy*.005)); return; }
     const sx=dx/LC.zoom, sy=-dy/(LC.zoom*Math.max(.3,Math.cos(LC.pitch))), cr=Math.cos(LC.rot), sr=Math.sin(LC.rot);
     LC.px=LC.drag[2]+(sx*cr+sy*sr); LC.py=LC.drag[3]+(-sx*sr+sy*cr); };
-  c.onwheel=e=>{ LC.zoom=Math.max(.04,Math.min(3,LC.zoom*(e.deltaY<0?1.15:.87))); };
-  $("#lcArea").onclick=async()=>{ const cur=await api.local_place(); const v=prompt("Which village or town should Local Intel cover?",cur); if(!v||v.trim()===cur) return; await api.local_place(v.trim()); toast("📍 Local Intel now covers "+v.trim()); GL.feeds.home=null; LC.map=null; LC.geo=null; LC.data=null; globeData(); localOpen(); };
+  c.onwheel=e=>{ LC.fly=null; LC.zoom=Math.max(.04,Math.min(3,LC.zoom*(e.deltaY<0?1.15:.87))); moved(); };
+  $("#lcArea").onclick=async()=>{ const cur=await api.local_place(); const v=await lcAsk("Which village or town should Local Intel cover?",cur); if(!v||v.trim()===cur) return; await api.local_place(v.trim()); toast("📍 Local Intel now covers "+v.trim()); GL.feeds.home=null; LC.map=null; LC.geo=null; LC.data=null; globeData(); localOpen(); };
+  $("#lcHome").onclick=lcSetHome;
   cancelAnimationFrame(LC.raf); LC.raf=requestAnimationFrame(localFrame);
-  api.globe_local_map().then(m=>{ if(m&&!m.error){ LC.map=m; lcPrep(); } else $("#lcSub").textContent="Map unavailable right now — data still loads"; });
+  api.globe_local_map().then(m=>{ if(m&&!m.error){ LC.map=m; LC.geo=null; lcPrep(); } else $("#lcSub").textContent="Map unavailable right now — data still loads"; });
   lcLoad(); }
+function lcFit(){ const k=Math.min(devicePixelRatio,[1,1.25,2][LC.q]); LC.k=k; for(const id of ["#lcB","#lcC"]){ const c=$(id); if(c){ c.width=innerWidth*k; c.height=innerHeight*k; } } LC.dirty=true; }
+function lcAsk(title,val){ return new Promise(res=>{ const d=document.createElement("div"); d.className="lc-ask"; d.innerHTML=`<div><b>${esc(title)}</b><input value="${esc(val||"")}"><small>Only saved on this PC — never uploaded.</small><p><button class="no">Cancel</button><button class="ok">Save</button></p></div>`;
+  $(".lc").appendChild(d); const i=d.querySelector("input"); i.focus(); i.select(); const done=v=>{ d.remove(); res(v); };
+  d.querySelector(".ok").onclick=()=>done(i.value); d.querySelector(".no").onclick=()=>done(null); i.onkeydown=e=>{ e.stopPropagation(); if(e.key==="Enter") done(i.value); if(e.key==="Escape") done(null); }; }); }
+function lcTab(t){ LC.tab=t; $$(".lc-tabs button").forEach(x=>x.classList.toggle("on",x.dataset.t===t)); lcPanel(); sfx("tick"); }
+async function lcSetHome(){ const cur=(await api.local_home()).address||""; const v=await lcAsk("Your house — number and street",cur);
+  if(v==null) return; const r=await api.local_home(v.trim()); if(LC.data){ LC.data.you=r.you; } if(v.trim()&&!r.you) toast("Couldn't find that address — try 'number street, village'","warn"); else if(r.you) { toast("🏠 Got it — showing what's near your house."); lcFlyTo(lcYou(),1.1); } LC.dirty=true; lcPanel(); }
+function lcFlyTo(m,zoom){ if(!m) return; LC.fly={px:-m[0],py:-m[1],zoom:zoom||Math.max(LC.zoom,.9)}; LC.orbit=false; }
 async function lcLoad(){ try{ LC.data=await api.globe_local(); }catch(e){ LC.data={}; } const D=LC.data; LC.flTs=performance.now();
   if(D.area&&D.area.kp) GL.kp=D.area.kp.kp;
-  if(D.home){ $("#lcName").textContent=D.home.name; }
+  if(D.home) $("#lcName").textContent=D.home.name;
   { const ar=D.area||{}; const now=new Date().toTimeString().slice(0,5); LC.night=!!(ar.sunset&&ar.sunrise&&(now>=ar.sunset||now<ar.sunrise)); LC.rain=/rain|drizzle|shower|storm/i.test((ar.weather||{}).sky||""); }
   if(D.home&&D.boundary&&D.boundary.ring){ const pr=lcProj(D.home); LC.bound=D.boundary.ring.map(q=>pr(q[0],q[1])); const xs=LC.bound.map(m=>m[0]), ys=LC.bound.map(m=>m[1]);
     const w=Math.max(...xs)-Math.min(...xs), hh=Math.max(...ys)-Math.min(...ys); LC.px=-(Math.max(...xs)+Math.min(...xs))/2*.45; LC.py=-(Math.max(...ys)+Math.min(...ys))/2*.45;
     LC.zoom=Math.max(.06,Math.min(.9,Math.min((innerWidth-480)/w,(innerHeight-160)/hh)*1.45)); } else LC.bound=null;
   const cr=D.crime||{}; $("#lcSub").textContent=cr.month?`${cr.total} crimes reported ${cr.area?"inside "+cr.area:"within "+cr.radius} · ${new Date(cr.month+"-01").toLocaleString("en-GB",{month:"long",year:"numeric"})}`:(cr.error?"Police data unavailable: "+cr.error:"");
-  lcPanel(); clearTimeout(LC.flT); LC.flT=setTimeout(lcFlights,20000); }
+  LC.dirty=true; lcPrep(); lcPanel(); clearTimeout(LC.flT); LC.flT=setTimeout(lcFlights,20000);
+  if(D.you) setTimeout(()=>{ if(LC.on) lcFlyTo(lcYou(),Math.max(LC.zoom*1.6,.5)); },2600); }
 async function lcFlights(){ if(!LC.on||!GL.on) return; try{ LC.data.flights=await api.globe_flights(); LC.flTs=performance.now(); if(LC.tab==="sky") lcPanel(); }catch(e){} LC.flT=setTimeout(lcFlights,20000); }
-function lcPrep(){ const h=LC.data&&LC.data.home; if(!h||!LC.map) return setTimeout(lcPrep,300); if(LC.geo&&LC.geoHome===h) return; LC.geoHome=h; const pr=lcProj(h); const M=LC.map;
+function lcPrep(){ const h=LC.data&&LC.data.home; if(!h||!LC.map) return; if(LC.geo&&LC.geoHome===h) return; LC.geoHome=h; const pr=lcProj(h); const M=LC.map;
   const cen=g=>{ let a=0,b=0; g.forEach(m=>{ a+=m[0]; b+=m[1]; }); return [a/g.length,b/g.length]; };
-  const roads=M.roads.map(r=>{ const g=r.g.map(p=>pr(p[0],p[1])); const c=cen(g); return {k:r.k,n:r.n,g,d:Math.hypot(c[0],c[1])}; });
-  const b=M.buildings.map(o=>{ const g=(o.g||o).map(p=>pr(p[0],p[1])); const c=cen(g); return {g,h:o.h||7,n:o.n||"",c,d:Math.hypot(c[0],c[1])}; });
+  const roads=M.roads.map(r=>{ const g=r.g.map(p=>pr(p[0],p[1])); const c=cen(g); return {k:r.k,n:r.n,g,d:Math.hypot(c[0],c[1]),w:RW[r.k]||1}; }).sort((a,b)=>a.w-b.w);
+  const b=M.buildings.map(o=>{ const g=(o.g||o).map(p=>pr(p[0],p[1])); const c=cen(g); let r=0; g.forEach(m=>r=Math.max(r,Math.hypot(m[0]-c[0],m[1]-c[1]))); return {g,h:o.h||7,n:o.n||"",c,r,d:Math.hypot(c[0],c[1])}; });
   LC.geo={roads,b,w:M.water.map(r=>({a:r.area,g:r.g.map(p=>pr(p[0],p[1]))})),rail:M.rail.map(g=>g.map(p=>pr(p[0],p[1]))),
     green:M.green.map(o=>({k:o.k||"",g:(o.g||o).map(p=>pr(p[0],p[1]))})),poi:M.poi.map(p=>({...p,m:pr(p.p[0],p.p[1])})),places:M.places.map(p=>({...p,m:pr(p.p[0],p.p[1])}))};
-  LC.geo.rmax=Math.max(1,...roads.map(r=>r.d),...b.map(q=>q.d)); }
+  LC.geo.rmax=Math.max(1,...roads.map(r=>r.d),...b.map(q=>q.d)); LC.dirty=true; }
 const RW={motorway:4,trunk:3.6,primary:3.2,secondary:2.6,tertiary:2.2,unclassified:1.6,residential:1.4,living_street:1.2,service:.8,track:.7,footway:.5,path:.5,cycleway:.5,bridleway:.5};
 const GRN={farmland:"rgba(120,200,140,.07)",meadow:"rgba(120,220,150,.08)",grass:"rgba(120,230,150,.09)",grassland:"rgba(120,230,150,.08)",village_green:"rgba(120,240,150,.12)",wood:"rgba(70,200,120,.16)",forest:"rgba(70,200,120,.16)",scrub:"rgba(90,190,120,.11)",orchard:"rgba(110,210,120,.12)",
   park:"rgba(93,255,176,.12)",recreation_ground:"rgba(93,255,176,.11)",pitch:"rgba(93,255,176,.16)",playground:"rgba(93,255,176,.14)",golf_course:"rgba(93,255,176,.1)",sports_centre:"rgba(93,255,176,.1)",nature_reserve:"rgba(70,200,120,.1)",
   cemetery:"rgba(150,170,200,.1)",allotments:"rgba(140,220,120,.12)",farmyard:"rgba(200,180,120,.08)",residential:"rgba(63,216,255,.035)",industrial:"rgba(200,160,255,.06)",commercial:"rgba(255,190,85,.05)",retail:"rgba(255,190,85,.06)"};
 const POIC={pub:["🍺","#ffbe55"],cafe:["☕","#ffd27f"],restaurant:["🍴","#ffd27f"],fast_food:["🍔","#ffd27f"],school:["🎓","#9fe8ff"],place_of_worship:["⛪","#e8f6ff"],library:["📚","#9fe8ff"],pharmacy:["💊","#5dffb0"],doctors:["🩺","#5dffb0"],post_office:["✉","#ff8a8a"],fuel:["⛽","#ff8a3d"],police:["🚓","#4da3ff"],fire_station:["🚒","#ff5a6e"],community_centre:["🏛","#c9a0ff"]};
-function lcCam(W,H,k){ const t=performance.now(); const intro=Math.min(1,(t-LC.t0)/1600), e=1-Math.pow(1-intro,3);
-  LC.pitch+=(LC.pitchT-LC.pitch)*.08; if(LC.orbit&&!LC.drag) LC.rot+=.0009;
+function lcCam(W,H,k){ const now=performance.now(); const intro=Math.min(1,(now-LC.t0)/1600), e=1-Math.pow(1-intro,3);
+  LC.pitch+=(LC.pitchT-LC.pitch)*.1; if(Math.abs(LC.pitchT-LC.pitch)<.002) LC.pitch=LC.pitchT; if(LC.orbit&&!LC.drag) LC.rot+=.0009;
+  if(LC.fly){ const f=LC.fly; LC.px+=(f.px-LC.px)*.09; LC.py+=(f.py-LC.py)*.09; LC.zoom+=(f.zoom-LC.zoom)*.09; if(Math.abs(f.px-LC.px)<1&&Math.abs(f.py-LC.py)<1&&Math.abs(f.zoom-LC.zoom)<.002) LC.fly=null; }
   const z=LC.zoom*k*(.35+.65*e), cp=Math.cos(LC.pitch), sp=Math.sin(LC.pitch), cr=Math.cos(LC.rot), sr=Math.sin(LC.rot); const cx=W*.4, cy=H*(.54+.08*LC.pitch);
   const S=(m,h=0)=>{ const X=m[0]+LC.px, Y=m[1]+LC.py; const rx=X*cr-Y*sr, ry=X*sr+Y*cr; return [cx+rx*z, cy-ry*z*cp-h*z*sp, ry]; };
-  return {z,cp,sp,cx,cy,S}; }
-function localFrame(ts){ if(!LC.on||!GL.on) return; const c=$("#lcC"); if(!c) return; LC.raf=requestAnimationFrame(localFrame);
-  if(LC.pitch>.05&&document.body.classList.contains("lite")&&(LC.fr=(LC.fr||0)+1)%2) return;          // half frame-rate in 3D on lite PCs
-  const x=c.getContext("2d"), W=c.width, H=c.height, k=devicePixelRatio, t=(ts-LC.t0)/1000; const {z,cp,sp,cx,cy,S}=lcCam(W,H,k); const in3d=LC.pitch>.08;
-  x.clearRect(0,0,W,H); const bg=x.createRadialGradient(cx,cy,0,cx,cy,Math.max(W,H)*.75); bg.addColorStop(0,LC.night?"#04111e":"#082236"); bg.addColorStop(1,"#01050b"); x.fillStyle=bg; x.fillRect(0,0,W,H);
-  const vis=p=>p[0]>-80&&p[0]<W+80&&p[1]>-80&&p[1]<H+80;
+  return {z,cp,sp,cx,cy,S,key:[z.toFixed(4),LC.pitch.toFixed(3),LC.rot.toFixed(4),LC.px.toFixed(1),LC.py.toFixed(1),W,H].join(),intro:now-LC.t0<3200}; }
+/* static layer: map, buildings, boundary — only redrawn when the camera moves (that's what kills the lag) */
+function lcBase(x,W,H,k,cam,t,lo){ const {z,S}=cam; const in3d=LC.pitch>.08; const G=LC.geo; const vis=p=>p[0]>-80&&p[0]<W+80&&p[1]>-80&&p[1]<H+80;
   const poly=(g,close,h=0)=>{ x.beginPath(); for(let i=0;i<g.length;i++){ const p=S(g[i],h); i?x.lineTo(p[0],p[1]):x.moveTo(p[0],p[1]); } if(close) x.closePath(); };
-  const revealR=t*1400; const G=LC.geo; const occ=new Set(); const free=(px,py,w)=>{ if(px<500*k&&py<200*k) return false; if(px>W-400*k) return false; const gx=Math.floor(px/(90*k)), gy=Math.floor(py/(22*k)); for(let i=0;i<=Math.ceil(w/(90*k));i++) if(occ.has((gx+i)+":"+gy)) return false; for(let i=0;i<=Math.ceil(w/(90*k));i++) occ.add((gx+i)+":"+gy); return true; };
-  // ground grid
-  const step=z>.12*k?100:1000, ext=6000; x.strokeStyle="rgba(120,200,255,.055)"; x.lineWidth=1;
-  for(let g=-ext;g<=ext;g+=step){ x.beginPath(); let p=S([g-LC.px,-ext-LC.py]); x.moveTo(p[0],p[1]); p=S([g-LC.px,ext-LC.py]); x.lineTo(p[0],p[1]); x.stroke(); x.beginPath(); p=S([-ext-LC.px,g-LC.py]); x.moveTo(p[0],p[1]); p=S([ext-LC.px,g-LC.py]); x.lineTo(p[0],p[1]); x.stroke(); }
-  if(G){ for(const o of G.green){ const f=GRN[o.k]; if(!f) continue; poly(o.g,1); x.fillStyle=f; x.fill(); if(o.k==="farmland"||o.k==="meadow"){ x.strokeStyle="rgba(120,220,150,.13)"; x.lineWidth=.8*k; x.stroke(); } }
+  x.clearRect(0,0,W,H); const bg=x.createRadialGradient(cam.cx,cam.cy,0,cam.cx,cam.cy,Math.max(W,H)*.75); bg.addColorStop(0,LC.night?"#04111e":"#082236"); bg.addColorStop(1,"#01050b"); x.fillStyle=bg; x.fillRect(0,0,W,H);
+  const revealR=cam.intro?t*1400:1e9; const occ=new Set(); const free=(px,py,w)=>{ if(px<500*k&&py<210*k) return false; if(px>W-400*k) return false; const gx=Math.floor(px/(90*k)), gy=Math.floor(py/(22*k)); for(let i=0;i<=Math.ceil(w/(90*k));i++) if(occ.has((gx+i)+":"+gy)) return false; for(let i=0;i<=Math.ceil(w/(90*k));i++) occ.add((gx+i)+":"+gy); return true; };
+  const step=z>.12*k?100:1000, ext=6000; x.strokeStyle="rgba(120,200,255,.055)"; x.lineWidth=1; x.beginPath();
+  for(let g=-ext;g<=ext;g+=step){ let p=S([g-LC.px,-ext-LC.py]); x.moveTo(p[0],p[1]); p=S([g-LC.px,ext-LC.py]); x.lineTo(p[0],p[1]); p=S([-ext-LC.px,g-LC.py]); x.moveTo(p[0],p[1]); p=S([ext-LC.px,g-LC.py]); x.lineTo(p[0],p[1]); } x.stroke();
+  if(G){ for(const o of G.green){ const f=GRN[o.k]; if(!f) continue; poly(o.g,1); x.fillStyle=f; x.fill(); if(!lo&&(o.k==="farmland"||o.k==="meadow")){ x.strokeStyle="rgba(120,220,150,.13)"; x.lineWidth=.8*k; x.stroke(); } }
     for(const w of G.w){ poly(w.g,w.a); if(w.a){ x.fillStyle="rgba(77,163,255,.28)"; x.fill(); } x.strokeStyle="rgba(77,163,255,.75)"; x.lineWidth=(w.a?1:1.8)*k; x.stroke(); }
-    x.setLineDash([6*k,5*k]); x.strokeStyle="rgba(200,210,230,.5)"; x.lineWidth=1.6*k; G.rail.forEach(g=>{ poly(g); x.stroke(); }); x.setLineDash([]);
-    for(const pass of [0,1]) for(const r of G.roads){ if(r.d>revealR) continue; const w=RW[r.k]||1; const minor=w<1; if(minor&&z<.15*k) continue;
-      poly(r.g); if(pass===0){ if(w<2) continue; x.strokeStyle="rgba(63,216,255,.13)"; x.lineWidth=(w*2.8+5)*k*Math.min(1.6,z/(.3*k)+.4); x.stroke(); }
-      else { x.strokeStyle=minor?"rgba(140,200,240,.3)":w>=2.6?"rgba(160,240,255,.95)":"rgba(115,205,248,.75)"; x.lineWidth=Math.max(.6,w*k*Math.min(1.8,z/(.3*k)+.3)); if(minor) x.setLineDash([3*k,3*k]); x.stroke(); x.setLineDash([]); } }
-    // scan wave while the map builds
-    if(revealR<G.rmax+400){ const p0=S([0,0]); x.strokeStyle="rgba(93,255,176,.5)"; x.lineWidth=2*k; x.beginPath(); for(let a=0;a<=64;a++){ const q=S([Math.cos(a/64*6.283)*revealR,Math.sin(a/64*6.283)*revealR]); a?x.lineTo(q[0],q[1]):x.moveTo(q[0],q[1]); } x.stroke(); }
-    // buildings: flat footprints, or extruded holographic blocks in 3D
-    if(z>.04*k){ const list=in3d?G.b.slice().sort((a,b)=>S(b.c)[2]-S(a.c)[2]):G.b; const hs=Math.min(1,(t-.3)/1.5);
-      for(const b of list){ if(b.d>revealR) continue; const cc=S(b.c); if(!vis(cc)) continue; const hh=b.h*4*Math.max(0,hs)*LC.pitch;
-        if(in3d&&hh>.5){ x.beginPath(); for(let i=0;i<b.g.length-1;i++){ const a=S(b.g[i]), bb=S(b.g[i+1]), at=S(b.g[i],hh), bt=S(b.g[i+1],hh); x.moveTo(a[0],a[1]); x.lineTo(bb[0],bb[1]); x.lineTo(bt[0],bt[1]); x.lineTo(at[0],at[1]); x.closePath(); }
-          x.fillStyle=LC.night?"rgba(24,80,125,.7)":"rgba(36,125,180,.6)"; x.fill(); x.strokeStyle="rgba(120,220,255,.25)"; x.lineWidth=.6*k; x.stroke(); poly(b.g,1,hh); x.fillStyle=b.n?"rgba(150,235,255,.75)":"rgba(100,210,252,.5)"; x.fill(); x.strokeStyle="rgba(190,245,255,.8)"; x.lineWidth=.7*k; x.stroke();
-          if(LC.night&&b.h<40&&((b.c[0]*7+b.c[1]*13)|0)%3===0){ const w=S(b.c,hh*.55); x.fillStyle="rgba(255,210,130,.85)"; x.fillRect(w[0]-1.2*k,w[1]-1.2*k,2.4*k,2.4*k); } }
-        else { poly(b.g,1); x.fillStyle=b.n?"rgba(120,225,255,.22)":"rgba(63,216,255,.11)"; x.fill(); x.strokeStyle="rgba(63,216,255,.32)"; x.lineWidth=.8*k; x.stroke(); } } }
-    if(z>.55*k){ x.font=`600 ${10.5*k}px Rajdhani,sans-serif`; x.fillStyle="rgba(200,240,255,.8)"; const done={}; for(const r of G.roads.slice().sort((a,b)=>(RW[b.k]||0)-(RW[a.k]||0))){ if(!r.n||done[r.n]||(RW[r.k]||0)<1.2) continue; done[r.n]=1; const p=S(r.g[Math.floor(r.g.length/2)]); if(!vis(p)) continue; const w=x.measureText(r.n).width; if(!free(p[0],p[1],w)) continue; x.fillText(r.n,p[0]+3*k,p[1]-3*k); } }
+    x.setLineDash([6*k,5*k]); x.strokeStyle="rgba(200,210,230,.5)"; x.lineWidth=1.6*k; x.beginPath(); G.rail.forEach(g=>g.forEach((m,i)=>{ const p=S(m); i?x.lineTo(p[0],p[1]):x.moveTo(p[0],p[1]); })); x.stroke(); x.setLineDash([]);
+    const zf=Math.min(1.8,z/(.3*k)+.3);
+    if(!lo&&LC.q>0){ x.strokeStyle="rgba(63,216,255,.13)"; for(const r of G.roads){ if(r.w<2||r.d>revealR) continue; x.lineWidth=(r.w*2.8+5)*k*Math.min(1.6,z/(.3*k)+.4); poly(r.g); x.stroke(); } }
+    let cur=null; for(const r of G.roads){ if(r.d>revealR) continue; const minor=r.w<1; if(minor&&(lo||LC.q===0||z<.15*k)) continue;
+      const st=minor?"m":r.w>=2.6?"a":"b"; if(st!==cur){ if(cur) x.stroke(); cur=st; x.beginPath(); x.strokeStyle=minor?"rgba(140,200,240,.3)":r.w>=2.6?"rgba(160,240,255,.95)":"rgba(115,205,248,.75)"; x.lineWidth=Math.max(.6,(minor?.5:r.w>=2.6?3:1.5)*k*zf); x.setLineDash(minor?[3*k,3*k]:[]); }
+      for(let i=0;i<r.g.length;i++){ const p=S(r.g[i]); i?x.lineTo(p[0],p[1]):x.moveTo(p[0],p[1]); } } if(cur) x.stroke(); x.setLineDash([]);
+    if(cam.intro&&revealR<G.rmax+400){ x.strokeStyle="rgba(93,255,176,.5)"; x.lineWidth=2*k; x.beginPath(); for(let a=0;a<=64;a++){ const q=S([Math.cos(a/64*6.283)*revealR-0,Math.sin(a/64*6.283)*revealR]); a?x.lineTo(q[0],q[1]):x.moveTo(q[0],q[1]); } x.stroke(); }
+    if(z>.04*k){ const walls=in3d&&!lo&&LC.q>0; const list=walls?G.b.slice().sort((a,b)=>S(b.c)[2]-S(a.c)[2]):G.b; const hs=cam.intro?Math.min(1,Math.max(0,(t-.3)/1.5)):1;
+      if(!walls){ x.beginPath(); for(const b of list){ if(b.d>revealR) continue; const cc=S(b.c); if(!vis(cc)) continue; const lift=in3d?b.h*4*hs*LC.pitch:0; b.g.forEach((m,i)=>{ const p=S(m,lift); i?x.lineTo(p[0],p[1]):x.moveTo(p[0],p[1]); }); x.closePath(); }
+        x.fillStyle=in3d?"rgba(100,210,252,.45)":"rgba(63,216,255,.13)"; x.fill(); x.strokeStyle=in3d?"rgba(190,245,255,.6)":"rgba(63,216,255,.35)"; x.lineWidth=.7*k; x.stroke(); }
+      else for(const b of list){ if(b.d>revealR) continue; const cc=S(b.c); if(!vis(cc)) continue; const hh=b.h*4*hs*LC.pitch; const big=b.r*z>(LC.q===2?2:5)*k;
+        if(big){ x.beginPath(); for(let i=0;i<b.g.length-1;i++){ const a=S(b.g[i]), bb=S(b.g[i+1]), at=S(b.g[i],hh), bt=S(b.g[i+1],hh); x.moveTo(a[0],a[1]); x.lineTo(bb[0],bb[1]); x.lineTo(bt[0],bt[1]); x.lineTo(at[0],at[1]); x.closePath(); }
+          x.fillStyle=LC.night?"rgba(24,80,125,.7)":"rgba(36,125,180,.6)"; x.fill(); }
+        poly(b.g,1,hh); x.fillStyle=b.n?"rgba(150,235,255,.75)":"rgba(100,210,252,.5)"; x.fill(); if(big){ x.strokeStyle="rgba(190,245,255,.8)"; x.lineWidth=.7*k; x.stroke(); }
+        if(LC.night&&b.h<40&&((b.c[0]*7+b.c[1]*13)|0)%3===0){ const w=S(b.c,hh*.55); x.fillStyle="rgba(255,210,130,.85)"; x.fillRect(w[0]-1.2*k,w[1]-1.2*k,2.4*k,2.4*k); } } }
+    if(!lo&&!LC.hide.poi&&z>.22*k){ x.font=`600 ${11*k}px Rajdhani,sans-serif`; for(const p of G.poi){ const q=S(p.m,in3d?14:0); if(!vis(q)) continue; const [ic,cl]=POIC[p.k]||["◆","#ffd27f"];
+      if(in3d){ const g0=S(p.m); x.strokeStyle=cl+"66"; x.lineWidth=1*k; x.beginPath(); x.moveTo(g0[0],g0[1]); x.lineTo(q[0],q[1]); x.stroke(); }
+      x.fillStyle=cl; x.beginPath(); x.arc(q[0],q[1],3*k,0,7); x.fill(); if(z>.4*k){ const s=ic+" "+p.n, w=x.measureText(s).width; if(free(q[0],q[1],w)){ x.fillStyle="rgba(255,236,190,.92)"; x.fillText(s,q[0]+7*k,q[1]+4*k); } } } }
+    if(!lo&&z>.55*k){ x.font=`600 ${10.5*k}px Rajdhani,sans-serif`; x.fillStyle="rgba(200,240,255,.8)"; const done={}; for(let i=G.roads.length-1;i>=0;i--){ const r=G.roads[i]; if(!r.n||done[r.n]||r.w<1.2) continue; done[r.n]=1; const p=S(r.g[Math.floor(r.g.length/2)]); if(!vis(p)) continue; const w=x.measureText(r.n).width; if(!free(p[0],p[1],w)) continue; x.fillText(r.n,p[0]+3*k,p[1]-3*k); } }
     if(z<.16*k){ x.font=`700 ${12*k}px Rajdhani,sans-serif`; for(const p of G.places){ if(LC.data&&LC.data.home&&p.n===LC.data.home.name) continue; const q=S(p.m); if(!vis(q)) continue; x.fillStyle="rgba(200,240,255,.7)"; x.beginPath(); x.arc(q[0],q[1],(p.k==="town"?3.5:2)*k,0,7); x.fill(); if(free(q[0],q[1],x.measureText(p.n).width*1.2)) x.fillText(p.n.toUpperCase(),q[0]+7*k,q[1]+4*k); } } }
-  // boundary: mask outside + glowing curtain wall
-  const ctr=S([0,0]); let sweepR=1609.3*z;
   if(LC.bound){ x.save(); x.beginPath(); x.rect(0,0,W,H); LC.bound.forEach((m,i)=>{ const p=S(m); i?x.lineTo(p[0],p[1]):x.moveTo(p[0],p[1]); }); x.closePath(); x.fillStyle="rgba(1,5,11,.74)"; x.fill("evenodd"); x.restore();
-    if(in3d){ const wh=55*LC.pitch; x.beginPath(); for(let i=0;i<LC.bound.length-1;i++){ const a=S(LC.bound[i]), b=S(LC.bound[i+1]), at=S(LC.bound[i],wh), bt=S(LC.bound[i+1],wh); x.moveTo(a[0],a[1]); x.lineTo(b[0],b[1]); x.lineTo(bt[0],bt[1]); x.lineTo(at[0],at[1]); x.closePath(); }
+    if(in3d&&!lo){ const wh=55*LC.pitch; x.beginPath(); for(let i=0;i<LC.bound.length-1;i++){ const a=S(LC.bound[i]), b=S(LC.bound[i+1]), at=S(LC.bound[i],wh), bt=S(LC.bound[i+1],wh); x.moveTo(a[0],a[1]); x.lineTo(b[0],b[1]); x.lineTo(bt[0],bt[1]); x.lineTo(at[0],at[1]); x.closePath(); }
       x.fillStyle="rgba(93,255,176,.07)"; x.fill(); poly(LC.bound,1,wh); x.strokeStyle="rgba(93,255,176,.45)"; x.lineWidth=1*k; x.stroke(); }
-    poly(LC.bound,1); x.strokeStyle="rgba(93,255,176,.25)"; x.lineWidth=9*k; x.stroke(); x.strokeStyle="#5dffb0"; x.lineWidth=2*k; x.setLineDash([10*k,5*k]); x.lineDashOffset=-t*20*k; x.stroke(); x.setLineDash([]);
-    const top=LC.bound.reduce((a,m)=>S(m)[1]<S(a)[1]?m:a,LC.bound[0]); const tp=S(top,in3d?55*LC.pitch:0); x.font=`800 ${12*k}px Rajdhani,sans-serif`; x.fillStyle="#5dffb0"; x.fillText(((LC.data&&LC.data.boundary&&LC.data.boundary.name)||"").toUpperCase()+" BOUNDARY",tp[0]+8*k,tp[1]-8*k);
-    sweepR=Math.max(...LC.bound.map(m=>Math.hypot(m[0],m[1])))*z; }
-  else { x.strokeStyle="rgba(93,255,176,.35)"; x.lineWidth=1*k; x.setLineDash([2*k,6*k]); for(const m of [804.7,1609.3]){ poly(Array.from({length:65},(_,a)=>[Math.cos(a/64*6.283)*m-0,Math.sin(a/64*6.283)*m]),1); x.stroke(); } x.setLineDash([]); }
-  // radar sweep (flat on the ground)
-  { const sw=(t*.9)%(2*Math.PI); x.save(); if(LC.bound){ poly(LC.bound,1); x.clip(); } x.beginPath(); const r=sweepR/z; x.moveTo(ctr[0],ctr[1]); for(let a=0;a<=12;a++){ const ang=sw-a*.03; const q=S([Math.cos(ang)*r,Math.sin(ang)*r]); x.lineTo(q[0],q[1]); } x.closePath(); x.fillStyle="rgba(93,255,176,.12)"; x.fill(); x.restore(); }
-  // POIs
-  if(G&&!LC.hide.poi&&z>.22*k){ x.font=`600 ${11*k}px Rajdhani,sans-serif`; for(const p of G.poi){ const q=S(p.m,in3d?14:0); if(!vis(q)) continue; const [ic,cl]=POIC[p.k]||["◆","#ffd27f"];
-    if(in3d){ const g0=S(p.m); x.strokeStyle=cl+"66"; x.lineWidth=1*k; x.beginPath(); x.moveTo(g0[0],g0[1]); x.lineTo(q[0],q[1]); x.stroke(); }
-    x.fillStyle=cl; x.beginPath(); x.arc(q[0],q[1],3*k,0,7); x.fill(); if(z>.4*k){ const s=ic+" "+p.n, w=x.measureText(s).width; if(free(q[0],q[1],w)){ x.fillStyle="rgba(255,236,190,.92)"; x.fillText(s,q[0]+7*k,q[1]+4*k); } } } }
-  // crime: ground rings + light pillars in 3D
-  const hits=[]; const D=LC.data||{}; const cr=D.crime||{}; const pr=D.home?lcProj(D.home):null;
+    poly(LC.bound,1); if(LC.q>0){ x.strokeStyle="rgba(93,255,176,.25)"; x.lineWidth=9*k; x.stroke(); } x.strokeStyle="#5dffb0"; x.lineWidth=2*k; x.setLineDash([10*k,5*k]); x.stroke(); x.setLineDash([]);
+    const top=LC.bound.reduce((a,m)=>S(m)[1]<S(a)[1]?m:a,LC.bound[0]); const tp=S(top,in3d?55*LC.pitch:0); x.font=`800 ${12*k}px Rajdhani,sans-serif`; x.fillStyle="#5dffb0"; x.fillText(((LC.data&&LC.data.boundary&&LC.data.boundary.name)||"").toUpperCase()+" BOUNDARY",tp[0]+8*k,tp[1]-8*k); } }
+/* live layer: pulses, crime pillars, you, planes — cheap, drawn every frame */
+function lcDyn(x,W,H,k,cam,t){ const {z,S}=cam; const in3d=LC.pitch>.08; const vis=p=>p[0]>-60&&p[0]<W+60&&p[1]>-60&&p[1]<H+60; x.clearRect(0,0,W,H);
+  const D=LC.data||{}; const cr=D.crime||{}; const pr=D.home?lcProj(D.home):null; const hits=[]; const flat=Math.max(.35,Math.cos(LC.pitch));
+  if(LC.bound&&LC.q>0){ const sw=(t*.9)%(2*Math.PI); x.save(); x.beginPath(); LC.bound.forEach((m,i)=>{ const p=S(m); i?x.lineTo(p[0],p[1]):x.moveTo(p[0],p[1]); }); x.closePath(); x.clip(); const r=Math.max(...LC.bound.map(m=>Math.hypot(m[0],m[1])))*1.1; const c0=S([0,0]);
+    x.beginPath(); x.moveTo(c0[0],c0[1]); for(let a=0;a<=12;a++){ const ang=sw-a*.03; const q=S([Math.cos(ang)*r,Math.sin(ang)*r]); x.lineTo(q[0],q[1]); } x.closePath(); x.fillStyle=`rgba(93,255,176,${(.1*Math.min(1,.12*k/z)).toFixed(3)})`; x.fill(); x.restore(); }
+  // your house
+  const ym=lcYou(); if(ym){ const g0=S(ym), ph=(t%2)/2; x.strokeStyle="rgba(255,190,85,.35)"; x.lineWidth=1.2*k; x.setLineDash([4*k,5*k]); x.beginPath(); x.ellipse(g0[0],g0[1],250*z,250*z*flat,0,0,7); x.stroke(); x.setLineDash([]);
+    x.fillStyle="rgba(255,190,85,.8)"; x.font=`700 ${10*k}px Rajdhani,sans-serif`; x.fillText("250 m",g0[0]+250*z*.72,g0[1]-250*z*flat*.72);
+    x.strokeStyle=`rgba(255,190,85,${1-ph})`; x.lineWidth=2*k; x.beginPath(); x.ellipse(g0[0],g0[1],(6+ph*30)*k,(6+ph*30)*k*flat,0,0,7); x.stroke();
+    const top=S(ym,in3d?90*LC.pitch:0); if(in3d){ const lg=x.createLinearGradient(g0[0],g0[1],top[0],top[1]); lg.addColorStop(0,"rgba(255,190,85,1)"); lg.addColorStop(1,"rgba(255,190,85,0)"); x.strokeStyle=lg; x.lineWidth=4*k; x.beginPath(); x.moveTo(g0[0],g0[1]); x.lineTo(top[0],top[1]); x.stroke(); }
+    x.fillStyle="#ffbe55"; x.shadowColor="#ffbe55"; x.shadowBlur=18*k; x.beginPath(); x.arc(g0[0],g0[1],6*k,0,7); x.fill(); x.shadowBlur=0;
+    x.font=`800 ${13*k}px Rajdhani,sans-serif`; x.fillStyle="#ffbe55"; x.fillText("🏠 YOU",top[0]+9*k,top[1]-6*k); }
   if(pr&&cr.items){ const rows=(LC.span==="six"?cr.six:cr.items)||[];
     if(LC.hide.heat){ x.globalCompositeOperation="lighter"; for(const r of rows){ if(LC.hide[r[2]]) continue; const p=S(pr(r[0],r[1])); const rr=Math.max(18*k,140*z); const g=x.createRadialGradient(p[0],p[1],0,p[0],p[1],rr); g.addColorStop(0,"rgba(255,80,80,.16)"); g.addColorStop(1,"rgba(255,80,80,0)"); x.fillStyle=g; x.fillRect(p[0]-rr,p[1]-rr,rr*2,rr*2); } x.globalCompositeOperation="source-over"; }
     const pts={}; for(const r of rows){ if(LC.hide[r[2]]) continue; const key=r[0]+","+r[1]; (pts[key]=pts[key]||[]).push(r); }
-    const arr=Object.values(pts).map(L=>({L,m:pr(L[0][0],L[0][1])})).sort((a,b)=>S(b.m)[2]-S(a.m)[2]); let i=0;
-    for(const o of arr){ const L=o.L; i++; if(t<1.4+i*.01) continue; const g0=S(o.m); if(!vis(g0)) continue;
+    const arr=Object.entries(pts).map(([key,L])=>({key,L,m:pr(L[0][0],L[0][1])})).sort((a,b)=>S(b.m)[2]-S(a.m)[2]); let i=0;
+    for(const o of arr){ const L=o.L; i++; if(t<1.4+i*.01) continue; const g0=S(o.m); if(!vis(g0)) continue; const foc=LC.focus===o.key;
       const cats={}; L.forEach(r=>cats[r[2]]=(cats[r[2]]||0)+1); const top=Object.entries(cats).sort((a,b)=>b[1]-a[1])[0][0]; const cl=CRC[top]||"#ff6b6b";
-      const rr=(3+Math.min(9,Math.sqrt(L.length)*2.2))*k; const ph=(t*.7+i*.13)%1;
-      x.strokeStyle=cl; x.globalAlpha=.6*(1-ph); x.lineWidth=1.5*k; x.beginPath(); x.ellipse(g0[0],g0[1],rr+ph*rr*1.6,(rr+ph*rr*1.6)*Math.max(.35,Math.cos(LC.pitch)),0,0,7); x.stroke(); x.globalAlpha=1;
+      const rr=(3+Math.min(9,Math.sqrt(L.length)*2.2))*k*(foc?1.5:1); const ph=(t*.7+i*.13)%1;
+      x.strokeStyle=cl; x.globalAlpha=.6*(1-ph); x.lineWidth=1.5*k; x.beginPath(); x.ellipse(g0[0],g0[1],rr+ph*rr*1.6,(rr+ph*rr*1.6)*flat,0,0,7); x.stroke(); x.globalAlpha=1;
       let p=g0; if(in3d){ const ph2=Math.min(1,(t-1.4-i*.01)*1.5); const hgt=(30+L.length*22)*LC.pitch*ph2; p=S(o.m,hgt);
-        const lg=x.createLinearGradient(g0[0],g0[1],p[0],p[1]); lg.addColorStop(0,cl); lg.addColorStop(1,cl+"00"); x.strokeStyle=lg; x.lineWidth=3.2*k; x.beginPath(); x.moveTo(g0[0],g0[1]); x.lineTo(p[0],p[1]); x.stroke(); }
-      x.fillStyle=cl; x.shadowColor=cl; x.shadowBlur=10*k; x.beginPath(); x.arc(p[0],p[1],rr*.55,0,7); x.fill(); x.shadowBlur=0;
+        const lg=x.createLinearGradient(g0[0],g0[1],p[0],p[1]); lg.addColorStop(0,cl); lg.addColorStop(1,cl+"00"); x.strokeStyle=lg; x.lineWidth=(foc?5:3.2)*k; x.beginPath(); x.moveTo(g0[0],g0[1]); x.lineTo(p[0],p[1]); x.stroke(); }
+      x.fillStyle=cl; if(LC.q>0){ x.shadowColor=cl; x.shadowBlur=10*k; } x.beginPath(); x.arc(p[0],p[1],rr*.55,0,7); x.fill(); x.shadowBlur=0;
+      if(foc){ x.strokeStyle="#fff"; x.lineWidth=2*k; x.beginPath(); x.arc(p[0],p[1],rr+4*k,t*3,t*3+4.5); x.stroke(); }
       if(L.length>1){ x.fillStyle="#02101a"; x.font=`800 ${9*k}px Rajdhani,sans-serif`; x.textAlign="center"; x.fillText(L.length,p[0],p[1]+3*k); x.textAlign="start"; }
-      hits.push({x:p[0],y:p[1],r:rr+4*k,L}); } }
-  // home beacon
-  { const hp=S([0,0]), top=S([0,0],in3d?120*LC.pitch:0); if(in3d){ const lg=x.createLinearGradient(hp[0],hp[1],top[0],top[1]); lg.addColorStop(0,"rgba(93,255,176,.9)"); lg.addColorStop(1,"rgba(93,255,176,0)"); x.strokeStyle=lg; x.lineWidth=4*k; x.beginPath(); x.moveTo(hp[0],hp[1]); x.lineTo(top[0],top[1]); x.stroke(); }
-    x.fillStyle="#5dffb0"; x.shadowColor="#5dffb0"; x.shadowBlur=16*k; x.beginPath(); x.arc(hp[0],hp[1],5*k,0,7); x.fill(); x.shadowBlur=0;
-    x.strokeStyle="rgba(93,255,176,.8)"; x.lineWidth=1.5*k; for(let a=0;a<4;a++){ x.beginPath(); x.ellipse(hp[0],hp[1],13*k,13*k*Math.max(.35,Math.cos(LC.pitch)),0,a*Math.PI/2+t,a*Math.PI/2+t+.9); x.stroke(); } }
-  // aircraft — flying above the map in 3D with ground shadows
+      hits.push({x:p[0],y:p[1],r:rr+5*k,L,key:o.key}); } }
+  // stop & search (exact times) — white diamonds
+  if(pr&&LC.hide.stops&&cr.stops) for(const s of cr.stops){ if(s.lat==null) continue; const p=S(pr(s.lat,s.lon),in3d?10:0); if(!vis(p)) continue; x.save(); x.translate(p[0],p[1]); x.rotate(Math.PI/4); x.fillStyle="#e8f6ff"; x.fillRect(-3.5*k,-3.5*k,7*k,7*k); x.restore(); hits.push({x:p[0],y:p[1],r:9*k,st:s}); }
+  // the village centre marker
+  { const hp=S([0,0]); x.fillStyle="rgba(93,255,176,.9)"; x.beginPath(); x.arc(hp[0],hp[1],3*k,0,7); x.fill(); }
   if(!LC.hide.fl&&pr&&D.flights&&D.flights.length){ const dt=(performance.now()-LC.flTs)/1000; x.font=`700 ${10.5*k}px Rajdhani,sans-serif`;
     for(const f of D.flights){ const m0=pr(f.lat,f.lon); const d=f.kt*.5144*dt, hd=f.hdg*Math.PI/180; const m=[m0[0]+Math.sin(hd)*d,m0[1]+Math.cos(hd)*d];
       const alt=in3d?Math.min(900,180+f.alt*.018)*LC.pitch:0; const q=S(m,alt), g0=S(m); if(!vis(q)) continue; const sel=LC.sel===f.cs;
       if(in3d){ x.setLineDash([2*k,4*k]); x.strokeStyle="rgba(232,246,255,.25)"; x.lineWidth=1*k; x.beginPath(); x.moveTo(g0[0],g0[1]); x.lineTo(q[0],q[1]); x.stroke(); x.setLineDash([]); x.fillStyle="rgba(0,0,0,.45)"; x.beginPath(); x.ellipse(g0[0],g0[1],6*k,3*k,0,0,7); x.fill(); }
       const tail=S([m[0]-Math.sin(hd)*400,m[1]-Math.cos(hd)*400],alt); const ang=Math.atan2(q[1]-tail[1],q[0]-tail[0])+Math.PI/2;
       x.strokeStyle="rgba(232,246,255,.3)"; x.lineWidth=1.2*k; x.beginPath(); x.moveTo(q[0],q[1]); x.lineTo(tail[0],tail[1]); x.stroke();
-      x.save(); x.translate(q[0],q[1]); x.rotate(ang); x.fillStyle=sel?"#ffbe55":"#e8f6ff"; x.shadowColor="#9fe8ff"; x.shadowBlur=8*k; x.beginPath(); x.moveTo(0,-9*k); x.lineTo(6*k,6*k); x.lineTo(0,3*k); x.lineTo(-6*k,6*k); x.closePath(); x.fill(); x.restore(); x.shadowBlur=0;
+      x.save(); x.translate(q[0],q[1]); x.rotate(ang); x.fillStyle=sel?"#ffbe55":"#e8f6ff"; x.beginPath(); x.moveTo(0,-9*k); x.lineTo(6*k,6*k); x.lineTo(0,3*k); x.lineTo(-6*k,6*k); x.closePath(); x.fill(); x.restore();
       x.fillStyle=sel?"#ffbe55":"rgba(232,246,255,.88)"; x.fillText(`${f.cs} · ${Math.round(f.alt/100)*100}ft`,q[0]+10*k,q[1]-7*k); hits.push({x:q[0],y:q[1],r:13*k,fl:f}); } }
-  // weather: rain streaks when it's raining right now
-  if(LC.rain){ x.strokeStyle="rgba(160,210,255,.22)"; x.lineWidth=1*k; x.beginPath(); for(let i=0;i<140;i++){ const rx=((i*97.3+t*60*(1+i%3))%W), ry=((i*53.7+t*900*(1+(i%5)*.2))%H); x.moveTo(rx,ry); x.lineTo(rx-4*k,ry+16*k); } x.stroke(); }
-  // hover
+  if(LC.rain){ x.strokeStyle="rgba(160,210,255,.22)"; x.lineWidth=1*k; x.beginPath(); for(let i=0;i<(LC.q?140:50);i++){ const rx=((i*97.3+t*60*(1+i%3))%W), ry=((i*53.7+t*900*(1+(i%5)*.2))%H); x.moveTo(rx,ry); x.lineTo(rx-4*k,ry+16*k); } x.stroke(); }
   LC.hover=null; if(LC.mouse&&!LC.drag) for(const h of hits) if(Math.hypot(h.x-LC.mouse[0],h.y-LC.mouse[1])<h.r) LC.hover=h;
-  const tip=$("#lcTip"); if(tip){ const H2=LC.hover; if(H2){ tip.style.display="block"; tip.style.left=(LC.mouse[0]/k+14)+"px"; tip.style.top=(LC.mouse[1]/k+10)+"px";
-      tip.innerHTML=H2.fl?`<b>✈ ${esc(H2.fl.cs)}</b><br>${H2.fl.alt.toLocaleString()} ft · ${H2.fl.kt} kt · ${esc(H2.fl.from||"")}`:`<b>${esc(H2.L[0][3]||"Nearby")}</b><br>`+H2.L.slice(0,7).map(r=>`<i style="color:${CRC[r[2]]||"#fff"}">●</i> ${esc(((cr.names||{})[r[2]]||r[2]))}${r[4]?` <small>— ${esc(r[4])}</small>`:""}`).join("<br>")+(H2.L.length>7?`<br><small>+${H2.L.length-7} more</small>`:"");
-    } else tip.style.display="none"; }
-  // compass + scale
+  const tip=$("#lcTip"), H2=LC.hover; if(tip){ if(H2){ tip.style.display="block"; tip.style.left=(LC.mouse[0]/k+14)+"px"; tip.style.top=(LC.mouse[1]/k+10)+"px"; tip.innerHTML=lcTip(H2); } else tip.style.display="none"; }
+  $("#lcC").style.cursor=H2?"pointer":""; }
+function lcDist(m){ const y=lcYou(); return y?Math.hypot(m[0]-y[0],m[1]-y[1]):null; }
+function lcTip(H2){ const D=LC.data||{}, cr=D.crime||{}, pr=lcProj(D.home);
+  if(H2.fl) return `<b>✈ ${esc(H2.fl.cs)}</b><br>${H2.fl.alt.toLocaleString()} ft · ${H2.fl.kt} kt · ${esc(H2.fl.from||"")}`;
+  if(H2.st){ const s=H2.st, d=new Date(s.at); return `<b>👮 Stop &amp; search</b><br>${d.toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short"})} · ${d.toTimeString().slice(0,5)}<br>${esc(s.type)}${s.for?" · looking for "+esc(s.for.toLowerCase()):""}<br><small>${esc(s.outcome||"")}${s.street?" · "+esc(s.street):""}</small>`; }
+  const L=H2.L, d=lcDist(pr(L[0][0],L[0][1]));
+  return `<b>${esc(L[0][3]||"Nearby")}</b>${d!=null?` <small>· ${FMTD(d)} from you</small>`:""}<br>`+L.slice(0,6).map(r=>`<i style="color:${CRC[r[2]]||"#fff"}">●</i> ${esc(((cr.names||{})[r[2]]||r[2]))} <small>· ${MONTH(r[6]||cr.month)}${r[4]?" — "+esc(r[4]):""}</small>`).join("<br>")+(L.length>6?`<br><small>+${L.length-6} more</small>`:"")+`<br><small style="opacity:.7">click for details</small>`; }
+function localFrame(ts){ if(!LC.on||!GL.on) return; LC.raf=requestAnimationFrame(localFrame); const B=$("#lcB"), C=$("#lcC"); if(!B||!C) return;
+  const W=B.width, H=B.height, k=LC.k||1, t=(ts-LC.t0)/1000; const cam=lcCam(W,H,k); const now=performance.now(); const moving=now-LC.lastMove<180||!!LC.drag&&LC.drag[4]>2||!!LC.fly||LC.orbit||Math.abs(LC.pitchT-LC.pitch)>.002;
+  const want=cam.key+(moving?"L":"H"); if(want!==LC.camKey||LC.dirty||cam.intro){ const t0=performance.now(); lcBase(B.getContext("2d"),W,H,k,cam,t,moving&&(LC.q<2||LC.lastBase>25)); const ms=performance.now()-t0; LC.camKey=want; LC.dirty=false; if(!moving) LC.lastBase=ms;
+    if(!cam.intro){ LC.baseMs.push(ms); if(LC.baseMs.length>5){ const avg=LC.baseMs.reduce((a,b)=>a+b)/LC.baseMs.length; LC.baseMs=[]; if(avg>45&&LC.q>0){ LC.q--; lcFit(); const b=$('#lcChips [data-s="q"]'); if(b) b.textContent="⚙ "+["Fast","Balanced","Max"][LC.q]; toast("Local Intel switched to "+["Fast","Balanced"][LC.q]+" graphics for smoother movement"); } } } }
+  lcDyn(C.getContext("2d"),W,H,k,cam,t);
   const cmp=$("#lcCmp"); if(cmp) cmp.style.transform=`rotate(${-LC.rot}rad)`;
-  const sc=$("#lcScale"); if(sc){ const m=[50,100,200,500,1000,2000,5000].find(v=>v*z/k>90)||5000; sc.style.width=(m*z/k)+"px"; sc.textContent=m>=1000?(m/1000)+" km":m+" m"; } }
+  const sc=$("#lcScale"); if(sc){ const m=[50,100,200,500,1000,2000,5000].find(v=>v*cam.z/k>90)||5000; sc.style.width=(m*cam.z/k)+"px"; sc.textContent=m>=1000?(m/1000)+" km":m+" m"; } }
+function lcBrief(cr){ const tr=cr.trend||[]; const avg=tr.length?tr.reduce((a,q)=>a+q.n,0)/tr.length:0; const top=(cr.by_cat||[])[0]; const y=lcYou(); const pr=lcProj(LC.data.home);
+  let s=`${cr.total} crimes were reported in ${cr.area||"the area"} in ${new Date(cr.month+"-01").toLocaleString("en-GB",{month:"long"})} — ${cr.total<avg*.85?"a quieter month than usual":cr.total>avg*1.15?"busier than usual":"about normal"} (6-month average ${Math.round(avg)}).`;
+  if(top) s+=` Most were ${top[1].toLowerCase()} (${top[2]}).`;
+  if(y){ const near=(cr.items||[]).map(r=>({r,d:Math.hypot(...[0,1].map(i=>pr(r[0],r[1])[i]-y[i]))})).sort((a,b)=>a.d-b.d); const n250=near.filter(o=>o.d<=250).length;
+    s+=n250?` ${n250} ${n250===1?"was":"were"} within 250 m of your house.`:` None were within 250 m of your house`+(near[0]?` — the nearest was ${FMTD(near[0].d)} away on ${near[0].r[3]||"a nearby street"}.`:"."); }
+  return s; }
 function lcPanel(){ const D=LC.data; const b=$("#lcBody"); if(!b||!D) return; const cr=D.crime||{}, ar=D.area||{};
-  if(LC.tab==="crime"){ if(!cr.month){ b.innerHTML=`<div class="lc-load">${esc(cr.error||"No police data yet.")}</div>`; return; }
+  if(LC.tab==="brief"){ if(!cr.month){ b.innerHTML=`<div class="lc-load">${esc(cr.error||"No police data yet.")}</div>`; return; }
     const rows=LC.span==="six"?cr.six:cr.items; const by={}; rows.forEach(r=>by[r[2]]=(by[r[2]]||0)+1); const cats=Object.entries(by).sort((a,b)=>b[1]-a[1]); const mx=cats.length?cats[0][1]:1;
     const tr=cr.trend||[]; const tmx=Math.max(1,...tr.map(q=>q.n)); const prev=tr.length>1?tr[tr.length-2].n:null; const avg=tr.length?Math.round(tr.reduce((a,q)=>a+q.n,0)/tr.length):0;
     const delta=prev==null?"":cr.total>prev?`<em class="up">▲ ${cr.total-prev} vs last month</em>`:cr.total<prev?`<em class="dn">▼ ${prev-cr.total} vs last month</em>`:`<em>level with last month</em>`;
-    b.innerHTML=`<div class="lc-big"><b>${LC.span==="six"?rows.length:cr.total}</b><span>${LC.span==="six"?"crimes in 6 months":"crimes · "+new Date(cr.month+"-01").toLocaleString("en-GB",{month:"short",year:"numeric"})}<br>${LC.span==="six"?"avg "+avg+"/month":delta}</span></div>
+    const solved=(cr.items||[]).filter(r=>/charged|caution|penalty|community resolution|offender/i.test(r[4]||"")).length;
+    b.innerHTML=`<div class="lc-ai"><b>ORION</b>${esc(lcBrief(cr))}</div>
+      ${D.you?"":`<button class="lc-sethome" id="lcSetHome">🏠 Add your house to see what's near you</button>`}
+      <div class="lc-big"><b>${LC.span==="six"?rows.length:cr.total}</b><span>${LC.span==="six"?"crimes in 6 months":"crimes · "+MONTH(cr.month)}<br>${LC.span==="six"?"avg "+avg+"/month":delta}</span></div>
+      <div class="lc-mini"><div><b>${solved}</b><small>suspect charged / dealt with</small></div><div><b>${(cr.items||[]).filter(r=>/no suspect|unable/i.test(r[4]||"")).length}</b><small>closed, no suspect</small></div><div><b>${(cr.items||[]).filter(r=>!r[4]||/under investigation|awaiting/i.test(r[4])).length}</b><small>still open</small></div></div>
       <h6>6-MONTH TREND</h6><div class="lc-trend">${tr.map(q=>`<div title="${q.m}: ${q.n}"><i style="height:${q.n/tmx*100}%"></i><small>${new Date(q.m+"-01").toLocaleString("en-GB",{month:"short"})}</small><b>${q.n}</b></div>`).join("")}</div>
-      <h6>BY TYPE <small>click to hide/show on map</small></h6>${cats.map(([k,n])=>`<div class="lc-cat ${LC.hide[k]?"off":""}" data-k="${k}"><i style="background:${CRC[k]||"#fff"}"></i><span>${esc((cr.names||{})[k]||k)}</span><u><s style="width:${n/mx*100}%;background:${CRC[k]||"#fff"}"></s></u><b>${n}</b></div>`).join("")}
-      ${cr.streets&&cr.streets.length?`<h6>HOTSPOTS · ${new Date(cr.month+"-01").toLocaleString("en-GB",{month:"short"})}</h6>${cr.streets.slice(0,5).map(([s,n])=>`<div class="lc-row"><span>${esc(s)}</span><b>${n}</b></div>`).join("")}`:""}
-      ${cr.outcomes&&cr.outcomes.length?`<h6>OUTCOMES SO FAR</h6>${cr.outcomes.map(([s,n])=>`<div class="lc-row"><span>${esc(s)}</span><b>${n}</b></div>`).join("")}`:""}
-      ${cr.hood&&cr.hood.name?`<h6>YOUR NEIGHBOURHOOD TEAM</h6><div class="lc-hood"><b>${esc(cr.hood.name)}</b> · ${esc(cr.hood.force||"")}${(cr.hood.priorities||[]).map(p=>`<p>⚑ ${esc(p)}</p>`).join("")}</div>`:""}
-      <p class="lc-note">police.uk open data · ${cr.area?"only crimes inside the "+esc(cr.area)+" boundary":"within "+esc(cr.radius||"1 mile")+" of the village centre"} · locations are anonymised to nearby streets · runs ~2 months behind</p>`;
-    $$(".lc-cat").forEach(d=>d.onclick=()=>{ LC.hide[d.dataset.k]=!LC.hide[d.dataset.k]; d.classList.toggle("off"); sfx("tick"); }); }
+      <h6>BY TYPE <small>click to hide/show</small></h6>${cats.map(([k,n])=>`<div class="lc-cat ${LC.hide[k]?"off":""}" data-k="${k}"><i style="background:${CRC[k]||"#fff"}"></i><span>${esc((cr.names||{})[k]||k)}</span><u><s style="width:${n/mx*100}%;background:${CRC[k]||"#fff"}"></s></u><b>${n}</b></div>`).join("")}
+      ${cr.streets&&cr.streets.length?`<h6>HOTSPOTS · ${MONTH(cr.month)} <small>click to fly there</small></h6>${cr.streets.slice(0,5).map(([s,n])=>`<div class="lc-row lc-go" data-st="${esc(s)}"><span>${esc(s)}</span><b>${n}</b></div>`).join("")}`:""}
+      ${cr.hood&&cr.hood.name?`<h6>YOUR NEIGHBOURHOOD POLICE</h6><div class="lc-hood"><b>${esc(cr.hood.name)}</b> · ${esc(cr.hood.force||"")}${(cr.hood.priorities||[]).map(p=>`<p>⚑ ${esc(p)}</p>`).join("")}</div>`:""}
+      <p class="lc-note">police.uk open data · only crimes ${cr.area?"inside the "+esc(cr.area)+" boundary":"within "+esc(cr.radius||"1 mile")} · runs ~2 months behind</p>`;
+    $$(".lc-cat").forEach(d=>d.onclick=()=>{ LC.hide[d.dataset.k]=!LC.hide[d.dataset.k]; d.classList.toggle("off"); sfx("tick"); });
+    $$(".lc-go").forEach(d=>d.onclick=()=>{ const r=(cr.items||[]).find(q=>q[3]===d.dataset.st); if(r){ const pr=lcProj(D.home); LC.focus=r[0]+","+r[1]; lcFlyTo(pr(r[0],r[1]),1); } });
+    const sh=$("#lcSetHome"); if(sh) sh.onclick=lcSetHome; }
+  else if(LC.tab==="log"){ if(!cr.month){ b.innerHTML=`<div class="lc-load">No police data yet.</div>`; return; } const pr=lcProj(D.home); const y=lcYou();
+    const rows=((LC.span==="six"?cr.six:cr.items)||[]).map(r=>({r,key:r[0]+","+r[1],m:pr(r[0],r[1])})).map(o=>({...o,d:y?Math.hypot(o.m[0]-y[0],o.m[1]-y[1]):null}));
+    rows.sort(LC.logSort==="near"&&y?(a,b)=>a.d-b.d:(a,b)=>(b.r[6]||"").localeCompare(a.r[6]||""));
+    const st=(cr.stops||[]);
+    b.innerHTML=`<div class="lc-explain">🕑 <b>Why no exact day or time?</b> The police only publish crimes by <b>month</b>, and move each one to a nearby street point, to protect victims. Stop &amp; search records (below) do have exact times.</div>
+      <div class="lc-sort"><span>${rows.length} crimes · ${LC.span==="six"?"6 months":MONTH(cr.month)}</span><button data-s="near" class="${LC.logSort==="near"?"on":""}" ${y?"":"disabled title='Add your house first'"}>nearest me</button><button data-s="new" class="${LC.logSort!=="near"||!y?"on":""}">newest</button></div>
+      ${rows.slice(0,80).map(o=>`<div class="lc-log ${LC.focus===o.key?"sel":""}" data-key="${o.key}"><i style="background:${CRC[o.r[2]]||"#fff"}"></i><div><b>${esc((cr.names||{})[o.r[2]]||o.r[2])}</b><span>📍 ${esc(o.r[3]||"nearby")}${o.d!=null?` · <em>${FMTD(o.d)} from you</em>`:""}</span><small>📅 ${MONTH(o.r[6]||cr.month)} · ${o.r[4]?esc(o.r[4])+(o.r[5]?" ("+MONTH(o.r[5])+")":""):"no outcome recorded yet"}</small></div></div>`).join("")}
+      <h6>STOP &amp; SEARCH · LAST 3 MONTHS <small>${st.length} · exact times</small></h6>
+      ${st.length?st.slice(0,30).map(s=>{ const d=new Date(s.at); return `<div class="lc-log st ${LC.focus==="s:"+s.at?"sel":""}"><i style="background:#e8f6ff"></i><div><b>${d.toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short"})} · ${d.toTimeString().slice(0,5)}</b><span>${esc(s.type)}${s.for?" · for "+esc(s.for.toLowerCase()):""}</span><small>${esc(s.outcome||"")}${s.street?" · "+esc(s.street):""}${s.age?" · age "+esc(s.age):""}</small></div></div>`; }).join(""):'<div class="lc-row"><span>None recorded in the area</span></div>'}`;
+    $$(".lc-sort button").forEach(x=>x.onclick=()=>{ LC.logSort=x.dataset.s; lcPanel(); });
+    $$(".lc-log[data-key]").forEach(d=>d.onclick=()=>{ LC.focus=d.dataset.key; const [la,lo]=d.dataset.key.split(",").map(Number); lcFlyTo(pr(la,lo),1.1); $$(".lc-log").forEach(x=>x.classList.toggle("sel",x===d)); });
+    const sel=$(".lc-log.sel"); if(sel) sel.scrollIntoView({block:"center"}); }
   else if(LC.tab==="area"){ const w=ar.weather||{}, a=ar.air, m=ar.moon||{}, kp=ar.kp; const fl=ar.floods;
     const aqc=a?(a.aqi<=20?"#5dffb0":a.aqi<=40?"#9fe8ff":a.aqi<=60?"#ffbe55":"#ff5a6e"):"#9fe8ff";
     b.innerHTML=`<div class="lc-tiles">
@@ -3076,15 +3150,16 @@ function lcPanel(){ const D=LC.data; const b=$("#lcBody"); if(!b||!D) return; co
       <div><small>AIR QUALITY</small><b style="color:${aqc}">${a?a.aqi:"—"}</b><span>${a?esc(a.label)+" · PM2.5 "+(a.pm25??"–"):""}</span></div>
       <div><small>UV · POLLEN</small><b>${a&&a.uv!=null?(+a.uv).toFixed(1):"—"}</b><span>${a?(a.pollen>50?"High pollen":a.pollen>10?"Some pollen":"Low pollen"):""}</span></div>
       <div><small>SUN</small><b>${esc(ar.sunset||"—")}</b><span>sunset · rise ${esc(ar.sunrise||"—")}</span></div>
-      <div><small>MOON</small><b><i class="lc-moon" style="--lit:${m.lit||0}%;--dir:${(m.age||0)<14.8?1:-1}"></i></b><span>${esc(m.name||"")} · ${m.lit??"–"}% lit</span></div>
+      <div><small>MOON</small><b><i class="lc-moon" style="--lit:${m.lit||0}%"></i></b><span>${esc(m.name||"")} · ${m.lit??"–"}% lit</span></div>
       <div><small>AURORA · KP</small><b style="color:${kp&&kp.kp>=5?"#5dffb0":"inherit"}">${kp?kp.kp:"—"}</b><span>${kp?esc(kp.chance):""}</span></div></div>
       <h6>FLOOD WARNINGS · 20 KM</h6>${fl==null?'<div class="lc-row"><span>Unavailable right now</span></div>':fl.length?fl.map(f=>`<div class="lc-row ${f.lvl<=2?"bad":"warn"}"><span>${esc(f.area)}</span><b>${esc(f.sev)}</b></div>`).join(""):'<div class="lc-row ok"><span>✓ No flood warnings or alerts nearby</span></div>'}
-      <p class="lc-note">Open-Meteo · NOAA SWPC · Environment Agency</p>`; }
+      ${LC.geo?`<h6>THE AREA IN NUMBERS</h6><div class="lc-row"><span>Buildings mapped</span><b>${LC.geo.b.length.toLocaleString()}</b></div><div class="lc-row"><span>Named roads</span><b>${new Set(LC.geo.roads.filter(r=>r.n).map(r=>r.n)).size}</b></div><div class="lc-row"><span>Shops, pubs, schools &amp; more</span><b>${LC.geo.poi.length}</b></div>`:""}
+      <p class="lc-note">Open-Meteo · NOAA SWPC · Environment Agency · OpenStreetMap</p>`; }
   else { const F=D.flights||[]; const h=D.home||{}; const km=f=>Math.round(Math.hypot((f.lat-h.lat)*111,(f.lon-h.lon)*111*Math.cos(h.lat*Math.PI/180)));
     b.innerHTML=`<div class="lc-big"><b>${F.length}</b><span>aircraft within ~50 km<br><em>live · OpenSky</em></span></div>
-      ${F.length?F.slice(0,14).map(f=>`<div class="lc-fl ${LC.sel===f.cs?"sel":""}" data-cs="${esc(f.cs)}"><b>✈ ${esc(f.cs)}</b><span>${f.alt.toLocaleString()} ft · ${f.kt} kt · ${km(f)} km ${f.vs>2?"↗":f.vs<-2?"↘":"→"}</span><small>${esc(f.from||"")}</small></div>`).join(""):'<div class="lc-load">No aircraft reported right now.</div>'}
+      ${F.length?F.slice(0,14).map(f=>`<div class="lc-fl ${LC.sel===f.cs?"sel":""}" data-cs="${esc(f.cs)}"><b>✈ ${esc(f.cs)}</b><span>${f.alt.toLocaleString()} ft · ${f.kt} kt · ${km(f)} km ${f.vs>2?"↗ climbing":f.vs<-2?"↘ descending":"→ level"}</span><small>${esc(f.from||"")}</small></div>`).join(""):'<div class="lc-load">No aircraft reported right now.</div>'}
       <p class="lc-note">Zoom out on the map to see them all</p>`;
-    $$(".lc-fl").forEach(d=>d.onclick=()=>{ LC.sel=d.dataset.cs; const f=F.find(q=>q.cs===LC.sel); if(f){ const m=lcProj(h)(f.lat,f.lon); LC.px=-m[0]; LC.py=-m[1]; LC.zoom=Math.min(LC.zoom,.05); } lcPanel(); }); } }
+    $$(".lc-fl").forEach(d=>d.onclick=()=>{ LC.sel=d.dataset.cs; const f=F.find(q=>q.cs===LC.sel); if(f){ lcFlyTo(lcProj(h)(f.lat,f.lon),.05); } lcPanel(); }); } }
 
 /* ---------- HOLOGRAMS ---------- */
 const HG={on:false,ry:0,rx:-.25,drag:null,raf:0,model:null,t0:0};
@@ -3249,6 +3324,7 @@ setTimeout(()=>{ if(api) return; const wait=ms=>new Promise(r=>setTimeout(r,ms))
     globe_events:()=>A([{t:"Wildfire — Northern Territory",c:"wildfires",lat:-13.4,lon:132.2},{t:"Wildfire — California",c:"wildfires",lat:38.9,lon:-121.3},{t:"Typhoon Kalmaegi",c:"severeStorms",lat:17.2,lon:128.4,track:[[12,138],[13.5,135],[15,132],[16.2,130],[17.2,128.4]]},{t:"Etna, Italy",c:"volcanoes",lat:37.75,lon:14.99},{t:"Sakurajima",c:"volcanoes",lat:31.58,lon:130.66},{t:"Iceberg A23A",c:"seaLakeIce",lat:-54,lon:-38}]),
     globe_flights:()=>A(mockFlights()),
     local_place:n=>A(n||"Desford"),
+    local_home:a=>A(a==null?{address:"",you:null}:{address:a,you:a?{lat:52.6226,lon:-1.3023,label:a}:null}),
     globe_local_map:()=>A(mockMap()),
     globe_local:async()=>{ await wait(900); const h={lat:52.6267,lon:-1.2903,name:"Desford"}; const C=["violent-crime","anti-social-behaviour","shoplifting","burglary","public-order","vehicle-crime","criminal-damage-arson","other-theft"]; const ST=["High Street","Main Street","Station Road","Cortanis Lane","Peckleton Lane","Kirkby Road","Manor Road","Lancaster Avenue"];
       const spots=Array.from({length:22},(_,i)=>[h.lat+Math.sin(i*2.4)*.009*Math.random(),h.lon+Math.cos(i*1.7)*.014*Math.random(),ST[i%8]]);

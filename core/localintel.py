@@ -64,6 +64,46 @@ def home():
     return {"lat": lat, "lon": lon, "name": name}
 
 
+def your_home(address=None):
+    """Your own house (typed in by you, stored only in your local config). Geocoded with OpenStreetMap's Nominatim;
+    falls back to the middle of your street from the local map."""
+    cfg = CTX.get("config", {})
+    addr = (address if address is not None else cfg.get("home_address", "")).strip()
+    if not addr:
+        return None
+    if address is None and cfg.get("home_ll") and cfg["home_ll"].get("q") == addr:
+        return cfg["home_ll"]
+    place = place_name()
+    q = addr if place.lower() in addr.lower() else f"{addr}, {place}"
+    out = None
+    try:
+        r = requests.get("https://nominatim.openstreetmap.org/search", headers=UA, timeout=15,
+                         params={"q": q, "format": "jsonv2", "limit": 1, "countrycodes": "gb"}).json()
+        if r:
+            out = {"lat": float(r[0]["lat"]), "lon": float(r[0]["lon"]), "exact": r[0].get("addresstype") in ("building", "house", "place")}
+    except Exception as e:
+        log.warning("nominatim: %s", e)
+    if not out:                                   # street-level fallback from the cached map
+        import re
+        street = re.sub(r"^\s*\d+[a-z]?\s*,?\s*", "", addr.split(",")[0], flags=re.I).strip().lower()
+        try:
+            m = local_map()
+            pts = [p for r in m["roads"] if r.get("n", "").lower() == street for p in r["g"]]
+            if pts:
+                out = {"lat": sum(p[0] for p in pts) / len(pts), "lon": sum(p[1] for p in pts) / len(pts), "exact": False}
+        except Exception:
+            pass
+    if out:
+        out.update({"q": addr, "label": addr.split(",")[0]})
+        cfg["home_ll"] = out
+        try:
+            from . import config
+            config.save(cfg)
+        except Exception:
+            pass
+    return out
+
+
 # ------------------------------------------------------------------ the village boundary (so it's just YOUR area)
 OVERPASS = ("https://overpass-api.de/api/interpreter", "https://overpass.kumi.systems/api/interpreter")
 
@@ -271,21 +311,53 @@ def _month_list(latest, n):
     return out
 
 
-def _crimes(la, lo, month, c, poly=None):
-    key = f"crime:{'poly' + str(len(poly)) if poly else ''}{la:.3f},{lo:.3f}:{month}"
-    if key in c:                                  # past months never change
-        return c[key]
+def _police(path, month, la, lo, poly):
     if poly:
-        r = requests.post(f"{POLICE}/crimes-street/all-crime", headers=UA, timeout=30,
+        r = requests.post(f"{POLICE}/{path}", headers=UA, timeout=30,
                           data={"poly": ":".join(f"{a},{b}" for a, b in poly), "date": month})
+        if r.status_code == 404:
+            return []
         r.raise_for_status()
-        rows = r.json()
-    else:
-        rows = _get(f"{POLICE}/crimes-street/all-crime", lat=la, lng=lo, date=month, timeout=30)
+        return r.json()
+    return _get(f"{POLICE}/{path}", lat=la, lng=lo, date=month, timeout=30)
+
+
+def _fresh(c, key, month, latest):
+    """Old months are fixed; the last 3 still get outcome updates, so refresh those weekly."""
+    e = c.get(key)
+    if not isinstance(e, dict):
+        return None
+    young = month >= _month_list(latest, 3)[-1]
+    return e["rows"] if not young or time.time() - e.get("ts", 0) < 7 * 86400 else None
+
+
+def _crimes(la, lo, month, c, poly=None, latest=""):
+    key = f"crime2:{'poly' + str(len(poly)) if poly else ''}{la:.3f},{lo:.3f}:{month}"
+    hit = _fresh(c, key, month, latest)
+    if hit is not None:
+        return hit
+    rows = _police("crimes-street/all-crime", month, la, lo, poly)
     slim = [[round(float(r["location"]["latitude"]), 5), round(float(r["location"]["longitude"]), 5), r["category"],
              (r["location"].get("street") or {}).get("name", "").replace("On or near ", ""),
-             (r.get("outcome_status") or {}).get("category", "")] for r in rows]
-    c[key] = slim
+             (r.get("outcome_status") or {}).get("category", ""), (r.get("outcome_status") or {}).get("date", ""),
+             r.get("month", month), r.get("location_type", "")] for r in rows]
+    c[key] = {"ts": time.time(), "rows": slim}
+    return slim
+
+
+def _stops(la, lo, month, c, poly=None, latest=""):
+    """Stop & search — the only police data with an exact date and time."""
+    key = f"stops:{'poly' + str(len(poly)) if poly else ''}{la:.3f},{lo:.3f}:{month}"
+    hit = _fresh(c, key, month, latest)
+    if hit is not None:
+        return hit
+    rows = _police("stops-street", month, la, lo, poly)
+    slim = [{"lat": round(float(r["location"]["latitude"]), 5) if r.get("location") else None,
+             "lon": round(float(r["location"]["longitude"]), 5) if r.get("location") else None,
+             "street": ((r.get("location") or {}).get("street") or {}).get("name", "").replace("On or near ", ""),
+             "at": r.get("datetime", ""), "type": r.get("type", ""), "for": r.get("object_of_search") or "",
+             "outcome": r.get("outcome") or "", "age": r.get("age_range") or "", "law": r.get("legislation") or ""} for r in rows]
+    c[key] = {"ts": time.time(), "rows": slim}
     return slim
 
 
@@ -299,13 +371,19 @@ def crime(h=None, months=6):
     per = {}
     for m in ms:
         try:
-            per[m] = _crimes(h["lat"], h["lon"], m, c, poly)
+            per[m] = _crimes(h["lat"], h["lon"], m, c, poly, latest)
         except Exception as e:
             log.warning("police %s: %s", m, e)
+    stops = []
+    for m in ms[:3]:
+        try:
+            stops += _stops(h["lat"], h["lon"], m, c, poly, latest)
+        except Exception as e:
+            log.warning("stops %s: %s", m, e)
     _save(c)
     cur = per.get(latest, [])
     by_cat, streets, outcomes = {}, {}, {}
-    for la, lo, cat, st, oc in cur:
+    for la, lo, cat, st, oc, *_ in cur:
         by_cat[cat] = by_cat.get(cat, 0) + 1
         if st:
             streets[st] = streets.get(st, 0) + 1
@@ -332,7 +410,8 @@ def crime(h=None, months=6):
             "by_cat": sorted(([k, CRIME_NAMES.get(k, k), v] for k, v in by_cat.items()), key=lambda x: -x[2]),
             "streets": sorted(streets.items(), key=lambda x: -x[1])[:6],
             "outcomes": sorted(outcomes.items(), key=lambda x: -x[1])[:5],
-            "trend": trend, "names": CRIME_NAMES, "hood": hood}
+            "trend": trend, "names": CRIME_NAMES, "hood": hood,
+            "stops": sorted([s for s in stops if s.get("at")], key=lambda s: s["at"], reverse=True)[:60]}
 
 
 # ------------------------------------------------------------------ area
@@ -437,7 +516,7 @@ def world_events():
 
 def local_all():
     h = home()
-    out = {"home": h, "boundary": boundary(h)}
+    out = {"home": h, "boundary": boundary(h), "you": your_home()}
     jobs = {"crime": lambda: crime(h), "area": lambda: area(h), "flights": lambda: flights(h)}
     res = {}
 
@@ -474,6 +553,14 @@ def local_intel():
         s += f"That's {'up' if c['total'] > prev else 'down' if c['total'] < prev else 'level'} from {prev} the month before; 6-month average {avg}. "
     if c["streets"]:
         s += f"Most reports on or near {c['streets'][0][0]}. "
+    y = your_home()
+    if y and c["items"]:
+        cl = math.cos(math.radians(y["lat"]))
+        ds = sorted((math.hypot((r[0] - y["lat"]) * 110540, (r[1] - y["lon"]) * 111320 * cl), r) for r in c["items"])
+        near = [d for d, _ in ds if d <= 250]
+        s += (f"{len(near)} within 250 m of the user's house. " if near else
+              f"Nothing within 250 m of the user's house; nearest was about {round(ds[0][0], -1):.0f} m away ({CRIME_NAMES.get(ds[0][1][2], '')}, {ds[0][1][3]}). ")
+    s += "(Police publish month only, no exact dates/times.) "
     if c["hood"].get("priorities"):
         s += f"Local police priority: {c['hood']['priorities'][0][:140]}"
     return s
