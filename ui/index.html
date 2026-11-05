@@ -2950,8 +2950,8 @@ async function lcLoad(){ try{ LC.data=await api.globe_local(); }catch(e){ LC.dat
   lcPanel(); clearTimeout(LC.flT); LC.flT=setTimeout(lcFlights,20000); }
 async function lcFlights(){ if(!LC.on||!GL.on) return; try{ LC.data.flights=await api.globe_flights(); LC.flTs=performance.now(); if(LC.tab==="sky") lcPanel(); }catch(e){} LC.flT=setTimeout(lcFlights,20000); }
 function lcPrep(){ const h=LC.data&&LC.data.home||GL.feeds.home; if(!h) return setTimeout(lcPrep,500); const pr=lcProj(h); const M=LC.map;
-  LC.geo={roads:M.roads.map(r=>({k:r.k,n:r.n,g:r.g.map(p=>pr(p[0],p[1]))})),b:M.buildings.map(g=>g.map(p=>pr(p[0],p[1]))),w:M.water.map(r=>({a:r.area,g:r.g.map(p=>pr(p[0],p[1]))})),
-    rail:M.rail.map(g=>g.map(p=>pr(p[0],p[1]))),green:M.green.map(g=>g.map(p=>pr(p[0],p[1]))),poi:M.poi.map(p=>({...p,m:pr(p.p[0],p.p[1])})),places:M.places.map(p=>({...p,m:pr(p.p[0],p.p[1])}))}; }
+  LC.geo={roads:M.roads.map(r=>({k:r.k,n:r.n,g:r.g.map(p=>pr(p[0],p[1]))})),b:M.buildings.map(g=>(g.g||g).map(p=>pr(p[0],p[1]))),w:M.water.map(r=>({a:r.area,g:r.g.map(p=>pr(p[0],p[1]))})),
+    rail:M.rail.map(g=>g.map(p=>pr(p[0],p[1]))),green:M.green.map(g=>(g.g||g).map(p=>pr(p[0],p[1]))),poi:M.poi.map(p=>({...p,m:pr(p.p[0],p.p[1])})),places:M.places.map(p=>({...p,m:pr(p.p[0],p.p[1])}))}; }
 const RW={motorway:4,trunk:3.6,primary:3.2,secondary:2.6,tertiary:2.2,unclassified:1.6,residential:1.4,living_street:1.2,service:.8,track:.7,footway:.5,path:.5,cycleway:.5,bridleway:.5};
 function localFrame(ts){ if(!LC.on||!GL.on) return; const c=$("#lcC"); if(!c) return; const x=c.getContext("2d"), W=c.width, H=c.height, k=devicePixelRatio, t=(ts-LC.t0)/1000;
   const intro=Math.min(1,t/1.2), z=LC.zoom*k*(.4+.6*(1-Math.pow(1-intro,3))); const cx=W*.4, cy=H*.54;

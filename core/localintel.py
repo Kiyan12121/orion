@@ -170,7 +170,7 @@ def _get(url, timeout=20, **params):
 def local_map(h=None, force=False):
     h = h or home()
     c = _cache()
-    key = f"map2:{h['lat']:.3f},{h['lon']:.3f}"
+    key = f"map3:{h['lat']:.3f},{h['lon']:.3f}"
     hit = c.get(key)
     if hit and not force and time.time() - hit.get("ts", 0) < 7 * 86400:
         return hit["data"]
@@ -190,10 +190,11 @@ def local_map(h=None, force=False):
   way(around:{rad},{la},{lo})[natural=water];
   way(around:{rad},{la},{lo})[waterway];
   way(around:{rad},{la},{lo})[railway~"^(rail|disused|abandoned)$"];
-  way(around:{rad},{la},{lo})[landuse~"^(forest|meadow|recreation_ground|cemetery)$"];
-  way(around:{rad},{la},{lo})[leisure~"^(park|pitch|golf_course|playground)$"];
-  node(around:{rad},{la},{lo})[amenity~"^(school|pub|cafe|restaurant|fast_food|pharmacy|doctors|place_of_worship|library|post_office|fuel|police|fire_station)$"];
-  node(around:{rad},{la},{lo})[shop];
+  way(around:{rad},{la},{lo})[landuse~"^(forest|meadow|recreation_ground|cemetery|farmland|grass|residential|industrial|commercial|retail|allotments|farmyard|orchard|village_green)$"];
+  way(around:{rad},{la},{lo})[natural~"^(wood|scrub|grassland)$"];
+  way(around:{rad},{la},{lo})[leisure~"^(park|pitch|golf_course|playground|sports_centre|nature_reserve)$"];
+  nwr(around:{rad},{la},{lo})[amenity~"^(school|pub|cafe|restaurant|fast_food|pharmacy|doctors|place_of_worship|library|post_office|fuel|police|fire_station|community_centre)$"];
+  nwr(around:{rad},{la},{lo})[shop];
   node(around:9000,{la},{lo})[place~"^(town|village|hamlet)$"];
 );
 out geom qt;"""
@@ -218,8 +219,31 @@ out geom qt;"""
         g = [[rnd(x["lat"]), rnd(x["lon"])] for x in e.get("geometry", []) if x]
         if len(g) < 2:
             continue
+        if e["type"] != "way" or (t.get("amenity") or t.get("shop")) and "building" not in t:
+            if t.get("name") and (t.get("amenity") or t.get("shop")):      # an area POI -> its centre
+                out["poi"].append({"p": [rnd(sum(q[0] for q in g) / len(g)), rnd(sum(q[1] for q in g) / len(g))], "n": t["name"],
+                                   "k": t.get("amenity") or "shop:" + t.get("shop", "")})
+            continue
         if "building" in t:
-            out["buildings"].append(g)
+            hgt = None
+            try:
+                hgt = float(str(t.get("height", "")).split()[0]) if t.get("height") else None
+            except ValueError:
+                pass
+            if hgt is None and t.get("building:levels"):
+                try:
+                    hgt = float(t["building:levels"]) * 3.2 + 1.5
+                except ValueError:
+                    pass
+            if hgt is None:
+                b = t["building"]
+                hgt = (3 if b in ("garage", "garages", "shed", "hut", "carport", "kiosk") else 16 if b in ("church", "chapel", "cathedral")
+                       else 9 if b in ("industrial", "warehouse", "barn", "farm_auxiliary", "school", "commercial", "retail", "sports_hall")
+                       else 7)
+            out["buildings"].append({"g": g, "h": round(hgt, 1), "n": t.get("name", "")})
+            if t.get("name") and (t.get("amenity") or t.get("shop")):
+                out["poi"].append({"p": [rnd(sum(q[0] for q in g) / len(g)), rnd(sum(q[1] for q in g) / len(g))], "n": t["name"],
+                                   "k": t.get("amenity") or "shop:" + t.get("shop", "")})
         elif "highway" in t:
             out["roads"].append({"g": g, "k": t["highway"], "n": t.get("name", "")})
         elif t.get("natural") == "water" or "waterway" in t:
@@ -227,7 +251,9 @@ out geom qt;"""
         elif "railway" in t:
             out["rail"].append(g)
         else:
-            out["green"].append(g)
+            out["green"].append({"g": g, "k": t.get("landuse") or t.get("natural") or t.get("leisure") or ""})
+    seen = set()
+    out["poi"] = [p for p in out["poi"] if not (p["n"] in seen or seen.add(p["n"]))]
     c[key] = {"ts": time.time(), "data": out}
     _save(c)
     return out
