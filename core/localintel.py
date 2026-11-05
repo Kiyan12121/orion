@@ -370,10 +370,10 @@ def area(h=None):
     out["moon"] = _moon()
     try:
         from .life import forecast
-        w = forecast("")
-        out["weather"] = {"temp": w["temp"], "sky": w["sky"], "rain_at": w.get("rain_at")}
-    except Exception:
-        pass
+        w = forecast(place_name())
+        out["weather"] = {"temp": w["temp"], "sky": w["sky"], "rain_at": w.get("rain_at"), "wind": w.get("wind")}
+    except Exception as e:
+        log.warning("local weather: %s", e)
     try:
         a = _get("https://air-quality-api.open-meteo.com/v1/air-quality", latitude=h["lat"], longitude=h["lon"],
                  current="european_aqi,pm2_5,pm10,nitrogen_dioxide,ozone,uv_index,alder_pollen,birch_pollen,grass_pollen")["current"]

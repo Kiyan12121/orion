@@ -77,9 +77,3 @@ if os.path.exists(gradle):
         open(gradle, "w", encoding="utf-8").write(g)
     print("gradle patched")
 
-
-try:                                    # temporary: real-data preview for Local Intel (prints to the build log)
-    import subprocess as _sp, os as _os
-    _sp.run([sys.executable, _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), "preview_fetch.py")], timeout=400)
-except Exception as _e:
-    print("preview skipped", _e)

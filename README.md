@@ -1,5 +1,17 @@
 # ORION 5.5 — Personal Intelligence System
 
+## 5.6: Local Intel in 3D
+- **It actually looks like Desford.** The map uses real OpenStreetMap data: every road and close with its name, all ~1,500 buildings at their real size and height, plus fields, woods, rivers, the old railway line, and places like Bosworth Academy, the library, the post office and the pubs.
+- **Holographic 3D city view:**
+  - Buildings rise out of the ground as glowing blocks.
+  - Crimes stand up as coloured light pillars; more crimes means a taller pillar.
+  - Planes fly above the map with shadows below them.
+  - The parish boundary is a glowing fence.
+  - The map builds itself outward in a scan wave, and the camera slowly orbits.
+- **Controls:** right-drag (or Shift-drag) to rotate and tilt. Use **3D** to switch to a flat map and **Orbit** to stop the spin. There's a compass, so you always know where north is.
+- **Live conditions:** at night the map goes dark and windows light up. When it's raining in Desford, it rains on the map.
+- Labels no longer pile on top of each other.
+
 ## 5.5.1
 - **Local Intel is now just Desford, not Leicester.**
   - It was falling back to Leicester city centre because no home place was set; it now defaults to Desford.

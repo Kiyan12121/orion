@@ -1128,6 +1128,7 @@ body.reveal .shell{animation:reveal 1.4s}
 .lc-fl{padding:8px 10px;margin-bottom:6px;border-radius:7px;background:rgba(var(--ar),.05);border-left:2px solid rgba(var(--ar),.5);cursor:pointer;font:500 13px var(--ui)}
 .lc-fl:hover,.lc-fl.sel{background:rgba(255,190,85,.12);border-color:#ffbe55}.lc-fl b{display:block;font-size:14px}.lc-fl span{color:var(--text)}.lc-fl small{display:block;color:var(--dim)}
 .lc-back{position:absolute;left:30px;bottom:44px;z-index:5;padding:9px 16px;border-radius:8px;border:1px solid rgba(var(--ar),.5);background:rgba(2,12,22,.7);color:var(--a2);font:800 13px var(--disp);letter-spacing:.2em;cursor:pointer}
+.lc-cmp{position:absolute;left:30px;bottom:96px;z-index:5;width:44px;height:44px;border-radius:50%;border:1px solid rgba(var(--ar),.45);background:rgba(2,12,22,.7);display:grid;place-items:center}.lc-cmp i{font:800 13px var(--disp);color:#ff8a8a;font-style:normal;display:block;transition:transform .1s}.lc-cmp i::before{content:'▲';display:block;font-size:9px;text-align:center;margin-bottom:-3px}
 .lc-scale{position:absolute;left:170px;bottom:52px;z-index:5;height:6px;border:1px solid var(--a2);border-top:0;font:600 11px var(--ui);color:var(--a2);text-align:center;line-height:0;padding-bottom:12px}
 @media (max-width:1000px){.lc-pn{width:300px}}
 </style>
@@ -2918,23 +2919,31 @@ function globeFrame(ts){ if(!GL.on) return; const c=$("#glC"); if(!c) return; if
 
 /* ---------- LOCAL INTEL: holographic map of home ---------- */
 const CRC={"anti-social-behaviour":"#ffbe55","bicycle-theft":"#9fe8ff","burglary":"#ff5a6e","criminal-damage-arson":"#ff8a3d","drugs":"#c9a0ff","other-theft":"#7fd4ff","possession-of-weapons":"#ff2e63","public-order":"#f3e37c","robbery":"#ff4dbe","shoplifting":"#5dffb0","theft-from-the-person":"#4da3ff","vehicle-crime":"#ffd27f","violent-crime":"#ff6b6b","other-crime":"#b8c4cc"};
-const LC={on:false,map:null,data:null,zoom:.32,px:0,py:0,drag:null,raf:0,t0:0,hide:{},span:"month",tab:"crime",geo:null,mouse:null,hover:null,flTs:0,sel:null};
+const LC={on:false,map:null,data:null,zoom:.32,px:0,py:0,rot:0,pitch:0,pitchT:.95,orbit:true,night:false,rain:false,drag:null,raf:0,t0:0,hide:{},span:"month",tab:"crime",geo:null,mouse:null,hover:null,flTs:0,sel:null};
 function lcProj(h){ const c=Math.cos(h.lat*Math.PI/180); return (la,lo)=>[(lo-h.lon)*111320*c,(la-h.lat)*110540]; }
-async function localOpen(){ LC.on=true; LC.t0=performance.now(); LC.zoom=.32; LC.px=LC.py=0; LC.sel=null; LC.bound=null;
+async function localOpen(){ LC.on=true; LC.t0=performance.now(); LC.zoom=.32; LC.px=LC.py=0; LC.sel=null; LC.bound=null; LC.rot=-.35; LC.pitch=0; LC.pitchT=LC.pitchT||.95;
   $("#lcWrap").innerHTML=`<div class="lc"><canvas id="lcC"></canvas>
     <div class="lc-hd"><small>LOCAL INTEL</small><h1 id="lcName">${esc((GL.feeds.home||{}).name||"HOME")}</h1><div id="lcSub">Scanning area…</div><button class="lc-area" id="lcArea">📍 change area</button></div>
-    <div class="lc-chips" id="lcChips"><button data-s="month" class="on">Latest month</button><button data-s="six">6 months</button><button data-s="heat">Heatmap</button><button data-s="fl" class="on">Aircraft</button><button data-s="poi" class="on">Places</button></div>
+    <div class="lc-chips" id="lcChips"><button data-s="month" class="on">Latest month</button><button data-s="six">6 months</button><button data-s="heat">Heatmap</button><button data-s="fl" class="on">Aircraft</button><button data-s="poi" class="on">Places</button><button data-s="d3" class="on">3D</button><button data-s="orbit" class="on">Orbit</button></div>
+    <div class="lc-cmp" title="North"><i id="lcCmp">N</i></div>
     <div class="lc-pn"><div class="lc-tabs"><button data-t="crime" class="on">CRIME</button><button data-t="area">AREA</button><button data-t="sky">SKY</button></div><div id="lcBody"><div class="lc-load">◌ Pulling police.uk, air quality, flood and flight data…</div></div></div>
     <button class="lc-back" id="lcBack">◀ GLOBE</button><div class="lc-scale" id="lcScale"></div><div class="gl-tip" id="lcTip"></div></div>`;
-  $("#glHint").textContent="DRAG TO PAN · SCROLL TO ZOOM · HOVER A DOT · CLICK A CATEGORY TO FILTER";
+  $("#glHint").textContent="DRAG TO PAN · RIGHT-DRAG TO ROTATE & TILT · SCROLL TO ZOOM · HOVER A DOT";
   $$("#glLayers,.gl-tl,.gl-tr,#glTarget").forEach(e=>e.style.display="none");
   $("#lcBack").onclick=()=>{ LC.on=false; $("#lcWrap").innerHTML=""; GL.dive=0; GL.zoom=1.3; $$(".gl-tl,.gl-tr,#glTarget").forEach(e=>e.style.display=""); $("#glHint").textContent="DRAG TO SPIN · SCROLL TO ZOOM · CLICK A MARKER · ESC TO CLOSE"; };
   $$(".lc-tabs button").forEach(b=>b.onclick=()=>{ LC.tab=b.dataset.t; $$(".lc-tabs button").forEach(x=>x.classList.toggle("on",x===b)); lcPanel(); sfx("tick"); });
   $$("#lcChips button").forEach(b=>b.onclick=()=>{ const s=b.dataset.s; if(s==="month"||s==="six"){ LC.span=s; $$('#lcChips [data-s="month"],#lcChips [data-s="six"]').forEach(x=>x.classList.toggle("on",x.dataset.s===s)); lcPanel(); }
+    else if(s==="d3"){ LC.pitchT=LC.pitchT>.1?0:.95; b.classList.toggle("on",LC.pitchT>.1); }
+    else if(s==="orbit"){ LC.orbit=!LC.orbit; b.classList.toggle("on",LC.orbit); }
     else { LC.hide[s]=!LC.hide[s]; b.classList.toggle("on",s==="heat"?!!LC.hide[s]:!LC.hide[s]); } sfx("tick"); });
   const c=$("#lcC"); const fit=()=>{ c.width=innerWidth*devicePixelRatio; c.height=innerHeight*devicePixelRatio; }; fit(); addEventListener("resize",fit);
-  c.onmousedown=e=>{ LC.drag=[e.clientX,e.clientY,LC.px,LC.py,0]; }; addEventListener("mouseup",()=>{ if(LC.drag&&LC.drag[4]<4&&LC.hover&&LC.hover.fl){ LC.sel=LC.hover.fl.cs; } LC.drag=null; });
-  c.onmousemove=e=>{ LC.mouse=[e.clientX*devicePixelRatio,e.clientY*devicePixelRatio]; if(!LC.drag) return; LC.drag[4]+=Math.abs(e.movementX)+Math.abs(e.movementY); LC.px=LC.drag[2]+(e.clientX-LC.drag[0])/LC.zoom; LC.py=LC.drag[3]-(e.clientY-LC.drag[1])/LC.zoom; };
+  c.oncontextmenu=e=>e.preventDefault();
+  c.onmousedown=e=>{ LC.drag=[e.clientX,e.clientY,LC.px,LC.py,0,e.button===2||e.shiftKey,LC.rot,LC.pitchT]; if(LC.drag[5]){ LC.orbit=false; const o=$('#lcChips [data-s="orbit"]'); o&&o.classList.remove("on"); } }; addEventListener("mouseup",()=>{ if(LC.drag&&LC.drag[4]<4&&LC.hover&&LC.hover.fl){ LC.sel=LC.hover.fl.cs; } LC.drag=null; });
+  c.onmousemove=e=>{ LC.mouse=[e.clientX*devicePixelRatio,e.clientY*devicePixelRatio]; if(!LC.drag) return; LC.drag[4]+=Math.abs(e.movementX)+Math.abs(e.movementY);
+    const dx=e.clientX-LC.drag[0], dy=e.clientY-LC.drag[1];
+    if(LC.drag[5]){ LC.rot=LC.drag[6]+dx*.006; LC.pitchT=LC.pitch=Math.max(0,Math.min(1.25,LC.drag[7]-dy*.005)); return; }
+    const sx=dx/LC.zoom, sy=-dy/(LC.zoom*Math.max(.3,Math.cos(LC.pitch))), cr=Math.cos(LC.rot), sr=Math.sin(LC.rot);
+    LC.px=LC.drag[2]+(sx*cr+sy*sr); LC.py=LC.drag[3]+(-sx*sr+sy*cr); };
   c.onwheel=e=>{ LC.zoom=Math.max(.04,Math.min(3,LC.zoom*(e.deltaY<0?1.15:.87))); };
   $("#lcArea").onclick=async()=>{ const cur=await api.local_place(); const v=prompt("Which village or town should Local Intel cover?",cur); if(!v||v.trim()===cur) return; await api.local_place(v.trim()); toast("📍 Local Intel now covers "+v.trim()); GL.feeds.home=null; LC.map=null; LC.geo=null; LC.data=null; globeData(); localOpen(); };
   cancelAnimationFrame(LC.raf); LC.raf=requestAnimationFrame(localFrame);
@@ -2943,76 +2952,110 @@ async function localOpen(){ LC.on=true; LC.t0=performance.now(); LC.zoom=.32; LC
 async function lcLoad(){ try{ LC.data=await api.globe_local(); }catch(e){ LC.data={}; } const D=LC.data; LC.flTs=performance.now();
   if(D.area&&D.area.kp) GL.kp=D.area.kp.kp;
   if(D.home){ $("#lcName").textContent=D.home.name; }
+  { const ar=D.area||{}; const now=new Date().toTimeString().slice(0,5); LC.night=!!(ar.sunset&&ar.sunrise&&(now>=ar.sunset||now<ar.sunrise)); LC.rain=/rain|drizzle|shower|storm/i.test((ar.weather||{}).sky||""); }
   if(D.home&&D.boundary&&D.boundary.ring){ const pr=lcProj(D.home); LC.bound=D.boundary.ring.map(q=>pr(q[0],q[1])); const xs=LC.bound.map(m=>m[0]), ys=LC.bound.map(m=>m[1]);
-    const w=Math.max(...xs)-Math.min(...xs), hh=Math.max(...ys)-Math.min(...ys); LC.px=-(Math.max(...xs)+Math.min(...xs))/2; LC.py=-(Math.max(...ys)+Math.min(...ys))/2;
-    LC.zoom=Math.max(.06,Math.min(.8,Math.min((innerWidth-480)/w,(innerHeight-160)/hh)*.85)); } else LC.bound=null;
+    const w=Math.max(...xs)-Math.min(...xs), hh=Math.max(...ys)-Math.min(...ys); LC.px=-(Math.max(...xs)+Math.min(...xs))/2*.45; LC.py=-(Math.max(...ys)+Math.min(...ys))/2*.45;
+    LC.zoom=Math.max(.06,Math.min(.9,Math.min((innerWidth-480)/w,(innerHeight-160)/hh)*1.45)); } else LC.bound=null;
   const cr=D.crime||{}; $("#lcSub").textContent=cr.month?`${cr.total} crimes reported ${cr.area?"inside "+cr.area:"within "+cr.radius} · ${new Date(cr.month+"-01").toLocaleString("en-GB",{month:"long",year:"numeric"})}`:(cr.error?"Police data unavailable: "+cr.error:"");
   lcPanel(); clearTimeout(LC.flT); LC.flT=setTimeout(lcFlights,20000); }
 async function lcFlights(){ if(!LC.on||!GL.on) return; try{ LC.data.flights=await api.globe_flights(); LC.flTs=performance.now(); if(LC.tab==="sky") lcPanel(); }catch(e){} LC.flT=setTimeout(lcFlights,20000); }
-function lcPrep(){ const h=LC.data&&LC.data.home||GL.feeds.home; if(!h) return setTimeout(lcPrep,500); const pr=lcProj(h); const M=LC.map;
-  LC.geo={roads:M.roads.map(r=>({k:r.k,n:r.n,g:r.g.map(p=>pr(p[0],p[1]))})),b:M.buildings.map(g=>(g.g||g).map(p=>pr(p[0],p[1]))),w:M.water.map(r=>({a:r.area,g:r.g.map(p=>pr(p[0],p[1]))})),
-    rail:M.rail.map(g=>g.map(p=>pr(p[0],p[1]))),green:M.green.map(g=>(g.g||g).map(p=>pr(p[0],p[1]))),poi:M.poi.map(p=>({...p,m:pr(p.p[0],p.p[1])})),places:M.places.map(p=>({...p,m:pr(p.p[0],p.p[1])}))}; }
+function lcPrep(){ const h=LC.data&&LC.data.home; if(!h||!LC.map) return setTimeout(lcPrep,300); if(LC.geo&&LC.geoHome===h) return; LC.geoHome=h; const pr=lcProj(h); const M=LC.map;
+  const cen=g=>{ let a=0,b=0; g.forEach(m=>{ a+=m[0]; b+=m[1]; }); return [a/g.length,b/g.length]; };
+  const roads=M.roads.map(r=>{ const g=r.g.map(p=>pr(p[0],p[1])); const c=cen(g); return {k:r.k,n:r.n,g,d:Math.hypot(c[0],c[1])}; });
+  const b=M.buildings.map(o=>{ const g=(o.g||o).map(p=>pr(p[0],p[1])); const c=cen(g); return {g,h:o.h||7,n:o.n||"",c,d:Math.hypot(c[0],c[1])}; });
+  LC.geo={roads,b,w:M.water.map(r=>({a:r.area,g:r.g.map(p=>pr(p[0],p[1]))})),rail:M.rail.map(g=>g.map(p=>pr(p[0],p[1]))),
+    green:M.green.map(o=>({k:o.k||"",g:(o.g||o).map(p=>pr(p[0],p[1]))})),poi:M.poi.map(p=>({...p,m:pr(p.p[0],p.p[1])})),places:M.places.map(p=>({...p,m:pr(p.p[0],p.p[1])}))};
+  LC.geo.rmax=Math.max(1,...roads.map(r=>r.d),...b.map(q=>q.d)); }
 const RW={motorway:4,trunk:3.6,primary:3.2,secondary:2.6,tertiary:2.2,unclassified:1.6,residential:1.4,living_street:1.2,service:.8,track:.7,footway:.5,path:.5,cycleway:.5,bridleway:.5};
-function localFrame(ts){ if(!LC.on||!GL.on) return; const c=$("#lcC"); if(!c) return; const x=c.getContext("2d"), W=c.width, H=c.height, k=devicePixelRatio, t=(ts-LC.t0)/1000;
-  const intro=Math.min(1,t/1.2), z=LC.zoom*k*(.4+.6*(1-Math.pow(1-intro,3))); const cx=W*.4, cy=H*.54;
-  const S=(m)=>[cx+(m[0]+LC.px)*z, cy-(m[1]+LC.py)*z]; x.clearRect(0,0,W,H);
-  const bg=x.createRadialGradient(cx,cy,0,cx,cy,Math.max(W,H)*.7); bg.addColorStop(0,"#071c2e"); bg.addColorStop(1,"#01050b"); x.fillStyle=bg; x.fillRect(0,0,W,H);
-  // grid every 100 m / 1 km
-  const step=z>.12*k?100:z>.02*k?1000:10000; x.strokeStyle="rgba(120,200,255,.06)"; x.lineWidth=1;
-  const x0=-(cx/z)-LC.px, x1=(W-cx)/z-LC.px, y0=-(H-cy)/z-LC.py, y1=cy/z-LC.py;
-  for(let gx=Math.floor(x0/step)*step;gx<x1;gx+=step){ const a=S([gx,0])[0]; x.beginPath(); x.moveTo(a,0); x.lineTo(a,H); x.stroke(); }
-  for(let gy=Math.floor(y0/step)*step;gy<y1;gy+=step){ const a=S([0,gy])[1]; x.beginPath(); x.moveTo(0,a); x.lineTo(W,a); x.stroke(); }
-  const poly=(g,close)=>{ x.beginPath(); g.forEach((m,i)=>{ const p=S(m); i?x.lineTo(p[0],p[1]):x.moveTo(p[0],p[1]); }); if(close) x.closePath(); };
-  const G=LC.geo; const reveal=Math.min(1,t/2.2);
-  if(G){ x.fillStyle="rgba(93,255,176,.05)"; G.green.forEach(g=>{ poly(g,1); x.fill(); });
-    G.w.forEach(w=>{ poly(w.g,w.a); if(w.a){ x.fillStyle="rgba(77,163,255,.25)"; x.fill(); } x.strokeStyle="rgba(77,163,255,.6)"; x.lineWidth=1.4*k; x.stroke(); });
-    if(z>.05*k){ x.fillStyle="rgba(63,216,255,.09)"; x.strokeStyle="rgba(63,216,255,.28)"; x.lineWidth=.8*k; const nb=Math.floor(G.b.length*reveal); for(let i=0;i<nb;i++){ poly(G.b[i],1); x.fill(); x.stroke(); } }
-    x.setLineDash([6*k,5*k]); x.strokeStyle="rgba(200,210,230,.45)"; x.lineWidth=1.4*k; G.rail.forEach(g=>{ poly(g); x.stroke(); }); x.setLineDash([]);
-    const nr=Math.floor(G.roads.length*reveal);
-    for(const pass of [0,1]) for(let i=0;i<nr;i++){ const r=G.roads[i]; const w=RW[r.k]||1; const minor=w<1; if(minor&&z<.15*k) continue;
-      poly(r.g); if(pass===0){ if(w<2) continue; x.strokeStyle="rgba(63,216,255,.12)"; x.lineWidth=(w*2.6+4)*k*Math.min(1.6,z/(.3*k)+.4); x.stroke(); }
-      else { x.strokeStyle=minor?"rgba(140,200,240,.28)":w>=2.6?"rgba(150,235,255,.95)":"rgba(110,200,245,.7)"; x.lineWidth=Math.max(.6,w*k*Math.min(1.8,z/(.3*k)+.3)); if(minor) x.setLineDash([3*k,3*k]); x.stroke(); x.setLineDash([]); } }
-    if(z>.45*k){ x.font=`600 ${10.5*k}px Rajdhani,sans-serif`; x.fillStyle="rgba(190,235,255,.75)"; const done={}; for(const r of G.roads){ if(!r.n||done[r.n]||(RW[r.k]||0)<1.2) continue; done[r.n]=1; const m=r.g[Math.floor(r.g.length/2)]; const p=S(m); if(p[0]<0||p[0]>W||p[1]<0||p[1]>H) continue; x.fillText(r.n,p[0]+3*k,p[1]-3*k); } }
-    if(!LC.hide.poi&&z>.22*k){ x.font=`600 ${11*k}px Rajdhani,sans-serif`; for(const p of G.poi){ const q=S(p.m); if(q[0]<0||q[0]>W||q[1]<0||q[1]>H) continue; x.fillStyle="#ffd27f"; x.save(); x.translate(q[0],q[1]); x.rotate(Math.PI/4); x.fillRect(-3*k,-3*k,6*k,6*k); x.restore(); if(z>.4*k){ x.fillStyle="rgba(255,226,170,.85)"; x.fillText(p.n,q[0]+7*k,q[1]+4*k); } } }
-    if(z<.16*k){ x.font=`700 ${12*k}px Rajdhani,sans-serif`; for(const p of G.places){ if(LC.data&&LC.data.home&&p.n===LC.data.home.name) continue; const q=S(p.m); x.fillStyle=p.k==="village"?"rgba(190,235,255,.6)":"#e8f6ff"; x.beginPath(); x.arc(q[0],q[1],(p.k==="city"?5:p.k==="town"?3.5:2)*k,0,7); x.fill(); x.fillText(p.n.toUpperCase(),q[0]+7*k,q[1]+4*k); } } }
-  // boundary (just your village) — or range rings if there isn't one
-  const ctr=S([0,0]); const sw=(t*.9)%(2*Math.PI); let sweepR=1609.3*z;
-  if(LC.bound){ x.save(); x.beginPath(); x.rect(0,0,W,H); LC.bound.forEach((m,i)=>{ const p=S(m); i?x.lineTo(p[0],p[1]):x.moveTo(p[0],p[1]); }); x.closePath(); x.fillStyle="rgba(1,5,11,.72)"; x.fill("evenodd"); x.restore();
+const GRN={farmland:"rgba(120,200,140,.07)",meadow:"rgba(120,220,150,.08)",grass:"rgba(120,230,150,.09)",grassland:"rgba(120,230,150,.08)",village_green:"rgba(120,240,150,.12)",wood:"rgba(70,200,120,.16)",forest:"rgba(70,200,120,.16)",scrub:"rgba(90,190,120,.11)",orchard:"rgba(110,210,120,.12)",
+  park:"rgba(93,255,176,.12)",recreation_ground:"rgba(93,255,176,.11)",pitch:"rgba(93,255,176,.16)",playground:"rgba(93,255,176,.14)",golf_course:"rgba(93,255,176,.1)",sports_centre:"rgba(93,255,176,.1)",nature_reserve:"rgba(70,200,120,.1)",
+  cemetery:"rgba(150,170,200,.1)",allotments:"rgba(140,220,120,.12)",farmyard:"rgba(200,180,120,.08)",residential:"rgba(63,216,255,.035)",industrial:"rgba(200,160,255,.06)",commercial:"rgba(255,190,85,.05)",retail:"rgba(255,190,85,.06)"};
+const POIC={pub:["🍺","#ffbe55"],cafe:["☕","#ffd27f"],restaurant:["🍴","#ffd27f"],fast_food:["🍔","#ffd27f"],school:["🎓","#9fe8ff"],place_of_worship:["⛪","#e8f6ff"],library:["📚","#9fe8ff"],pharmacy:["💊","#5dffb0"],doctors:["🩺","#5dffb0"],post_office:["✉","#ff8a8a"],fuel:["⛽","#ff8a3d"],police:["🚓","#4da3ff"],fire_station:["🚒","#ff5a6e"],community_centre:["🏛","#c9a0ff"]};
+function lcCam(W,H,k){ const t=performance.now(); const intro=Math.min(1,(t-LC.t0)/1600), e=1-Math.pow(1-intro,3);
+  LC.pitch+=(LC.pitchT-LC.pitch)*.08; if(LC.orbit&&!LC.drag) LC.rot+=.0009;
+  const z=LC.zoom*k*(.35+.65*e), cp=Math.cos(LC.pitch), sp=Math.sin(LC.pitch), cr=Math.cos(LC.rot), sr=Math.sin(LC.rot); const cx=W*.4, cy=H*(.54+.08*LC.pitch);
+  const S=(m,h=0)=>{ const X=m[0]+LC.px, Y=m[1]+LC.py; const rx=X*cr-Y*sr, ry=X*sr+Y*cr; return [cx+rx*z, cy-ry*z*cp-h*z*sp, ry]; };
+  return {z,cp,sp,cx,cy,S}; }
+function localFrame(ts){ if(!LC.on||!GL.on) return; const c=$("#lcC"); if(!c) return; LC.raf=requestAnimationFrame(localFrame);
+  if(LC.pitch>.05&&document.body.classList.contains("lite")&&(LC.fr=(LC.fr||0)+1)%2) return;          // half frame-rate in 3D on lite PCs
+  const x=c.getContext("2d"), W=c.width, H=c.height, k=devicePixelRatio, t=(ts-LC.t0)/1000; const {z,cp,sp,cx,cy,S}=lcCam(W,H,k); const in3d=LC.pitch>.08;
+  x.clearRect(0,0,W,H); const bg=x.createRadialGradient(cx,cy,0,cx,cy,Math.max(W,H)*.75); bg.addColorStop(0,LC.night?"#04111e":"#082236"); bg.addColorStop(1,"#01050b"); x.fillStyle=bg; x.fillRect(0,0,W,H);
+  const vis=p=>p[0]>-80&&p[0]<W+80&&p[1]>-80&&p[1]<H+80;
+  const poly=(g,close,h=0)=>{ x.beginPath(); for(let i=0;i<g.length;i++){ const p=S(g[i],h); i?x.lineTo(p[0],p[1]):x.moveTo(p[0],p[1]); } if(close) x.closePath(); };
+  const revealR=t*1400; const G=LC.geo; const occ=new Set(); const free=(px,py,w)=>{ if(px<500*k&&py<200*k) return false; if(px>W-400*k) return false; const gx=Math.floor(px/(90*k)), gy=Math.floor(py/(22*k)); for(let i=0;i<=Math.ceil(w/(90*k));i++) if(occ.has((gx+i)+":"+gy)) return false; for(let i=0;i<=Math.ceil(w/(90*k));i++) occ.add((gx+i)+":"+gy); return true; };
+  // ground grid
+  const step=z>.12*k?100:1000, ext=6000; x.strokeStyle="rgba(120,200,255,.055)"; x.lineWidth=1;
+  for(let g=-ext;g<=ext;g+=step){ x.beginPath(); let p=S([g-LC.px,-ext-LC.py]); x.moveTo(p[0],p[1]); p=S([g-LC.px,ext-LC.py]); x.lineTo(p[0],p[1]); x.stroke(); x.beginPath(); p=S([-ext-LC.px,g-LC.py]); x.moveTo(p[0],p[1]); p=S([ext-LC.px,g-LC.py]); x.lineTo(p[0],p[1]); x.stroke(); }
+  if(G){ for(const o of G.green){ const f=GRN[o.k]; if(!f) continue; poly(o.g,1); x.fillStyle=f; x.fill(); if(o.k==="farmland"||o.k==="meadow"){ x.strokeStyle="rgba(120,220,150,.13)"; x.lineWidth=.8*k; x.stroke(); } }
+    for(const w of G.w){ poly(w.g,w.a); if(w.a){ x.fillStyle="rgba(77,163,255,.28)"; x.fill(); } x.strokeStyle="rgba(77,163,255,.75)"; x.lineWidth=(w.a?1:1.8)*k; x.stroke(); }
+    x.setLineDash([6*k,5*k]); x.strokeStyle="rgba(200,210,230,.5)"; x.lineWidth=1.6*k; G.rail.forEach(g=>{ poly(g); x.stroke(); }); x.setLineDash([]);
+    for(const pass of [0,1]) for(const r of G.roads){ if(r.d>revealR) continue; const w=RW[r.k]||1; const minor=w<1; if(minor&&z<.15*k) continue;
+      poly(r.g); if(pass===0){ if(w<2) continue; x.strokeStyle="rgba(63,216,255,.13)"; x.lineWidth=(w*2.8+5)*k*Math.min(1.6,z/(.3*k)+.4); x.stroke(); }
+      else { x.strokeStyle=minor?"rgba(140,200,240,.3)":w>=2.6?"rgba(160,240,255,.95)":"rgba(115,205,248,.75)"; x.lineWidth=Math.max(.6,w*k*Math.min(1.8,z/(.3*k)+.3)); if(minor) x.setLineDash([3*k,3*k]); x.stroke(); x.setLineDash([]); } }
+    // scan wave while the map builds
+    if(revealR<G.rmax+400){ const p0=S([0,0]); x.strokeStyle="rgba(93,255,176,.5)"; x.lineWidth=2*k; x.beginPath(); for(let a=0;a<=64;a++){ const q=S([Math.cos(a/64*6.283)*revealR,Math.sin(a/64*6.283)*revealR]); a?x.lineTo(q[0],q[1]):x.moveTo(q[0],q[1]); } x.stroke(); }
+    // buildings: flat footprints, or extruded holographic blocks in 3D
+    if(z>.04*k){ const list=in3d?G.b.slice().sort((a,b)=>S(b.c)[2]-S(a.c)[2]):G.b; const hs=Math.min(1,(t-.3)/1.5);
+      for(const b of list){ if(b.d>revealR) continue; const cc=S(b.c); if(!vis(cc)) continue; const hh=b.h*4*Math.max(0,hs)*LC.pitch;
+        if(in3d&&hh>.5){ x.beginPath(); for(let i=0;i<b.g.length-1;i++){ const a=S(b.g[i]), bb=S(b.g[i+1]), at=S(b.g[i],hh), bt=S(b.g[i+1],hh); x.moveTo(a[0],a[1]); x.lineTo(bb[0],bb[1]); x.lineTo(bt[0],bt[1]); x.lineTo(at[0],at[1]); x.closePath(); }
+          x.fillStyle=LC.night?"rgba(24,80,125,.7)":"rgba(36,125,180,.6)"; x.fill(); x.strokeStyle="rgba(120,220,255,.25)"; x.lineWidth=.6*k; x.stroke(); poly(b.g,1,hh); x.fillStyle=b.n?"rgba(150,235,255,.75)":"rgba(100,210,252,.5)"; x.fill(); x.strokeStyle="rgba(190,245,255,.8)"; x.lineWidth=.7*k; x.stroke();
+          if(LC.night&&b.h<40&&((b.c[0]*7+b.c[1]*13)|0)%3===0){ const w=S(b.c,hh*.55); x.fillStyle="rgba(255,210,130,.85)"; x.fillRect(w[0]-1.2*k,w[1]-1.2*k,2.4*k,2.4*k); } }
+        else { poly(b.g,1); x.fillStyle=b.n?"rgba(120,225,255,.22)":"rgba(63,216,255,.11)"; x.fill(); x.strokeStyle="rgba(63,216,255,.32)"; x.lineWidth=.8*k; x.stroke(); } } }
+    if(z>.55*k){ x.font=`600 ${10.5*k}px Rajdhani,sans-serif`; x.fillStyle="rgba(200,240,255,.8)"; const done={}; for(const r of G.roads.slice().sort((a,b)=>(RW[b.k]||0)-(RW[a.k]||0))){ if(!r.n||done[r.n]||(RW[r.k]||0)<1.2) continue; done[r.n]=1; const p=S(r.g[Math.floor(r.g.length/2)]); if(!vis(p)) continue; const w=x.measureText(r.n).width; if(!free(p[0],p[1],w)) continue; x.fillText(r.n,p[0]+3*k,p[1]-3*k); } }
+    if(z<.16*k){ x.font=`700 ${12*k}px Rajdhani,sans-serif`; for(const p of G.places){ if(LC.data&&LC.data.home&&p.n===LC.data.home.name) continue; const q=S(p.m); if(!vis(q)) continue; x.fillStyle="rgba(200,240,255,.7)"; x.beginPath(); x.arc(q[0],q[1],(p.k==="town"?3.5:2)*k,0,7); x.fill(); if(free(q[0],q[1],x.measureText(p.n).width*1.2)) x.fillText(p.n.toUpperCase(),q[0]+7*k,q[1]+4*k); } } }
+  // boundary: mask outside + glowing curtain wall
+  const ctr=S([0,0]); let sweepR=1609.3*z;
+  if(LC.bound){ x.save(); x.beginPath(); x.rect(0,0,W,H); LC.bound.forEach((m,i)=>{ const p=S(m); i?x.lineTo(p[0],p[1]):x.moveTo(p[0],p[1]); }); x.closePath(); x.fillStyle="rgba(1,5,11,.74)"; x.fill("evenodd"); x.restore();
+    if(in3d){ const wh=55*LC.pitch; x.beginPath(); for(let i=0;i<LC.bound.length-1;i++){ const a=S(LC.bound[i]), b=S(LC.bound[i+1]), at=S(LC.bound[i],wh), bt=S(LC.bound[i+1],wh); x.moveTo(a[0],a[1]); x.lineTo(b[0],b[1]); x.lineTo(bt[0],bt[1]); x.lineTo(at[0],at[1]); x.closePath(); }
+      x.fillStyle="rgba(93,255,176,.07)"; x.fill(); poly(LC.bound,1,wh); x.strokeStyle="rgba(93,255,176,.45)"; x.lineWidth=1*k; x.stroke(); }
     poly(LC.bound,1); x.strokeStyle="rgba(93,255,176,.25)"; x.lineWidth=9*k; x.stroke(); x.strokeStyle="#5dffb0"; x.lineWidth=2*k; x.setLineDash([10*k,5*k]); x.lineDashOffset=-t*20*k; x.stroke(); x.setLineDash([]);
-    const top=LC.bound.reduce((a,m)=>m[1]>a[1]?m:a,LC.bound[0]); const tp=S(top); x.font=`800 ${12*k}px Rajdhani,sans-serif`; x.fillStyle="#5dffb0"; x.fillText(((LC.data&&LC.data.boundary&&LC.data.boundary.name)||"").toUpperCase()+" BOUNDARY",tp[0]+8*k,tp[1]-8*k);
+    const top=LC.bound.reduce((a,m)=>S(m)[1]<S(a)[1]?m:a,LC.bound[0]); const tp=S(top,in3d?55*LC.pitch:0); x.font=`800 ${12*k}px Rajdhani,sans-serif`; x.fillStyle="#5dffb0"; x.fillText(((LC.data&&LC.data.boundary&&LC.data.boundary.name)||"").toUpperCase()+" BOUNDARY",tp[0]+8*k,tp[1]-8*k);
     sweepR=Math.max(...LC.bound.map(m=>Math.hypot(m[0],m[1])))*z; }
-  else { x.strokeStyle="rgba(93,255,176,.35)"; x.lineWidth=1*k; x.setLineDash([2*k,6*k]); x.font=`700 ${10*k}px Rajdhani,sans-serif`; x.fillStyle="rgba(93,255,176,.7)";
-    for(const [m,l] of [[804.7,"½ MILE"],[1609.3,"1 MILE · CRIME RADIUS"]]){ x.beginPath(); x.arc(ctr[0],ctr[1],m*z,0,7); x.stroke(); x.fillText(l,ctr[0]+m*z*.71+4*k,ctr[1]-m*z*.71); } x.setLineDash([]); }
-  const gr=x.createConicGradient?x.createConicGradient(sw,ctr[0],ctr[1]):null; if(gr){ gr.addColorStop(0,"rgba(93,255,176,.16)"); gr.addColorStop(.08,"rgba(93,255,176,0)"); gr.addColorStop(1,"rgba(93,255,176,0)"); x.fillStyle=gr; x.beginPath(); x.arc(ctr[0],ctr[1],sweepR,0,7); x.fill(); }
-  // crime
+  else { x.strokeStyle="rgba(93,255,176,.35)"; x.lineWidth=1*k; x.setLineDash([2*k,6*k]); for(const m of [804.7,1609.3]){ poly(Array.from({length:65},(_,a)=>[Math.cos(a/64*6.283)*m-0,Math.sin(a/64*6.283)*m]),1); x.stroke(); } x.setLineDash([]); }
+  // radar sweep (flat on the ground)
+  { const sw=(t*.9)%(2*Math.PI); x.save(); if(LC.bound){ poly(LC.bound,1); x.clip(); } x.beginPath(); const r=sweepR/z; x.moveTo(ctr[0],ctr[1]); for(let a=0;a<=12;a++){ const ang=sw-a*.03; const q=S([Math.cos(ang)*r,Math.sin(ang)*r]); x.lineTo(q[0],q[1]); } x.closePath(); x.fillStyle="rgba(93,255,176,.12)"; x.fill(); x.restore(); }
+  // POIs
+  if(G&&!LC.hide.poi&&z>.22*k){ x.font=`600 ${11*k}px Rajdhani,sans-serif`; for(const p of G.poi){ const q=S(p.m,in3d?14:0); if(!vis(q)) continue; const [ic,cl]=POIC[p.k]||["◆","#ffd27f"];
+    if(in3d){ const g0=S(p.m); x.strokeStyle=cl+"66"; x.lineWidth=1*k; x.beginPath(); x.moveTo(g0[0],g0[1]); x.lineTo(q[0],q[1]); x.stroke(); }
+    x.fillStyle=cl; x.beginPath(); x.arc(q[0],q[1],3*k,0,7); x.fill(); if(z>.4*k){ const s=ic+" "+p.n, w=x.measureText(s).width; if(free(q[0],q[1],w)){ x.fillStyle="rgba(255,236,190,.92)"; x.fillText(s,q[0]+7*k,q[1]+4*k); } } } }
+  // crime: ground rings + light pillars in 3D
   const hits=[]; const D=LC.data||{}; const cr=D.crime||{}; const pr=D.home?lcProj(D.home):null;
   if(pr&&cr.items){ const rows=(LC.span==="six"?cr.six:cr.items)||[];
     if(LC.hide.heat){ x.globalCompositeOperation="lighter"; for(const r of rows){ if(LC.hide[r[2]]) continue; const p=S(pr(r[0],r[1])); const rr=Math.max(18*k,140*z); const g=x.createRadialGradient(p[0],p[1],0,p[0],p[1],rr); g.addColorStop(0,"rgba(255,80,80,.16)"); g.addColorStop(1,"rgba(255,80,80,0)"); x.fillStyle=g; x.fillRect(p[0]-rr,p[1]-rr,rr*2,rr*2); } x.globalCompositeOperation="source-over"; }
     const pts={}; for(const r of rows){ if(LC.hide[r[2]]) continue; const key=r[0]+","+r[1]; (pts[key]=pts[key]||[]).push(r); }
-    let i=0; for(const key in pts){ const L=pts[key]; const p=S(pr(L[0][0],L[0][1])); i++; if(t<1.2+i*.004) continue;
+    const arr=Object.values(pts).map(L=>({L,m:pr(L[0][0],L[0][1])})).sort((a,b)=>S(b.m)[2]-S(a.m)[2]); let i=0;
+    for(const o of arr){ const L=o.L; i++; if(t<1.4+i*.01) continue; const g0=S(o.m); if(!vis(g0)) continue;
       const cats={}; L.forEach(r=>cats[r[2]]=(cats[r[2]]||0)+1); const top=Object.entries(cats).sort((a,b)=>b[1]-a[1])[0][0]; const cl=CRC[top]||"#ff6b6b";
       const rr=(3+Math.min(9,Math.sqrt(L.length)*2.2))*k; const ph=(t*.7+i*.13)%1;
-      x.strokeStyle=cl; x.globalAlpha=.6*(1-ph); x.lineWidth=1.5*k; x.beginPath(); x.arc(p[0],p[1],rr+ph*rr*1.6,0,7); x.stroke(); x.globalAlpha=1;
+      x.strokeStyle=cl; x.globalAlpha=.6*(1-ph); x.lineWidth=1.5*k; x.beginPath(); x.ellipse(g0[0],g0[1],rr+ph*rr*1.6,(rr+ph*rr*1.6)*Math.max(.35,Math.cos(LC.pitch)),0,0,7); x.stroke(); x.globalAlpha=1;
+      let p=g0; if(in3d){ const ph2=Math.min(1,(t-1.4-i*.01)*1.5); const hgt=(30+L.length*22)*LC.pitch*ph2; p=S(o.m,hgt);
+        const lg=x.createLinearGradient(g0[0],g0[1],p[0],p[1]); lg.addColorStop(0,cl); lg.addColorStop(1,cl+"00"); x.strokeStyle=lg; x.lineWidth=3.2*k; x.beginPath(); x.moveTo(g0[0],g0[1]); x.lineTo(p[0],p[1]); x.stroke(); }
       x.fillStyle=cl; x.shadowColor=cl; x.shadowBlur=10*k; x.beginPath(); x.arc(p[0],p[1],rr*.55,0,7); x.fill(); x.shadowBlur=0;
       if(L.length>1){ x.fillStyle="#02101a"; x.font=`800 ${9*k}px Rajdhani,sans-serif`; x.textAlign="center"; x.fillText(L.length,p[0],p[1]+3*k); x.textAlign="start"; }
       hits.push({x:p[0],y:p[1],r:rr+4*k,L}); } }
-  // home
-  const hp=S([0,0]); x.fillStyle="#5dffb0"; x.shadowColor="#5dffb0"; x.shadowBlur=16*k; x.beginPath(); x.arc(hp[0],hp[1],5*k,0,7); x.fill(); x.shadowBlur=0;
-  x.strokeStyle="rgba(93,255,176,.8)"; x.lineWidth=1.5*k; for(let a=0;a<4;a++){ x.beginPath(); x.arc(hp[0],hp[1],13*k,a*Math.PI/2+t,a*Math.PI/2+t+.9); x.stroke(); }
-  // aircraft (dead-reckoned between refreshes)
+  // home beacon
+  { const hp=S([0,0]), top=S([0,0],in3d?120*LC.pitch:0); if(in3d){ const lg=x.createLinearGradient(hp[0],hp[1],top[0],top[1]); lg.addColorStop(0,"rgba(93,255,176,.9)"); lg.addColorStop(1,"rgba(93,255,176,0)"); x.strokeStyle=lg; x.lineWidth=4*k; x.beginPath(); x.moveTo(hp[0],hp[1]); x.lineTo(top[0],top[1]); x.stroke(); }
+    x.fillStyle="#5dffb0"; x.shadowColor="#5dffb0"; x.shadowBlur=16*k; x.beginPath(); x.arc(hp[0],hp[1],5*k,0,7); x.fill(); x.shadowBlur=0;
+    x.strokeStyle="rgba(93,255,176,.8)"; x.lineWidth=1.5*k; for(let a=0;a<4;a++){ x.beginPath(); x.ellipse(hp[0],hp[1],13*k,13*k*Math.max(.35,Math.cos(LC.pitch)),0,a*Math.PI/2+t,a*Math.PI/2+t+.9); x.stroke(); } }
+  // aircraft — flying above the map in 3D with ground shadows
   if(!LC.hide.fl&&pr&&D.flights&&D.flights.length){ const dt=(performance.now()-LC.flTs)/1000; x.font=`700 ${10.5*k}px Rajdhani,sans-serif`;
-    for(const f of D.flights){ const m=pr(f.lat,f.lon); const d=f.kt*.5144*dt, h=f.hdg*Math.PI/180; const q=S([m[0]+Math.sin(h)*d,m[1]+Math.cos(h)*d]); if(q[0]<-50||q[0]>W+50||q[1]<-50||q[1]>H+50) continue;
-      const sel=LC.sel===f.cs; x.save(); x.translate(q[0],q[1]); x.rotate(h); x.fillStyle=sel?"#ffbe55":"#e8f6ff"; x.beginPath(); x.moveTo(0,-8*k); x.lineTo(5*k,6*k); x.lineTo(0,3*k); x.lineTo(-5*k,6*k); x.closePath(); x.fill(); x.restore();
-      x.strokeStyle="rgba(232,246,255,.25)"; x.lineWidth=1*k; x.beginPath(); x.moveTo(q[0],q[1]); x.lineTo(q[0]-Math.sin(h)*30*k,q[1]+Math.cos(h)*30*k); x.stroke();
-      x.fillStyle=sel?"#ffbe55":"rgba(232,246,255,.85)"; x.fillText(`${f.cs} · ${Math.round(f.alt/100)*100}ft`,q[0]+9*k,q[1]-6*k); hits.push({x:q[0],y:q[1],r:12*k,fl:f}); } }
-  // hover tooltip
-  LC.hover=null; if(LC.mouse) for(const h of hits) if(Math.hypot(h.x-LC.mouse[0],h.y-LC.mouse[1])<h.r) LC.hover=h;
+    for(const f of D.flights){ const m0=pr(f.lat,f.lon); const d=f.kt*.5144*dt, hd=f.hdg*Math.PI/180; const m=[m0[0]+Math.sin(hd)*d,m0[1]+Math.cos(hd)*d];
+      const alt=in3d?Math.min(900,180+f.alt*.018)*LC.pitch:0; const q=S(m,alt), g0=S(m); if(!vis(q)) continue; const sel=LC.sel===f.cs;
+      if(in3d){ x.setLineDash([2*k,4*k]); x.strokeStyle="rgba(232,246,255,.25)"; x.lineWidth=1*k; x.beginPath(); x.moveTo(g0[0],g0[1]); x.lineTo(q[0],q[1]); x.stroke(); x.setLineDash([]); x.fillStyle="rgba(0,0,0,.45)"; x.beginPath(); x.ellipse(g0[0],g0[1],6*k,3*k,0,0,7); x.fill(); }
+      const tail=S([m[0]-Math.sin(hd)*400,m[1]-Math.cos(hd)*400],alt); const ang=Math.atan2(q[1]-tail[1],q[0]-tail[0])+Math.PI/2;
+      x.strokeStyle="rgba(232,246,255,.3)"; x.lineWidth=1.2*k; x.beginPath(); x.moveTo(q[0],q[1]); x.lineTo(tail[0],tail[1]); x.stroke();
+      x.save(); x.translate(q[0],q[1]); x.rotate(ang); x.fillStyle=sel?"#ffbe55":"#e8f6ff"; x.shadowColor="#9fe8ff"; x.shadowBlur=8*k; x.beginPath(); x.moveTo(0,-9*k); x.lineTo(6*k,6*k); x.lineTo(0,3*k); x.lineTo(-6*k,6*k); x.closePath(); x.fill(); x.restore(); x.shadowBlur=0;
+      x.fillStyle=sel?"#ffbe55":"rgba(232,246,255,.88)"; x.fillText(`${f.cs} · ${Math.round(f.alt/100)*100}ft`,q[0]+10*k,q[1]-7*k); hits.push({x:q[0],y:q[1],r:13*k,fl:f}); } }
+  // weather: rain streaks when it's raining right now
+  if(LC.rain){ x.strokeStyle="rgba(160,210,255,.22)"; x.lineWidth=1*k; x.beginPath(); for(let i=0;i<140;i++){ const rx=((i*97.3+t*60*(1+i%3))%W), ry=((i*53.7+t*900*(1+(i%5)*.2))%H); x.moveTo(rx,ry); x.lineTo(rx-4*k,ry+16*k); } x.stroke(); }
+  // hover
+  LC.hover=null; if(LC.mouse&&!LC.drag) for(const h of hits) if(Math.hypot(h.x-LC.mouse[0],h.y-LC.mouse[1])<h.r) LC.hover=h;
   const tip=$("#lcTip"); if(tip){ const H2=LC.hover; if(H2){ tip.style.display="block"; tip.style.left=(LC.mouse[0]/k+14)+"px"; tip.style.top=(LC.mouse[1]/k+10)+"px";
       tip.innerHTML=H2.fl?`<b>✈ ${esc(H2.fl.cs)}</b><br>${H2.fl.alt.toLocaleString()} ft · ${H2.fl.kt} kt · ${esc(H2.fl.from||"")}`:`<b>${esc(H2.L[0][3]||"Nearby")}</b><br>`+H2.L.slice(0,7).map(r=>`<i style="color:${CRC[r[2]]||"#fff"}">●</i> ${esc(((cr.names||{})[r[2]]||r[2]))}${r[4]?` <small>— ${esc(r[4])}</small>`:""}`).join("<br>")+(H2.L.length>7?`<br><small>+${H2.L.length-7} more</small>`:"");
     } else tip.style.display="none"; }
-  // scale bar
-  const sc=$("#lcScale"); if(sc){ const m=[50,100,200,500,1000,2000,5000,10000,20000].find(v=>v*z/k>90)||20000; sc.style.width=(m*z/k)+"px"; sc.textContent=m>=1000?(m/1000)+" km":m+" m"; }
-  LC.raf=requestAnimationFrame(localFrame); }
+  // compass + scale
+  const cmp=$("#lcCmp"); if(cmp) cmp.style.transform=`rotate(${-LC.rot}rad)`;
+  const sc=$("#lcScale"); if(sc){ const m=[50,100,200,500,1000,2000,5000].find(v=>v*z/k>90)||5000; sc.style.width=(m*z/k)+"px"; sc.textContent=m>=1000?(m/1000)+" km":m+" m"; } }
 function lcPanel(){ const D=LC.data; const b=$("#lcBody"); if(!b||!D) return; const cr=D.crime||{}, ar=D.area||{};
   if(LC.tab==="crime"){ if(!cr.month){ b.innerHTML=`<div class="lc-load">${esc(cr.error||"No police data yet.")}</div>`; return; }
     const rows=LC.span==="six"?cr.six:cr.items; const by={}; rows.forEach(r=>by[r[2]]=(by[r[2]]||0)+1); const cats=Object.entries(by).sort((a,b)=>b[1]-a[1]); const mx=cats.length?cats[0][1]:1;
