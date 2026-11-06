@@ -561,6 +561,9 @@ body.busy .horb u{animation-duration:.9s}body.busy .horb i{animation-duration:1.
           <p class="empty" style="font-size:12.5px">Then say “ORION, quiz me” on the ride home and answer out loud.</p></div>
       </div>
       <div class="msub" id="s-money">
+        <div class="card" id="mHQ"><h3>CEO HQ <button class="btn sm ghost" id="mHQrep" style="border:0;padding:0">REPORT</button></h3><div class="lm-stats" id="mHQk"></div><div id="mHQp" style="margin-top:10px"></div>
+          <div class="two" style="margin-top:10px"><input class="inp" id="mSpAmt" type="number" step="0.01" inputmode="decimal" placeholder="£ spent"><input class="inp" id="mSpNote" placeholder="on what?"></div>
+          <button class="btn sm ghost" id="mSpAdd" style="margin-top:8px">− LOG SPENDING</button></div>
         <div class="card"><h3>THIS MONTH</h3><div class="bigm" id="mMonth">£0</div><p class="empty" id="mTotal">—</p>
           <div class="two" style="margin-top:10px"><select class="inp" id="mVen"></select><input class="inp" id="mAmt" type="number" step="0.01" inputmode="decimal" placeholder="£"></div>
           <input class="inp" id="mNote" placeholder="What for?" style="margin-top:8px"><button class="btn" id="mLog">+ LOG IT</button></div>
@@ -1188,7 +1191,12 @@ function paintFocusM(f){ MF=f; MF._t=Date.now(); clearInterval(mfTick); const ti
     $("#mTime").textContent=`${String(Math.floor(left/60)).padStart(2,"0")}:${String(Math.floor(left%60)).padStart(2,"0")}`; $("#mRing").style.setProperty("--p",MF.phase==="off"?0:100-left/tot*100); };
   $("#mFocusSt").textContent=f.phase==="off"?"":f.phase==="work"?"FOCUSING":"BREAK"; $("#mFocus").textContent=f.phase==="off"?"▶ START 25 MIN":"■ END SESSION"; tick(); if(f.phase!=="off") mfTick=setInterval(tick,1000); }
 $("#mFocus").onclick=async()=>{ try{ const o=await api("/api/study",MF&&MF.phase!=="off"?{action:"unfocus"}:{action:"focus",minutes:25,brk:5,subject:$("#mSubj").value.trim()}); paintFocusM(o.focus); }catch(e){ toast(e.message); } };
-async function loadMoneyM(){ try{ const v=await api("/api/ventures"), E=v.earn; $("#mMonth").textContent=money(E.this_month); $("#mTotal").textContent=`All time ${money(E.total)}`;
+function paintHQM(H){ if(!H) return; const m=H.month,p=H.pipeline,f=n=>"£"+Math.round(+n).toLocaleString("en-GB");
+  $("#mHQk").innerHTML=`<div><b>${f(m.profit)}</b><small>profit this month</small></div><div><b>${m.pace==null?"—":f(m.pace)}</b><small>on pace for</small></div><div><b>${f(p.forecast)}</b><small>pipeline forecast</small></div>`;
+  $("#mHQp").innerHTML=H.priorities.map(x=>`<div class="lm-row"><i style="background:var(--amber)"></i><div><span>${x.icon} ${esc(x.text)}</span></div></div>`).join(""); }
+$("#mSpAdd").onclick=async()=>{ const a=+$("#mSpAmt").value; if(!a) return toast("How much?"); try{ const v=await api("/api/ventures",{action:"spend_add",venture:$("#mVen").value||"Other",amount:a,note:$("#mSpNote").value}); $("#mSpAmt").value=$("#mSpNote").value=""; toast("Spending logged."); paintHQM(v.hq); }catch(e){ toast(e.message); } };
+$("#mHQrep").onclick=async()=>{ try{ await api("/api/ventures",{action:"report"}); toast("📊 Board report on its way."); }catch(e){ toast(e.message); } };
+async function loadMoneyM(){ try{ const v=await api("/api/ventures"), E=v.earn; paintHQM(v.hq); $("#mMonth").textContent=money(E.this_month); $("#mTotal").textContent=`All time ${money(E.total)}`;
     if(!$("#mVen").options.length) $("#mVen").innerHTML=E.ventures.map(x=>`<option>${esc(x)}</option>`).join(""); $("#mBy").innerHTML=hb2(E.by_venture,money);
     $("#mDev").innerHTML=v.dev.length?v.dev.slice(-6).reverse().map(t=>`<div class="row"><span class="st ${t.status==="done"?"done":t.status==="queued"?"running":""}">${t.status.toUpperCase()}</span>${esc(t.task.slice(0,70))}</div>`).join(""):'<p class="empty">Nothing queued.</p>'; }catch(e){} }
 $("#mLog").onclick=async()=>{ const a=+$("#mAmt").value; if(!a) return toast("How much?"); try{ await api("/api/ventures",{action:"earn_add",venture:$("#mVen").value,amount:a,note:$("#mNote").value}); $("#mAmt").value=$("#mNote").value=""; toast(`Logged ${money(a)} 💷`); loadMoneyM(); }catch(e){ toast(e.message); } };

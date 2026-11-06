@@ -1,4 +1,30 @@
-# ORION 6.0 — Personal Intelligence System
+# ORION 6.1 — Personal Intelligence System
+
+## New in 6.1: Automation & CEO upgrades
+**⚡ Automations — "when this happens, do that"** (Night Shift page, or just tell ORION)
+- **Triggers:**
+  - Opening or closing an app, or starting or stopping a game.
+  - Being away for N minutes, or coming back.
+  - A time of day (daily, weekdays or weekends), sunset or sunrise.
+  - Rain within the hour.
+  - CPU maxed out, memory nearly full, disk space low, laptop battery low.
+  - A new file in Downloads.
+  - "Haven't revised by 7:30".
+- **Actions:**
+  - ORION speaks, messages your phone, or carries out any instruction.
+  - Opens an app, switches mode, or runs a Night Shift routine.
+  - Turns gaming mode on/off, or starts a focus session.
+- **One-click ideas:** Game time, Welcome home catch-up, Revision nudge, Rain warning, Bedtime wind-down, Low-disk clean-up, Discord + Spotify, and more.
+- **Each rule** has a cooldown so it can't spam, a ▶ button to test it, and an on/off switch. There's also a master switch for all of them.
+- **Say it in chat:** "when I open Fortnite turn on gaming mode", "if I haven't revised by half seven, nag me".
+- **Autonomous mode now has standing goals:** tell ORION what to work towards while you're away (e.g. "find 5 barber leads a week") and it does those first.
+
+**💷 CEO HQ** (top of the CEO page, and on the phone under More › Money)
+- **Live numbers:** this month in, profit, what you're on pace for, a pipeline forecast weighted by how likely each deal is to close, win rate, and follow-ups due.
+- **ORION's 3 priorities this week:** worked out from your own numbers (quiet leads, goal pace, which venture really pays per hour, empty pipeline, month pace).
+- **Profit, not just takings:** log spending per venture and see real profit by venture. There's a pipeline funnel too.
+- **Draft follow-ups:** a personalised message for every lead that's gone quiet, saved to Documents › ORION Leads. Nothing is ever sent.
+- **Weekly board report:** every Sunday at 6 pm a short money report goes to your phone and PC. You can also send one any time.
 
 ## New in 6.0
 **Smarter brain**

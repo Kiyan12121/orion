@@ -61,6 +61,9 @@ def recent(n=30):
 
 def situation():
     lines = [time.strftime("Now: %A %d %B, %H:%M.")]
+    goals = (CTX.get("config") or {}).get("autonomy_goals", "").strip()
+    if goals:
+        lines.append("THE USER'S STANDING GOALS FOR YOU (work towards these first):\n" + goals)
     try:
         from .life import homework
         hw = [h for h in homework() if not h.get("done") and h["days"] <= 3]

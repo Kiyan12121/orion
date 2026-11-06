@@ -34,10 +34,11 @@ from core import money                                      # noqa: E402
 from core import holo                                       # noqa: E402,F401
 from core import plus                                       # noqa: E402
 from core import skillbook                                  # noqa: E402
-from core import saver, pctools, proactive, ironman, gestures, localintel, brain6, skills6         # noqa: E402
+from core import saver, pctools, proactive, ironman, gestures, localintel, brain6, skills6, automate, ceo         # noqa: E402
 from core.autonomy import Autonomy                          # noqa: E402
 from core import gaming as gaming_mod                        # noqa: E402
 from core.routines import NightShift                        # noqa: E402
+from core import routines                                   # noqa: E402
 from core.devices import Push, Remote, Sync, Updater        # noqa: E402
 from core.gaming import Controller, GamingMode, Hotkey      # noqa: E402
 from core.listen import VoiceID, WakeListener, extras_status  # noqa: E402
@@ -118,6 +119,8 @@ class Api:
                                      lambda: self._sync.enabled and threading.Thread(target=self._sync.sync_now, daemon=True).start())
         tools.CTX["sync"] = self._sync
         self._shift = NightShift(self._cfg, self._jobs, self._shift_notify, self._emit, self._updater)
+        self._automate = automate.Engine(self._cfg, self._emit, self._auto_action)
+        self._weekly = ceo.Weekly(self._cfg, self._notify)
         tools.CTX["push_phone"] = lambda t: self._push.send(t, "ORION", 5, "iphone")
         self._voice_id = VoiceID(self._cfg)
         self._link = Link(self._cfg, self._memory, self._emit)
@@ -1506,7 +1509,7 @@ class Api:
 
     # ---------------------------------------------------------------- ventures + gaming pages
     def ventures_get(self):
-        return {"dev": ventures.dev_sync(self._jobs), "earn": ventures.earn_summary(), "goals": money.goals(),
+        return {"hq": ceo.hq(), "dev": ventures.dev_sync(self._jobs), "earn": ventures.earn_summary(), "goals": money.goals(),
                 "crm": money.crm(), "followups": [x["id"] for x in money.crm_followups()], "stages": money.STAGES,
                 "ideas": list(reversed(money.ideas()))[:20], "per_hour": money.per_hour(),
                 "content": self._shift.ns["builtin"].get("content", {}).get("on", False)}
@@ -1526,6 +1529,19 @@ class Api:
             ventures.earn_add(b.get("venture", "Other"), float(b.get("amount") or 0), b.get("note", ""), b.get("date") or None)
         elif a == "earn_del":
             ventures.earn_remove(b.get("id"))
+        elif a == "spend_add":
+            ceo.expense_add(b.get("venture", "Other"), float(b.get("amount") or 0), b.get("note", ""))
+        elif a == "spend_del":
+            ceo.expense_remove(b.get("id"))
+        elif a == "followups":
+            def fu():
+                fp, n = ceo.draft_followups(self._brain)
+                self._emit("toast", level="info", text=f"📨 {n} follow-up draft(s) saved to Documents › ORION Leads." if fp else "No leads need a follow-up right now.")
+                if fp and os.name == "nt":
+                    os.startfile(fp)
+            threading.Thread(target=fu, daemon=True).start()
+        elif a == "report":
+            threading.Thread(target=lambda: self._notify(ceo.board_report(), important=False), daemon=True).start()
         elif a == "leads":
             self._toolbox.run("leads_find", {"business_type": b.get("type", ""), "area": b.get("area", ""),
                                              "offer": b.get("offer", "")})
@@ -1766,6 +1782,71 @@ class Api:
         self._cfg["auto_lite"] = bool(on)
         config_mod.save(self._cfg)
         return True
+
+    # ---------------------------------------------------------------- automations (when → then)
+    def _auto_action(self, r, ctx):
+        a, v = r["action"]["type"], str(r["action"].get("value") or "")
+        if a == "say":
+            self._speaker.say(v or r["name"])
+        elif a == "notify":
+            self._notify(v or r["name"], important=True)
+        elif a == "do":
+            extra = f" (Context: {', '.join(f'{k}={x}' for k, x in ctx.items())})" if ctx else ""
+            self._jobs.add(v + extra, source="automation", title=f"⚡ {r['name']}", notify=True)
+        elif a == "open_app":
+            threading.Thread(target=self._toolbox.run, args=("open_app", {"name": v}), daemon=True).start()
+        elif a == "theme":
+            self.set_theme(v or "standby")
+        elif a == "routine":
+            if v in routines.BUILTIN:
+                self._shift.run_builtin(v)
+            else:
+                c = next((c for c in self._shift.ns["custom"] if c["name"].lower() == v.lower()), None)
+                if c:
+                    self._jobs.add(c["prompt"], source="automation", title=f"⚡ {c['name']}", notify=True)
+        elif a == "gaming":
+            if (v.lower() != "off") != self._gaming.active:
+                self.gaming_toggle()
+        elif a == "focus":
+            study.focus_start(int(float(v or 25)))
+
+    def automations_get(self):
+        rs = automate.load()
+        return {"on": self._cfg.get("automations_on", True), "rules": [{**r, "text": automate.describe(r)} for r in rs],
+                "triggers": automate.TRIGGERS, "actions": automate.ACTIONS,
+                "presets": [{**p, "text": automate.describe({**p, "on": True})} for p in automate.PRESETS],
+                "goals": self._cfg.get("autonomy_goals", "")}
+
+    def automations_action(self, b):
+        a = b.get("action")
+        rs = automate.load()
+        if a == "add":
+            try:
+                automate.add(b.get("name", ""), b.get("trigger") or {}, b.get("act") or {})
+            except ValueError as e:
+                self._emit("toast", level="warn", text=str(e))
+        elif a == "preset":
+            p = next((p for p in automate.PRESETS if p["name"] == b.get("name")), None)
+            if p and not any(r["name"] == p["name"] for r in rs):
+                automate.add(p["name"], dict(p["trigger"]), dict(p["action"]))
+        elif a in ("toggle", "delete"):
+            for r in rs:
+                if r["id"] == b.get("id"):
+                    r["on"] = not r.get("on", True)
+            if a == "delete":
+                rs = [r for r in rs if r["id"] != b.get("id")]
+            automate.save(rs)
+        elif a == "test":
+            r = next((r for r in rs if r["id"] == b.get("id")), None)
+            if r:
+                self._automate._fire(r, {"test": True})
+        elif a == "master":
+            self._cfg["automations_on"] = bool(b.get("on"))
+            config_mod.save(self._cfg)
+        elif a == "goals":
+            self._cfg["autonomy_goals"] = str(b.get("text", ""))[:1500]
+            config_mod.save(self._cfg)
+        return self.automations_get()
 
     def voice_extras(self, v=None):
         vc = self._cfg["voice"]

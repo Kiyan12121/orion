@@ -1160,6 +1160,20 @@ body.reveal .shell{animation:reveal 1.4s}
 .trail.done button{background:none;border:0;color:var(--dim);font:600 11.5px var(--ui);cursor:pointer;padding:0;opacity:.75}.trail.done button:hover{color:var(--a2);opacity:1}
 .trail.done .tl{display:none;padding:4px 0 0 4px}.trail.done.open .tl{display:block}.trail.done .tl div{display:flex;gap:6px;line-height:1.6}
 .brArch{margin-top:10px;font:500 13px var(--ui);color:var(--dim);line-height:1.5}.brArch b{color:var(--a2)}
+.atr{display:flex;gap:8px;align-items:flex-start;padding:7px 4px;border-bottom:1px solid rgba(var(--ar),.08)}.atr.off{opacity:.45}.atr>div{flex:1;min-width:0}
+.atr b{display:block;font:600 13px var(--ui)}.atr small{display:block;font:500 11.5px var(--ui);color:var(--dim);line-height:1.35}.atr .x{background:none;border:0;color:var(--dim);cursor:pointer;font-size:16px}
+.atPre{display:flex;flex-wrap:wrap;gap:5px}.atPre button{font:600 11.5px var(--ui);padding:5px 9px;border-radius:14px;border:1px dashed rgba(var(--ar),.4);background:rgba(var(--ar),.05);color:var(--text);cursor:pointer}
+.atPre button:hover{border-style:solid;color:var(--a2)}.atw{font:800 10.5px var(--disp);letter-spacing:.15em;color:var(--a2);width:44px;flex:none;align-self:center}
+.hq h5 span{display:flex;gap:6px}.hqk{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:14px}
+.hqk div{padding:10px 12px;border-radius:9px;background:rgba(var(--ar),.06);border:1px solid rgba(var(--ar),.14)}.hqk small{display:block;font:700 9.5px var(--ui);letter-spacing:.18em;color:rgba(var(--ar),.8)}
+.hqk b{display:block;font:800 26px var(--disp);color:var(--a2);margin:2px 0}.hqk span{font:500 11.5px var(--ui);color:var(--dim)}.hqk .good b{color:#5dffb0}.hqk .bad b{color:#ff6b7d}.hqk .warn b{color:#ffbe55}
+.hqrow{display:grid;grid-template-columns:1.25fr 1fr .8fr;gap:16px}.hqh{display:block;font:700 10.5px var(--ui);letter-spacing:.2em;color:rgba(var(--ar),.8);margin-bottom:8px}
+.hqp{display:flex;gap:10px;align-items:flex-start;padding:9px 10px;margin-bottom:6px;border-radius:8px;background:linear-gradient(90deg,rgba(var(--ar),.1),transparent);border-left:2px solid var(--a)}
+.hqp i{font-style:normal;font-size:17px}.hqp span{flex:1;font:500 13.5px var(--ui);line-height:1.45}
+.hqv{display:grid;grid-template-columns:110px 1fr 60px;gap:8px;align-items:center;margin-bottom:6px;font:500 12.5px var(--ui)}.hqv small{grid-column:1/-1;margin-top:-4px;color:var(--dim);font-size:11px}
+.hqv u,.hqf u{height:6px;border-radius:3px;background:rgba(var(--ar),.1);overflow:hidden}.hqv s,.hqf s{display:block;height:100%;background:linear-gradient(90deg,var(--a),#5dffb0)}.hqv s.neg{background:#ff6b7d}.hqv b{text-align:right}.hqv b.neg{color:#ff6b7d}
+.hqf{display:grid;grid-template-columns:70px 1fr 24px;gap:8px;align-items:center;margin-bottom:7px;font:600 11.5px var(--ui);text-transform:uppercase;letter-spacing:.06em;color:var(--dim)}.hqf b{color:var(--text);text-align:right}
+@media (max-width:1300px){.hqk{grid-template-columns:repeat(3,1fr)}.hqrow{grid-template-columns:1fr}}
 </style>
 </head>
 <body class="state-idle" data-theme="standby">
@@ -1345,6 +1359,17 @@ body.reveal .shell{animation:reveal 1.4s}
               <input class="inp" id="rtPrompt" placeholder="What ORION should do — e.g. check my Root messages and summarise them" style="margin-bottom:6px">
               <div class="voicerow"><input class="inp" type="time" id="rtTime" value="07:00"><select class="inp" id="rtDays"><option value="daily">Every day</option><option value="weekdays">Weekdays</option><option value="weekends">Weekends</option></select><button class="btn small" id="rtAdd" style="height:36px">ADD</button></div>
             </div>
+            <div class="lbl sp">AUTOMATIONS · WHEN → THEN <label class="tog" style="float:right;margin:0;font-size:11px"><input type="checkbox" id="atOn"> on</label></div>
+            <div id="atList"></div>
+            <div class="lbl" style="margin-top:8px;font-size:10.5px">ONE-CLICK IDEAS</div><div class="atPre" id="atPre"></div>
+            <div class="card" style="margin-top:10px"><h4>NEW AUTOMATION</h4>
+              <input class="inp" id="atName" placeholder="Name (optional)" style="margin-bottom:6px">
+              <div class="voicerow"><b class="atw">WHEN</b><select class="inp" id="atTrig"></select></div>
+              <div class="voicerow" style="margin-top:6px"><input class="inp" id="atTV" placeholder="app name / minutes / time…"><select class="inp" id="atDays" style="width:120px;flex:none"><option value="daily">every day</option><option value="weekdays">weekdays</option><option value="weekends">weekends</option></select></div>
+              <div class="voicerow" style="margin-top:6px"><b class="atw">THEN</b><select class="inp" id="atAct"></select></div>
+              <input class="inp" id="atAV" placeholder="what to say / do / open…" style="margin-top:6px">
+              <button class="btn small wide" id="atAdd" style="margin-top:8px">⚡ ADD AUTOMATION</button>
+              <p style="font-size:12px;margin-top:6px;color:var(--dim)">Or just tell ORION: “when I open Fortnite, turn on gaming mode”.</p></div>
             <div class="lbl sp">SETTINGS</div>
             <label class="tog"><input type="checkbox" id="nsOn"> Night Shift enabled</label>
             <div class="voicerow" style="align-items:center;font-size:13.5px;color:var(--dim)">Heavy jobs wait until I've been away for <input class="inp" type="number" id="nsIdle" min="1" max="120" style="width:70px"> minutes</div>
@@ -1438,7 +1463,9 @@ body.reveal .shell{animation:reveal 1.4s}
             <div class="card"><h4>AUTONOMOUS MODE <button class="btn small" id="auNow">RUN NOW</button></h4>
               <p>When you've been away, ORION gets on with useful things by itself and messages or rings your phone if something matters.</p>
               <label class="tog"><input type="checkbox" id="auOn"> Autonomous mode on</label>
-              <div class="voicerow" style="align-items:center;font-size:13.5px;color:var(--dim)">Start after <input class="inp" type="number" id="auIdle" min="5" style="width:70px"> min away, then every <input class="inp" type="number" id="auEvery" min="15" style="width:70px"> min</div></div>
+              <div class="voicerow" style="align-items:center;font-size:13.5px;color:var(--dim)">Start after <input class="inp" type="number" id="auIdle" min="5" style="width:70px"> min away, then every <input class="inp" type="number" id="auEvery" min="15" style="width:70px"> min</div>
+              <div class="field" style="margin-top:10px"><label>STANDING GOALS — what ORION should work towards while you're away</label>
+                <textarea class="goal" id="auGoals" style="min-height:70px;font-size:13px" placeholder="e.g. Find 5 barber leads a week and draft emails · keep my maths revision on track for the mock · reply to Root DMs politely"></textarea></div></div>
             <div class="card"><h4>MY DAY</h4>
               <div class="two"><div class="field"><label>WAKE UP</label><input type="time" id="dyWake"></div><div class="field"><label>PC USUALLY OFF</label><input type="time" id="dyOff"></div>
                 <div class="field"><label>SCHOOL STARTS</label><input type="time" id="dyStart"></div><div class="field"><label>SCHOOL ENDS</label><input type="time" id="dyEnd"></div></div>
@@ -1596,6 +1623,14 @@ body.reveal .shell{animation:reveal 1.4s}
           <div class="scroll">
             <div class="wtitle"><h2>CEO · VENTURES</h2><span>everything here is about one thing: making you money</span></div>
             <div class="dgrid">
+              <div class="tile s12 hq"><h5>CEO HQ <span><button class="mini" id="hqReport">📊 BOARD REPORT → PHONE</button> <button class="mini" id="hqFu">📨 DRAFT FOLLOW-UPS</button></span></h5>
+                <div class="hqk" id="hqK"></div>
+                <div class="hqrow"><div class="hqpri"><b class="hqh">ORION'S PRIORITIES THIS WEEK</b><div id="hqPri"></div></div>
+                  <div class="hqpl"><b class="hqh">PROFIT BY VENTURE</b><div id="hqPL"></div>
+                    <b class="hqh" style="margin-top:12px">LOG SPENDING</b>
+                    <div class="voicerow"><select class="inp" id="spVen" style="flex:none;width:150px"></select><input class="inp" id="spAmt" type="number" step="0.01" placeholder="£" style="flex:none;width:70px"><input class="inp" id="spNote" placeholder="on what?"><button class="btn small" id="spAdd" style="height:36px">−£</button></div>
+                    <div id="spList"></div></div>
+                  <div class="hqfun"><b class="hqh">PIPELINE</b><div id="hqFunnel"></div></div></div></div>
               <div class="tile s4"><h5>QUOTE CALCULATOR <i>NEVER UNDERCHARGE</i></h5>
                 <div class="voicerow" style="margin-bottom:6px"><select class="inp" id="qcKind"><option>discord bot</option><option>automation</option><option>website</option><option>roblox script</option><option>minecraft plugin</option><option>video edit</option><option>logo</option><option>app</option><option>other</option></select>
                 <input class="inp" id="qcHours" type="number" min="0.5" step="0.5" placeholder="Hours (optional)" style="width:130px;flex:none"></div>
@@ -1818,6 +1853,7 @@ window.ui={event(e){ switch(e.kind){
   case "devices_changed": if($("#page-devices").classList.contains("on")) loadDevices(); break;
   case "focus": e._t=Date.now(); paintFocus(e); break;
   case "card": holoCard(e.card); break;
+  case "automations_changed": if($("#page-shift").classList.contains("on")) loadAuto(); break;
   case "mission": { const all=(e.done||[]).length&&e.done.every(Boolean); holoCard({id:"plan6",kind:"plan",title:e.title,steps:e.steps,done:e.done,note:e.note,icon:all?"✅":"🧭",pinned:!all}); if(all) sfx("done"); break; }
   case "exam_paper": $("#ehGo").textContent="✦ NEW PAPER"; $("#ehGo").disabled=false; if(e.ok){ toast("📝 Paper ready — good luck."); loadScholar(); openExam(e.data.id); } else toast(e.error,"warn"); break;
   case "exam_ready": if(on("study")) loadScholar(); break;
@@ -2071,7 +2107,26 @@ async function loadRoutines(){ const r=await api.routines_get(); $("#nsOn").chec
   $$("[data-tm]").forEach(c=>c.onchange=()=>api.routines_action({action:"time_builtin",id:c.dataset.tm,time:c.value}));
   $$("[data-run]").forEach(b=>b.onclick=async()=>{ await api.routines_action({action:"run",id:b.dataset.run}); toast("Running now — result shows here when done."); });
   $$("[data-rm]").forEach(b=>b.onclick=async()=>{ await api.routines_action({action:"remove",id:b.dataset.rm}); loadRoutines(); }); }
-function loadShift(){ loadJobs(); loadRoutines(); }
+function loadShift(){ loadJobs(); loadRoutines(); loadAuto(); }
+const AT_HINT={app_open:"app name — e.g. fortnite",app_close:"app name — e.g. roblox",away:"minutes — e.g. 30",back:"minutes away — e.g. 60",time:"time — e.g. 22:30",disk_low:"GB — e.g. 15",battery_low:"% — e.g. 20",ram_high:"% — e.g. 92",new_download:"file type — e.g. .pdf",no_revision:"time — e.g. 19:30"};
+const AC_HINT={say:"what ORION says",notify:"the message",do:"an instruction — e.g. summarise my DMs",open_app:"app — e.g. Spotify",theme:"standby / serious / stealth / executive / scholar / hacker",routine:"tidy_downloads / clear_temp / backup / health / a routine name",gaming:"on / off",focus:"minutes — e.g. 25"};
+let AT=null;
+async function loadAuto(r){ AT=r||await api.automations_get(); $("#atOn").checked=AT.on;
+  if(!$("#atTrig").options.length){ $("#atTrig").innerHTML=Object.entries(AT.triggers).map(([k,v])=>`<option value="${k}">${esc(v)}</option>`).join(""); $("#atAct").innerHTML=Object.entries(AT.actions).map(([k,v])=>`<option value="${k}">${esc(v)}</option>`).join(""); hintAt(); }
+  $("#atList").innerHTML=AT.rules.length?AT.rules.map(x=>`<div class="atr ${x.on?"":"off"}"><input type="checkbox" data-att="${x.id}" ${x.on?"checked":""}><div><b>⚡ ${esc(x.name)}</b><small>${esc(x.text)}${x.runs?` · ran ${x.runs}×`:""}</small></div><button class="mini" data-atx="${x.id}" title="Test it now">▶</button><button class="x" data-atd="${x.id}">×</button></div>`).join(""):'<div class="empty">No automations yet — tap an idea below or build your own.</div>';
+  const have=new Set(AT.rules.map(x=>x.name)); $("#atPre").innerHTML=AT.presets.filter(p=>!have.has(p.name)).map(p=>`<button data-atp="${esc(p.name)}" title="${esc(p.text)}">+ ${esc(p.name)}</button>`).join("");
+  $$("[data-att]").forEach(b=>b.onchange=async()=>loadAuto(await api.automations_action({action:"toggle",id:b.dataset.att})));
+  $$("[data-atd]").forEach(b=>b.onclick=async()=>loadAuto(await api.automations_action({action:"delete",id:b.dataset.atd})));
+  $$("[data-atx]").forEach(b=>b.onclick=async()=>{ loadAuto(await api.automations_action({action:"test",id:b.dataset.atx})); });
+  $$("[data-atp]").forEach(b=>b.onclick=async()=>{ loadAuto(await api.automations_action({action:"preset",name:b.dataset.atp})); toast("⚡ Added: "+b.dataset.atp); });
+  if(document.activeElement!==$("#auGoals")&&$("#auGoals")) $("#auGoals").value=AT.goals||""; }
+function hintAt(){ const t=$("#atTrig").value, a=$("#atAct").value; $("#atTV").placeholder=AT_HINT[t]||"(nothing needed)"; $("#atTV").disabled=!AT_HINT[t]; $("#atDays").style.display=["time","no_revision","sunset","sunrise"].includes(t)?"":"none"; $("#atAV").placeholder=AC_HINT[a]||""; }
+$("#atTrig").onchange=hintAt; $("#atAct").onchange=hintAt;
+$("#atOn").onchange=async()=>loadAuto(await api.automations_action({action:"master",on:$("#atOn").checked}));
+$("#atAdd").onclick=async()=>{ const t=$("#atTrig").value, tv=$("#atTV").value.trim(); const trig={type:t}; if(tv) trig.value=["away","back","disk_low","battery_low","ram_high"].includes(t)?+tv:tv; if(["time","no_revision","sunset","sunrise"].includes(t)) trig.days=$("#atDays").value;
+  if(AT_HINT[t]&&!tv&&!["away","back","disk_low","battery_low","ram_high","new_download","no_revision"].includes(t)) return toast("Fill in the WHEN box.","warn");
+  loadAuto(await api.automations_action({action:"add",name:$("#atName").value,trigger:trig,act:{type:$("#atAct").value,value:$("#atAV").value.trim()}})); $("#atName").value=$("#atTV").value=$("#atAV").value=""; toast("⚡ Automation added."); };
+$("#auGoals").onchange=()=>api.automations_action({action:"goals",text:$("#auGoals").value});
 $("#jobAdd").onclick=async()=>{ const t=$("#jobIn").value.trim(); if(!t) return; await api.job_add(t,$("#jobHeavy").checked); $("#jobIn").value=""; $("#jobHeavy").checked=false; toast("Queued."); loadJobs(); };
 $("#jobIn").addEventListener("keydown",e=>{ if(e.key==="Enter") $("#jobAdd").click(); });
 $("#jobsClear").onclick=async()=>{ await api.jobs_clear(); loadJobs(); };
@@ -2427,7 +2482,23 @@ $("#exSubmit").onclick=()=>{ const ans={}; $$("#exBody textarea").forEach(t=>{ i
   $("#exSubmit").textContent="MARKING…"; $("#exSubmit").disabled=true; api.scholar_action({action:"mark",id:EXAM.id,answers:ans,photos:EXPHOTOS,minutes:Math.round((Date.now()-EXAM._t0)/60000)}); };
 
 /* ================= v4: CEO ================= */
-function paintCEO(v){ const G=v.goals||[];
+function paintHQ(H){ if(!H) return; const m=H.month, p=H.pipeline, f=n=>"£"+(+n).toLocaleString("en-GB",{maximumFractionDigits:0});
+  const d=m.last_in&&m.pace!=null?Math.round((m.pace/m.last_in-1)*100):null;
+  $("#hqK").innerHTML=[["THIS MONTH IN",f(m.in),`last month ${f(m.last_in)}`],["PROFIT",f(m.profit),`${f(m.out)} spent`,m.profit<0?"bad":""],["ON PACE FOR",m.pace==null?"—":f(m.pace),m.pace==null?"too early in the month":d==null?"this month":(d>=0?"▲ ":"▼ ")+Math.abs(d)+"% vs last",d!=null&&d<0?"bad":"good"],
+    ["PIPELINE FORECAST",f(p.forecast),`${p.open} open · ${f(p.value)} if all close`],["WIN RATE",p.win_rate==null?"—":p.win_rate+"%",`${p.won} won · ${p.lost} lost`],["FOLLOW-UPS",H.followups.length,H.followups.length?"waiting on you":"all clear",H.followups.length?"warn":"good"]]
+    .map(([a,b,c,cl])=>`<div class="${cl||""}"><small>${a}</small><b>${b}</b><span>${esc(c)}</span></div>`).join("");
+  $("#hqPri").innerHTML=H.priorities.map(x=>`<div class="hqp"><i>${x.icon}</i><span>${esc(x.text)}</span>${x.act==="followups"?'<button class="mini" data-hq="fu">DRAFT</button>':x.act==="leads"?'<button class="mini" data-hq="leads">FIND LEADS</button>':""}</div>`).join("");
+  $$("[data-hq]").forEach(b=>b.onclick=()=>{ if(b.dataset.hq==="fu") $("#hqFu").click(); else $("#ldType").focus(); });
+  const V=H.ventures; const mx=Math.max(1,...V.map(r=>Math.abs(r[3])));
+  $("#hqPL").innerHTML=V.length?V.map(r=>`<div class="hqv"><span>${esc(r[0])}</span><u><s class="${r[3]<0?"neg":""}" style="width:${Math.abs(r[3])/mx*100}%"></s></u><b class="${r[3]<0?"neg":""}">${f(r[3])}</b><small>${f(r[1])} in · ${f(r[2])} out</small></div>`).join(""):'<div class="empty">Log earnings and spending to see real profit.</div>';
+  const st=p.stages, order=["lead","contacted","replied","call","proposal","won"], smx=Math.max(1,...order.map(s=>st[s]||0));
+  $("#hqFunnel").innerHTML=order.map((s,i)=>`<div class="hqf"><span>${s}</span><u><s style="width:${(st[s]||0)/smx*100}%;opacity:${1-i*.1}"></s></u><b>${st[s]||0}</b></div>`).join("");
+  $("#spList").innerHTML=(H.expenses||[]).slice(0,4).map(x=>`<div class="li" style="padding:4px 0"><span class="g"><b>−£${x.amount.toFixed(2)}</b> <small>${esc(x.venture)} · ${esc(x.note||"")} · ${x.date.slice(5)}</small></span><button class="x" data-spdel="${x.id}">×</button></div>`).join("");
+  $$("[data-spdel]").forEach(b=>b.onclick=async()=>{ const v=await api.ventures_action({action:"spend_del",id:b.dataset.spdel}); paintHQ(v.hq); }); }
+$("#spAdd").onclick=async()=>{ if(!+$("#spAmt").value) return; const v=await api.ventures_action({action:"spend_add",venture:$("#spVen").value,amount:+$("#spAmt").value,note:$("#spNote").value}); $("#spAmt").value=$("#spNote").value=""; paintHQ(v.hq); toast("Spending logged."); };
+$("#hqFu").onclick=()=>{ api.ventures_action({action:"followups"}); toast("📨 Drafting follow-ups in the background…"); };
+$("#hqReport").onclick=()=>{ api.ventures_action({action:"report"}); toast("📊 Board report sent to your phone."); };
+function paintCEO(v){ const G=v.goals||[]; paintHQ(v.hq); if(!$("#spVen").options.length&&v.earn) $("#spVen").innerHTML=v.earn.ventures.map(x=>`<option>${esc(x)}</option>`).join("");
   $("#gGoals").innerHTML=G.length?G.map(g=>`<div style="margin-bottom:10px"><div class="li" style="border:0;padding:0"><span class="g"><b>${esc(g.name)}</b> <small>by ${g.by}</small></span><span style="font:12px var(--mono)">£${g.got.toFixed(0)}/£${g.target.toFixed(0)}</span><button class="x" data-gdel="${g.id}">×</button></div><div class="goalbar"><i style="width:${g.pct}%"></i></div><small style="color:var(--dim)">${g.pct>=100?"🎉 Smashed it":`£${g.per_week.toFixed(2)}/week needed · ${g.days_left} days left`}</small></div>`).join(""):'<div class="empty">No goals yet — e.g. £500 by summer.</div>';
   $$("[data-gdel]").forEach(b=>b.onclick=async()=>{ paintCEO(await api.ventures_action({action:"goal_del",id:b.dataset.gdel})); });
   $("#iList").innerHTML=(v.ideas||[]).slice(0,6).map(i=>`<div class="idea ${i.verdict||""}"><b>${esc(i.name||"Idea")}</b> · ${i.score??"?"}/100 · ${String(i.verdict||"").toUpperCase()}<small>~£${i.realistic_gbp_per_week??"?"}/wk · first £ in ${i.weeks_to_first_pound??"?"} wks · ${esc(i.why||"")}</small></div>`).join("");
@@ -2448,6 +2519,7 @@ $("#mmGo").onclick=()=>{ api.ventures_action({action:"meeting"}); go("comms"); }
 /* ================= v4: link, autonomy, my day (Devices) ================= */
 async function loadV4Devices(){ try{ const l=await api.link_get(); $("#lkAddr").value=l.addr||""; $("#lkPill").textContent=!l.enabled?"OFF":l.online?"LINKED":"PC OFFLINE"; $("#lkPill").className="pill "+(l.online?"ok":l.enabled?"warn":"");
     $("#lkInfo").textContent=`This device: ${l.device}.`+(l.enabled?(l.online?" Talking straight to the gaming PC.":" PC is off — carrying on here, will catch up when it's back."):""); }catch(e){}
+  try{ api.automations_get().then(r=>{ AT=AT||r; if($("#auGoals")) $("#auGoals").value=r.goals||""; }); }catch(e){}
   try{ const a=await api.autonomy_get(); $("#auOn").checked=a.enabled; $("#auIdle").value=a.idle_minutes; $("#auEvery").value=a.every_minutes;
     const d=a.day; $("#dyWake").value=d.wake; $("#dyOff").value=d.pc_off; $("#dyStart").value=d.school_start; $("#dyEnd").value=d.school_end; $("#dyHol").checked=!!d.holiday; }catch(e){} }
 $("#lkSave").onclick=async()=>{ await api.link_set({addr:$("#lkAddr").value,pin:$("#lkPin").value,enabled:!!$("#lkAddr").value.trim()}); $("#lkPin").value=""; toast("Linking…"); setTimeout(loadV4Devices,2500); };
@@ -3369,6 +3441,11 @@ setTimeout(()=>{ if(api) return; const wait=ms=>new Promise(r=>setTimeout(r,ms))
         area:{home:h,sunrise:"07:02",sunset:"16:24",moon:{age:15.1,name:"Full moon",lit:99},weather:{temp:9,sky:"cloudy",rain_at:"21:00"},air:{aqi:18,label:"Good",pm25:4.2,uv:.6,pollen:2},kp:{kp:3.3,chance:"Very unlikely"},floods:[]},flights:mockFlights()}; },
     globe_find:p=>A({lat:35.68,lon:139.69,name:p}),
     voice_extras:v=>A({acks:true,greetings:true}),
+    automations_get:()=>A(window.__AT||(window.__AT={on:true,goals:"",rules:[{id:"a1",name:"Game time",on:true,runs:6,text:"When I start a game → say “Gaming mode engaged, sir. I'll hold your messages.”",trigger:{type:"game_start"},action:{type:"say"}},{id:"a2",name:"Revision nudge",on:true,runs:2,text:"When I haven't revised by 19:30 → message my phone",trigger:{type:"no_revision"},action:{type:"notify"}}],
+      triggers:{app_open:"When I open an app",app_close:"When I close an app",game_start:"When I start gaming",game_end:"When I stop gaming",away:"When I've been away for N min",back:"When I come back after N min away",time:"At a time",sunset:"At sunset",rain_soon:"When rain is coming",disk_low:"When disk space is low",new_download:"When a new file lands in Downloads",no_revision:"If I haven't revised by a time"},
+      actions:{say:"ORION says…",notify:"Message my phone",do:"ORION does…",open_app:"Open an app",theme:"Switch mode",routine:"Run a Night Shift routine",gaming:"Gaming mode on/off",focus:"Start a focus session"},
+      presets:[{name:"Welcome home",text:"When I'm back after 120+ min away → do: Give me a 3-line catch-up"},{name:"Rain warning",text:"When rain is coming → message my phone"},{name:"Discord with Spotify",text:"When I open discord → open Spotify"},{name:"Bedtime wind-down",text:"When it's 22:30 (weekdays) → say “…”"},{name:"Sort new PDFs",text:"When a new .pdf downloads → do: …"}]})),
+    automations_action:b=>{ const A2=window.__AT; if(b.action==="preset"){ A2.rules.push({id:"p"+Date.now(),name:b.name,on:true,runs:0,text:(A2.presets.find(p=>p.name===b.name)||{}).text}); } if(b.action==="delete") A2.rules=A2.rules.filter(r=>r.id!==b.id); return A(A2); },
     auto_lite:()=>A(true),
     suitup_apps:a=>A(a||["Spotify","Discord"]),
     gestures_get:()=>A({enabled:!!window.__GES,on:!!window.__GES,mode:"mediapipe",err:"",have:{cv2:true,mediapipe:true}}),gestures_set:on=>{ window.__GES=on; return api.gestures_get(); },gestures_install:()=>A(true),
@@ -3379,7 +3456,10 @@ setTimeout(()=>{ if(api) return; const wait=ms=>new Promise(r=>setTimeout(r,ms))
     study_mark:()=>A(true),study_make:()=>A(true),study_action:b=>api.study_get(),
     gaming_get:()=>A({total_mins:742,sessions:11,longest:186,all_time_hours:212.5,active:false,game:null,by_game:[["Roblox",520],["Minecraft",160],["Fortnite",62]],daily:[{day:"10-26",mins:95},{day:"10-27",mins:40},{day:"10-28",mins:180},{day:"10-29",mins:0},{day:"10-30",mins:125},{day:"10-31",mins:210},{day:"11-01",mins:92}],settings:{auto:true,boost:true,clip_buffer:false,break_every_min:120,high_performance:true}}),
     gaming_set:()=>api.gaming_get(),clip_now:()=>A("Clipped"),
-    ventures_get:()=>A({content:false,dev:[{id:"d1",project:"Projects",task:"Discord bot that posts my new YouTube uploads",status:"done",result:"Built and tested — saved in projects\\Projects."},{id:"d2",project:"Projects",task:"Booking-bot demo for the barber pitch",status:"todo",result:""}],earn:{total:186.5,this_month:42,by_venture:[["Automation services",120],["Hatchlands",46.5],["Content / YouTube",20]],months:[{month:"2026-06",total:0},{month:"2026-07",total:15},{month:"2026-08",total:40},{month:"2026-09",total:24.5},{month:"2026-10",total:65},{month:"2026-11",total:42}],recent:[{id:"e1",date:"2026-11-01",venture:"Hatchlands",amount:12,note:"gamepass sales"},{id:"e2",date:"2026-10-29",venture:"Automation services",amount:30,note:"booking bot for barber"}],ventures:["Hatchlands","Content / YouTube","Automation services","Root bot","Dropshipping","Other"]}}),
+    ventures_get:()=>A({hq:{month:{in:142,out:23.5,profit:118.5,pace:213,last_in:168,last_profit:150},week_in:38,pipeline:{open:6,value:740,forecast:186,won:3,lost:2,win_rate:60,stages:{lead:3,contacted:2,replied:1,call:0,proposal:1,won:3,lost:2}},
+      ventures:[["Automation services",205,15,190],["Content / YouTube",42,8.5,33.5],["Root bot",0,4.99,-4.99]],per_hour:[],goals:[],followups:[{id:"c1",name:"Fade Lab Barbers",stage:"contacted"},{id:"c2",name:"Desford Dental",stage:"proposal"}],
+      priorities:[{icon:"📨",text:"Follow up with Fade Lab Barbers, Desford Dental — they've gone quiet. Quiet leads are the cheapest money you'll ever make.",act:"followups"},{icon:"🎯",text:"'Summer fund' needs £24/week — you made £38 in the last 7 days. 32 days left.",act:"goal"},{icon:"🚀",text:"On pace for £213 — 27% up on last month. Keep doing what's working.",act:"pace"}],
+      expenses:[{id:"e1",venture:"Automation services",amount:15,note:"domain + hosting",date:"2026-11-02"},{id:"e2",venture:"Root bot",amount:4.99,note:"bot hosting",date:"2026-11-01"}]},content:false,dev:[{id:"d1",project:"Projects",task:"Discord bot that posts my new YouTube uploads",status:"done",result:"Built and tested — saved in projects\\Projects."},{id:"d2",project:"Projects",task:"Booking-bot demo for the barber pitch",status:"todo",result:""}],earn:{total:186.5,this_month:42,by_venture:[["Automation services",120],["Hatchlands",46.5],["Content / YouTube",20]],months:[{month:"2026-06",total:0},{month:"2026-07",total:15},{month:"2026-08",total:40},{month:"2026-09",total:24.5},{month:"2026-10",total:65},{month:"2026-11",total:42}],recent:[{id:"e1",date:"2026-11-01",venture:"Hatchlands",amount:12,note:"gamepass sales"},{id:"e2",date:"2026-10-29",venture:"Automation services",amount:30,note:"booking bot for barber"}],ventures:["Hatchlands","Content / YouTube","Automation services","Root bot","Dropshipping","Other"]}}),
     ventures_action:()=>api.ventures_get(),
     brain_get:()=>A({local:"qwen2.5:3b",auto_learn:true,archive:{turns:1284,since:"03 Oct 2026"},facts:[{i:0,text:"Kiyan is in Year 11, doing GCSEs this summer",cat:"fact",t:"2026-10-23",src:"you"},{i:1,text:"Best mate on Root is Sam",cat:"person",t:"2026-10-29",src:"learned"},{i:2,text:"Building Hatchlands, a pet hatching idle game on Roblox",cat:"project",t:"2026-10-07",src:"you"},{i:3,text:"Prefers short replies while gaming",cat:"preference",t:"2026-10-30",src:"learned"},{i:4,text:"Wants to earn money with AI automation this winter",cat:"goal",t:"2026-10-30",src:"you"}],
       shortcuts:[{phrase:"gaming setup",does:"open Discord and Spotify and turn on gaming mode",uses:6}],suggest:[{phrase:"check my messages",count:9},{phrase:"whats using my ram",count:4}],

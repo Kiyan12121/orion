@@ -67,6 +67,8 @@ SMART = re.compile(r"\b(code|script|program|build|make|create|write|fix|debug|ex
 CORE = {"plan_show", "plan_tick", "recall", "show_card", "close_popups", "skill_find", "skill_use", "habit", "ambient", "screensaver_show", "suit_up", "threat_scan_tool", "hologram", "globe", "local_intel", "queue_job", "mission_start", "weather", "note_add", "homework_add", "get_time", "open_app", "open_website", "web_search", "remember",
         "request_more_tools", "set_theme", "schedule_add", "schedule_list", "check_availability"}
 GROUPS = {
+    "automation": ({"automation_add", "automation_list", "automation_remove", "routine_add", "routine_list"},
+                   r"when(ever)? i |every time|automat|whenever|if i (open|close|start|haven)|rule|trigger|routine"),
     "computer": ({"type_text", "press_keys", "mouse_click", "scroll", "read_screen", "find_on_screen",
                   "click_text", "wait", "list_running_apps", "close_app"},
                  r"click|type|press|screen|scroll|window|button|close|tab|key|mouse|select|menu|notepad|"
@@ -111,8 +113,9 @@ GROUPS = {
              r"clipboard|copied|screen ?time|how long (was|have) i|find (my |a |the )?file|where'?s (my|the) file|"
              r"dictat|type what i say|memo|voice note|brain ?dump"),
     "money": ({"idea_score", "money_goal", "crm_update", "crm_list", "invoice_make", "time_log", "money_meeting",
-               "earning_add", "earnings_summary", "leads_find", "money_wrap", "price_calc"},
-              r"wrapped|quote|how much (should|to) (i )?charge|idea|money|earn|£|goal|lead|client|customer|crm|invoice|bill |per hour|price|charge|business|sale|profit"),
+               "earning_add", "earnings_summary", "leads_find", "money_wrap", "price_calc", "expense_log", "ceo_report",
+               "followups_draft"},
+              r"wrapped|quote|how much (should|to) (i )?charge|idea|money|earn|£|goal|lead|client|customer|crm|invoice|bill |per hour|price|charge|business|sale|profit|spent|spend|expense|ceo|follow.?up|pipeline"),
     "scholar": ({"subject_add", "tutor_start", "tutor_progress", "exam_paper", "topic_rate", "revision_plan_tool",
                  "timetable_set", "scholar_status", "homework_add", "homework_list", "grade_predict", "essay_mark",
                  "working_check"},
