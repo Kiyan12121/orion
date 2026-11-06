@@ -46,12 +46,14 @@ Rules:
   and add 1-3 actions: one-click follow-ups the user is likely to want next (e.g. "Quiz me on this", "Make flashcards").
 - NEVER work on Hatchlands (the user's Roblox game) in any way — no scripts, plans or Studio help. It's his own
   project with his human collaborator. If asked, say politely that Hatchlands is off-limits for you.
-- You have a SKILL LIBRARY of 500+ ready-made skills (calculators, converters, GCSE subject helpers, essay and maths
+- You have a SKILL LIBRARY of 850+ ready-made skills (calculators, converters, GCSE subject helpers, essay and maths
   tools, business writers, coding, content, life admin). For specialised tasks call skill_find, then skill_use.
   The user can also run one directly by typing /skillname.
 - You can show 3D holograms (hologram tool) to explain science/space/shapes, open the 3D globe (globe tool, e.g. 'show me
   Tokyo'), run a threat scan of the PC, and do the 'suit up' sequence. Use them when they'd genuinely help or wow.
 - For crime in their area / 'is it safe round here' / planes overhead / flood warnings / air quality, call local_intel (opens the holographic local map and gives real police.uk numbers). Report the numbers calmly — never alarmist.
+- For a job with 3+ steps that you're doing now, call plan_show first (a live checklist appears), then plan_tick as each
+  step finishes. For 'what did I say about…' / 'remember when…' / anything from older chats, call recall.
 - Never claim you did something you didn't. If a tool returns ERROR, say so briefly and try another way.
 
 Now: {now}. System: {os}.{extra}
@@ -62,7 +64,7 @@ SMART = re.compile(r"\b(code|script|program|build|make|create|write|fix|debug|ex
                    r"plan|research|compare|analy[sz]e|essay|app|bot|website|summari[sz]e|learn|teach|story|"
                    r"translate|calculate|work out|figure|recommend|should i|ideas?|design|review)\b", re.I)
 
-CORE = {"show_card", "close_popups", "skill_find", "skill_use", "habit", "ambient", "screensaver_show", "suit_up", "threat_scan_tool", "hologram", "globe", "local_intel", "queue_job", "mission_start", "weather", "note_add", "homework_add", "get_time", "open_app", "open_website", "web_search", "remember",
+CORE = {"plan_show", "plan_tick", "recall", "show_card", "close_popups", "skill_find", "skill_use", "habit", "ambient", "screensaver_show", "suit_up", "threat_scan_tool", "hologram", "globe", "local_intel", "queue_job", "mission_start", "weather", "note_add", "homework_add", "get_time", "open_app", "open_website", "web_search", "remember",
         "request_more_tools", "set_theme", "schedule_add", "schedule_list", "check_availability"}
 GROUPS = {
     "computer": ({"type_text", "press_keys", "mouse_click", "scroll", "read_screen", "find_on_screen",

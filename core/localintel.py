@@ -59,9 +59,21 @@ def place_name():
 
 
 def home():
+    """Centre of your area. Remembers the last good answer so it still works when a lookup fails."""
     from .life import _geo
-    lat, lon, name = _geo(place_name())
-    return {"lat": lat, "lon": lon, "name": name}
+    place = place_name()
+    c = _cache()
+    try:
+        lat, lon, name = _geo(place)
+        out = {"lat": lat, "lon": lon, "name": name}
+        if c.get("home:" + place) != out:
+            c["home:" + place] = out
+            _save(c)
+        return out
+    except Exception:
+        if c.get("home:" + place):
+            return c["home:" + place]
+        raise
 
 
 def your_home(address=None):
@@ -479,7 +491,10 @@ def area(h=None):
 
 
 def flights(h=None, box=.45):
-    h = h or home()
+    try:
+        h = h or home()
+    except Exception:
+        return []
     try:
         r = _get("https://opensky-network.org/api/states/all", timeout=15, lamin=h["lat"] - box, lamax=h["lat"] + box,
                  lomin=h["lon"] - box * 1.6, lomax=h["lon"] + box * 1.6)
@@ -515,7 +530,10 @@ def world_events():
 
 
 def local_all():
-    h = home()
+    try:
+        h = home()
+    except Exception as e:
+        return {"error": f"Couldn't find {place_name()} — are you online? ({e.__class__.__name__})"}
     out = {"home": h, "boundary": boundary(h), "you": your_home()}
     jobs = {"crime": lambda: crime(h), "area": lambda: area(h), "flights": lambda: flights(h)}
     res = {}

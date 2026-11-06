@@ -170,8 +170,7 @@ def forecast(place=""):
             "sky": CODES.get(c["weather_code"], "mixed"), "wind": round(c["wind_speed_10m"]), "code": c["weather_code"],
             "rain_at": rain_soon,
             "days": [{"date": d["time"][i], "max": round(d["temperature_2m_max"][i]), "min": round(d["temperature_2m_min"][i]),
-                      "sky": CODES.get(d["weather_code"][i], "mixed"), "code": d["weather_code"][i], "rain": d["precipitation_probability_max"][i],
-                      "code": d["weather_code"][i]} for i in range(len(d["time"]))],
+                      "sky": CODES.get(d["weather_code"][i], "mixed"), "code": d["weather_code"][i], "rain": d["precipitation_probability_max"][i]} for i in range(len(d["time"]))],
             "sunset": d["sunset"][0][11:16]}
 
 

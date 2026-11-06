@@ -136,6 +136,11 @@ class Memory:
             if role == "user":
                 self._turns_since_learn += 1
             self._save()
+        try:
+            from .brain6 import archive
+            archive(role, content, device or DEVICE)
+        except Exception:
+            pass
 
     def recent(self, n=12):
         """Plain role/content turns for the AI (device tags stripped)."""

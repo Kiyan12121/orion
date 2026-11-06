@@ -369,6 +369,17 @@ body.busy .horb u{animation-duration:.9s}body.busy .horb i{animation-duration:1.
 @keyframes ping{from{transform:scale(.4);opacity:1}to{transform:scale(1.3);opacity:0}}@keyframes flash{50%{background-color:rgba(var(--ar),.12)}}
 @keyframes rise{from{opacity:0;transform:translateY(6px)}}@keyframes b{50%{opacity:.3}}@keyframes drop{from{opacity:0;transform:translateY(-16px) scale(.97)}}
 @keyframes mp{50%{box-shadow:0 0 0 10px rgba(255,85,119,.18)}}
+.lm-map{position:relative;height:300px;border-radius:14px;overflow:hidden;background:radial-gradient(circle at 50% 50%,#08223a,#01060d);touch-action:none}
+.lm-map canvas{width:100%;height:100%;display:block}.lm-me{position:absolute;right:8px;bottom:8px;width:38px;height:38px;border-radius:50%;border:1px solid var(--edge);background:rgba(2,12,22,.75);color:var(--amber);font-size:18px}
+.lm-leg{position:absolute;left:8px;top:8px;font:600 10.5px var(--ui);color:var(--dim);background:rgba(2,12,22,.6);padding:4px 8px;border-radius:8px}
+.lm-ai{margin-top:12px;font:500 14px var(--ui);line-height:1.5;padding:12px;border-radius:12px;background:linear-gradient(135deg,rgba(63,216,255,.12),rgba(77,255,166,.05));border:1px solid var(--edge)}
+.lm-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px}.lm-stats div{text-align:center;padding:8px 4px;border-radius:10px;background:rgba(63,216,255,.06)}
+.lm-stats b{display:block;font:800 22px var(--ui);color:var(--accent,#3fd8ff)}.lm-stats small{font:500 10.5px var(--ui);color:var(--dim)}
+.lm-note{font:500 12px var(--ui);color:var(--dim);margin:-4px 0 8px;line-height:1.45}.lm-note b{color:var(--text)}
+.lm-seg button{font:600 11px var(--ui);padding:3px 9px;border-radius:12px;border:1px solid var(--edge);background:none;color:var(--dim);margin-left:4px}.lm-seg button.on{color:var(--text);background:rgba(63,216,255,.18)}
+.lm-row{display:flex;gap:10px;padding:9px 2px;border-bottom:1px solid rgba(255,255,255,.05)}.lm-row i{width:9px;height:9px;border-radius:50%;flex:none;margin-top:6px}
+.lm-row b{display:block;font:600 14px var(--ui)}.lm-row span{display:block;font:500 12.5px var(--ui);color:var(--text)}.lm-row span em{font-style:normal;color:var(--amber)}.lm-row small{display:block;font:500 11.5px var(--ui);color:var(--dim)}
+.lm-row.sel{background:rgba(255,190,85,.1);border-radius:10px}
 </style>
 </head>
 <body data-theme="standby">
@@ -517,7 +528,7 @@ body.busy .horb u{animation-duration:.9s}body.busy .horb i{animation-duration:1.
     <section class="view" id="v-more">
       <div class="subnav" id="subnav"><button data-go="pc">🖥️ PC</button>
         <button data-sub="study" class="on">📚 Study</button><button data-sub="money">💷 Money</button><button data-sub="games">🎮 Gaming</button>
-        <button data-sub="skills">✨ Skills</button><button data-sub="brain">🧠 Brain</button><button data-sub="health">🩺 Health</button>
+        <button data-sub="skills">✨ Skills</button><button data-sub="brain">🧠 Brain</button><button data-sub="health">🩺 Health</button><button data-sub="local">📍 Local</button>
       </div>
       <div class="msub on" id="s-study">
         <div class="card"><h3>FOCUS <i id="mFocusSt"></i></h3>
@@ -590,6 +601,17 @@ body.busy .horb u{animation-duration:.9s}body.busy .horb i{animation-duration:1.
           <div class="two" style="margin-top:8px"><button class="btn sm ghost" id="mSlX">CLOSE</button><button class="btn sm" id="mSlGo">▶ RUN</button></div>
           <div id="mSlOut"></div></div>
         <div id="mSlList"></div>
+      </div>
+      <div class="msub" id="s-local">
+        <div class="card lcm"><h3><span id="lmTitle" style="text-transform:none">Local intel</span><button class="btn sm ghost" id="lmRe" style="border:0;padding:0">REFRESH</button></h3>
+          <div class="lm-map"><canvas id="lmC"></canvas><div class="lm-leg" id="lmLeg"></div><button class="lm-me" id="lmMe">◎</button></div>
+          <div class="lm-ai" id="lmAi">Connect to your PC to load your area.</div>
+          <div class="lm-stats" id="lmStats"></div></div>
+        <div class="card"><h3>Crimes <span class="lm-seg"><button data-ls="near" class="on">nearest me</button><button data-ls="new">newest</button></span></h3>
+          <p class="lm-note">Police only publish the <b>month</b> — never the day or time — and move each crime to a nearby street, to protect victims.</p>
+          <div id="lmLog"></div></div>
+        <div class="card"><h3>Stop &amp; search <small style="font:500 11px var(--ui)">exact times</small></h3><div id="lmStops"><p class="empty">—</p></div></div>
+        <div class="card"><h3>Area</h3><div id="lmArea"><p class="empty">—</p></div></div>
       </div>
       <div class="msub" id="s-health">
         <div class="card"><h3>HEALTH CHECK <button class="btn sm ghost" id="mHRe" style="border:0;padding:0">RE-CHECK</button></h3><div id="mHealth"><p class="empty">Connect to your PC.</p></div></div>
@@ -1094,9 +1116,62 @@ async function checkLaunch(){ try{ if(Native){ const r=await Native.consumeLaunc
 /* ---------- MORE: study, money, gaming, brain, health ---------- */
 const money=v=>"£"+(+v||0).toFixed(2).replace(/\.00$/,""), hm=m=>m>=60?`${Math.floor(m/60)}h${String(m%60).padStart(2,"0")}`:`${m}m`;
 function hb2(rows,fmt){ const mx=Math.max(1,...rows.map(r=>r[1])); return rows.length?rows.map(r=>`<div class="hb2"><b>${esc(r[0])}</b><div><i style="width:${r[1]/mx*100}%"></i></div><span>${esc(fmt(r[1]))}</span></div>`).join(""):'<p class="empty">Nothing yet.</p>'; }
+
+/* ---------- Local intel on the phone (data comes from your PC) ---------- */
+const LCOL={"anti-social-behaviour":"#ffbe55","bicycle-theft":"#9fe8ff","burglary":"#ff5a6e","criminal-damage-arson":"#ff8a3d","drugs":"#c9a0ff","other-theft":"#7fd4ff","possession-of-weapons":"#ff2e63","public-order":"#f3e37c","robbery":"#ff4dbe","shoplifting":"#5dffb0","theft-from-the-person":"#4da3ff","vehicle-crime":"#ffd27f","violent-crime":"#ff6b6b","other-crime":"#b8c4cc"};
+const LM={D:null,M:null,z:.12,px:0,py:0,sort:"near",sel:null,touch:null};
+const lmProj=h=>{ const c=Math.cos(h.lat*Math.PI/180); return (la,lo)=>[(lo-h.lon)*111320*c,(la-h.lat)*110540]; };
+const lmMon=m=>m?new Date(m+"-01").toLocaleString("en-GB",{month:"short",year:"numeric"}):"";
+const lmD=m=>m>=1000?(m/1000).toFixed(1)+" km":Math.round(m/10)*10+" m";
+async function loadLocalM(force){ if(!pcOnline) return; $("#lmAi").textContent="Pulling police.uk, map and area data from your PC…";
+  try{ const [D,M]=await Promise.all([api("/api/local",undefined,90000),LM.M&&!force?Promise.resolve(LM.M):api("/api/local_map",undefined,90000)]); LM.D=D; if(M&&!M.error) LM.M=M; }catch(e){ $("#lmAi").textContent="Couldn't load: "+e.message; return; }
+  const D=LM.D; if(D.error){ $("#lmAi").textContent=D.error; return; } const cr=D.crime||{}; $("#lmTitle").textContent="📍 "+((D.home||{}).name||"Local");
+  const pr=lmProj(D.home); LM.pr=pr; LM.you=D.you?pr(D.you.lat,D.you.lon):null; LM.bound=D.boundary&&D.boundary.ring?D.boundary.ring.map(q=>pr(q[0],q[1])):null;
+  LM.geo=LM.M?{roads:LM.M.roads.map(r=>({w:{primary:3,secondary:2.4,tertiary:2,unclassified:1.4,residential:1.2}[r.k]||.6,g:r.g.map(p=>pr(p[0],p[1]))})),b:LM.M.buildings.map(o=>(o.g||o).map(p=>pr(p[0],p[1])))}:null;
+  if(LM.you){ LM.px=-LM.you[0]; LM.py=-LM.you[1]; LM.z=.22; } else { LM.px=LM.py=0; LM.z=.12; }
+  const tr=cr.trend||[], avg=tr.length?tr.reduce((a,q)=>a+q.n,0)/tr.length:0, top=(cr.by_cat||[])[0];
+  let s=cr.month?`${cr.total} crimes in ${cr.area||"the area"} in ${new Date(cr.month+"-01").toLocaleString("en-GB",{month:"long"})} — ${cr.total<avg*.85?"quieter than usual":cr.total>avg*1.15?"busier than usual":"about normal"} (avg ${Math.round(avg)}).${top?` Most were ${top[1].toLowerCase()}.`:""}`:(cr.error||"No police data yet.");
+  if(LM.you&&cr.items){ const ds=cr.items.map(r=>{ const m=pr(r[0],r[1]); return Math.hypot(m[0]-LM.you[0],m[1]-LM.you[1]); }).sort((a,b)=>a-b); const n=ds.filter(d=>d<=250).length; s+=n?` ${n} within 250 m of your house.`:` None within 250 m of your house (nearest ${lmD(ds[0]||0)}).`; }
+  else if(cr.items) s+=" Add your house on the PC (Local Intel › your house) to see what's near you.";
+  $("#lmAi").textContent=s;
+  const prev=tr.length>1?tr[tr.length-2].n:null;
+  $("#lmStats").innerHTML=cr.month?`<div><b>${cr.total}</b><small>${lmMon(cr.month)}</small></div><div><b>${prev==null?"–":(cr.total>prev?"▲":"▼")+Math.abs(cr.total-prev)}</b><small>vs last month</small></div><div><b>${(cr.stops||[]).length}</b><small>stop &amp; searches</small></div>`:"";
+  const ar=D.area||{}, w=ar.weather||{}, a=ar.air;
+  $("#lmArea").innerHTML=`<div class="lm-row"><i style="background:var(--accent,#3fd8ff)"></i><div><b>${w.temp!=null?Math.round(w.temp)+"° "+esc(w.sky||""):"—"}</b><small>sunrise ${esc(ar.sunrise||"–")} · sunset ${esc(ar.sunset||"–")}</small></div></div>
+    <div class="lm-row"><i style="background:#5dffb0"></i><div><b>Air quality ${a?a.aqi+" · "+esc(a.label):"—"}</b><small>${a&&a.uv!=null?"UV "+(+a.uv).toFixed(1):""}</small></div></div>
+    <div class="lm-row"><i style="background:#c9a0ff"></i><div><b>${ar.moon?esc(ar.moon.name)+" · "+ar.moon.lit+"% lit":"—"}</b><small>Aurora: ${ar.kp?esc(ar.kp.chance)+" (Kp "+ar.kp.kp+")":"—"}</small></div></div>
+    <div class="lm-row"><i style="background:#4da3ff"></i><div><b>${ar.floods==null?"Flood data unavailable":ar.floods.length?ar.floods.length+" flood alert(s) nearby":"No flood warnings nearby ✓"}</b><small>${(D.flights||[]).length} aircraft overhead right now</small></div></div>`;
+  const st=cr.stops||[]; $("#lmStops").innerHTML=st.length?st.slice(0,12).map(x=>{ const d=new Date(x.at); return `<div class="lm-row"><i style="background:#e8f6ff"></i><div><b>${d.toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short"})} · ${d.toTimeString().slice(0,5)}</b><span>${esc(x.type)}${x.for?" · for "+esc(x.for.toLowerCase()):""}</span><small>${esc(x.outcome||"")}${x.street?" · "+esc(x.street):""}</small></div></div>`; }).join(""):'<p class="empty">None in the last 3 months.</p>';
+  lmLog(); lmDraw(); }
+function lmLog(){ const D=LM.D; if(!D||!D.crime||!D.crime.items) return; const cr=D.crime, pr=LM.pr;
+  const rows=cr.items.map(r=>{ const m=pr(r[0],r[1]); return {r,key:r[0]+","+r[1],m,d:LM.you?Math.hypot(m[0]-LM.you[0],m[1]-LM.you[1]):null}; });
+  rows.sort(LM.sort==="near"&&LM.you?(a,b)=>a.d-b.d:(a,b)=>(b.r[6]||"").localeCompare(a.r[6]||""));
+  $("#lmLog").innerHTML=rows.map(o=>`<div class="lm-row ${LM.sel===o.key?"sel":""}" data-k="${o.key}"><i style="background:${LCOL[o.r[2]]||"#fff"}"></i><div><b>${esc((cr.names||{})[o.r[2]]||o.r[2])}</b><span>📍 ${esc(o.r[3]||"nearby")}${o.d!=null?` · <em>${lmD(o.d)} from you</em>`:""}</span><small>📅 ${lmMon(o.r[6]||cr.month)} · ${o.r[4]?esc(o.r[4]):"no outcome yet"}</small></div></div>`).join("");
+  $$("#lmLog .lm-row").forEach(d=>d.onclick=()=>{ LM.sel=d.dataset.k; const [la,lo]=d.dataset.k.split(",").map(Number); const m=pr(la,lo); LM.px=-m[0]; LM.py=-m[1]; LM.z=Math.max(LM.z,.3); lmDraw(); lmLog(); $(".lm-map").scrollIntoView({behavior:"smooth",block:"center"}); }); }
+function lmDraw(){ const c=$("#lmC"); if(!c||!LM.D) return; const k=devicePixelRatio||2, W=c.clientWidth*k, H=c.clientHeight*k; c.width=W; c.height=H; const x=c.getContext("2d"), z=LM.z*k;
+  const S=m=>[W/2+(m[0]+LM.px)*z,H/2-(m[1]+LM.py)*z]; const path=(g,cl)=>{ x.beginPath(); g.forEach((m,i)=>{ const p=S(m); i?x.lineTo(p[0],p[1]):x.moveTo(p[0],p[1]); }); if(cl) x.closePath(); };
+  if(LM.geo){ x.fillStyle="rgba(63,216,255,.16)"; x.beginPath(); LM.geo.b.forEach(g=>{ g.forEach((m,i)=>{ const p=S(m); i?x.lineTo(p[0],p[1]):x.moveTo(p[0],p[1]); }); x.closePath(); }); x.fill();
+    for(const r of LM.geo.roads){ if(r.w<1&&LM.z<.2) continue; path(r.g); x.strokeStyle=r.w>=2.4?"rgba(160,240,255,.9)":r.w>=1?"rgba(115,205,248,.6)":"rgba(140,200,240,.25)"; x.lineWidth=Math.max(.6,r.w*k*.7); x.stroke(); } }
+  if(LM.bound){ x.save(); x.beginPath(); x.rect(0,0,W,H); LM.bound.forEach((m,i)=>{ const p=S(m); i?x.lineTo(p[0],p[1]):x.moveTo(p[0],p[1]); }); x.closePath(); x.fillStyle="rgba(1,5,11,.7)"; x.fill("evenodd"); x.restore(); path(LM.bound,1); x.strokeStyle="#4dffa6"; x.setLineDash([8*k/2,4*k/2]); x.lineWidth=1.5*k; x.stroke(); x.setLineDash([]); }
+  const cr=(LM.D.crime||{}); const pts={}; (cr.items||[]).forEach(r=>{ const key=r[0]+","+r[1]; (pts[key]=pts[key]||[]).push(r); });
+  for(const key in pts){ const L=pts[key], p=S(LM.pr(L[0][0],L[0][1])), cl=LCOL[L[0][2]]||"#ff6b6b", r=(3+Math.min(7,Math.sqrt(L.length)*2))*k/1.4;
+    x.fillStyle=cl; x.shadowColor=cl; x.shadowBlur=8*k; x.beginPath(); x.arc(p[0],p[1],r,0,7); x.fill(); x.shadowBlur=0; if(L.length>1){ x.fillStyle="#021018"; x.font=`800 ${8*k}px sans-serif`; x.textAlign="center"; x.fillText(L.length,p[0],p[1]+3*k); }
+    if(LM.sel===key){ x.strokeStyle="#fff"; x.lineWidth=2*k; x.beginPath(); x.arc(p[0],p[1],r+4*k,0,7); x.stroke(); } }
+  if(LM.you){ const p=S(LM.you); x.strokeStyle="rgba(255,190,85,.4)"; x.setLineDash([3*k,4*k]); x.beginPath(); x.arc(p[0],p[1],250*z,0,7); x.stroke(); x.setLineDash([]); x.fillStyle="#ffbe55"; x.shadowColor="#ffbe55"; x.shadowBlur=14*k; x.beginPath(); x.arc(p[0],p[1],6*k,0,7); x.fill(); x.shadowBlur=0; x.font=`800 ${11*k}px sans-serif`; x.textAlign="left"; x.fillText("YOU",p[0]+9*k,p[1]-7*k); }
+  $("#lmLeg").textContent=`${(cr.items||[]).length} crimes · ${lmMon(cr.month)}`; }
+(function(){ const c=$("#lmC"); let t0=null;
+  c.addEventListener("touchstart",e=>{ const T=[...e.touches]; t0={px:LM.px,py:LM.py,z:LM.z,x:T[0].clientX,y:T[0].clientY,d:T.length>1?Math.hypot(T[0].clientX-T[1].clientX,T[0].clientY-T[1].clientY):0}; },{passive:true});
+  c.addEventListener("touchmove",e=>{ if(!t0) return; e.preventDefault(); const T=[...e.touches];
+    if(T.length>1&&t0.d){ LM.z=Math.max(.03,Math.min(2,t0.z*Math.hypot(T[0].clientX-T[1].clientX,T[0].clientY-T[1].clientY)/t0.d)); }
+    else { LM.px=t0.px+(T[0].clientX-t0.x)/LM.z; LM.py=t0.py-(T[0].clientY-t0.y)/LM.z; } lmDraw(); },{passive:false});
+  c.addEventListener("touchend",()=>{ t0=null; });
+  c.addEventListener("wheel",e=>{ e.preventDefault(); LM.z=Math.max(.03,Math.min(2,LM.z*(e.deltaY<0?1.15:.87))); lmDraw(); },{passive:false}); })();
+$("#lmMe").onclick=()=>{ if(LM.you){ LM.px=-LM.you[0]; LM.py=-LM.you[1]; LM.z=.3; } else { LM.px=LM.py=0; LM.z=.12; } lmDraw(); };
+$("#lmRe").onclick=()=>loadLocalM(true);
+$$("[data-ls]").forEach(b=>b.onclick=()=>{ LM.sort=b.dataset.ls; $$("[data-ls]").forEach(x=>x.classList.toggle("on",x===b)); lmLog(); });
 function goSub(n){ store.set("sub",n); $$("#subnav button").forEach(b=>b.classList.toggle("on",b.dataset.sub===n)); $$(".msub").forEach(x=>x.classList.toggle("on",x.id==="s-"+n));
   if(n==="skills") return loadSkillsM();
-  if(!pcOnline){ return; } ({study:loadStudyM,money:loadMoneyM,games:loadGamesM,brain:loadBrainM,health:loadHealthM})[n]?.(); }
+  if(!pcOnline){ return; } ({study:loadStudyM,money:loadMoneyM,games:loadGamesM,brain:loadBrainM,health:loadHealthM,local:()=>{ if(!LM.D) loadLocalM(); else lmDraw(); }})[n]?.(); }
 $$("#subnav button").forEach(b=>b.onclick=()=>goSub(b.dataset.sub));
 let MC=[], MCUR=null, MF=null, mfTick=null;
 async function loadStudyM(){ loadLifeM(); try{ const o=await api("/api/study"); paintFocusM(o.focus);

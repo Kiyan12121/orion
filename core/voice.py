@@ -151,7 +151,7 @@ class Speaker:
                 try:
                     from .modes import voice as mode_voice
                     mv, rate, pitch = mode_voice(self.cfg.get("theme", "standby"), self.cfg)
-                    audio = asyncio.run(self._neural(text, voice or mv, rate, pitch))
+                    audio = self._cached(text, voice or mv, rate, pitch)
                     if gen == self.gen and audio:
                         self.emit("audio", id=uuid.uuid4().hex[:8], text=text,
                                   data=base64.b64encode(audio).decode())
@@ -160,6 +160,45 @@ class Speaker:
                     pass          # offline or service hiccup -> fall through to Windows voice
             if gen == self.gen:
                 self.offline_say(text)
+
+    def _cached(self, text, voice, rate, pitch, store=True):
+        """Short phrases ('Right away, sir.') are kept on disk, so they play instantly next time."""
+        import hashlib
+        import os
+        from .paths import DATA_DIR
+        short = len(text) <= 70
+        if short:
+            d = os.path.join(DATA_DIR, "voicecache")
+            fp = os.path.join(d, hashlib.md5(f"{voice}|{rate}|{pitch}|{text}".encode()).hexdigest() + ".mp3")
+            try:
+                with open(fp, "rb") as f:
+                    return f.read()
+            except OSError:
+                pass
+        audio = asyncio.run(self._neural(text, voice, rate, pitch))
+        if short and audio and store:
+            try:
+                os.makedirs(d, exist_ok=True)
+                with open(fp, "wb") as f:
+                    f.write(audio)
+            except OSError:
+                pass
+        return audio
+
+    def prewarm(self, phrases):
+        """Make the stock phrases ahead of time (background, once)."""
+        if not self.neural_ok:
+            return
+
+        def run():
+            try:
+                from .modes import voice as mode_voice
+                mv, rate, pitch = mode_voice(self.cfg.get("theme", "standby"), self.cfg)
+                for p in phrases:
+                    self._cached(p, mv, rate, pitch)
+            except Exception:
+                pass
+        threading.Thread(target=run, daemon=True).start()
 
     @staticmethod
     async def _neural(text, voice, rate, pitch="+0Hz"):

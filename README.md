@@ -1,4 +1,40 @@
-# ORION 5.5 — Personal Intelligence System
+# ORION 6.0 — Personal Intelligence System
+
+## New in 6.0
+**Smarter brain**
+- **Plan cards:** for any job with 3+ steps, ORION puts up a live holographic checklist and ticks each step off as it goes. The plan shows on your phone too.
+- **"How I did it":** while ORION works you see what it's doing in the chat ("🔎 Searching the web…", "📅 Adding to your plan…"). Afterwards it folds into a "3 steps · how I did it" line you can open.
+- **Total recall:** every conversation is now archived on your PC, so ORION can look back weeks or months ("what did I say about my mocks?"), not just the last 60 messages. The Brain page shows how much it remembers.
+- **Knows your day:** ORION knows whether it's a school day, the weekend or late at night, what's next on your plan, and what homework is due, and answers with that in mind.
+
+**Jarvis voice & presence**
+- **Instant replies:** ORION says "Right away, sir." / "Let me look that up, sir." the moment it starts a job, so it never feels like it's ignoring you. Short phrases are saved after the first time, so they play instantly.
+- **Welcome back:** after 45+ minutes away, ORION greets you out loud with what's next and anything it finished while you were gone (at most every 2 hours, never late at night).
+- Both can be switched off in ⚙.
+
+**Phone 6.0**
+- **📍 Local Intel on your phone** (More › Local):
+  - Desford's map with pinch-to-zoom, crime dots and your house.
+  - ORION's summary, every crime sorted nearest-to-you, stop & search with exact times, plus air, moon, aurora and floods.
+
+**Speed & polish**
+- **Smooth mode by itself:** if a machine runs the interface below ~28 fps, ORION switches itself into smooth mode and remembers it. Change it in ⚙ Visuals.
+- **Bug fixes:**
+  - Habits and suggestions were broken: two features were fighting over the same file.
+  - Local Intel crashed when you were offline; it now remembers your area.
+  - A duplicate weather field.
+  - A chat-display crash with the new activity trail.
+
+**+346 skills (now 851)**
+- **67 new instant tools:**
+  - Maths: averages, fractions, ratios, nth term, straight lines, bounds, trig, standard form, area and volume.
+  - Science: physics equations, moles & Mr, resistors, half-life.
+  - Money: loans, margins, best value, wages, subscriptions.
+  - Dates and time: sleep cycles, timestamps.
+  - Text and code tools, plus gaming: K/D, win rate, eDPI.
+  - Fun: 8-ball, teams, would-you-rather…
+- **8 new study tasks for every GCSE subject (216 skills):** 6-mark plans, teach-me-back, stretch questions, 60-second summaries, spec checks…
+- **63 new playbooks** for school, writing, content, business, coding, life and gaming.
 
 ## 5.7: Local Intel — smoother, smarter, and centred on you
 - **Much smoother on laptops:**

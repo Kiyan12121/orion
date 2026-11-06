@@ -1150,6 +1150,16 @@ body.reveal .shell{animation:reveal 1.4s}
 .lc-ask b{font:700 16px var(--ui);display:block;margin-bottom:10px}.lc-ask input{width:100%;box-sizing:border-box;padding:10px 12px;border-radius:8px;border:1px solid rgba(var(--ar),.4);background:rgba(var(--ar),.07);color:var(--text);font:500 15px var(--ui);outline:none}
 .lc-ask small{display:block;margin-top:6px;color:var(--dim);font:500 12px var(--ui)}.lc-ask p{display:flex;justify-content:flex-end;gap:8px;margin:14px 0 0}
 .lc-ask button{padding:8px 16px;border-radius:8px;border:1px solid rgba(var(--ar),.4);background:none;color:var(--text);font:700 13px var(--ui);cursor:pointer}.lc-ask .ok{background:var(--a);color:#021018;border:0}
+.pl6-bar{height:5px;border-radius:3px;background:rgba(var(--ar),.15);overflow:hidden;margin-bottom:5px}.pl6-bar i{display:block;height:100%;background:linear-gradient(90deg,var(--a),#5dffb0);transition:width .6s;box-shadow:0 0 10px var(--a)}
+.pl6 small{font:600 12px var(--ui);color:var(--dim)}.pl6 ol{list-style:none;margin:8px 0 0;padding:0}.pl6 li{display:flex;gap:9px;align-items:flex-start;padding:5px 0;font:500 14px var(--ui);color:var(--dim);transition:.3s}
+.pl6 li em{flex:none;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font:700 11px var(--ui);font-style:normal;border:1px solid rgba(var(--ar),.35)}
+.pl6 li.ok{color:var(--text)}.pl6 li.ok em{background:#5dffb0;color:#021018;border-color:#5dffb0}.pl6 li.ok span{text-decoration:line-through;text-decoration-color:rgba(93,255,176,.5)}
+.pl6 li.now{color:var(--a2)}.pl6 li.now em{border-color:var(--a);color:var(--a2);animation:pulse2 1.2s infinite}
+.trail{font:500 12.5px var(--ui);color:var(--dim);margin-bottom:6px}.trail.live div{display:flex;gap:6px;align-items:center;opacity:.55;line-height:1.7}.trail.live div.now{opacity:1;color:var(--a2)}
+.trail.live div.now i{animation:pulse2 1s infinite}.trail small{opacity:.7;max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.trail.done button{background:none;border:0;color:var(--dim);font:600 11.5px var(--ui);cursor:pointer;padding:0;opacity:.75}.trail.done button:hover{color:var(--a2);opacity:1}
+.trail.done .tl{display:none;padding:4px 0 0 4px}.trail.done.open .tl{display:block}.trail.done .tl div{display:flex;gap:6px;line-height:1.6}
+.brArch{margin-top:10px;font:500 13px var(--ui);color:var(--dim);line-height:1.5}.brArch b{color:var(--a2)}
 </style>
 </head>
 <body class="state-idle" data-theme="standby">
@@ -1294,7 +1304,7 @@ body.reveal .shell{animation:reveal 1.4s}
       <section class="panel pages">
         <!-- COMMS -->
         <div class="page on" id="page-comms">
-          <div class="ph">COMMS <span style="font-family:var(--mono);letter-spacing:0;font-weight:500;color:var(--faint)">UI 5.0</span><i id="brainlabel">AUTO BRAIN</i></div>
+          <div class="ph">COMMS <span style="font-family:var(--mono);letter-spacing:0;font-weight:500;color:var(--faint)">ORION 6</span><i id="brainlabel">AUTO BRAIN</i></div>
           <div id="log"></div>
           <button id="toBottom" title="Jump to latest">▼ LATEST</button>
           <div class="quick" id="quick">
@@ -1402,7 +1412,7 @@ body.reveal .shell{animation:reveal 1.4s}
         <div class="page" id="page-skills" data-wide="1">
           <div class="scroll">
             <div class="wtitle"><h2>SKILL LIBRARY</h2><span id="slSub">—</span></div>
-            <div class="slbar"><input class="inp" id="slQ" placeholder="Search 500+ skills — e.g. quadratic, essay plan, cold email, low fps…"><span class="sub2">Tip: type <b>/name</b> in chat to run one</span></div>
+            <div class="slbar"><input class="inp" id="slQ" placeholder="Search 850+ skills — e.g. quadratic, essay plan, cold email, low fps…"><span class="sub2">Tip: type <b>/name</b> in chat to run one</span></div>
             <div class="slcats" id="slCats"></div>
             <div class="slrun" id="slRun" style="display:none">
               <div class="slrh"><b id="slT">—</b><span id="slD" class="sub2"></span><button class="btn small" id="slClose">✕</button></div>
@@ -1633,7 +1643,7 @@ body.reveal .shell{animation:reveal 1.4s}
                 <div class="chips" id="brCats"></div>
                 <div id="brFacts" style="max-height:46vh;overflow:auto"></div>
                 <div class="voicerow" style="margin-top:8px"><input class="inp" id="brNew" placeholder="Add something — e.g. my best mate is Sam"><select class="inp" id="brCat" style="flex:none;width:140px"><option>person</option><option>project</option><option>preference</option><option>goal</option><option selected>fact</option></select><button class="btn small" id="brAdd" style="height:36px">ADD</button></div>
-                <label class="tog" style="margin-top:8px"><input type="checkbox" id="brAuto"> Learn about me automatically from our chats</label></div>
+                <label class="tog" style="margin-top:8px"><input type="checkbox" id="brAuto"> Learn about me automatically from our chats</label><div class="brArch" id="brArch"></div></div>
               <div class="tile s5"><h5>SHORTCUTS <i>INSTANT COMMANDS</i></h5>
                 <div id="brShorts"><div class="empty">None yet.</div></div>
                 <input class="inp" id="scPhrase" placeholder="When I say… e.g. gaming setup" style="margin:8px 0 6px">
@@ -1731,6 +1741,8 @@ body.reveal .shell{animation:reveal 1.4s}
   <label class="tog"><input type="checkbox" id="sSimple"> Simple layout <small>— hide the telemetry column (the ◧ button in the top bar toggles it)</small></label>
   <label class="tog"><input type="checkbox" id="sPro"> Let ORION pop things up by itself <small>— events starting soon, homework due, rain, what happened while you were away…</small></label>
   <label class="tog"><input type="checkbox" id="sSaver"> Holographic screensaver when I'm away <small>— <input class="inp" id="sSaverMin" type="number" min="0" style="width:64px;display:inline-block;padding:2px 6px"> min (0 = same as autonomous mode) · never while gaming or watching something</small></label>
+  <label class="tog"><input type="checkbox" id="sAcks"> Quick spoken replies while I work <small>— “One moment, sir.”</small></label>
+  <label class="tog"><input type="checkbox" id="sGreet"> Welcome me back out loud when I sit down</label>
   <label class="tog"><input type="checkbox" id="sBreakVoice"> Say break reminders out loud <small>— every <input class="inp" id="sBreakMin" type="number" min="0" style="width:64px;display:inline-block;padding:2px 6px"> min of non-stop PC use (0 = off)</small></label>
   <label class="tog" style="display:block">🦾 Suit-up apps <small>— opened when you say “suit up” (comma-separated, e.g. Spotify, Discord)</small><input class="inp" id="sSuit" placeholder="Spotify, Discord"></label>
   <label class="tog"><input type="checkbox" id="sAutoMode"> Switch modes automatically <small>— CEO for money, Scholar for school, Hacker for code…</small></label>
@@ -1806,6 +1818,7 @@ window.ui={event(e){ switch(e.kind){
   case "devices_changed": if($("#page-devices").classList.contains("on")) loadDevices(); break;
   case "focus": e._t=Date.now(); paintFocus(e); break;
   case "card": holoCard(e.card); break;
+  case "mission": { const all=(e.done||[]).length&&e.done.every(Boolean); holoCard({id:"plan6",kind:"plan",title:e.title,steps:e.steps,done:e.done,note:e.note,icon:all?"✅":"🧭",pinned:!all}); if(all) sfx("done"); break; }
   case "exam_paper": $("#ehGo").textContent="✦ NEW PAPER"; $("#ehGo").disabled=false; if(e.ok){ toast("📝 Paper ready — good luck."); loadScholar(); openExam(e.data.id); } else toast(e.error,"warn"); break;
   case "exam_ready": if(on("study")) loadScholar(); break;
   case "exam_marked": $("#exSubmit").textContent="SUBMIT FOR MARKING"; $("#exSubmit").disabled=false; if(e.ok){ sfx("ok"); openExam(e.data.id); loadScholar(); } else toast(e.error,"warn"); break;
@@ -1870,12 +1883,23 @@ function msgEl(role,tier,model){ const d=document.createElement("div"); d.classN
 function setTags(d,tier,model){ let h=""; if(tier&&tier!=="none") h+=`<span class="tier ${tier}">${tier.toUpperCase()}</span>`; if(model) h+=`<span class="model">${esc(model)}</span>`; d.querySelector(".tags").innerHTML=h; }
 function addMsg(role,text,tier){ const d=msgEl(role,tier); d.querySelector(".body").innerHTML=render(text); scrollChat(); if(role!=="user"&&!$("#page-comms").classList.contains("on")) {} }
 function scrollChat(force){ const l=$("#log"); if(force||l.scrollHeight-l.scrollTop-l.clientHeight<220) l.scrollTop=l.scrollHeight; }
+const TRAIL={web_search:["🔎","Searching the web"],fetch_page:["📄","Reading a page"],browser_open:["🌐","Opening a site"],browser_click:["🖱","Clicking"],browser_type:["⌨","Typing"],weather:["🌦","Checking the weather"],
+  open_app:["🚀","Opening"],remember:["🧠","Remembering"],recall:["🗂","Looking through past chats"],schedule_add:["📅","Adding to your plan"],schedule_list:["📅","Checking your plan"],check_availability:["📅","Checking when you're free"],
+  plan_show:["🧭","Planning"],plan_tick:["✓","Step done"],show_card:["💠","Putting it on screen"],skill_find:["📚","Finding a skill"],skill_use:["⚙","Using a skill"],code_write:["💻","Writing code"],code_run:["▶","Testing the code"],
+  project_create:["📁","Starting a project"],local_intel:["📍","Checking Desford"],globe:["🌍","Opening the globe"],hologram:["💠","Building a hologram"],homework_add:["📝","Adding homework"],note_add:["🗒","Saving a note"],queue_job:["🛰","Queuing a job"],
+  read_screen:["👁","Reading your screen"],type_text:["⌨","Typing"],press_keys:["⌨","Pressing keys"],mouse_click:["🖱","Clicking"],get_time:["🕑","Checking the time"],set_theme:["🎨","Changing theme"]};
+function trailAdd(e){ if(!current) return; const [ic,t]=TRAIL[e.name]||["⚙",e.name.replace(/_/g," ")]; const arg=(e.args||"").replace(/^['"]|['"]$/g,"").slice(0,48);
+  current.trail=current.trail||[]; if(current.trail.length&&current.trail[current.trail.length-1].t===t&&e.name!=="plan_tick") return; current.trail.push({ic,t,arg});
+  let tr=current.el.querySelector(".trail"); if(!tr){ tr=document.createElement("div"); tr.className="trail live"; const bd=current.el.querySelector(".body"); bd.parentNode.insertBefore(tr,bd); }
+  tr.innerHTML=current.trail.slice(-4).map((s,i,a)=>`<div class="${i===a.length-1?"now":""}"><i>${s.ic}</i>${esc(s.t)}${s.arg&&!/^\{/.test(s.arg)?` <small>${esc(s.arg)}</small>`:""}</div>`).join(""); scrollChat(); }
 function startStream(id){ holoClear(); const d=msgEl("assistant"); d.querySelector(".body").innerHTML='<span class="typing"><span></span><span></span><span></span></span>'; current={id,el:d,text:""}; $("#log").scrollTop=1e9; }
 function appendStream(id,t){ if(!current||current.id!==id) return; current.text+=t; current.el.querySelector(".body").innerHTML=render(current.text,true)+'<span class="cursor"></span>'; scrollChat(); }
 function endStream(e){ if(!current||current.id!==e.id) return; const d=current.el;
   if(e.stopped){ d.classList.add("stopped"); d.querySelector(".body").innerHTML=current.text?render(current.text)+" <i style='color:var(--dim)'>[stopped]</i>":"<i>Stopped.</i>"; }
   else d.querySelector(".body").innerHTML=render(e.text||current.text||"Done.");
-  setTags(d,e.tier,e.model); current=null; scrollChat(); }
+  setTags(d,e.tier,e.model);
+  const tr=d.querySelector(".trail"); if(tr&&current.trail){ const n=current.trail.length; tr.className="trail done"; tr.innerHTML=`<button>⚙ ${n} step${n>1?"s":""} · how I did it</button><div class="tl">${current.trail.map(s=>`<div><i>${s.ic}</i>${esc(s.t)}${s.arg&&!/^\{/.test(s.arg)?` <small>${esc(s.arg)}</small>`:""}</div>`).join("")}</div>`; tr.querySelector("button").onclick=()=>tr.classList.toggle("open"); }
+  current=null; scrollChat(); }
 (function(){ const l=$("#log");
   // drive the scroll ourselves so it works in every WebView / touchpad / mouse
   l.addEventListener("wheel",e=>{ e.preventDefault(); l.scrollTop+=e.deltaMode===1?e.deltaY*32:e.deltaMode===2?e.deltaY*l.clientHeight:e.deltaY; },{passive:false});
@@ -1898,6 +1922,7 @@ $$("#quick button").forEach(b=>b.onclick=()=>send(b.dataset.q));
 function logLine(html){ const d=document.createElement("div"); d.innerHTML=html; $("#actlog").appendChild(d); while($("#actlog").children.length>80) $("#actlog").firstChild.remove(); $("#actlog").scrollTop=1e9; return d; }
 const rows={};
 function logTool(e){ const key=e.name+e.args, icon={running:"◌",ok:"✓",error:"✕",denied:"⊘",blocked:"⛔"}[e.status], html=`<b>${icon}</b> <em>${esc(e.name)}</em>(${esc(e.args)})`;
+  if(e.status==="running"&&current) trailAdd(e);
   if(e.status==="running"){ rows[key]=logLine(html); rows[key].className="running"; $("#actcount").textContent=++actN; setStatus(null,e.name.replace(/_/g," ")+"…"); }
   else if(rows[key]){ rows[key].innerHTML=html; rows[key].className=e.status; delete rows[key]; if(e.status==="blocked") toast("Blocked a dangerous action.","warn"); } }
 $("#undoBtn").onclick=()=>api.undo();
@@ -1956,7 +1981,7 @@ function paintAfk(on,note){ $("#afkchip").classList.toggle("show",!!on); $("#afk
 $("#afkchip").onclick=()=>go("root");
 
 /* ================= settings / memory ================= */
-$("#nSet").onclick=async()=>{ const s=await api.get_settings(); $("#sSkin").value=UIP.skin; $("#sText").value=UIP.text; $("#sSimple").checked=!!UIP.simple; $("#sPro").checked=UIP.proactive!==false; (async()=>{ try{ const sv=await api.saver_get(); $("#sSaver").checked=sv.enabled; $("#sSaverMin").value=sv.idle_minutes; $("#sBreakMin").value=sv.break_minutes; $("#sBreakVoice").checked=sv.break_voice; }catch(e){} })(); (async()=>{ try{ $("#sSuit").value=(await api.suitup_apps()).join(", "); }catch(e){} })(); $("#sAutoMode").checked=s.auto_mode!==false; $("#sModeVoice").checked=s.per_mode!==false; $("#sSfx").checked=localStorage.getItem("orion_sfx")!=="0";
+$("#nSet").onclick=async()=>{ const s=await api.get_settings(); try{ const vx=await api.voice_extras(); $("#sAcks").checked=vx.acks; $("#sGreet").checked=vx.greetings; }catch(e){} $("#sSkin").value=UIP.skin; $("#sText").value=UIP.text; $("#sSimple").checked=!!UIP.simple; $("#sPro").checked=UIP.proactive!==false; (async()=>{ try{ const sv=await api.saver_get(); $("#sSaver").checked=sv.enabled; $("#sSaverMin").value=sv.idle_minutes; $("#sBreakMin").value=sv.break_minutes; $("#sBreakVoice").checked=sv.break_voice; }catch(e){} })(); (async()=>{ try{ $("#sSuit").value=(await api.suitup_apps()).join(", "); }catch(e){} })(); $("#sAutoMode").checked=s.auto_mode!==false; $("#sModeVoice").checked=s.per_mode!==false; $("#sSfx").checked=localStorage.getItem("orion_sfx")!=="0";
   $("#cmList").textContent=Object.keys(s.custom_modes||{}).length?"Your modes: "+Object.values(s.custom_modes).map(m=>m.label).join(", "):""; try{ $("#sPlace").value=(await api.life_get()).home_place||""; }catch(e){} try{ const v=await api.voice_settings(); $("#sPatience").value=v.patience; $("#sConvo").checked=!!v.conversation; $("#sBarge").checked=!!v.barge_in; $("#sDuck").checked=v.duck!==false; $("#sSens").value=v.mic_sensitivity; $("#sSensV").textContent=(+v.mic_sensitivity).toFixed(1)+"×"; }catch(e){} $("#sName").value=s.name; $("#sTitle").value=s.title; $("#sOwner").value=s.owner||""; $("#sLocal").value=s.local_model; $("#sLocalV").value=s.local_vision||"";
   $("#sKeys").innerHTML=s.providers.map(p=>`<div class="field"><label>${esc(p.label.toUpperCase())} KEY ${p.key_url?`<a data-url="${esc(p.key_url)}">get a free key ↗</a>`:""}</label>
     <input type="password" data-pid="${esc(p.id)}" value="${esc(p.key)}" placeholder="${p.id==="groq"?"gsk_…  (needed for voice + captions)":p.id==="gemini"?"best free vision brain":"optional — extra free allowance"}"></div>`).join("");
@@ -1972,7 +1997,7 @@ $("#sSave").onclick=async()=>{ const keys={}; $$("#sKeys input").forEach(i=>keys
   if($("#sPlace").value.trim()) api.life_action({action:"place",place:$("#sPlace").value.trim()});
   api.voice_settings({patience:$("#sPatience").value,conversation:$("#sConvo").checked,barge_in:$("#sBarge").checked,duck:$("#sDuck").checked,mic_sensitivity:+$("#sSens").value});
   const r=await api.save_settings({name:$("#sName").value,title:$("#sTitle").value,owner:$("#sOwner").value,keys,local_model:$("#sLocal").value,local_vision:$("#sLocalV").value,voice:$("#sVoice").value,engine:$("#sEngine").value,
-    speak:$("#sSpeak").checked,safe_mode:$("#sSafe").checked,auto_mode:(saveUi({skin:$("#sSkin").value,text:$("#sText").value,simple:$("#sSimple").checked,proactive:$("#sPro").checked}),api.suitup_apps&&api.suitup_apps($("#sSuit").value.split(",")),api.saver_set&&api.saver_set({enabled:$("#sSaver").checked,idle_minutes:+$("#sSaverMin").value||0,break_minutes:+$("#sBreakMin").value||0,break_voice:$("#sBreakVoice").checked}),$("#sAutoMode").checked),per_mode:$("#sModeVoice").checked,fullscreen:$("#sFs").checked,skip_boot:$("#sBoot").checked,visuals:$("#sVis").value});
+    speak:(api.voice_extras&&api.voice_extras({acks:$("#sAcks").checked,greetings:$("#sGreet").checked}),$("#sSpeak").checked),safe_mode:$("#sSafe").checked,auto_mode:(saveUi({skin:$("#sSkin").value,text:$("#sText").value,simple:$("#sSimple").checked,proactive:$("#sPro").checked}),api.suitup_apps&&api.suitup_apps($("#sSuit").value.split(",")),api.saver_set&&api.saver_set({enabled:$("#sSaver").checked,idle_minutes:+$("#sSaverMin").value||0,break_minutes:+$("#sBreakMin").value||0,break_voice:$("#sBreakVoice").checked}),$("#sAutoMode").checked),per_mode:$("#sModeVoice").checked,fullscreen:$("#sFs").checked,skip_boot:$("#sBoot").checked,visuals:$("#sVis").value});
   applyCfg(r); $("#vSet").classList.remove("show"); toast("Configuration saved."); paintLinks(await api.status()); pollMeters(); };
 $("#mClose").onclick=()=>$("#vMem").classList.remove("show");
 $("#clearChat").onclick=async()=>{ await api.clear_chat(); $("#log").innerHTML=""; $("#vMem").classList.remove("show"); toast("Chat history cleared."); };
@@ -2222,6 +2247,7 @@ async function loadBrain(){ BR=await api.brain_get();
   $("#brSuggest").innerHTML=BR.suggest.length?BR.suggest.map(x=>`<div class="li"><span class="g">“${esc(x.phrase)}” <small>${x.count}× recently</small></span><button class="mini" data-mk="${esc(x.phrase)}">MAKE SHORTCUT</button></div>`).join(""):'<div class="empty">Nothing yet — I\'ll spot patterns as you use me.</div>';
   $$("[data-mk]").forEach(b=>b.onclick=()=>{ $("#scPhrase").value=b.dataset.mk; $("#scDoes").value=b.dataset.mk; $("#scDoes").focus(); });
   $("#brAuto").checked=!!BR.auto_learn;
+  { const a=BR.archive||{}; $("#brArch").innerHTML=a.turns?`🗂 <b>Total recall:</b> ${a.turns.toLocaleString()} messages remembered since ${esc(a.since||"")} — ask “what did I say about…” any time.`:"🗂 <b>Total recall</b> starts now — every chat is saved on this PC so I can look back months."; }
   $("#brHow").innerHTML=`Every message goes: <b>instant reflexes &amp; shortcuts</b> → <b>cloud brains</b> (${esc(cfg.cloud||"Groq, Cerebras, OpenRouter, Gemini")}, each with its own free allowance) → <b>local brain</b> on this PC (${esc(BR.local)}). If every brain is out of allowance, the request is queued and retried automatically. Web research happens in ORION's hidden browser — nothing pops up on your screen unless you ask to see it.`; }
 const _lb=loadBrain; loadBrain=async()=>{ await _lb(); loadLife(); };
 $("#brAdd").onclick=async()=>{ const t=$("#brNew").value.trim(); if(!t) return; await api.brain_action({action:"fact_add",text:t,cat:$("#brCat").value}); $("#brNew").value=""; loadBrain(); };
@@ -2264,6 +2290,9 @@ $("#ntText").addEventListener("keydown",e=>{ if(e.key==="Enter") $("#ntAdd").cli
 const HOLO={list:[],slots:[[58,8],[58,36],[58,64],[2,10],[2,40],[2,68]]};
 const HC_ICON={weather:"",points:"💠",steps:"🧭",chart:"📊",code:"⌨️",text:"💬",image:"🖼️",list:"📰",results:"🔎",event:"⏰",ring:"🎯",stat:"📈",checklist:"✅"};
 function hcBody(c){ let body="";
+  if(c.kind==="plan"){ const n=(c.steps||[]).length, d=(c.done||[]).filter(Boolean).length, cur=(c.done||[]).indexOf(false);
+    return `<div class="pl6"><div class="pl6-bar"><i style="width:${n?d/n*100:0}%"></i></div><small>${d}/${n} done${c.note?" · "+esc(c.note):""}</small>
+      <ol>${(c.steps||[]).map((s,i)=>`<li class="${c.done[i]?"ok":i===cur?"now":""}"><em>${c.done[i]?"✓":i===cur?"▶":i+1}</em><span>${esc(s)}</span></li>`).join("")}</ol></div>`; }
   if(c.kind==="weather"&&c.weather){ const w=c.weather; const days=(w.days||[]).slice(0,3);
     body=`<div class="hwx3"><div class="i">${WXI(w.code)}</div><div><b>${w.temp}°</b><small>${esc(w.sky)}${w.feels!=null?` · feels ${w.feels}°`:""}</small><small>${w.rain_at?"🌧 rain from "+esc(w.rain_at):"no rain soon"}${w.sunset?` · 🌇 ${esc(w.sunset)}`:""}</small></div></div>`+
       (days.length?`<div class="wdays">${days.map(d=>`<div><small>${new Date(d.date).toLocaleDateString("en-GB",{weekday:"short"})}</small><em>${WXI(d.code??3)}</em><b>${d.max}°</b><i>${d.min}°</i><u style="--r:${d.rain||0}%"></u></div>`).join("")}</div>`:""); }
@@ -2289,6 +2318,7 @@ function holoCard(c){ c=c||{};
   // never stack duplicates: same id (or same title+kind) → refresh the card that's already up
   const dup=HOLO.list.find(h=>(c.id&&h.card.id===c.id)||(h.card.title===c.title&&h.card.kind===c.kind));
   if(dup){ dup.card=c; const bd=dup.el.querySelector(".hc-body"); bd.innerHTML=hcBody(c); const tb=dup.el.querySelector(".hc-t b"); if(tb) tb.textContent=c.title||""; hcWire(dup.el,c);
+    if("pinned" in c){ dup.pinned=!!c.pinned; dup.el.classList.toggle("pinned",dup.pinned); }
     dup.el.classList.remove("flash"); void dup.el.offsetWidth; dup.el.classList.add("flash"); clearTimeout(dup.timer); if(!dup.pinned) dup.timer=setTimeout(()=>{ if(!dup.pinned) holoKill(dup); },32000); return; }
   const el=document.createElement("div"); el.className="hcard hc2 kind-"+(c.kind||"points")+(c.proactive?" pro":""); const body=hcBody(c);
   const icon=c.icon||(c.kind==="weather"&&c.weather?WXI(c.weather.code):HC_ICON[c.kind]||"💠");
@@ -2300,7 +2330,7 @@ function holoCard(c){ c=c||{};
   const nR=HOLO.list.filter(h=>h.col==="r").length, nL=HOLO.list.filter(h=>h.col==="l").length;
   if(nR>=3&&nL>=3){ const old=HOLO.list.find(h=>!h.pinned); if(old) holoKill(old); }
   const col=(nR<=nL||nL>=3)&&nR<3?"r":"l";
-  const h={el,col,pinned:false,card:c}; HOLO.list.push(h); $("#holo .hcol."+col).prepend(el); sfx(c.proactive?"done":"card"); holoBeam(el); hcWire(el,c);
+  const h={el,col,pinned:!!c.pinned,card:c}; if(c.pinned) el.classList.add("pinned"); HOLO.list.push(h); $("#holo .hcol."+col).prepend(el); sfx(c.proactive?"done":"card"); holoBeam(el); hcWire(el,c);
   const [pin,close]=el.querySelectorAll(".hc-btns button");
   pin.onclick=e=>{ e.stopPropagation(); h.pinned=!h.pinned; el.classList.toggle("pinned",h.pinned); };
   close.onclick=e=>{ e.stopPropagation(); holoKill(h); };
@@ -2520,7 +2550,9 @@ function frame(t){ requestAnimationFrame(frame); if(lite&&t-lastFrame<33) return
     for(const p of parts){ p.y-=p.v*(state==="thinking"?2.4:1); p.x+=Math.sin(phase*.3+p.d)*.15; if(p.y<-5){p.y=bg.height+5;p.x=Math.random()*bg.width;} bx.globalAlpha=p.o*.6; bx.beginPath(); bx.arc(p.x,p.y,p.r,0,7); bx.fill(); } bx.globalAlpha=1; } }
 
 /* ================= boot ================= */
-function applyCfg(c){ cfg=c; lite=!!c.lite; try{ addCustomDots(c.custom_modes); }catch(e){} document.body.classList.toggle("lite",lite); initBg();
+function fpsWatch(){ if(cfg.visuals!=="auto"||lite||fpsWatch.done) return; fpsWatch.done=1; setTimeout(()=>{ let n=0; const t0=performance.now(); const tick=()=>{ n++; if(performance.now()-t0<5000) requestAnimationFrame(tick); else { const fps=n/5;
+    if(fps<28&&!document.hidden){ lite=true; document.body.classList.add("lite"); try{ initBg(); }catch(e){} api.auto_lite&&api.auto_lite(true); toast(`⚡ Smooth mode on — this machine was running at ${Math.round(fps)} fps. Change it in ⚙ Visuals.`); } } }; requestAnimationFrame(tick); },9000); }
+function applyCfg(c){ cfg=c; lite=!!c.lite; setTimeout(fpsWatch,100); try{ addCustomDots(c.custom_modes); }catch(e){} document.body.classList.toggle("lite",lite); initBg();
   $("#name").textContent=c.name.toUpperCase(); $("#bootname").textContent=c.name.toUpperCase(); $("#bootver").textContent="v"+(c.version||"2.0"); document.title=c.name;
   $("#ringtext").textContent=`${c.name.toUpperCase()} · PERSONAL INTELLIGENCE SYSTEM · ALL SYSTEMS ONLINE · ${c.name.toUpperCase()} · AT YOUR SERVICE ·`; applyTheme(c.theme||"standby"); paintSpeak(c.speak); }
 async function boot(){ try{ applyUi(await api.ui_prefs()); }catch(e){} const c=await api.init(); applyCfg(c); const st=api.status();
@@ -3288,7 +3320,7 @@ setTimeout(()=>{ if(api) return; const wait=ms=>new Promise(r=>setTimeout(r,ms))
     saver_show:()=>{ setTimeout(()=>ui.event({kind:"saver",on:true}),300); return A(true); },saver_exit:()=>A(true),saver_get:()=>A({enabled:true,idle_minutes:0,break_minutes:50,break_voice:false}),saver_set:b=>A(b),
     pc_tool:async(n,a)=>{ await wait(400); return {ok:true,result:n==="speed_test"?"Download 54.2 Mbps, ping 18 ms — great for gaming and streaming.":"Done."}; },
     habits_get:()=>A([{name:"Revise 30 min",streak:4,today:true,week:[0,1,1,0,1,1,1],best:6},{name:"Gym",streak:0,today:false,week:[1,0,1,0,0,1,0],best:3},{name:"Read 10 pages",streak:2,today:false,week:[0,0,0,0,1,1,0],best:2}]),
-    skilllib_get:()=>A({count:505,cats:{Tools:8,Money:24,Writing:44,Code:21,Maths:6,Science:4,School:30,Life:22,Subjects:324},skills:[{name:"quadratic",title:"Quadratic solver",cat:"Maths",desc:"Roots, working and turning point of ax²+bx+c.",kind:"local",example:"1 -5 6"},{name:"essayplan",title:"Essay plan (PEEL)",cat:"School",desc:"Plan an essay: thesis + PEEL paragraphs with quotes to use.",kind:"prompt",example:""},{name:"coldemail",title:"Cold email / DM pitch",cat:"Money",desc:"Short pitch that gets replies.",kind:"prompt",example:""},{name:"convert",title:"Unit converter",cat:"Tools",desc:"Convert lengths, weights, volumes, temps, times, data, speeds.",kind:"local",example:"5 miles to km"},{name:"lowendpc",title:"Low-end PC settings",cat:"Gaming",desc:"More FPS, less lag.",kind:"prompt",example:""},{name:"physics_quiz",title:"Physics: Quick quiz",cat:"Subjects",desc:"GCSE Physics — quick quiz (give the topic).",kind:"prompt",example:""}]}),
+    skilllib_get:()=>A({count:851,cats:{Tools:8,Money:24,Writing:44,Code:21,Maths:6,Science:4,School:30,Life:22,Subjects:324},skills:[{name:"quadratic",title:"Quadratic solver",cat:"Maths",desc:"Roots, working and turning point of ax²+bx+c.",kind:"local",example:"1 -5 6"},{name:"essayplan",title:"Essay plan (PEEL)",cat:"School",desc:"Plan an essay: thesis + PEEL paragraphs with quotes to use.",kind:"prompt",example:""},{name:"coldemail",title:"Cold email / DM pitch",cat:"Money",desc:"Short pitch that gets replies.",kind:"prompt",example:""},{name:"convert",title:"Unit converter",cat:"Tools",desc:"Convert lengths, weights, volumes, temps, times, data, speeds.",kind:"local",example:"5 miles to km"},{name:"lowendpc",title:"Low-end PC settings",cat:"Gaming",desc:"More FPS, less lag.",kind:"prompt",example:""},{name:"physics_quiz",title:"Physics: Quick quiz",cat:"Subjects",desc:"GCSE Physics — quick quiz (give the topic).",kind:"prompt",example:""}]}),
     skilllib_run:async(n,t)=>{ await wait(400); return {ok:true,result:"x = 3 or x = 2\nWorking: x = (−b ± √(b²−4ac)) / 2a = (5 ± √1) / 2\nTurning point: (2.5, -0.25)"}; },
     plus_get:()=>A({grades:[{subject:"Maths",target:"7",grade:"6",pct:63,basis:"3 papers + topics",gap:4,focus:["Circle theorems","Vectors"]},{subject:"English Literature",target:"7",grade:"7",pct:71,basis:"2 papers + topics",gap:9,focus:[]},{subject:"Physics",target:"6",grade:"5",pct:52,basis:"1 paper + topics",gap:3,focus:["Electricity"]}],
       money:{total:84,change:36,best:{amount:30,venture:"Automation services"},per_hour:[["Automation services",18.5,4.2]],goals:[{name:"£500 by summer",pct:31,per_week:22.5}]},gaming:{hours:14.5,prev_hours:18,sessions:4,top:["Roblox",275],longest:180}}),
@@ -3336,6 +3368,8 @@ setTimeout(()=>{ if(api) return; const wait=ms=>new Promise(r=>setTimeout(r,ms))
       return {home:h,boundary:{name:"Desford",ring},crime:{month:"2026-09",radius:"the Desford boundary",area:"Desford",items:cur,six:per.flat(),total:cur.length,by_cat:Object.entries(by).map(([k,v])=>[k,names[k],v]),streets:Object.entries(st).sort((a,b)=>b[1]-a[1]),outcomes:Object.entries(oc).sort((a,b)=>b[1]-a[1]),trend:ms.map((m,i)=>({m,n:per[i].length})),names,hood:{name:"Desford & Peckleton",force:"Leicestershire",priorities:["Anti-social behaviour around the village centre in the evenings.","Speeding on Peckleton Lane and Kirkby Road."]}},
         area:{home:h,sunrise:"07:02",sunset:"16:24",moon:{age:15.1,name:"Full moon",lit:99},weather:{temp:9,sky:"cloudy",rain_at:"21:00"},air:{aqi:18,label:"Good",pm25:4.2,uv:.6,pollen:2},kp:{kp:3.3,chance:"Very unlikely"},floods:[]},flights:mockFlights()}; },
     globe_find:p=>A({lat:35.68,lon:139.69,name:p}),
+    voice_extras:v=>A({acks:true,greetings:true}),
+    auto_lite:()=>A(true),
     suitup_apps:a=>A(a||["Spotify","Discord"]),
     gestures_get:()=>A({enabled:!!window.__GES,on:!!window.__GES,mode:"mediapipe",err:"",have:{cv2:true,mediapipe:true}}),gestures_set:on=>{ window.__GES=on; return api.gestures_get(); },gestures_install:()=>A(true),
     suit_up:()=>{ ui.event({kind:"suitup",report:"All systems online, sir. It's 9 degrees and cloudy outside. Next up: Maths revision at 17:00. Processor at 22 percent, memory at 58.",apps:["Spotify","Discord"]}); return A(true); } };
@@ -3347,7 +3381,7 @@ setTimeout(()=>{ if(api) return; const wait=ms=>new Promise(r=>setTimeout(r,ms))
     gaming_set:()=>api.gaming_get(),clip_now:()=>A("Clipped"),
     ventures_get:()=>A({content:false,dev:[{id:"d1",project:"Projects",task:"Discord bot that posts my new YouTube uploads",status:"done",result:"Built and tested — saved in projects\\Projects."},{id:"d2",project:"Projects",task:"Booking-bot demo for the barber pitch",status:"todo",result:""}],earn:{total:186.5,this_month:42,by_venture:[["Automation services",120],["Hatchlands",46.5],["Content / YouTube",20]],months:[{month:"2026-06",total:0},{month:"2026-07",total:15},{month:"2026-08",total:40},{month:"2026-09",total:24.5},{month:"2026-10",total:65},{month:"2026-11",total:42}],recent:[{id:"e1",date:"2026-11-01",venture:"Hatchlands",amount:12,note:"gamepass sales"},{id:"e2",date:"2026-10-29",venture:"Automation services",amount:30,note:"booking bot for barber"}],ventures:["Hatchlands","Content / YouTube","Automation services","Root bot","Dropshipping","Other"]}}),
     ventures_action:()=>api.ventures_get(),
-    brain_get:()=>A({local:"qwen2.5:3b",auto_learn:true,facts:[{i:0,text:"Kiyan is in Year 11, doing GCSEs this summer",cat:"fact",t:"2026-10-23",src:"you"},{i:1,text:"Best mate on Root is Sam",cat:"person",t:"2026-10-29",src:"learned"},{i:2,text:"Building Hatchlands, a pet hatching idle game on Roblox",cat:"project",t:"2026-10-07",src:"you"},{i:3,text:"Prefers short replies while gaming",cat:"preference",t:"2026-10-30",src:"learned"},{i:4,text:"Wants to earn money with AI automation this winter",cat:"goal",t:"2026-10-30",src:"you"}],
+    brain_get:()=>A({local:"qwen2.5:3b",auto_learn:true,archive:{turns:1284,since:"03 Oct 2026"},facts:[{i:0,text:"Kiyan is in Year 11, doing GCSEs this summer",cat:"fact",t:"2026-10-23",src:"you"},{i:1,text:"Best mate on Root is Sam",cat:"person",t:"2026-10-29",src:"learned"},{i:2,text:"Building Hatchlands, a pet hatching idle game on Roblox",cat:"project",t:"2026-10-07",src:"you"},{i:3,text:"Prefers short replies while gaming",cat:"preference",t:"2026-10-30",src:"learned"},{i:4,text:"Wants to earn money with AI automation this winter",cat:"goal",t:"2026-10-30",src:"you"}],
       shortcuts:[{phrase:"gaming setup",does:"open Discord and Spotify and turn on gaming mode",uses:6}],suggest:[{phrase:"check my messages",count:9},{phrase:"whats using my ram",count:4}],
       habits:{total:820,this_week:96,busiest_hour:21,by_hour:[1,0,0,0,0,0,0,4,9,3,2,3,4,8,6,7,12,18,22,25,31,38,20,6]}}),
     brain_action:()=>api.brain_get(),

@@ -15,7 +15,15 @@ from collections import Counter
 from .paths import DATA_DIR
 from .tools import CTX, tool
 
-USAGE = os.path.join(DATA_DIR, "usage.json")
+USAGE = os.path.join(DATA_DIR, "requests_log.json")      # was usage.json — clashed with the provider token counter
+
+
+def _usage():
+    u = _load(USAGE, None)
+    if u is None:                                            # one-time migration from the old shared file
+        old = _load(os.path.join(DATA_DIR, "usage.json"), [])
+        u = old if isinstance(old, list) else []
+    return [x for x in u if isinstance(x, dict) and "t" in x] if isinstance(u, list) else []
 SHORTS = os.path.join(DATA_DIR, "shortcuts.json")
 _lock = threading.Lock()
 
@@ -43,7 +51,7 @@ def log_request(text, tier=None):
     if not text or text.startswith("["):
         return
     with _lock:
-        u = _load(USAGE, [])
+        u = _usage()
         u.append({"t": time.time(), "text": text[:300], "tier": tier,
                   "hour": time.localtime().tm_hour, "wd": time.localtime().tm_wday})
         _save(USAGE, u[-3000:])
@@ -93,7 +101,7 @@ def expand(text):
 def suggestions(days=14, min_count=3):
     since = time.time() - days * 86400
     have = {x["phrase"] for x in shortcuts()}
-    c = Counter(norm(x["text"]) for x in _load(USAGE, []) if x["t"] > since)
+    c = Counter(norm(x["text"]) for x in _usage() if x["t"] > since)
     out = []
     for phrase, n in c.most_common(40):
         if n < min_count or not phrase or phrase in have or len(phrase) < 6 or len(phrase) > 120:
@@ -104,7 +112,7 @@ def suggestions(days=14, min_count=3):
 
 def habits():
     """When you usually do things — used for the dashboard and smarter suggestions."""
-    u = _load(USAGE, [])
+    u = _usage()
     if not u:
         return {"total": 0}
     hours = Counter(x["hour"] for x in u)

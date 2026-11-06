@@ -9,8 +9,9 @@ from .tools import CTX
 
 
 class Proactive:
-    def __init__(self, cfg, emit):
-        self.cfg, self.emit = cfg, emit
+    def __init__(self, cfg, emit, say=None):
+        self.cfg, self.emit, self.say = cfg, emit, say or (lambda t: None)
+        self.last_greet = 0
         self.seen = set()
         self.once = set()                 # milestones: once ever (per run), not once a day
         self.day = ""
@@ -110,6 +111,25 @@ class Proactive:
                 items.append(f"✉ {len(dms)} DM(s) on Root — latest from {dms[-1].get('who', '?')}")
         except Exception:
             pass
+        # Jarvis-style spoken welcome when you sit back down (not too often, never late at night)
+        h = dt.datetime.now().hour
+        if (mins >= 45 and 7 <= h < 23 and time.time() - self.last_greet > 2 * 3600
+                and self.cfg.get("voice", {}).get("greetings", True)):
+            self.last_greet = time.time()
+            t = self.cfg.get("user_title", "sir")
+            part = "Good morning" if h < 12 else "Good afternoon" if h < 18 else "Good evening"
+            line = f"{part}, {t}. Welcome back."
+            try:
+                from .schedule import upcoming
+                up = upcoming(1)[:1]
+                if up:
+                    line += f" Next up: {up[0]['title']} at {up[0]['at']:%H:%M}."
+            except Exception:
+                pass
+            jobs_done = sum(1 for i in items if i.startswith("✅"))
+            if jobs_done:
+                line += f" I finished {jobs_done} job{'s' if jobs_done > 1 else ''} while you were away."
+            self.say(line)
         if items and mins >= 20:
             self._card(f"back-{int(since)}", "points", f"While you were away ({mins // 60}h {mins % 60}m)" if mins >= 60 else f"While you were away ({mins} min)",
                        items=items[:6], icon="🛰️", actions=[{"label": "Tell me more", "say": "what did you get done while I was away?"}])

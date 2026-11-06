@@ -34,7 +34,7 @@ from core import money                                      # noqa: E402
 from core import holo                                       # noqa: E402,F401
 from core import plus                                       # noqa: E402
 from core import skillbook                                  # noqa: E402
-from core import saver, pctools, proactive, ironman, gestures, localintel         # noqa: E402
+from core import saver, pctools, proactive, ironman, gestures, localintel, brain6, skills6         # noqa: E402
 from core.autonomy import Autonomy                          # noqa: E402
 from core import gaming as gaming_mod                        # noqa: E402
 from core.routines import NightShift                        # noqa: E402
@@ -83,6 +83,8 @@ class Api:
         self._toolbox = tools.Toolbox(self._cfg, self._emit, self._confirm)
         self._brain = Brain(self._cfg, self._memory, self._toolbox, self._emit, self._context)
         self._speaker = Speaker(self._cfg, self._emit)
+        self._speaker.prewarm(brain6.all_acks(self._cfg.get("user_title", "sir")) +
+                              [f"Very good, {self._cfg.get('user_title', 'sir')}.", f"Stopped, {self._cfg.get('user_title', 'sir')}."])
         self._recorder = Recorder()
         self._gaming = GamingMode(self._cfg, self._emit, self._notify, self._brain)
         tools.CTX["toolbox_run"] = lambda name, args: self._toolbox.run(name, args)
@@ -107,7 +109,7 @@ class Api:
         self._jobs = Jobs(self._cfg, self._run_job, lambda t, title=None: self._push.send(t, title), self._emit)
         self._jobs.on_finish = self._job_finished
         self._autonomy = Autonomy(self._cfg, self._jobs, self._emit)
-        self._proactive = proactive.Proactive(self._cfg, self._emit)
+        self._proactive = proactive.Proactive(self._cfg, self._emit, lambda t: self._speaker.say(t))
         self._saver = saver.Saver(self._cfg, self._emit, lambda: self._window)
         self._gestures = gestures.Gestures(self._cfg, self._emit)
         self._breaks = pctools.Breaks(self._cfg, lambda t: self._speaker.say(t), lambda t: self._emit("toast", text="🧘 " + t))
@@ -191,6 +193,19 @@ class Api:
 
     # ---------------------------------------------------------------- plumbing
     def _emit(self, kind, **data):
+        ack = getattr(self, "_ack", None)
+        if kind == "tool" and ack and ack.get("open") and data.get("status") == "running":
+            ack["open"] = False
+            g = getattr(self, "_gaming", None)
+            if self._cfg["voice"].get("acks", True) and not (g and g.active) and self._speaker.idle:
+                a = brain6.ack_for(data.get("name", ""), self._cfg.get("user_title", "sir"))
+                if a:
+                    self._speaker.say(a)
+        if kind == "mission":                      # the phone shows plan cards too
+            st = data.get("steps", [])
+            self._cards = (getattr(self, "_cards", []) + [(time.time(), {
+                "id": "plan6", "kind": "steps", "title": data.get("title", "Plan"), "icon": "🧭",
+                "items": [("✓ " if d else "") + s for s, d in zip(st, data.get("done", []))]})])[-12:]
         if kind == "card":
             self._cards = (getattr(self, "_cards", []) + [(time.time(), data.get("card"))])[-12:]
         elif kind == "live":
@@ -241,6 +256,12 @@ class Api:
         r = getattr(self, "_root", None)
         if r and r.afk:
             bits.append("User is AFK; ORION is answering their Root DMs.")
+        try:
+            s = brain6.situation()
+            if s:
+                bits.append(s)
+        except Exception:
+            pass
         return " ".join(bits)
 
     def _run_job(self, j):
@@ -500,8 +521,8 @@ class Api:
     def init(self):
         c = self._cfg
         vis = c.get("visuals", "auto")
-        lite = vis == "lite" or (vis == "auto" and self.lite_profile)
-        return {"custom_modes": c.get("custom_modes", {}), "owner": c.get("owner_name", ""), "name": c["assistant_name"], "title": c["user_title"], "version": config_mod.VERSION,
+        lite = vis == "lite" or (vis == "auto" and (self.lite_profile or c.get("auto_lite")))
+        return {"visuals": vis, "custom_modes": c.get("custom_modes", {}), "owner": c.get("owner_name", ""), "name": c["assistant_name"], "title": c["user_title"], "version": config_mod.VERSION,
                 "theme": c["theme"], "brain": c["brain"], "speak": c["voice"]["speak_replies"],
                 "safe_mode": c["safe_mode"], "lite": lite, "skip_boot": c.get("skip_boot", False),
                 "has_key": bool(self._brain.cloud), "mic": self._recorder.available,
@@ -624,6 +645,7 @@ class Api:
             self._emit("stream_start", id=mid)
             buf, last = [], [time.time()]
             speech = SentenceStream(self._speaker.say if speak else (lambda *_: None))
+            self._ack = {"open": bool(speak), "t": time.time()}   # say "One moment, sir." as soon as real work starts
 
             def flush():
                 if buf:
@@ -634,6 +656,7 @@ class Api:
             def on_delta(chunk):
                 if ev.is_set():
                     raise Cancelled()
+                self._ack["open"] = False
                 buf.append(chunk)
                 speech.feed(chunk)
                 if time.time() - last[0] > 0.06:
@@ -814,7 +837,10 @@ class Api:
             c["auto_mode"] = bool(s["auto_mode"])
         if "per_mode" in s:
             v["per_mode"] = bool(s["per_mode"])
-        c["visuals"] = s.get("visuals") if s.get("visuals") in ("auto", "full", "lite") else "auto"
+        nv = s.get("visuals") if s.get("visuals") in ("auto", "full", "lite") else "auto"
+        if nv != c.get("visuals"):
+            c.pop("auto_lite", None)                 # choosing visuals by hand resets the automatic smooth mode
+        c["visuals"] = nv
         config_mod.save(c)
         self._brain.reload_providers()
         return self.init()
@@ -1193,7 +1219,7 @@ class Api:
             return pk
         if path == "/api/autonomy":
             return self.autonomy_get()
-        simple = {"/api/skilllib": self.skilllib_get, "/api/plus": self.plus_get, "/api/life": self.life_get, "/api/health": self.health_get, "/api/study": self.study_get, "/api/ventures": self.ventures_get,
+        simple = {"/api/local": self.globe_local, "/api/local_map": self.globe_local_map, "/api/skilllib": self.skilllib_get, "/api/plus": self.plus_get, "/api/life": self.life_get, "/api/health": self.health_get, "/api/study": self.study_get, "/api/ventures": self.ventures_get,
                   "/api/gaming": self.gaming_get, "/api/brain": self.brain_get}
         if path.split("?")[0] in simple:
             return simple[path.split("?")[0]]()
@@ -1458,7 +1484,7 @@ class Api:
         return {"facts": [{"i": i, "text": f["text"], "cat": f.get("cat", "fact"), "t": f.get("t", ""),
                            "src": f.get("src", "you")} for i, f in enumerate(self._memory.facts)],
                 "shortcuts": learning.shortcuts(), "suggest": learning.suggestions(), "habits": learning.habits(),
-                "local": self._brain.local.fast[0], "auto_learn": self._cfg.get("auto_learn", True)}
+                "local": self._brain.local.fast[0], "auto_learn": self._cfg.get("auto_learn", True), "archive": brain6.stats()}
 
     def brain_action(self, b):
         a = b.get("action")
@@ -1734,6 +1760,19 @@ class Api:
             self._cfg["local_place"] = str(name).strip()[:60]
             config_mod.save(self._cfg)
         return localintel.place_name()
+
+    def auto_lite(self, on=True):
+        """The interface measured a low frame rate on this machine: remember to start in smooth mode."""
+        self._cfg["auto_lite"] = bool(on)
+        config_mod.save(self._cfg)
+        return True
+
+    def voice_extras(self, v=None):
+        vc = self._cfg["voice"]
+        if v:
+            vc["acks"], vc["greetings"] = bool(v.get("acks", True)), bool(v.get("greetings", True))
+            config_mod.save(self._cfg)
+        return {"acks": vc.get("acks", True), "greetings": vc.get("greetings", True)}
 
     def local_home(self, address=None):
         """Your house for Local Intel — stored only in your local config.json (never uploaded)."""

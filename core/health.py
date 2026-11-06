@@ -18,7 +18,7 @@ from .paths import APP_DIR, DATA_DIR, FROZEN, SKILLS_DIR
 
 FLAGS = 0x08000000 if os.name == "nt" else 0
 BACKUP_FILES = ["memory.json", "schedule.json", "study.json", "shortcuts.json", "earnings.json", "devqueue.json",
-                "gamestats.json", "jobs.json", "routines_state.json", "usage.json", "root_log.json", "root_layout.json",
+                "gamestats.json", "jobs.json", "routines_state.json", "usage.json", "requests_log.json", "root_log.json", "root_layout.json",
                 "voiceprint.npy"]
 
 
