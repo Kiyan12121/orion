@@ -67,6 +67,7 @@ SMART = re.compile(r"\b(code|script|program|build|make|create|write|fix|debug|ex
 CORE = {"plan_show", "plan_tick", "recall", "show_card", "close_popups", "skill_find", "skill_use", "habit", "ambient", "screensaver_show", "suit_up", "threat_scan_tool", "hologram", "globe", "local_intel", "queue_job", "mission_start", "weather", "note_add", "homework_add", "get_time", "open_app", "open_website", "web_search", "remember",
         "request_more_tools", "set_theme", "schedule_add", "schedule_list", "check_availability"}
 GROUPS = {
+    "orionos": ({"os_open_app", "os_volume", "os_wifi"}, r"wi-?fi|volume|louder|quieter|mute|open (the )?(browser|files|terminal|editor|app)|network"),
     "automation": ({"automation_add", "automation_list", "automation_remove", "routine_add", "routine_list"},
                    r"when(ever)? i |every time|automat|whenever|if i (open|close|start|haven)|rule|trigger|routine"),
     "computer": ({"type_text", "press_keys", "mouse_click", "scroll", "read_screen", "find_on_screen",
@@ -139,6 +140,8 @@ GROUPS = {
     "video": ({"video_autocut", "video_captions", "video_shorts", "video_info", "video_metadata", "list_files"},
               r"video|clip|youtube|shorts|caption|subtitle|edit|vod|stream|mp4|tiktok"),
 }
+if not __import__("os").path.exists("/etc/orion-os"):         # ORION OS desktop tools only exist on ORION OS
+    GROUPS.pop("orionos", None)
 AUTOPILOT_RE = re.compile(r"^\s*(auto ?pilot|autonomous(ly)?)\s*[:,\-]?\s*", re.I)
 
 

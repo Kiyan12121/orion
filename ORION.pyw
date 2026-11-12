@@ -34,7 +34,7 @@ from core import money                                      # noqa: E402
 from core import holo                                       # noqa: E402,F401
 from core import plus                                       # noqa: E402
 from core import skillbook                                  # noqa: E402
-from core import saver, pctools, proactive, ironman, gestures, localintel, brain6, skills6, automate, ceo         # noqa: E402
+from core import saver, pctools, proactive, ironman, gestures, localintel, brain6, skills6, automate, ceo, oslinux         # noqa: E402
 from core.autonomy import Autonomy                          # noqa: E402
 from core import gaming as gaming_mod                        # noqa: E402
 from core.routines import NightShift                        # noqa: E402
@@ -525,7 +525,7 @@ class Api:
         c = self._cfg
         vis = c.get("visuals", "auto")
         lite = vis == "lite" or (vis == "auto" and (self.lite_profile or c.get("auto_lite")))
-        return {"visuals": vis, "custom_modes": c.get("custom_modes", {}), "owner": c.get("owner_name", ""), "name": c["assistant_name"], "title": c["user_title"], "version": config_mod.VERSION,
+        return {"os": oslinux.ACTIVE, "visuals": vis, "custom_modes": c.get("custom_modes", {}), "owner": c.get("owner_name", ""), "name": c["assistant_name"], "title": c["user_title"], "version": config_mod.VERSION,
                 "theme": c["theme"], "brain": c["brain"], "speak": c["voice"]["speak_replies"],
                 "safe_mode": c["safe_mode"], "lite": lite, "skip_boot": c.get("skip_boot", False),
                 "has_key": bool(self._brain.cloud), "mic": self._recorder.available,
@@ -2009,16 +2009,59 @@ class Api:
         except Exception as e:
             return {"ok": False, "error": f"{type(e).__name__}: {e}"}
 
-    def power_down(self):
-        """Plays the power-down sequence (UI animation + voice), then quits."""
+    def power_down(self, action=None):
+        """Plays the power-down sequence (UI animation + voice), then quits — or, on ORION OS, shuts down / restarts the PC."""
         self._emit("powerdown", title=self._cfg.get("user_title", "sir"))
         try:
             if self._cfg["voice"]["speak_replies"]:
-                self._speaker.say(f"Powering down. Goodbye, {self._cfg.get('user_title', 'sir')}.")
+                self._speaker.say(f"{'Restarting' if action == 'restart' else 'Powering down'}. Goodbye, {self._cfg.get('user_title', 'sir')}.")
         except Exception:
             pass
-        threading.Timer(3.2, self.quit).start()
+        if oslinux.ACTIVE and action in ("shutdown", "restart"):
+            threading.Timer(3.4, oslinux.power, args=(action,)).start()
+        else:
+            threading.Timer(3.2, self.quit).start()
         return True
+
+    # ---------------------------------------------------------------- ORION OS (ORION is the desktop)
+    def os_status(self):
+        return oslinux.status() if oslinux.ACTIVE else {"os": False}
+
+    def os_apps(self):
+        return oslinux.apps()
+
+    def os_launch(self, app_id):
+        return oslinux.launch(app_id)
+
+    def os_window(self, wid, action="focus"):
+        return oslinux.window_action(wid, action)
+
+    def os_wifi(self, ssid=None, password=""):
+        if ssid is None:
+            return oslinux.wifi_list()
+        return oslinux.wifi_connect(ssid, password)
+
+    def os_set(self, b):
+        if "volume" in b:
+            oslinux.set_volume(b["volume"])
+        if "mute" in b:
+            oslinux.set_volume(mute=bool(b["mute"]))
+        if "brightness" in b:
+            oslinux.set_brightness(b["brightness"])
+        if "wifi" in b:
+            oslinux.wifi_power(bool(b["wifi"]))
+        return oslinux.status()
+
+    def os_power(self, action):
+        if action == "sleep":
+            return oslinux.power("sleep")
+        return self.power_down(action)
+
+    def os_files(self, path=""):
+        return oslinux.files(path)
+
+    def os_open(self, path):
+        return oslinux.open_path(path)
 
     # ---------------------------------------------------------------- holo browser windows (click to drive it yourself)
     def _bshot(self, delay=0.0):
@@ -2121,6 +2164,15 @@ def main():
     api = Api()
     # warm up the app index in the background so the first "open X" is instant
     threading.Thread(target=tools._start_menu_index, daemon=True).start()
+    if oslinux.ACTIVE:
+        # ORION OS: the whole screen is ORION. Served over a local web server so the shell (os.html) and the full
+        # ORION interface inside it share one connection to the backend.
+        window = webview.create_window("ORION", url=os.path.join(os.path.dirname(UI_PATH), "os.html"), js_api=api,
+                                       fullscreen=True, background_color="#050a16", text_select=False)
+        api._window = window
+        log.info("starting ORION OS shell")
+        webview.start(debug=False, http_server=True, gui="gtk")
+        return
     window = webview.create_window(
         api._cfg.get("assistant_name", "ORION"), url=UI_PATH, js_api=api,
         fullscreen=api._cfg.get("fullscreen", True), width=1366, height=820,

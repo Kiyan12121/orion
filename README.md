@@ -1,5 +1,24 @@
 # ORION 6.1 — Personal Intelligence System
 
+## New in 6.2: ORION OS
+ORION can now be the whole computer. Flash **ORION OS** to a USB stick, boot from it, and the PC starts straight into one full-screen ORION, with no Windows desktop in the way.
+
+- **The screen is ORION.** A live Orion-constellation sky that reacts to ORION: it thinks, listens and speaks with the stars. Down the left are the clock, a greeting and your day. Talk to it or type in "Ask ORION".
+- **Places** (Overview, Plan, Study, Gaming, Money, Globe, Settings) slide up over the sky, and every ORION feature works there.
+- **Apps**: open the web browser, files, terminal, notes, photos, video and calculator. Press the **Windows key** to get back to ORION.
+- **Control centre**: Wi-Fi, volume, brightness, battery, and sleep, restart or shut down. ORION can do these by voice too ("turn it down", "open the browser").
+- **Saves your stuff**: with a persistent partition, chats, settings and files survive reboots.
+- Build it yourself with `orion-os/build.sh`, or download the ready-made ISO from the ORION OS release.
+
+### Putting ORION OS on a USB (Windows, free)
+1. Download `ORION-OS-1.0.iso` and **Rufus** (rufus.ie).
+2. In Rufus pick the USB stick and the ISO, then set **Persistent partition size** to about 20 GB. Click Start; if asked, pick **ISO image mode**.
+3. Restart the PC and press the boot-menu key (F8, F11 or F12, or Esc). Pick the USB.
+4. If it won't boot, turn **Secure Boot** off in the BIOS.
+5. In the menu, pick "ORION OS". Windows on the hard drive is never touched. Unplug the stick to go back to normal.
+
+The login is user `orion`, password `orion` (only needed for `sudo` in the terminal).
+
 ## New in 6.1: Automation & CEO upgrades
 **⚡ Automations — "when this happens, do that"** (Night Shift page, or just tell ORION)
 - **Triggers:**

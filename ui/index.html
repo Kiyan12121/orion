@@ -1174,6 +1174,27 @@ body.reveal .shell{animation:reveal 1.4s}
 .hqv u,.hqf u{height:6px;border-radius:3px;background:rgba(var(--ar),.1);overflow:hidden}.hqv s,.hqf s{display:block;height:100%;background:linear-gradient(90deg,var(--a),#5dffb0)}.hqv s.neg{background:#ff6b7d}.hqv b{text-align:right}.hqv b.neg{color:#ff6b7d}
 .hqf{display:grid;grid-template-columns:70px 1fr 24px;gap:8px;align-items:center;margin-bottom:7px;font:600 11.5px var(--ui);text-transform:uppercase;letter-spacing:.06em;color:var(--dim)}.hqf b{color:var(--text);text-align:right}
 @media (max-width:1300px){.hqk{grid-template-columns:repeat(3,1fr)}.hqrow{grid-template-columns:1fr}}
+.osonly{display:none!important}body.orionos .osonly{display:flex!important}
+.osq{align-items:center;gap:9px;padding:6px 12px;border-radius:18px;border:1px solid rgba(var(--ar),.3);background:rgba(var(--ar),.06);color:var(--text);font:600 13px var(--ui);cursor:pointer;margin-right:12px}
+.osq:hover{border-color:var(--a)}
+.osqp{position:fixed;top:64px;right:20px;width:330px;z-index:90;display:none;padding:14px 16px;border-radius:14px;border:1px solid rgba(var(--ar),.4);background:rgba(3,12,22,.96);backdrop-filter:blur(14px);box-shadow:0 20px 60px rgba(0,0,0,.6);animation:tgIn .25s}
+.osqp.show{display:block}.osqh{display:flex;justify-content:space-between;margin-bottom:10px}.osqh b{font:800 11px var(--disp);letter-spacing:.25em;color:var(--a2)}.osqh small{color:var(--dim);font:500 11.5px var(--ui)}
+.osqp label{display:flex;justify-content:space-between;align-items:center;font:600 12.5px var(--ui);margin:10px 0 4px}.osqp input[type=range]{width:100%;accent-color:var(--a)}
+.oswifi{max-height:180px;overflow:auto}.oswifi div{display:flex;justify-content:space-between;padding:7px 8px;border-radius:7px;cursor:pointer;font:500 13px var(--ui)}.oswifi div:hover{background:rgba(var(--ar),.1)}.oswifi div.on{color:#5dffb0}
+.oswifi form{display:flex;gap:6px;padding:4px 8px 8px}.oswifi form input{flex:1}
+.ospw{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:14px}.ospw button{padding:9px 4px;border-radius:9px;border:1px solid rgba(var(--ar),.3);background:rgba(var(--ar),.06);color:var(--text);font:600 12px var(--ui);cursor:pointer}
+.ospw button.danger{border-color:rgba(255,90,110,.5);color:#ff8a98}.ospw button:hover{background:rgba(var(--ar),.18)}.osper{font:500 11.5px var(--ui);color:var(--dim);margin:10px 0 0}
+.osrun{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.osrun .w{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:10px;border:1px solid rgba(var(--ar),.3);background:rgba(var(--ar),.07);cursor:pointer;font:600 13px var(--ui);max-width:280px}
+.osrun .w span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.osrun .w b{color:var(--dim);font-weight:500}.osrun .w i{font-style:normal;color:var(--dim);padding:0 2px}.osrun .w i:hover{color:#ff8a98}
+.ossearch{float:right;width:200px;height:30px;margin-top:-6px}.osapps{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:10px}
+.osapps button{display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px 8px;border-radius:14px;border:1px solid rgba(var(--ar),.15);background:rgba(var(--ar),.05);color:var(--text);cursor:pointer;transition:.15s;font:600 13px var(--ui)}
+.osapps button:hover{border-color:var(--a);background:rgba(var(--ar),.14);transform:translateY(-2px)}.osapps button em{font-style:normal;font-size:30px;filter:drop-shadow(0 0 10px rgba(var(--ar),.5))}.osapps button small{font:500 10.5px var(--ui);color:var(--dim)}
+.osfiles{max-height:420px;overflow:auto}.osfiles div{display:flex;gap:8px;padding:6px 6px;border-radius:6px;cursor:pointer;font:500 13px var(--ui)}.osfiles div:hover{background:rgba(var(--ar),.1)}.osfiles small{margin-left:auto;color:var(--dim)}
+.osbc{font:600 11px var(--ui);letter-spacing:.05em;color:var(--dim);text-transform:none}.osbc a{color:var(--a2);cursor:pointer}
+body.embed #dock{display:none!important}body.embed .main>header{visibility:hidden;overflow:hidden;height:0;min-height:0;padding:0;margin:0;border:0}body.embed #boot{display:none!important}
+body.embed .shell{grid-template-columns:minmax(0,1fr)}body.embed .main{grid-template-rows:0 minmax(0,1fr) 82px;padding-top:14px}
+body.embed:not(.on-comms) .main>footer{visibility:hidden;overflow:hidden;height:0;min-height:0;padding:0;margin:0}body.embed:not(.on-comms) .main{grid-template-rows:0 minmax(0,1fr) 0}
+body.embed .shell::before,body.embed .shell::after{display:none}
 </style>
 </head>
 <body class="state-idle" data-theme="standby">
@@ -1192,6 +1213,7 @@ body.reveal .shell{animation:reveal 1.4s}
   <nav class="dock" id="dock">
     <div class="dlogo" title="ORION"><i></i><b></b><s></s></div>
     <button class="nav on" data-page="comms"><svg viewBox="0 0 24 24"><path d="M4 5h16v10H9l-5 4z"/></svg><span class="tip">COMMS</span></button>
+    <button class="nav osonly" data-page="os"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span class="tip">APPS · ORION OS</span></button>
     <button class="nav" data-page="dash"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="10" rx="1.5"/><rect x="13" y="3" width="8" height="6" rx="1.5"/><rect x="13" y="11" width="8" height="10" rx="1.5"/><rect x="3" y="15" width="8" height="6" rx="1.5"/></svg><span class="tip">DASHBOARD</span></button>
     <button class="nav" data-page="auto"><svg viewBox="0 0 24 24"><path d="M12 3l2.5 5.5L20 9l-4 4 1 6-5-3-5 3 1-6-4-4 5.5-.5z"/></svg><span class="tip">AUTOPILOT</span><span class="bdg" id="b-auto"></span></button>
     <button class="nav" data-page="shift"><svg viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg><span class="tip">NIGHT SHIFT &amp; JOBS</span><span class="bdg" id="b-shift"></span></button>
@@ -1231,6 +1253,7 @@ body.reveal .shell{animation:reveal 1.4s}
         <span id="llocal"><i class="dot" id="dlocal"></i>LOCAL</span>
         <span><i class="dot ok" id="dvoice"></i>VOICE</span>
       </div>
+      <button class="osonly osq" id="osQ" title="Wi-Fi, sound, brightness, power"><span id="osQnet">📶</span><span id="osQvol">🔊</span><span id="osQbat"></span></button>
       <div class="clock"><b id="clock">--:--:--</b><small id="date">—</small></div>
       <div class="winbtns">
         <button class="ib" id="layoutBtn" title="Show/hide the side panel"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/></svg></button>
@@ -1695,6 +1718,14 @@ body.reveal .shell{animation:reveal 1.4s}
           </div>
         </div>
         <!-- HEALTH -->
+        <div class="page" id="page-os" data-wide="1">
+          <div class="wtitle"><h2>ORION OS</h2><span id="osSub">your apps, files and windows</span></div>
+          <div class="osrun" id="osRun"></div>
+          <div class="dgrid">
+            <div class="tile s8"><h5>APPS <input class="inp ossearch" id="osSearch" placeholder="search apps…"></h5><div class="osapps" id="osApps"></div></div>
+            <div class="tile s4"><h5>FILES <span class="osbc" id="osBc"></span></h5><div class="osfiles" id="osFiles"></div></div>
+          </div>
+        </div>
         <div class="page" id="page-health" data-wide="1">
           <div class="scroll">
             <div class="wtitle"><h2>HEALTH CHECK</h2><span id="hcSub">—</span></div>
@@ -1806,6 +1837,12 @@ body.reveal .shell{animation:reveal 1.4s}
   <div class="row2"><button class="btn deny" id="clearChat">CLEAR CHAT HISTORY</button><button class="btn" id="mClose">CLOSE</button></div>
 </div></div>
 
+<div class="osqp" id="osQP"><div class="osqh"><b>QUICK SETTINGS</b><small id="osUp"></small></div>
+  <label>🔊 Volume <span id="osVolV"></span></label><input type="range" min="0" max="150" id="osVol"><button class="mini" id="osMute">MUTE</button>
+  <div id="osBriW"><label>☀ Brightness <span id="osBriV"></span></label><input type="range" min="5" max="100" id="osBri"></div>
+  <label>📶 Wi-Fi <span id="osNetV"></span> <button class="mini" id="osScan">SCAN</button></label><div class="oswifi" id="osWifi"></div>
+  <div class="ospw"><button id="osSleep">☾ Sleep</button><button id="osRestart">↻ Restart</button><button id="osOff" class="danger">⏻ Shut down</button></div>
+  <p class="osper" id="osPer"></p></div>
 <script>
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 let api=null, cfg={name:"ORION",title:"sir"}, state="idle", busy=false, micOn=false, micLevel=0, audioLevel=0, lite=false, speaking=false;
@@ -1896,10 +1933,10 @@ function applyTheme(t){ if(!THEMES[t]) t="standby"; document.body.dataset.theme=
 $$("#themes button").forEach(b=>b.onclick=()=>{ applyTheme(b.dataset.t); api.set_theme(b.dataset.t); });
 
 /* ================= navigation ================= */
-function go(p){ $$(".nav[data-page]").forEach(n=>n.classList.toggle("on",n.dataset.page===p)); $$(".page").forEach(x=>x.classList.toggle("on",x.id==="page-"+p));
+function go(p){ document.body.classList.toggle("on-comms",p==="comms"); $$(".nav[data-page]").forEach(n=>n.classList.toggle("on",n.dataset.page===p)); $$(".page").forEach(x=>x.classList.toggle("on",x.id==="page-"+p));
   const b=$("#b-"+p); if(b) b.classList.remove("show");
   const pg=$("#page-"+p); $(".stage").classList.toggle("wide",!!(pg&&pg.dataset.wide));
-  ({sched:()=>{ loadSched(); loadCal(); },skills:loadSkills,root:loadRoot,devices:loadDevices,shift:loadShift,dash:loadDash,study:loadStudy,gaming:loadGaming,ventures:loadVentures,brain:loadBrain,health:loadHealth})[p]?.(); }
+  ({sched:()=>{ loadSched(); loadCal(); },skills:loadSkills,root:loadRoot,devices:loadDevices,shift:loadShift,dash:loadDash,study:loadStudy,gaming:loadGaming,ventures:loadVentures,brain:loadBrain,health:loadHealth,os:()=>{ osFiles(OSX.path); osTick(); if(!OSX.apps.length) api.os_apps().then(a=>{ OSX.apps=a; osPaintApps(); }); }})[p]?.(); }
 document.addEventListener("click",e=>{ const g=e.target.closest("[data-go]"); if(g) go(g.dataset.go); });
 $$(".nav[data-page]").forEach(n=>n.onclick=()=>go(n.dataset.page));
 function badge(p){ const pg=$("#page-"+p); if(pg && !pg.classList.contains("on")) $("#b-"+p)?.classList.add("show"); }
@@ -2008,7 +2045,7 @@ function paintBrain(m){ $$("#brains button").forEach(b=>b.classList.toggle("on",
 function paintLinks(s){ if(!s) return; paintBrain(s.brain); $("#dcloud").className="dot "+(s.cloud.ok?"ok":(s.cloud.count?"bad":"")); $("#ncloud").textContent=s.cloud.count?`×${s.cloud.count}`:"";
   $("#lcloud").title=s.cloud.count?"Cloud brains: "+s.cloud.labels.join(", "):"No cloud keys — add one in Settings"; $("#dlocal").className="dot "+(s.local.ok?"ok":"bad"); $("#llocal").title=s.local.ok?"Local: "+s.local.model:"Ollama not running"; }
 $("#bFs").onclick=()=>api.toggle_fullscreen(); $("#bMin").onclick=()=>api.minimize();
-$("#bQuit").onclick=()=>{ setStatus("POWERING DOWN","goodbye"); if(api.power_down) api.power_down(); else { powerDown(); setTimeout(()=>api.quit(),3000); } };
+$("#bQuit").onclick=e=>{ if(OSX.on){ e.stopPropagation(); $("#osQP").classList.add("show"); osWifi(); return; } setStatus("POWERING DOWN","goodbye"); if(api.power_down) api.power_down(); else { powerDown(); setTimeout(()=>api.quit(),3000); } };
 $("#bSpeak").onclick=async()=>paintSpeak(await api.toggle_speak());
 function paintSpeak(on){ $("#spkwave").style.opacity=on?1:.15; $("#dvoice").className="dot "+(on?"ok":""); }
 function paintGaming(on,game){ $("#gchip").classList.toggle("show",!!on); $("#gamingbtn").style.color=on?"var(--violet)":""; $("#gname").textContent=on?("GAMING · "+String(game||"").replace(/\.exe$/i,"").toUpperCase()).slice(0,24):"GAMING"; }
@@ -2624,11 +2661,11 @@ function frame(t){ requestAnimationFrame(frame); if(lite&&t-lastFrame<33) return
 /* ================= boot ================= */
 function fpsWatch(){ if(cfg.visuals!=="auto"||lite||fpsWatch.done) return; fpsWatch.done=1; setTimeout(()=>{ let n=0; const t0=performance.now(); const tick=()=>{ n++; if(performance.now()-t0<5000) requestAnimationFrame(tick); else { const fps=n/5;
     if(fps<28&&!document.hidden){ lite=true; document.body.classList.add("lite"); try{ initBg(); }catch(e){} api.auto_lite&&api.auto_lite(true); toast(`⚡ Smooth mode on — this machine was running at ${Math.round(fps)} fps. Change it in ⚙ Visuals.`); } } }; requestAnimationFrame(tick); },9000); }
-function applyCfg(c){ cfg=c; lite=!!c.lite; setTimeout(fpsWatch,100); try{ addCustomDots(c.custom_modes); }catch(e){} document.body.classList.toggle("lite",lite); initBg();
+function applyCfg(c){ cfg=c; lite=!!c.lite; if(c.os&&!OSX.on&&!EMBED) setTimeout(osInit,50); setTimeout(fpsWatch,100); try{ addCustomDots(c.custom_modes); }catch(e){} document.body.classList.toggle("lite",lite); initBg();
   $("#name").textContent=c.name.toUpperCase(); $("#bootname").textContent=c.name.toUpperCase(); $("#bootver").textContent="v"+(c.version||"2.0"); document.title=c.name;
   $("#ringtext").textContent=`${c.name.toUpperCase()} · PERSONAL INTELLIGENCE SYSTEM · ALL SYSTEMS ONLINE · ${c.name.toUpperCase()} · AT YOUR SERVICE ·`; applyTheme(c.theme||"standby"); paintSpeak(c.speak); }
 async function boot(){ try{ applyUi(await api.ui_prefs()); }catch(e){} const c=await api.init(); applyCfg(c); const st=api.status();
-  await bootFX(c);
+  if(!EMBED) await bootFX(c);
   paintLinks(await st); $("#boot").classList.add("gone");
   (c.history||[]).forEach(m=>addMsg(m.role,m.content));
   const hr=new Date().getHours(),greet=hr<12?"Good morning":hr<18?"Good afternoon":"Good evening";
@@ -3376,10 +3413,47 @@ function mockMap(){ const h={lat:52.6267,lon:-1.2903}; const c=Math.cos(h.lat*Ma
   return {roads,buildings:b,water:[{area:false,g:[[-2600,-1400],[-1200,-1100],[0,-1300],[1400,-900],[2600,-1100]].map(p=>L(...p))}],rail:[[[-2600,1900],[0,1500],[2600,1700]].map(p=>L(...p))],green:[[[-500,-700],[-200,-700],[-200,-450],[-500,-450]].map(p=>L(...p))],
     poi:[{p:L(40,30),n:"The Blue Bell",k:"pub"},{p:L(-120,60),n:"Desford Library",k:"library"},{p:L(260,-80),n:"Co-op",k:"shop:convenience"},{p:L(-380,240),n:"Primary School",k:"school"},{p:L(90,-200),n:"St Martin's Church",k:"place_of_worship"}],
     places:[["Leicester",10500,1800,"city"],["Hinckley",-12500,-2500,"town"],["Market Bosworth",-8000,4200,"town"],["Kirby Muxloe",5200,2600,"village"],["Groby",4600,6200,"village"],["Ratby",2900,4500,"village"],["Earl Shilton",-6800,-3200,"town"],["Newbold Verdon",-3400,2300,"village"],["Peckleton",-2600,-700,"village"],["Enderby",9000,-3800,"village"]].map(q=>({p:L(q[1],q[2]),n:q[0],k:q[3]}))}; }
+
+/* ---------- ORION OS: ORION is the desktop ---------- */
+const OSX={on:false,apps:[],path:"",st:null};
+async function osInit(){ OSX.on=true; document.body.classList.add("orionos"); $("#bQuit").title="Power"; osTick(); setInterval(osTick,5000); try{ OSX.apps=await api.os_apps(); osPaintApps(); }catch(e){} }
+async function osTick(){ if(!OSX.on) return; try{ const s=await api.os_status(); OSX.st=s;
+  $("#osQnet").textContent=s.wired?"🖧":s.wifi?(s.wifi.signal>66?"📶":s.wifi.signal>33?"📶":"📶"):"⚠"; $("#osQnet").title=s.wifi?s.wifi.ssid:(s.wired?"Wired":"Offline");
+  $("#osQvol").textContent=s.muted||!s.volume?"🔇":s.volume<40?"🔈":"🔊"; $("#osQbat").textContent=s.battery?`${s.battery.plugged?"⚡":"🔋"}${s.battery.pct}%`:"";
+  if(!$("#osQP").classList.contains("show")){ $("#osVol").value=s.volume; $("#osVolV").textContent=s.volume+"%"; if(s.brightness!=null){ $("#osBri").value=s.brightness; $("#osBriV").textContent=s.brightness+"%"; } }
+  $("#osBriW").style.display=s.brightness==null?"none":""; $("#osNetV").textContent=s.wifi?s.wifi.ssid:(s.wired?"wired":"not connected"); $("#osUp").textContent="up "+Math.floor(s.uptime/3600)+"h "+Math.floor(s.uptime%3600/60)+"m";
+  $("#osPer").textContent=s.persist?"💾 Saving changes to the USB stick.":"⚠ Live mode: changes are lost when you shut down. Make the USB with a persistent partition (see the guide) to keep them.";
+  $("#osRun").innerHTML=(s.windows||[]).map(w=>`<div class="w" data-w="${w.id}" title="${esc(w.title)}"><span><b>${esc(w.cls)}</b> · ${esc(w.title)}</span><i data-wc="${w.id}">✕</i></div>`).join("")||"";
+  $$("#osRun [data-w]").forEach(d=>d.onclick=e=>{ if(e.target.dataset.wc){ api.os_window(e.target.dataset.wc,"close"); e.target.parentNode.remove(); } else api.os_window(d.dataset.w,"focus"); }); }catch(e){} }
+function osPaintApps(){ const q=($("#osSearch").value||"").toLowerCase(); const L=OSX.apps.filter(a=>!q||a.name.toLowerCase().includes(q)||a.desc.toLowerCase().includes(q));
+  $("#osApps").innerHTML=L.map(a=>`<button data-app="${esc(a.id)}" title="${esc(a.desc)}"><em>${a.icon}</em>${esc(a.name)}<small>${esc(a.cat)}</small></button>`).join("")||'<div class="empty">No apps found.</div>';
+  $$("[data-app]").forEach(b=>b.onclick=()=>{ api.os_launch(b.dataset.app); toast("Opening "+b.textContent.trim().split("\n")[0]+"…"); setTimeout(osTick,1500); }); }
+async function osFiles(p){ const r=await api.os_files(p||""); OSX.path=r.path; const parts=r.path?r.path.split("/"):[];
+  $("#osBc").innerHTML=`<a data-p="">🏠 home</a>`+parts.map((x,i)=>` / <a data-p="${esc(parts.slice(0,i+1).join("/"))}">${esc(x)}</a>`).join("");
+  $("#osFiles").innerHTML=r.items.map(f=>`<div data-f="${esc((r.path?r.path+"/":"")+f.name)}" data-d="${f.dir?1:0}">${f.dir?"📁":/\.(png|jpe?g|gif|webp)$/i.test(f.name)?"🖼":/\.(mp4|mkv|webm|mov)$/i.test(f.name)?"🎬":/\.(mp3|wav|ogg|flac)$/i.test(f.name)?"🎵":/\.pdf$/i.test(f.name)?"📄":"📝"} ${esc(f.name)}<small>${f.dir?"":f.size>1e6?(f.size/1e6).toFixed(1)+" MB":Math.ceil(f.size/1e3)+" KB"}</small></div>`).join("")||'<div class="empty">Empty folder</div>';
+  $$("#osBc a").forEach(a=>a.onclick=()=>osFiles(a.dataset.p)); $$("#osFiles [data-f]").forEach(d=>d.onclick=()=>{ if(d.dataset.d==="1") osFiles(d.dataset.f); else { api.os_open(d.dataset.f); toast("Opening…"); } }); }
+async function osWifi(){ $("#osWifi").innerHTML='<div>◌ scanning…</div>'; const L=await api.os_wifi();
+  $("#osWifi").innerHTML=L.map(n=>`<div class="${n.on?"on":""}" data-ss="${esc(n.ssid)}" data-sec="${n.secure?1:0}"><span>${n.on?"✓ ":""}${esc(n.ssid)}</span><span>${n.secure?"🔒":""} ${n.signal}%</span></div>`).join("")||"<div>No networks found</div>";
+  $$("#osWifi [data-ss]").forEach(d=>d.onclick=()=>{ if(d.classList.contains("on")) return; $$("#osWifi form").forEach(f=>f.remove());
+    if(d.dataset.sec==="0") return osJoin(d.dataset.ss,""); const f=document.createElement("form"); f.innerHTML=`<input class="inp" type="password" placeholder="password"><button class="mini">JOIN</button>`; d.after(f); f.querySelector("input").focus();
+    f.onsubmit=e=>{ e.preventDefault(); osJoin(d.dataset.ss,f.querySelector("input").value); }; f.querySelector("input").onkeydown=e=>e.stopPropagation(); }); }
+async function osJoin(ss,pw){ toast("Connecting to "+ss+"…"); const r=await api.os_wifi(ss,pw); toast(r.ok?"✓ Connected to "+ss:"Couldn't connect: "+r.msg,r.ok?"info":"warn"); osWifi(); osTick(); }
+$("#osQ").onclick=e=>{ e.stopPropagation(); const p=$("#osQP"); p.classList.toggle("show"); if(p.classList.contains("show")) osWifi(); };
+document.addEventListener("click",e=>{ const p=$("#osQP"); if(p&&p.classList.contains("show")&&!p.contains(e.target)&&e.target.id!=="osQ") p.classList.remove("show"); });
+$("#osVol").oninput=()=>{ $("#osVolV").textContent=$("#osVol").value+"%"; clearTimeout(OSX.vt); OSX.vt=setTimeout(()=>api.os_set({volume:+$("#osVol").value}),120); };
+$("#osBri").oninput=()=>{ $("#osBriV").textContent=$("#osBri").value+"%"; clearTimeout(OSX.bt); OSX.bt=setTimeout(()=>api.os_set({brightness:+$("#osBri").value}),120); };
+$("#osMute").onclick=()=>api.os_set({mute:!(OSX.st&&OSX.st.muted)}).then(()=>osTick());
+$("#osScan").onclick=osWifi; $("#osSearch").oninput=osPaintApps; $("#osSearch").onkeydown=e=>{ e.stopPropagation(); if(e.key==="Enter"){ const b=$("#osApps [data-app]"); b&&b.click(); } };
+$("#osSleep").onclick=()=>{ $("#osQP").classList.remove("show"); api.os_power("sleep"); };
+$("#osRestart").onclick=()=>{ $("#osQP").classList.remove("show"); api.os_power("restart"); };
+$("#osOff").onclick=()=>{ $("#osQP").classList.remove("show"); api.os_power("shutdown"); };
 /* ================= start: real app, or browser preview with a fake backend ================= */
-window.addEventListener("pywebviewready",()=>{ api=window.pywebview.api; boot(); });
-setTimeout(()=>{ if(api) return; const wait=ms=>new Promise(r=>setTimeout(r,ms)); const A=async v=>v;
-  api={ init:()=>A({boot_checks:[["Neural core","Groq + Gemini",true],["Local brain","qwen2.5:3b",true],["Long-term memory","42 facts",true],["Voice","neural",true],["Microphone","ready",true],["Phone link","online",true],["Cloud sync","synced 2 min ago",true],["Homework","2 due",true],["Jobs","0 queued",true]],name:"ORION",title:"sir",version:"4.1.0",theme:"standby",brain:"auto",speak:true,has_key:true,facts:3,history:[],lite:false,hotkey:"ctrl+alt+space",gaming:false,afk:false}),
+/* inside the ORION OS shell: borrow the shell's connection and hide our own chrome */
+const EMBED=new URLSearchParams(location.search).has("embed")&&window.parent!==window;
+if(EMBED){ document.body.classList.add("embed"); window.EMBED_GO=p=>go(p); const grab=()=>{ if(window.parent.OS_PREVIEW) return; if(window.parent.OS_API){ api=window.parent.OS_API; boot(); } else setTimeout(grab,100); }; grab(); }
+else window.addEventListener("pywebviewready",()=>{ api=window.pywebview.api; boot(); });
+setTimeout(()=>{ if(api||(EMBED&&!window.parent.OS_PREVIEW)) return; const wait=ms=>new Promise(r=>setTimeout(r,ms)); const A=async v=>v;
+  api={ init:()=>A({os:/[?&]os\b/.test(location.search),boot_checks:[["Neural core","Groq + Gemini",true],["Local brain","qwen2.5:3b",true],["Long-term memory","42 facts",true],["Voice","neural",true],["Microphone","ready",true],["Phone link","online",true],["Cloud sync","synced 2 min ago",true],["Homework","2 due",true],["Jobs","0 queued",true]],name:"ORION",title:"sir",version:"4.1.0",theme:"standby",brain:"auto",speak:true,has_key:true,facts:3,history:[],lite:false,hotkey:"ctrl+alt+space",gaming:false,afk:false}),
     status:()=>A({brain:"auto",cloud:{ok:true,count:2,labels:["Groq","Gemini"]},local:{ok:false,model:"qwen2.5:3b"}}),
     meters:()=>A([{label:"Groq",model:"openai/gpt-oss-120b",requests:154,tokens:412000,req_left:846,req_limit:1000,tok_left:6200,tok_limit:8000,resting:0},{label:"Gemini",model:"gemini-2.5-flash",requests:12,tokens:38000,req_left:null,req_limit:null,tok_left:null,tok_limit:null,resting:0}]),
     stats:()=>A({cpu:25+Math.random()*25,ram:58,ram_used:9.3,ram_total:16,disk:48,disk_free:493,procs:212,net:Date.now()*40,uptime:20000,battery:null}),
@@ -3441,6 +3515,11 @@ setTimeout(()=>{ if(api) return; const wait=ms=>new Promise(r=>setTimeout(r,ms))
         area:{home:h,sunrise:"07:02",sunset:"16:24",moon:{age:15.1,name:"Full moon",lit:99},weather:{temp:9,sky:"cloudy",rain_at:"21:00"},air:{aqi:18,label:"Good",pm25:4.2,uv:.6,pollen:2},kp:{kp:3.3,chance:"Very unlikely"},floods:[]},flights:mockFlights()}; },
     globe_find:p=>A({lat:35.68,lon:139.69,name:p}),
     voice_extras:v=>A({acks:true,greetings:true}),
+    os_status:()=>A({os:true,volume:62,muted:false,brightness:null,battery:null,wifi:{ssid:"VM0420-Home",signal:78},wired:false,uptime:5420,persist:true,windows:[{id:"0x1",cls:"Epiphany",title:"BBC Bitesize — GCSE Maths"},{id:"0x2",cls:"Pcmanfm",title:"Documents"}]}),
+    os_apps:()=>A([["epiphany","Web","🌐","Network","Browse the web"],["pcmanfm","File Manager","📁","System","Browse your files"],["lxterminal","Terminal","⌨","System",""],["mousepad","Text Editor","📝","Utility",""],["ristretto","Image Viewer","🖼","Graphics",""],["mpv","mpv Media Player","🎬","AudioVideo",""],["galculator","Calculator","🧮","Utility",""],["pavucontrol","Volume Control","🔊","AudioVideo",""]].map(a=>({id:a[0],name:a[1],icon:a[2],cat:a[3],desc:a[4]}))),
+    os_launch:()=>A(true),os_window:()=>A(true),os_set:()=>A({}),os_power:()=>A(true),os_open:()=>A(true),
+    os_wifi:(s)=>A(s==null?[{ssid:"VM0420-Home",on:true,signal:78,secure:true},{ssid:"BT-Hub-7K2",on:false,signal:51,secure:true},{ssid:"Desford Library",on:false,signal:22,secure:false}]:{ok:true,msg:""}),
+    os_files:p=>A({path:p||"",items:p?[{name:"Maths revision.pdf",dir:false,size:2400000},{name:"essay draft.txt",dir:false,size:5300}]:[{name:"Desktop",dir:true,size:0},{name:"Documents",dir:true,size:0},{name:"Downloads",dir:true,size:0},{name:"Music",dir:true,size:0},{name:"Pictures",dir:true,size:0},{name:"Videos",dir:true,size:0}]}),
     automations_get:()=>A(window.__AT||(window.__AT={on:true,goals:"",rules:[{id:"a1",name:"Game time",on:true,runs:6,text:"When I start a game → say “Gaming mode engaged, sir. I'll hold your messages.”",trigger:{type:"game_start"},action:{type:"say"}},{id:"a2",name:"Revision nudge",on:true,runs:2,text:"When I haven't revised by 19:30 → message my phone",trigger:{type:"no_revision"},action:{type:"notify"}}],
       triggers:{app_open:"When I open an app",app_close:"When I close an app",game_start:"When I start gaming",game_end:"When I stop gaming",away:"When I've been away for N min",back:"When I come back after N min away",time:"At a time",sunset:"At sunset",rain_soon:"When rain is coming",disk_low:"When disk space is low",new_download:"When a new file lands in Downloads",no_revision:"If I haven't revised by a time"},
       actions:{say:"ORION says…",notify:"Message my phone",do:"ORION does…",open_app:"Open an app",theme:"Switch mode",routine:"Run a Night Shift routine",gaming:"Gaming mode on/off",focus:"Start a focus session"},

@@ -1,0 +1,30 @@
+# ORION OS boot animation — a reactor core spinning up
+Window.SetBackgroundTopColor(0.01, 0.02, 0.05);
+Window.SetBackgroundBottomColor(0.0, 0.01, 0.03);
+cx = Window.GetWidth() / 2; cy = Window.GetHeight() / 2 - 40;
+ring = Sprite(Image("ring.png")); ring.SetPosition(cx - 210, cy - 210, 1);
+word = Image("word.png"); ws = Sprite(word); ws.SetPosition(cx - word.GetWidth() / 2, cy + 230, 5); ws.SetOpacity(0);
+sub = Image("sub.png"); ss = Sprite(sub); ss.SetPosition(cx - sub.GetWidth() / 2, cy + 300, 5); ss.SetOpacity(0);
+dot = Image("dot.png"); dotg = Image("dotg.png");
+N = 24;
+for (i = 0; i < N; i++) { d[i] = Sprite(dot); d2[i] = Sprite(dotg); }
+t = 0; prog = 0;
+fun refresh() {
+  t++;
+  f = Math.Min(t / 60, 1);
+  ws.SetOpacity(f); ss.SetOpacity(f * 0.8);
+  for (i = 0; i < N; i++) {
+    a = (i / N) * 6.2832 + t * 0.045;
+    r = 150 * (0.6 + 0.4 * f);
+    d[i].SetPosition(cx + Math.Cos(a) * r - 15, cy + Math.Sin(a) * r - 15, 3);
+    d[i].SetOpacity((0.25 + 0.75 * ((i + t / 3) % N) / N) * f);
+    b = -(i / N) * 6.2832 - t * 0.07;
+    r2 = 90 * f;
+    d2[i].SetPosition(cx + Math.Cos(b) * r2 - 12, cy + Math.Sin(b) * r2 - 12, 4);
+    if (i % 3 == 0) d2[i].SetOpacity(0.9 * f); else d2[i].SetOpacity(0);
+  }
+}
+Plymouth.SetRefreshFunction(refresh);
+# password prompts (e.g. encrypted disks) — keep them readable
+fun display_normal() { }
+Plymouth.SetDisplayNormalFunction(display_normal);
