@@ -393,7 +393,8 @@ async function start(){ window.OS_API=api; let c={}; try{ c=await api.init(); }c
   setTimeout(()=>{ $("#curtain").classList.add("gone"); boot0=performance.now(); },400);
   setTimeout(()=>$("#q").focus(),1200); }
 window.addEventListener("pywebviewready",()=>{ if(api) return; api=window.pywebview.api; start(); });
-setTimeout(()=>{ if(api) return; window.OS_PREVIEW=true;   // opened in a normal browser: a pretend ORION so the shell can be previewed
+(function poll(){ if(api) return; const P=window.pywebview; if(P&&P.api&&typeof P.api.init==="function"){ api=P.api; start(); } else setTimeout(poll,250); })();
+if(/[?&]preview/.test(location.search)) setTimeout(()=>{ if(api) return; window.OS_PREVIEW=true;   // opened in a normal browser: a pretend ORION so the shell can be previewed
   const A=async v=>v, W=ms=>new Promise(r=>setTimeout(r,ms));
   api={ init:()=>A({title:"sir"}), saver_data:()=>A({weather:{temp:7,sky:"clear",place:"Desford",rain_at:null},next:[{at:"Fri 08:40",title:"Maths mock"},{at:"Fri 16:00",title:"Revise circle theorems"}],job:"",queued:0,money:142}),
     os_status:()=>A({volume:62,muted:false,brightness:null,battery:null,wifi:{ssid:"VM0420-Home",signal:78},wired:false,persist:true,windows:[]}),

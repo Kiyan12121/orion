@@ -3452,7 +3452,7 @@ $("#osOff").onclick=()=>{ $("#osQP").classList.remove("show"); api.os_power("shu
 const EMBED=new URLSearchParams(location.search).has("embed")&&window.parent!==window;
 if(EMBED){ document.body.classList.add("embed"); window.EMBED_GO=p=>go(p); const grab=()=>{ if(window.parent.OS_PREVIEW) return; if(window.parent.OS_API){ api=window.parent.OS_API; boot(); } else setTimeout(grab,100); }; grab(); }
 else window.addEventListener("pywebviewready",()=>{ api=window.pywebview.api; boot(); });
-setTimeout(()=>{ if(api||(EMBED&&!window.parent.OS_PREVIEW)) return; const wait=ms=>new Promise(r=>setTimeout(r,ms)); const A=async v=>v;
+setTimeout(()=>{ if(api||window.pywebview||(EMBED&&!window.parent.OS_PREVIEW)) return; const wait=ms=>new Promise(r=>setTimeout(r,ms)); const A=async v=>v;
   api={ init:()=>A({os:/[?&]os\b/.test(location.search),boot_checks:[["Neural core","Groq + Gemini",true],["Local brain","qwen2.5:3b",true],["Long-term memory","42 facts",true],["Voice","neural",true],["Microphone","ready",true],["Phone link","online",true],["Cloud sync","synced 2 min ago",true],["Homework","2 due",true],["Jobs","0 queued",true]],name:"ORION",title:"sir",version:"4.1.0",theme:"standby",brain:"auto",speak:true,has_key:true,facts:3,history:[],lite:false,hotkey:"ctrl+alt+space",gaming:false,afk:false}),
     status:()=>A({brain:"auto",cloud:{ok:true,count:2,labels:["Groq","Gemini"]},local:{ok:false,model:"qwen2.5:3b"}}),
     meters:()=>A([{label:"Groq",model:"openai/gpt-oss-120b",requests:154,tokens:412000,req_left:846,req_limit:1000,tok_left:6200,tok_limit:8000,resting:0},{label:"Gemini",model:"gemini-2.5-flash",requests:12,tokens:38000,req_left:null,req_limit:null,tok_left:null,tok_limit:null,resting:0}]),
