@@ -28,9 +28,16 @@ TRIGGERS = {
     "cpu_high": "When the CPU is maxed out", "ram_high": "When memory is nearly full", "disk_low": "When disk space is low",
     "battery_low": "When the laptop battery is low", "new_download": "When a new file lands in Downloads",
     "no_revision": "If I haven't revised by a time",
+    # ORION OS
+    "os_start": "When ORION OS starts", "unlock": "When I unlock ORION", "wifi_join": "When I join a Wi-Fi network",
+    "offline": "When the internet drops", "online": "When the internet comes back",
+    "charger_in": "When I plug the charger in", "charger_out": "When I unplug the charger",
 }
+OS_ONLY = {"os_start", "unlock", "wifi_join", "volume", "lock", "power", "sky"}
 ACTIONS = {"say": "ORION says…", "notify": "Message my phone", "do": "ORION does…", "open_app": "Open an app",
-           "theme": "Switch mode", "routine": "Run a Night Shift routine", "gaming": "Gaming mode on/off", "focus": "Start a focus session"}
+           "theme": "Switch mode", "routine": "Run a Night Shift routine", "gaming": "Gaming mode on/off", "focus": "Start a focus session",
+           "volume": "Set the volume (ORION OS)", "lock": "Lock the screen (ORION OS)",
+           "power": "Shut down / restart / sleep, with a 60-second warning (ORION OS)", "sky": "Change the sky (ORION OS)"}
 PRESETS = [
     {"name": "Game time", "trigger": {"type": "game_start"}, "action": {"type": "say", "value": "Gaming mode engaged, sir. I'll hold your messages."}},
     {"name": "Good game", "trigger": {"type": "game_end"}, "action": {"type": "do", "value": "Tell me in one line how long I just played and what homework is due next."}},
@@ -43,6 +50,13 @@ PRESETS = [
     {"name": "Sort new PDFs", "trigger": {"type": "new_download", "value": ".pdf"}, "action": {"type": "do", "value": "A new PDF just downloaded — tell me its name and ask if it's homework I should add."}},
     {"name": "Discord with Spotify", "trigger": {"type": "app_open", "value": "discord"}, "action": {"type": "open_app", "value": "Spotify"}},
     {"name": "Bedtime wind-down", "trigger": {"type": "time", "value": "22:30", "days": "weekdays"}, "action": {"type": "say", "value": "It's half ten on a school night, sir. Time to start winding down."}},
+    {"name": "Bedtime shutdown", "os": True, "trigger": {"type": "time", "value": "23:30", "days": "weekdays"}, "action": {"type": "power", "value": "shutdown"}},
+    {"name": "Welcome back brief", "os": True, "trigger": {"type": "unlock"}, "cooldown": 240, "action": {"type": "do", "value": "Welcome me back in 3 short lines: anything new, what's due next, and what's next on my plan."}},
+    {"name": "Quiet nights", "os": True, "trigger": {"type": "time", "value": "22:00"}, "action": {"type": "volume", "value": "30"}},
+    {"name": "Aurora after dark", "os": True, "trigger": {"type": "sunset"}, "action": {"type": "sky", "value": "aurora"}},
+    {"name": "Night sky at sunrise", "os": True, "trigger": {"type": "sunrise"}, "action": {"type": "sky", "value": "night"}},
+    {"name": "Internet's down", "os": True, "trigger": {"type": "offline"}, "action": {"type": "say", "value": "We've lost the internet, sir. I'll keep going offline where I can."}},
+    {"name": "Lock when I leave", "os": True, "trigger": {"type": "away", "value": 5}, "action": {"type": "lock"}},
     {"name": "PC struggling", "trigger": {"type": "cpu_high"}, "action": {"type": "notify", "value": "Your PC's CPU has been maxed out for over a minute — something's hogging it."}},
 ]
 _lock = threading.Lock()
@@ -69,15 +83,22 @@ def describe(r):
             "time": f"it's {tv} ({t.get('days', 'daily')})", "sunset": "the sun sets", "sunrise": "the sun rises",
             "rain_soon": "rain is coming", "cpu_high": "the CPU is maxed out", "ram_high": "memory is nearly full",
             "disk_low": f"disk space drops under {tv or 15} GB", "battery_low": f"battery drops under {tv or 20}%",
-            "new_download": f"a new {tv or 'file'} downloads", "no_revision": f"I haven't revised by {tv or '19:30'}"}.get(t["type"], t["type"])
+            "new_download": f"a new {tv or 'file'} downloads", "no_revision": f"I haven't revised by {tv or '19:30'}",
+            "os_start": "ORION OS starts", "unlock": "I unlock ORION", "wifi_join": f"I join {tv or 'a Wi-Fi network'}",
+            "offline": "the internet drops", "online": "the internet comes back", "charger_in": "I plug the charger in",
+            "charger_out": "I unplug the charger"}.get(t["type"], t["type"])
     then = {"say": f"say “{a.get('value', '')}”", "notify": "message my phone", "do": f"do: {a.get('value', '')}",
             "open_app": f"open {a.get('value', '')}", "theme": f"switch to {a.get('value', '')} mode",
             "routine": f"run {a.get('value', '')}", "gaming": f"gaming mode {a.get('value', 'on')}",
-            "focus": f"start a {a.get('value', 25)}-min focus session"}.get(a["type"], a["type"])
+            "focus": f"start a {a.get('value', 25)}-min focus session", "volume": f"set the volume to {a.get('value', 30)}%",
+            "lock": "lock the screen", "power": {'restart': 'restart', 'sleep': 'put to sleep'}.get(a.get('value'), 'shut down') + ' the PC (60-second warning)',
+            "sky": f"switch the sky to {a.get('value', 'night')}"}.get(a["type"], a["type"])
     return f"When {when} → {then}"
 
 
 def add(name, trigger, action, cooldown=None):
+    cooldown = cooldown or {"os_start": 1, "unlock": 1, "wifi_join": 5, "offline": 10, "online": 10, "charger_in": 2,
+                            "charger_out": 2}.get(trigger.get("type"))
     if trigger.get("type") not in TRIGGERS or action.get("type") not in ACTIONS:
         raise ValueError("Unknown trigger or action.")
     rules = load()
@@ -100,9 +121,18 @@ class Engine:
         self.cpu_hot_since = None
         self.downloads = None
         self.away_fired = set()
+        self.signals = []
+        self.net = None
+        self.ssid = None
+        self.plugged = None
+        self.net_checked = 0
         threading.Thread(target=self._loop, daemon=True).start()
 
     # ------------------------------------------------------------------ signals
+    def signal(self, kind, **ctx):
+        """Events the ORION OS screen reports (os_start, unlock)."""
+        self.signals.append((kind, ctx))
+
     def _procs(self):
         out = set()
         for p in psutil.process_iter(["name"]):
@@ -135,6 +165,8 @@ class Engine:
 
     def tick(self):
         rules = [r for r in load() if r.get("on", True)]
+        sig = {k for k, _ in self.signals}
+        self.signals = []
         if not rules:
             return
         types = {r["trigger"]["type"] for r in rules}
@@ -164,6 +196,23 @@ class Engine:
             now = self._downloads()
             ev["new_files"] = list(now - (self.downloads or now))
             self.downloads = now
+        ev["signals"] = sig
+        if types & {"offline", "online"} and time.time() - self.net_checked > 15:
+            from .oslinux import online
+            self.net_checked = time.time()
+            n = online()
+            ev["went_offline"], ev["went_online"] = self.net is True and not n, self.net is False and n
+            self.net = n
+        if "wifi_join" in types:
+            from .oslinux import wifi_ssid
+            w = wifi_ssid()
+            ev["joined"] = w if w and w != self.ssid else None
+            self.ssid = w
+        if types & {"charger_in", "charger_out"}:
+            b = psutil.sensors_battery()
+            p = b.power_plugged if b else None
+            ev["plug_in"], ev["plug_out"] = self.plugged is False and p is True, self.plugged is True and p is False
+            self.plugged = p
         now = dt.datetime.now()
         hm = now.strftime("%H:%M")
         for r in rules:
@@ -202,6 +251,15 @@ class Engine:
         if ty == "back":
             b = ev.get("back_after")
             return {"mins": round(b)} if b and b >= float(v or 60) else None
+        if ty in ("os_start", "unlock"):
+            return {} if ty in ev.get("signals", ()) else None
+        if ty == "wifi_join":
+            j = ev.get("joined")
+            return {"network": j} if j and (not v or str(v).lower() in j.lower()) else None
+        if ty in ("offline", "online"):
+            return {} if ev.get("went_" + ty) else None
+        if ty in ("charger_in", "charger_out"):
+            return {} if ev.get("plug_in" if ty == "charger_in" else "plug_out") else None
         days = t.get("days", "daily")
         if days == "weekdays" and now.weekday() >= 5 or days == "weekends" and now.weekday() < 5:
             return None
@@ -261,9 +319,11 @@ class Engine:
 
 # ------------------------------------------------------------------ tools for the brain
 @tool("AUTOMATION: create a 'when X happens, do Y' rule that runs by itself. trigger: app_open, app_close, game_start, game_end, "
-      "away, back, time, sunset, sunrise, rain_soon, cpu_high, ram_high, disk_low, battery_low, new_download, no_revision. "
-      "trigger_value: app name / minutes / HH:MM / GB / % / file extension. action: say, notify, do, open_app, theme, routine, "
-      "gaming, focus. action_value: what to say / instruction to do / app / mode / routine / on|off / minutes. "
+      "away, back, time, sunset, sunrise, rain_soon, cpu_high, ram_high, disk_low, battery_low, new_download, no_revision, "
+      "and on ORION OS: os_start, unlock, wifi_join, offline, online, charger_in, charger_out. "
+      "trigger_value: app name / minutes / HH:MM / GB / % / file extension / Wi-Fi name. action: say, notify, do, open_app, theme, "
+      "routine, gaming, focus, and on ORION OS: volume, lock, power, sky. action_value: what to say / instruction to do / app / "
+      "mode / routine / on|off / minutes / volume % / shutdown|restart|sleep / night|aurora|dawn|deep. "
       "e.g. 'when I open Fortnite turn on gaming mode', 'if I haven't revised by 7:30 nag me'.",
       {"name": ("string", "Short name", False), "trigger": ("string", "Trigger type", True),
        "trigger_value": ("string", "Value for the trigger", False), "days": ("string", "daily | weekdays | weekends (time triggers)", False),

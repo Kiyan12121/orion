@@ -525,7 +525,7 @@ class Api:
         c = self._cfg
         vis = c.get("visuals", "auto")
         lite = vis == "lite" or (vis == "auto" and (self.lite_profile or c.get("auto_lite")))
-        return {"os": oslinux.ACTIVE, "visuals": vis, "custom_modes": c.get("custom_modes", {}), "owner": c.get("owner_name", ""), "name": c["assistant_name"], "title": c["user_title"], "version": config_mod.VERSION,
+        return {"os": oslinux.ACTIVE, "os_sky": c.get("os_sky", "night"), "os_dnd": c.get("os_dnd", False), "visuals": vis, "custom_modes": c.get("custom_modes", {}), "owner": c.get("owner_name", ""), "name": c["assistant_name"], "title": c["user_title"], "version": config_mod.VERSION,
                 "theme": c["theme"], "brain": c["brain"], "speak": c["voice"]["speak_replies"],
                 "safe_mode": c["safe_mode"], "lite": lite, "skip_boot": c.get("skip_boot", False),
                 "has_key": bool(self._brain.cloud), "mic": self._recorder.available,
@@ -1793,8 +1793,27 @@ class Api:
         elif a == "do":
             extra = f" (Context: {', '.join(f'{k}={x}' for k, x in ctx.items())})" if ctx else ""
             self._jobs.add(v + extra, source="automation", title=f"⚡ {r['name']}", notify=True)
+        elif a == "open_app" and oslinux.ACTIVE:
+            oslinux.open_by_name(v)
         elif a == "open_app":
             threading.Thread(target=self._toolbox.run, args=("open_app", {"name": v}), daemon=True).start()
+        elif a in automate.OS_ONLY and not oslinux.ACTIVE:
+            self._emit("toast", level="warn", text=f"'{r['name']}' only works on ORION OS.")
+        elif a == "volume":
+            oslinux.set_volume(int(float(v or 30)))
+        elif a == "lock":
+            self._emit("os_lock")
+        elif a == "power":
+            act = v if v in ("shutdown", "restart", "sleep") else "shutdown"
+            self._emit("os_power_countdown", action=act, seconds=60, name=r["name"])
+            try:
+                self._speaker.say(f"{r['name']}, {self._cfg.get('user_title', 'sir')}. {'Shutting down' if act == 'shutdown' else 'Restarting' if act == 'restart' else 'Going to sleep'} in one minute unless you cancel.")
+            except Exception:
+                pass
+        elif a == "sky":
+            self._cfg["os_sky"] = v if v in oslinux.SKIES else "night"
+            config_mod.save(self._cfg)
+            self._emit("os_sky", sky=self._cfg["os_sky"])
         elif a == "theme":
             self.set_theme(v or "standby")
         elif a == "routine":
@@ -1814,7 +1833,7 @@ class Api:
         rs = automate.load()
         return {"on": self._cfg.get("automations_on", True), "rules": [{**r, "text": automate.describe(r)} for r in rs],
                 "triggers": automate.TRIGGERS, "actions": automate.ACTIONS,
-                "presets": [{**p, "text": automate.describe({**p, "on": True})} for p in automate.PRESETS],
+                "presets": [{**p, "text": automate.describe({**p, "on": True})} for p in automate.PRESETS if oslinux.ACTIVE or not p.get("os")],
                 "goals": self._cfg.get("autonomy_goals", "")}
 
     def automations_action(self, b):
@@ -1828,7 +1847,7 @@ class Api:
         elif a == "preset":
             p = next((p for p in automate.PRESETS if p["name"] == b.get("name")), None)
             if p and not any(r["name"] == p["name"] for r in rs):
-                automate.add(p["name"], dict(p["trigger"]), dict(p["action"]))
+                automate.add(p["name"], dict(p["trigger"]), dict(p["action"]), p.get("cooldown"))
         elif a in ("toggle", "delete"):
             for r in rs:
                 if r["id"] == b.get("id"):
@@ -2011,7 +2030,7 @@ class Api:
 
     def power_down(self, action=None):
         """Plays the power-down sequence (UI animation + voice), then quits — or, on ORION OS, shuts down / restarts the PC."""
-        self._emit("powerdown", title=self._cfg.get("user_title", "sir"))
+        self._emit("powerdown", title=self._cfg.get("user_title", "sir"), action=action or "shutdown")
         try:
             if self._cfg["voice"]["speak_replies"]:
                 self._speaker.say(f"{'Restarting' if action == 'restart' else 'Powering down'}. Goodbye, {self._cfg.get('user_title', 'sir')}.")
@@ -2073,6 +2092,26 @@ class Api:
         st = L.status()
         st["idle_now"] = oslinux.idle_seconds()
         return st
+
+    def os_signal(self, kind):
+        if kind in ("os_start", "unlock") and getattr(self, "_automate", None):
+            self._automate.signal(kind)
+        return True
+
+    def os_sysinfo(self):
+        return oslinux.sysinfo()
+
+    def os_screenshot(self):
+        return oslinux.screenshot()
+
+    def os_pref(self, key, value=None):
+        allowed = {"os_sky": oslinux.SKIES, "os_dnd": (True, False)}
+        if key not in allowed:
+            return None
+        if value is not None and value in allowed[key]:
+            self._cfg[key] = value
+            config_mod.save(self._cfg)
+        return self._cfg.get(key)
 
     def os_files(self, path=""):
         return oslinux.files(path)

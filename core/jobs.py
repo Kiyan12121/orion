@@ -18,7 +18,10 @@ _lock = threading.RLock()
 
 
 def idle_seconds():
-    """Seconds since the last mouse/keyboard input (Windows)."""
+    """Seconds since the last mouse/keyboard input (Windows, or ORION OS / Linux)."""
+    if os.name != "nt":
+        from .oslinux import idle_seconds as _idle
+        return float(_idle() or 0.0)
     try:
         import ctypes
 

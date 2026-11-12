@@ -1,5 +1,18 @@
 # ORION 6.1 — Personal Intelligence System
 
+## New in 6.3: ORION OS 1.2
+- **Shutdown animation**: Orion glides to the centre, folds into its belt, flares once, says goodbye, and the screen fades to black. Restart says "See you shortly".
+- **Automations for ORION OS**:
+  - New triggers: OS starts, I unlock, I join a Wi-Fi network, the internet drops or comes back, the charger goes in or out.
+  - New actions: set volume, lock the screen, change the sky, and shut down, restart or sleep. Power actions show a 60-second countdown with Cancel.
+  - One-click ideas: Bedtime shutdown, Welcome back brief, Quiet nights, Aurora after dark, Lock when I leave, Internet's down.
+- **Automate** and **Files** are now places on the bottom bar. Files lets you browse Documents, Downloads, Pictures and the rest, and opens anything.
+- **Notification centre**: a bell keeps ORION's messages, with **Do not disturb** to hold them quietly.
+- **Skies**: Night, Aurora (moving northern lights), Dawn or Deep. You can also ask ORION ("make it aurora").
+- **PC stats** in the control centre (CPU, memory, temperature, time on), and **Screenshot**, also on the Print Screen key.
+- Apps now have plain names (Web, Files, Calculator…), so "open the browser" works.
+- Away/back automations now work on ORION OS too.
+
 ## New in 6.2: ORION OS
 ORION can now be the whole computer. Flash **ORION OS** to a USB stick, boot from it, and the PC starts straight into one full-screen ORION, with no Windows desktop in the way.
 
@@ -12,7 +25,7 @@ ORION can now be the whole computer. Flash **ORION OS** to a USB stick, boot fro
 - Build it yourself with `orion-os/build.sh`, or download the ready-made ISO from the ORION OS release.
 
 ### Putting ORION OS on a USB (Windows, free)
-1. Download `ORION-OS-1.1.iso` and **Rufus** (rufus.ie).
+1. Download `ORION-OS-1.2.iso` and **Rufus** (rufus.ie).
 2. In Rufus pick the USB stick and the ISO, then set **Persistent partition size** to about 20 GB. Click Start; if asked, pick **ISO image mode**.
 3. Restart the PC and press the boot-menu key (F8, F11 or F12, or Esc). Pick the USB.
 4. If it won't boot, turn **Secure Boot** off in the BIOS.

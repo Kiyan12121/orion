@@ -5,7 +5,7 @@ import os
 
 from .paths import CONFIG_PATH
 
-VERSION = "6.2.1"
+VERSION = "6.3.0"
 
 # Any OpenAI-compatible service can be added here. Each has its OWN free allowance,
 # so ORION spreads work across all providers that have a key.

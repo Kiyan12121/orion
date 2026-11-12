@@ -67,7 +67,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--glacier);outlin
 .ask .stop{display:none}.busy .ask .stop{display:grid}
 
 /* ---------- places along the bottom ---------- */
-.places{position:fixed;left:0;right:0;bottom:30px;display:flex;justify-content:center;gap:4px;z-index:6}
+.places{position:fixed;left:0;right:0;bottom:30px;display:flex;justify-content:center;gap:4px;z-index:10}
 .places button{padding:9px 16px;border-radius:20px;font:500 14.5px var(--ui);color:var(--mist);transition:color .2s,background .2s}
 .places button:hover{color:var(--frost);background:rgba(139,233,255,.07)}
 .places button.on{color:var(--space);background:var(--glacier)}
@@ -191,6 +191,77 @@ body.unlocking .lock{animation:lout .6s forwards}
 .confirm input::placeholder{font:400 15px var(--ui);letter-spacing:0;color:var(--dim)}.confirm input:focus{border-color:var(--glacier)}
 .confirm .msg{min-height:18px;margin-top:8px;font-size:13px;color:var(--ember)}
 .confirm .yes.blue{background:var(--glacier);color:#03131c}
+
+/* ---------- skies ---------- */
+body.sky-deep{background:#000}
+body.sky-dawn{background:radial-gradient(130% 80% at 60% 120%,#5a2a4a 0%,#2a1838 30%,#0b1027 62%,#03050c 100%)}
+body.sky-aurora{background:radial-gradient(120% 90% at 50% 10%,#06222c 0%,#041222 50%,#02050c 100%)}
+.cc .skies{display:flex;gap:10px}
+.cc .skies button{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;font:500 12.5px var(--ui);color:var(--mist);padding:6px 0;border-radius:12px}
+.cc .skies button i{width:44px;height:30px;border-radius:9px;border:1px solid var(--edge);display:block}
+.cc .skies button.on{color:var(--frost)}.cc .skies button.on i{border-color:var(--glacier);box-shadow:0 0 0 3px rgba(139,233,255,.18)}
+.cc .skies button:hover{background:rgba(139,233,255,.06)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:4px}
+.stats div{padding:9px 10px;border-radius:12px;background:rgba(139,233,255,.05)}
+.stats b{display:block;font:500 17px var(--disp);font-variant-numeric:tabular-nums}
+.stats small{font-size:11.5px;color:var(--mist)}
+.stats .hot b{color:var(--solar)}
+.cc{max-height:calc(100vh - 84px);overflow:auto}
+.cc .quick{display:flex;gap:8px;margin-top:10px}
+.cc .quick button{flex:1;height:38px;border-radius:12px;background:rgba(139,233,255,.06);font:500 13.5px var(--ui);display:flex;align-items:center;justify-content:center;gap:8px}
+.cc .quick button:hover{background:rgba(139,233,255,.13)}
+.cc .quick svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+
+/* ---------- notification centre ---------- */
+.tray .bell{position:relative}
+.tray .bell em{position:absolute;top:4px;right:6px;min-width:16px;height:16px;padding:0 4px;border-radius:8px;background:var(--glacier);color:var(--space);font:700 10.5px/16px var(--ui);font-style:normal;text-align:center}
+.tray .bell em:empty{display:none}
+body.dnd .tray .bell{color:var(--nebula)}
+.nc{right:24px;width:380px}
+.nc .head{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.nc .head h3{margin:0;flex:1}
+.nc .head button{height:32px;padding:0 12px;border-radius:16px;font:500 13px var(--ui);color:var(--mist)}
+.nc .head button:hover{background:rgba(139,233,255,.08);color:var(--frost)}
+.nc .head button.on{background:rgba(155,140,255,.18);color:#cfc8ff}
+.nlist{display:flex;flex-direction:column;gap:6px;max-height:420px;overflow:auto}
+.nlist div{padding:10px 12px;border-radius:12px;background:rgba(139,233,255,.05);font-size:14px;line-height:1.4}
+.nlist small{display:block;color:var(--mist);font-size:12px;margin-top:2px}
+.nlist .warn{background:rgba(255,178,62,.08)}
+.nlist p{color:var(--mist);font-size:14px;padding:18px 4px;text-align:center}
+
+/* ---------- files ---------- */
+.files{padding:24px 30px;display:none}
+.files.show{display:block}
+.fbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.fbar button{height:34px;padding:0 14px;border-radius:17px;background:rgba(139,233,255,.05);font:500 13.5px var(--ui);color:var(--mist)}
+.fbar button:hover,.fbar button.on{background:rgba(139,233,255,.13);color:var(--frost)}
+.crumbs{display:flex;align-items:center;gap:4px;font:500 15px var(--ui);margin-bottom:12px;color:var(--mist);flex-wrap:wrap}
+.crumbs button{padding:4px 8px;border-radius:8px}.crumbs button:hover{background:rgba(139,233,255,.08);color:var(--frost)}
+.crumbs button:last-child{color:var(--frost)}
+.flist{display:flex;flex-direction:column}
+.flist button{display:grid;grid-template-columns:34px 1fr 90px 110px;align-items:center;gap:10px;padding:9px 12px;border-radius:12px;text-align:left;font-size:14.5px}
+.flist button:hover{background:rgba(139,233,255,.07)}
+.flist em{font-style:normal;font-size:20px}
+.flist span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.flist small{color:var(--mist);font-size:13px;text-align:right;font-variant-numeric:tabular-nums}
+
+/* ---------- countdown ---------- */
+.count{position:fixed;top:24px;left:50%;transform:translate(-50%,-140%);z-index:45;display:flex;align-items:center;gap:16px;padding:12px 12px 12px 22px;border-radius:22px;
+  background:rgba(14,10,22,.96);border:1px solid rgba(255,122,107,.45);box-shadow:0 20px 60px rgba(0,0,0,.6);transition:transform .45s cubic-bezier(.2,.9,.3,1.1)}
+.count.show{transform:translate(-50%,0)}
+.count p{font:500 15px var(--ui)}.count p b{font:500 20px var(--disp);color:#ffb4ab;font-variant-numeric:tabular-nums;margin:0 2px}
+.count small{display:block;font-size:12.5px;color:var(--mist)}
+.count button{height:40px;padding:0 18px;border-radius:20px;font-weight:600;white-space:nowrap}
+.count .keep{background:var(--glacier);color:#03131c}
+.count .now{color:var(--mist)}.count .now:hover{background:rgba(255,122,107,.15);color:#ffb4ab}
+
+/* ---------- farewell ---------- */
+body.leaving .top,body.leaving .day,body.leaving .talk,body.leaving .places,body.leaving .lock,body.leaving .notices,body.leaving .sheet,body.leaving .veil,body.leaving .cc,body.leaving .count{opacity:0!important;pointer-events:none!important;transition:opacity .6s}
+.bye{position:fixed;left:0;right:0;top:66vh;text-align:center;z-index:46;pointer-events:none;opacity:0;transition:opacity 1.2s}
+.bye.show{opacity:1}
+.bye p{font:300 30px var(--disp);letter-spacing:.32em;color:var(--frost);padding-left:.32em}
+.bye small{display:block;margin-top:14px;font:400 14px var(--ui);color:var(--mist);letter-spacing:.04em}
+body.gone-dark{cursor:none}
 @media (max-width:1100px){.day{width:46vw}.talk{width:80vw}.sheet{width:calc(100vw - 40px);right:20px}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -204,6 +275,7 @@ body.unlocking .lock{animation:lout .6s forwards}
     <button id="tNet" title="Wi-Fi and sound"><svg viewBox="0 0 24 24"><path d="M2 9a15 15 0 0 1 20 0M5.5 12.5a10 10 0 0 1 13 0M9 16a5 5 0 0 1 6 0"/><circle cx="12" cy="19.5" r=".8"/></svg><span id="tNetT">—</span></button>
     <button id="tVol" title="Sound"><svg viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4z"/><path id="volW" d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg><span id="tVolT"></span></button>
     <button id="tBat" title="Battery" hidden><svg viewBox="0 0 24 24"><rect x="2.5" y="7" width="17" height="10" rx="2"/><path d="M21.5 10.5v3"/></svg><span id="tBatT"></span></button>
+    <button class="bell" id="tBell" title="Notifications"><svg viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></svg><em id="bellN"></em></button>
     <button class="pw" id="tPow" title="Power"><svg viewBox="0 0 24 24"><path d="M12 3v8M6.3 6.3a8 8 0 1 0 11.4 0"/></svg></button>
   </div>
 </div>
@@ -234,6 +306,8 @@ body.unlocking .lock{animation:lout .6s forwards}
   <button data-p="ventures">Money</button>
   <button data-p="globe">Globe</button>
   <button data-p="apps">Apps</button>
+  <button data-p="files">Files</button>
+  <button data-p="shift">Automate</button>
   <button data-p="settings">Settings</button>
 </nav>
 
@@ -242,6 +316,11 @@ body.unlocking .lock{animation:lout .6s forwards}
   <header><b id="sheetT">ORION</b><span></span><button id="sheetFull">Fill screen</button><button id="sheetX">Close</button></header>
   <div class="body">
     <iframe id="hub" title="ORION" src="index.html?embed"></iframe>
+    <div class="files" id="files">
+      <div class="fbar" id="fbar"></div>
+      <div class="crumbs" id="crumbs"></div>
+      <div class="flist" id="flist"></div>
+    </div>
     <div class="apps" id="apps">
       <div class="running" id="running"></div>
       <input id="appQ" placeholder="Find an app">
@@ -251,11 +330,18 @@ body.unlocking .lock{animation:lout .6s forwards}
 </aside>
 
 <div class="cc" id="cc" role="dialog" aria-label="Control centre">
+  <div class="stats" id="stats"></div>
   <h3>Sound</h3><div class="row"><input type="range" id="vol" min="0" max="150"><output id="volO"></output></div>
   <div id="briW"><h3>Brightness</h3><div class="row"><input type="range" id="bri" min="5" max="100"><output id="briO"></output></div></div>
   <h3>Wi-Fi</h3><div class="nets" id="nets"></div>
   <h3>Lock screen</h3><div class="lockrow"><button id="pLock">Lock now</button><button id="pPin">Set PIN</button>
     <select id="pIdle" title="Lock after I've been away"><option value="0">Never</option><option value="5">5 min</option><option value="10">10 min</option><option value="30">30 min</option><option value="60">1 hour</option></select></div>
+  <h3>Sky</h3><div class="skies" id="skies">
+    <button data-sky="night"><i style="background:radial-gradient(circle at 65% 40%,#16305a,#050a16)"></i>Night</button>
+    <button data-sky="aurora"><i style="background:linear-gradient(180deg,#0a3a3a,#6cffc4 45%,#06182a 46%,#02050c)"></i>Aurora</button>
+    <button data-sky="dawn"><i style="background:linear-gradient(0deg,#ff9a6b,#5a2a4a 40%,#0b1027)"></i>Dawn</button>
+    <button data-sky="deep"><i style="background:#000"></i>Deep</button></div>
+  <div class="quick"><button id="pShot"><svg viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>Screenshot</button></div>
   <div class="pwr"><button id="pSleep"><svg viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg>Sleep</button>
     <button id="pRe"><svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.6M20 4v5h-5"/></svg>Restart</button>
     <button class="off" id="pOff"><svg viewBox="0 0 24 24"><path d="M12 3v8M6.3 6.3a8 8 0 1 0 11.4 0"/></svg>Shut down</button></div>
@@ -266,6 +352,9 @@ body.unlocking .lock{animation:lout .6s forwards}
   <nav><button class="no" id="cfNo">Cancel</button><button class="yes" id="cfYes">Shut down</button></nav></div></div>
 
 <div class="notices" id="notices"></div>
+<div class="cc nc" id="nc" role="dialog" aria-label="Notifications"><div class="head"><h3>Notifications</h3><button id="ncDnd" title="Hold notifications quietly here">Do not disturb</button><button id="ncClr">Clear</button></div><div class="nlist" id="nlist"></div></div>
+<div class="count" id="count"><div><p><span id="cdWhat">Shutting down</span> in <b id="cdN">60</b>s</p><small id="cdWhy"></small></div><button class="keep" id="cdNo">Cancel</button><button class="now" id="cdNow">Do it now</button></div>
+<div class="bye" id="bye"><p id="byeT">GOODBYE</p><small id="byeS"></small></div>
 
 <div class="lock" id="lock" aria-label="Locked">
   <div class="tray"><span id="lNet"><svg viewBox="0 0 24 24"><path d="M2 9a15 15 0 0 1 20 0M5.5 12.5a10 10 0 0 1 13 0M9 16a5 5 0 0 1 6 0"/><circle cx="12" cy="19.5" r=".8"/></svg><em id="lNetT"></em></span><span id="lBat" hidden><svg viewBox="0 0 24 24"><rect x="2.5" y="7" width="17" height="10" rx="2"/><path d="M21.5 10.5v3"/></svg><em id="lBatT"></em></span></div>
@@ -291,7 +380,7 @@ body.unlocking .lock{animation:lout .6s forwards}
 <script>
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-let api=null, title="sir", mood="idle", level=0, booted=false, locked=false, lk=0, missed=[];
+let api=null, title="sir", mood="idle", level=0, booted=false, locked=false, lk=0, missed=[], skyT="night", fare=0, fareK="shutdown";
 
 /* ============ the sky: the Orion constellation is ORION ============ */
 const STARS=[ // x,y across the figure (0..1), magnitude, colour
@@ -304,39 +393,49 @@ function fitSky(){ const k=Math.min(devicePixelRatio||1,2); sky.width=innerWidth
   dust=Array.from({length:Math.round(innerWidth*innerHeight/5200)},()=>({x:Math.random(),y:Math.random(),r:Math.random()**3*1.6+.25,a:Math.random()*.6+.15,tw:Math.random()*6})); }
 addEventListener("resize",fitSky); fitSky();
 function drawSky(now){ const W=sky.width,H=sky.height,k=sky.k,t=(now-t0)/1000; sx.clearRect(0,0,W,H);
-  for(const d of dust){ sx.globalAlpha=d.a*(.7+.3*Math.sin(t*.8+d.tw)); sx.fillStyle="#cfe6ff"; sx.beginPath(); sx.arc(d.x*W,d.y*H,d.r*k,0,7); sx.fill(); }
+  const F=fare?Math.min(1.25,(now-fare)/3000):0, live=1-Math.min(1,F*1.4);
+  if(skyT==="aurora"){ for(let r=0;r<4;r++){ const hue=r%2?[108,255,196]:[139,233,255]; sx.beginPath(); const y0=H*(.16+r*.05);
+      for(let x=0;x<=W;x+=W/60){ const y=y0+Math.sin(x/W*6+t*.25+r*1.7)*H*.04+Math.sin(x/W*13-t*.4+r)*H*.015; x?sx.lineTo(x,y):sx.moveTo(x,y); }
+      for(let x=W;x>=0;x-=W/60){ const y=y0+H*(.18+.06*Math.sin(x/W*4+t*.2+r))+Math.sin(x/W*6+t*.25+r*1.7)*H*.04; sx.lineTo(x,y); }
+      const g=sx.createLinearGradient(0,y0-H*.05,0,y0+H*.25); g.addColorStop(0,`rgba(${hue},0)`); g.addColorStop(.25,`rgba(${hue},${.10*live})`); g.addColorStop(1,`rgba(${hue},0)`); sx.fillStyle=g; sx.fill(); } }
+  if(skyT==="dawn"){ const g=sx.createRadialGradient(W*.6,H*1.15,0,W*.6,H*1.15,H*.9); g.addColorStop(0,`rgba(255,160,110,${.32*live})`); g.addColorStop(.5,`rgba(200,90,120,${.12*live})`); g.addColorStop(1,"rgba(0,0,0,0)"); sx.fillStyle=g; sx.fillRect(0,0,W,H); }
+  for(const d of dust){ if(skyT==="deep"&&d.r<.5) continue; sx.globalAlpha=d.a*(.7+.3*Math.sin(t*.8+d.tw))*live; sx.fillStyle="#cfe6ff"; sx.beginPath(); sx.arc(d.x*W,d.y*H,d.r*k,0,7); sx.fill(); }
   sx.globalAlpha=1;
   // the figure sits right of centre, tall
-  lk+=((locked?1:0)-lk)*.06; const fh=Math.min(H*.7,W*.5)*(1-lk*.4), fw=fh*.62, ox=W*(.67-lk*.17)-fw/2, oy=H*(.43-lk*.07)-fh/2; const P=s=>[ox+s.x*fw, oy+s.y*fh];
+  lk+=((locked||fare?1:0)-lk)*(fare?.09:.06); const fh=Math.min(H*.7,W*.5)*(1-lk*.4), fw=fh*.62, ox=W*(.67-lk*.17)-fw/2, oy=H*(.43-lk*.07)-fh/2; const P0=s=>[ox+s.x*fw, oy+s.y*fh], bz=P0(STARS[4]), ce=Math.min(1,Math.max(0,F/.72)), cq=ce*ce*(3-2*ce);
+  const P=s=>{ const p=P0(s); return F?[p[0]+(bz[0]-p[0])*cq, p[1]+(bz[1]-p[1])*cq]:p; };
   const b=boot0?Math.min(1,(now-boot0)/2600):0;          // startup: stars ignite one by one, then the lines draw
   const lv=mood==="speaking"?level:0, think=mood==="thinking", listen=mood==="listening";
   // lines
   LINES.forEach(([a,c],i)=>{ const p=P(STARS[a]), q=P(STARS[c]); const lb=Math.max(0,Math.min(1,(b-.45-i*.05)/.25)); if(!lb) return;
     const ex=p[0]+(q[0]-p[0])*lb, ey=p[1]+(q[1]-p[1])*lb;
-    sx.strokeStyle=`rgba(139,233,255,${.16+(think?.12:0)+lv*.25})`; sx.lineWidth=1.2*k; sx.beginPath(); sx.moveTo(p[0],p[1]); sx.lineTo(ex,ey); sx.stroke();
+    sx.strokeStyle=`rgba(139,233,255,${(.16+(think?.12:0)+lv*.25)*live})`; sx.lineWidth=1.2*k; sx.beginPath(); sx.moveTo(p[0],p[1]); sx.lineTo(ex,ey); sx.stroke();
     if(think&&lb===1){ const f=((t*.55+i*.13)%1); const x=p[0]+(q[0]-p[0])*f, y=p[1]+(q[1]-p[1])*f; const g=sx.createRadialGradient(x,y,0,x,y,14*k); g.addColorStop(0,"rgba(139,233,255,.9)"); g.addColorStop(1,"rgba(139,233,255,0)"); sx.fillStyle=g; sx.fillRect(x-14*k,y-14*k,28*k,28*k); } });
   // the belt speaks: rings flow outward from Alnilam while ORION talks or listens
   const belt=P(STARS[4]);
   if(lv>.02||listen){ for(let r=0;r<3;r++){ const f=(t*.6+r/3)%1, R=(40+f*260)*k*(listen?.8:1); sx.strokeStyle=listen?`rgba(255,178,62,${(1-f)*.35})`:`rgba(139,233,255,${(1-f)*(.18+lv*.5)})`; sx.lineWidth=1.4*k; sx.beginPath(); sx.ellipse(belt[0],belt[1],R,R*.42,-.32,0,7); sx.stroke(); } }
   // two orbits around the belt: ORION's instruments, slowly turning
-  if(b>.6){ const ob=Math.min(1,(b-.6)/.4); for(let o=0;o<2;o++){ const R=(o?fh*.30:fh*.21), tilt=o?-.32:.18, rot=t*(o?-.06:.09);
+  if(b>.6){ const ob=Math.min(1,(b-.6)/.4); for(let o=0;o<2;o++){ const R=(o?fh*.30:fh*.21)*(1-cq*.96)+.01, tilt=o?-.32:.18, rot=t*(o?-.06:.09)*(1+F*14);
       sx.save(); sx.translate(belt[0],belt[1]); sx.rotate(tilt); sx.scale(1,o?.36:.44);
-      sx.strokeStyle=`rgba(139,233,255,${(.07+(think?.06:0)+lv*.12)*ob})`; sx.lineWidth=1*k/(o?.36:.44)*.5; sx.beginPath(); sx.arc(0,0,R,0,7); sx.stroke();
-      sx.strokeStyle=`rgba(139,233,255,${(.32+lv*.4)*ob})`; sx.lineWidth=2*k; for(let a=0;a<3;a++){ sx.beginPath(); sx.arc(0,0,R,rot+a*2.1,rot+a*2.1+.38); sx.stroke(); }
-      for(let a=0;a<48;a++){ const an=a/48*6.283; const r2=R+(a%4?3:8)*k; sx.strokeStyle=`rgba(139,233,255,${(a%4?.08:.2)*ob})`; sx.lineWidth=k; sx.beginPath(); sx.moveTo(Math.cos(an)*R,Math.sin(an)*R); sx.lineTo(Math.cos(an)*r2,Math.sin(an)*r2); sx.stroke(); }
-      const sa=rot*1.7+o*3; sx.fillStyle=o?"#9b8cff":"#8be9ff"; sx.beginPath(); sx.arc(Math.cos(sa)*R,Math.sin(sa)*R,3.2*k/(o?.36:.44)*.45,0,7); sx.fill(); sx.restore(); } }
+      sx.strokeStyle=`rgba(139,233,255,${(.07+(think?.06:0)+lv*.12)*ob*live})`; sx.lineWidth=1*k/(o?.36:.44)*.5; sx.beginPath(); sx.arc(0,0,R,0,7); sx.stroke();
+      sx.strokeStyle=`rgba(139,233,255,${(.32+lv*.4)*ob*(1-Math.min(1,F))})`; sx.lineWidth=2*k; for(let a=0;a<3;a++){ sx.beginPath(); sx.arc(0,0,R,rot+a*2.1,rot+a*2.1+.38); sx.stroke(); }
+      for(let a=0;a<48;a++){ const an=a/48*6.283; const r2=R+(a%4?3:8)*k; sx.strokeStyle=`rgba(139,233,255,${(a%4?.08:.2)*ob*live})`; sx.lineWidth=k; sx.beginPath(); sx.moveTo(Math.cos(an)*R,Math.sin(an)*R); sx.lineTo(Math.cos(an)*r2,Math.sin(an)*r2); sx.stroke(); }
+      const sa=rot*1.7+o*3; if(F<.6){ sx.fillStyle=o?"#9b8cff":"#8be9ff"; sx.beginPath(); sx.arc(Math.cos(sa)*R,Math.sin(sa)*R,3.2*k/(o?.36:.44)*.45,0,7); sx.fill(); } sx.restore(); } }
   // stars
   STARS.forEach((s,i)=>{ const ig=Math.max(0,Math.min(1,(b-i*.05)/.2)); if(!ig) return; const p=P(s);
     let size=(5.2-s.m*1.15)*k*(fh/900)*1.6; size=Math.max(2.2*k,size);
     if(s.belt) size*=1+lv*1.6+(listen?.25*Math.sin(t*5+i):0)+pulse*.6;
-    const br=(.8+.2*Math.sin(t*1.3+i*1.7))*ig; const [r,g,bl]=listen&&s.belt?[255,190,90]:s.c;
+    const br=(.8+.2*Math.sin(t*1.3+i*1.7))*ig*(F>.72?Math.max(0,1-(F-.72)*5):1); const [r,g,bl]=listen&&s.belt?[255,190,90]:s.c;
     const halo=sx.createRadialGradient(p[0],p[1],0,p[0],p[1],size*7); halo.addColorStop(0,`rgba(${r},${g},${bl},${.42*br})`); halo.addColorStop(.25,`rgba(${r},${g},${bl},${.12*br})`); halo.addColorStop(1,`rgba(${r},${g},${bl},0)`);
     sx.fillStyle=halo; sx.fillRect(p[0]-size*7,p[1]-size*7,size*14,size*14);
     sx.fillStyle=`rgba(255,255,255,${br})`; sx.beginPath(); sx.arc(p[0],p[1],size*.55,0,7); sx.fill();
     sx.strokeStyle=`rgba(${r},${g},${bl},${.35*br})`; sx.lineWidth=k; sx.beginPath(); sx.moveTo(p[0]-size*3,p[1]); sx.lineTo(p[0]+size*3,p[1]); sx.moveTo(p[0],p[1]-size*3); sx.lineTo(p[0],p[1]+size*3); sx.stroke();
-    if(b>.9&&!s.belt){ sx.font=`500 ${11*k}px Oxanium,sans-serif`; sx.fillStyle=`rgba(143,166,189,${.55*Math.min(1,(b-.9)*10)})`; sx.fillText(s.n,p[0]+size*2.4+6*k,p[1]+4*k); } });
+    if(b>.9&&!s.belt&&!F){ sx.font=`500 ${11*k}px Oxanium,sans-serif`; sx.fillStyle=`rgba(143,166,189,${.55*Math.min(1,(b-.9)*10)})`; sx.fillText(s.n,p[0]+size*2.4+6*k,p[1]+4*k); } });
   // M42, the nebula below the belt: ORION's quiet glow
-  const m=P({x:.47,y:.66}); const neb=sx.createRadialGradient(m[0],m[1],0,m[0],m[1],fh*.14); neb.addColorStop(0,`rgba(155,140,255,${.16*b+(think?.05:0)})`); neb.addColorStop(1,"rgba(155,140,255,0)"); sx.fillStyle=neb; sx.fillRect(m[0]-fh*.14,m[1]-fh*.14,fh*.28,fh*.28);
+  const m=P({x:.47,y:.66}); const neb=sx.createRadialGradient(m[0],m[1],0,m[0],m[1],fh*.14); neb.addColorStop(0,`rgba(155,140,255,${(.16*b+(think?.05:0))*live})`); neb.addColorStop(1,"rgba(155,140,255,0)"); sx.fillStyle=neb; sx.fillRect(m[0]-fh*.14,m[1]-fh*.14,fh*.28,fh*.28);
+  if(F>.62){ const q=(F-.62)/.6, big=Math.sin(Math.min(1,q/.45)*Math.PI), rad=Math.max(1,(fh*.42*big+6*k)*(q>.45?Math.max(0,1-(q-.45)*1.9):1));
+    const g=sx.createRadialGradient(bz[0],bz[1],0,bz[0],bz[1],rad); g.addColorStop(0,`rgba(255,255,255,${Math.max(0,1-q*.85)})`); g.addColorStop(.18,`rgba(139,233,255,${.55*Math.max(0,1-q)})`); g.addColorStop(1,"rgba(139,233,255,0)");
+    sx.fillStyle=g; sx.fillRect(bz[0]-rad,bz[1]-rad,rad*2,rad*2); }
   pulse*=.94; level*=.9;
   requestAnimationFrame(drawSky); }
 requestAnimationFrame(drawSky);
@@ -374,7 +473,7 @@ setInterval(()=>{ if(van&&!voice.paused){ van.getByteFrequencyData(vbuf); let s=
 
 /* ============ events from ORION ============ */
 const hub=$("#hub"); const H=()=>hub.contentWindow;
-const OVERLAYS=new Set(["globe","holo3d","scan","suitup","powerdown"]);
+const OVERLAYS=new Set(["globe","holo3d","scan","suitup"]);
 window.ui={ event(e){ try{ handle(e); }catch(err){} if(e.kind==="audio"||e.kind==="audio_stop") return;
     try{ H().ui&&H().ui.event(e); }catch(err){} } };
 function handle(e){ switch(e.kind){
@@ -394,22 +493,26 @@ function handle(e){ switch(e.kind){
   case "card": if(e.card&&e.card.title) notice(`<b>${esc(e.card.icon||"")} ${esc(e.card.title)}</b>`,"",()=>openPlace("comms")); break;
   case "stopped": document.body.classList.remove("busy"); mood="idle"; break;
   case "os_lock": lock(); break;
+  case "os_power_countdown": countdown(e.action,e.seconds||60,e.name); break;
+  case "os_sky": setSky(e.sky); break;
+  case "powerdown": farewell(e.action); break;
   default: if(OVERLAYS.has(e.kind)) openPlace(null,true); } }
 
-function notice(text,level,click){ if(locked){ missed.push(text.replace(/<[^>]+>/g,"")); paintAway(); return; } const n=document.createElement("div"); n.className="notice "+(level==="warn"?"warn":""); n.innerHTML=/<b>/.test(text)?text:esc(text);
+function notice(text,level,click){ remember(text,level); if(dnd&&level!=="force") return; if(locked){ missed.push(text.replace(/<[^>]+>/g,"")); paintAway(); return; } const n=document.createElement("div"); n.className="notice "+(level==="warn"?"warn":""); n.innerHTML=/<b>/.test(text)?text:esc(text);
   n.onclick=()=>{ n.remove(); click&&click(); }; $("#notices").appendChild(n); setTimeout(()=>n.remove(),6500); while($("#notices").children.length>3) $("#notices").firstChild.remove(); }
 
 /* ============ places ============ */
-const NAMES={comms:"Conversation",dash:"Overview",sched:"Plan",study:"Study",gaming:"Gaming",ventures:"Money",apps:"Apps",settings:"Settings",globe:"Globe"};
+const NAMES={files:"Files",shift:"Automate",comms:"Conversation",dash:"Overview",sched:"Plan",study:"Study",gaming:"Gaming",ventures:"Money",apps:"Apps",settings:"Settings",globe:"Globe"};
 function openPlace(p,full){ $("#veil").classList.add("show"); $("#sheet").classList.add("show"); $("#sheet").classList.toggle("full",!!full);
   $$("#places button").forEach(b=>b.classList.toggle("on",b.dataset.p===p));
-  const isApps=p==="apps"; $("#apps").classList.toggle("show",isApps); hub.style.visibility=isApps?"hidden":"visible"; $("#sheetT").textContent=NAMES[p]||"ORION";
-  try{ if(p==="settings") H().document.querySelector("#nSet").click(); else if(p==="globe") H().globeOpen(null); else if(p&&!isApps) H().go(p); }catch(e){}
+  const isApps=p==="apps", isFiles=p==="files", local=isApps||isFiles; $("#apps").classList.toggle("show",isApps); $("#files").classList.toggle("show",isFiles); hub.style.visibility=local?"hidden":"visible"; $("#sheetT").textContent=NAMES[p]||"ORION";
+  try{ if(p==="settings") H().document.querySelector("#nSet").click(); else if(p==="globe") H().globeOpen(null); else if(p==="shift"){ H().go("shift"); setTimeout(()=>{ try{ const a=H().document.querySelector("#atList"); a&&a.scrollIntoView({block:"start"}); }catch(e){} },400); } else if(p&&!local) H().go(p); }catch(e){}
+  if(isFiles) loadFiles(FPATH);
   if(isApps){ loadApps(); setTimeout(()=>$("#appQ").focus(),300); } }
 function closePlace(quiet){ $("#veil").classList.remove("show"); $("#sheet").classList.remove("show","full"); $$("#places button").forEach(b=>b.classList.remove("on")); if(!quiet) $("#q").focus(); }
 $$("#places button").forEach(b=>b.onclick=()=>b.classList.contains("on")?closePlace():openPlace(b.dataset.p));
 $("#veil").onclick=closePlace; $("#sheetX").onclick=closePlace; $("#sheetFull").onclick=()=>$("#sheet").classList.toggle("full");
-addEventListener("keydown",e=>{ if(e.key==="Escape"){ if($("#cc").classList.contains("show")) $("#cc").classList.remove("show"); else if($("#confirm").classList.contains("show")) $("#confirm").classList.remove("show"); else closePlace(); }
+addEventListener("keydown",e=>{ if(e.key==="Escape"){ $("#nc").classList.remove("show"); if($("#cc").classList.contains("show")) $("#cc").classList.remove("show"); else if($("#confirm").classList.contains("show")) $("#confirm").classList.remove("show"); else closePlace(); }
   if(e.key==="/"&&document.activeElement.tagName!=="INPUT"){ e.preventDefault(); $("#q").focus(); } });
 
 /* ============ apps ============ */
@@ -437,7 +540,7 @@ async function nets(){ $("#nets").innerHTML=`<p class="hint" style="padding:0 10
   $$("#nets [data-s]").forEach(b=>b.onclick=()=>{ if(b.classList.contains("on")) return; $$("#nets form").forEach(f=>f.remove()); if(b.dataset.sec==="0") return join(b.dataset.s,"");
     const f=document.createElement("form"); f.innerHTML=`<input type="password" placeholder="Password for ${esc(b.dataset.s)}"><button>Join</button>`; b.after(f); f.querySelector("input").focus(); f.onsubmit=e=>{ e.preventDefault(); join(b.dataset.s,f.querySelector("input").value); }; }); }
 async function join(s,p){ notice("Joining "+s+"…"); const r=await api.os_wifi(s,p); notice(r.ok?"Connected to "+s+".":"Couldn't join "+s+": "+(r.msg||"wrong password?"),r.ok?"":"warn"); nets(); tray(); }
-function toggleCC(){ const c=$("#cc"); c.classList.toggle("show"); if(c.classList.contains("show")){ nets(); tray(); loadLock(); } }
+function toggleCC(){ const c=$("#cc"); c.classList.toggle("show"); if(c.classList.contains("show")){ $("#nc").classList.remove("show"); nets(); tray(); loadLock(); stats(); } }
 $("#tNet").onclick=$("#tVol").onclick=$("#tBat").onclick=e=>{ e.stopPropagation(); toggleCC(); };
 document.addEventListener("click",e=>{ const c=$("#cc"); if(c.classList.contains("show")&&!c.contains(e.target)) c.classList.remove("show"); });
 $("#vol").oninput=()=>{ $("#volO").textContent=$("#vol").value+"%"; clearTimeout(window._v); window._v=setTimeout(()=>api.os_set({volume:+$("#vol").value}).then(tray),120); };
@@ -448,9 +551,9 @@ let pend=null;
 function askPower(a){ $("#cc").classList.remove("show"); pend=a; $("#cfT").textContent=a==="restart"?"Restart?":"Shut down?"; $("#cfP").textContent=a==="restart"?"ORION will restart the PC. Anything unsaved in other apps will close.":"ORION will say goodbye and switch the PC off. Anything unsaved in other apps will close.";
   $("#cfYes").textContent=a==="restart"?"Restart":"Shut down"; $("#confirm").classList.add("show"); $("#cfYes").focus(); }
 $("#tPow").onclick=e=>{ e.stopPropagation(); toggleCC(); };
-$("#pOff").onclick=()=>askPower("shutdown"); $("#pRe").onclick=()=>askPower("restart"); $("#pSleep").onclick=()=>{ $("#cc").classList.remove("show"); lock(); setTimeout(()=>api.os_power("sleep"),700); };
+$("#pOff").onclick=()=>askPower("shutdown"); $("#pRe").onclick=()=>askPower("restart"); $("#pSleep").onclick=()=>{ $("#cc").classList.remove("show"); goSleep(); };
 $("#cfNo").onclick=()=>$("#confirm").classList.remove("show");
-$("#cfYes").onclick=()=>{ $("#confirm").classList.remove("show"); const c=$("#curtain"); c.querySelector("p").textContent=pend==="restart"?"RESTARTING":"GOODBYE"; c.classList.remove("gone"); api.os_power(pend); };
+$("#cfYes").onclick=()=>{ $("#confirm").classList.remove("show"); farewell(pend); api.os_power(pend); };
 
 
 /* ============ lock screen ============ */
@@ -466,7 +569,7 @@ function lock(){ if(locked) return; locked=true; document.body.classList.add("lo
   $("#lock").classList.remove("askpin"); $("#pinI").value=""; $("#pinE").textContent=""; $("#pinWho").textContent=title;
   paintGlance();
   paintLock(); paintAway(); document.activeElement&&document.activeElement.blur(); try{ api&&api.os_lock("front"); }catch(e){} }
-function unlock(){ if(!locked) return; document.body.classList.add("unlocking"); pulse=1.4;
+function unlock(){ if(!locked) return; document.body.classList.add("unlocking"); pulse=1.4; try{ api.os_signal("unlock"); }catch(e){}
   setTimeout(()=>{ locked=false; document.body.classList.remove("locked","unlocking"); const m=missed.length; missed=[]; paintAway();
     if(m) setTimeout(()=>notice(`<b>${m} thing${m>1?"s":""} happened while you were away</b>`,"",()=>openPlace("comms")),500); $("#q").focus(); },550); }
 function tryWake(){ if(!locked) return; if(!LS.pin) return unlock(); const L=$("#lock"); if(!L.classList.contains("askpin")){ L.classList.add("askpin"); } setTimeout(()=>$("#pinI").focus(),30); }
@@ -491,9 +594,65 @@ async function savePin(newPin){ const r=await api.os_lock("set",newPin,$("#pdOld
   $("#pinD").classList.remove("show"); await loadLock(); notice(newPin?"PIN saved. You'll need it to unlock ORION.":"PIN removed. Any key unlocks ORION now."); }
 $("#pdOk").onclick=()=>savePin($("#pdNew").value.trim()); $("#pdRm").onclick=()=>savePin("");
 $("#pdNew").onkeydown=e=>{ if(e.key==="Enter") $("#pdOk").click(); };
+
+/* ============ skies ============ */
+function setSky(k,save){ skyT=k||"night"; document.body.classList.remove("sky-night","sky-aurora","sky-dawn","sky-deep"); document.body.classList.add("sky-"+skyT);
+  $$("#skies [data-sky]").forEach(b=>b.classList.toggle("on",b.dataset.sky===skyT)); if(save) api.os_pref("os_sky",skyT); }
+$$("#skies [data-sky]").forEach(b=>b.onclick=e=>{ e.stopPropagation(); setSky(b.dataset.sky,true); });
+
+/* ============ PC stats ============ */
+async function stats(){ if(!$("#cc").classList.contains("show")) return; let s; try{ s=await api.os_sysinfo(); }catch(e){ return; }
+  const up=s.uptime>=3600?Math.floor(s.uptime/3600)+"h "+Math.floor(s.uptime%3600/60)+"m":Math.floor(s.uptime/60)+"m";
+  $("#stats").innerHTML=`<div class="${s.cpu>85?"hot":""}"><b>${s.cpu}%</b><small>CPU</small></div><div class="${s.ram>88?"hot":""}"><b>${s.ram}%</b><small>Memory</small></div>`+
+    (s.temp!=null?`<div class="${s.temp>80?"hot":""}"><b>${s.temp}°</b><small>Temp</small></div>`:`<div><b>${s.disk_free}</b><small>GB free</small></div>`)+`<div><b>${up}</b><small>On for</small></div>`; }
+setInterval(stats,3000);
+$("#pShot").onclick=async e=>{ e.stopPropagation(); $("#cc").classList.remove("show"); await new Promise(r=>setTimeout(r,400)); let p=null; try{ p=await api.os_screenshot(); }catch(err){}
+  notice(p?"Screenshot saved to Pictures/Screenshots.":"Couldn't take a screenshot.",p?"":"warn"); };
+
+/* ============ notification centre ============ */
+let NOTES=[], unread=0, dnd=false;
+function remember(text,level){ NOTES.unshift({t:text.replace(/<[^>]+>/g,""),at:new Date(),warn:level==="warn"}); NOTES=NOTES.slice(0,40);
+  if(!$("#nc").classList.contains("show")) unread++; paintBell(); if($("#nc").classList.contains("show")) paintNC(); }
+function paintBell(){ $("#bellN").textContent=unread?String(Math.min(unread,99)):""; }
+function paintNC(){ $("#nlist").innerHTML=NOTES.length?NOTES.map(n=>`<div class="${n.warn?"warn":""}">${esc(n.t)}<small>${n.at.toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"})}</small></div>`).join(""):`<p>Nothing yet. ORION's messages will collect here.</p>`;
+  $("#ncDnd").classList.toggle("on",dnd); $("#ncDnd").textContent=dnd?"Do not disturb is on":"Do not disturb"; }
+function setDnd(v,save){ dnd=!!v; document.body.classList.toggle("dnd",dnd); paintNC(); if(save){ api.os_pref("os_dnd",dnd); } }
+$("#tBell").onclick=e=>{ e.stopPropagation(); $("#cc").classList.remove("show"); const n=$("#nc"); n.classList.toggle("show"); if(n.classList.contains("show")){ unread=0; paintBell(); paintNC(); } };
+$("#ncClr").onclick=e=>{ e.stopPropagation(); NOTES=[]; paintNC(); };
+$("#ncDnd").onclick=e=>{ e.stopPropagation(); setDnd(!dnd,true); notice(dnd?"Do not disturb is on. Messages wait quietly in notifications.":"Do not disturb is off."); };
+document.addEventListener("click",e=>{ const n=$("#nc"); if(n.classList.contains("show")&&!n.contains(e.target)) n.classList.remove("show"); });
+
+/* ============ files ============ */
+const FICON=n=>/\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(n)?"🖼":/\.(mp4|mkv|webm|mov|avi)$/i.test(n)?"🎬":/\.(mp3|wav|ogg|flac|m4a)$/i.test(n)?"🎵":/\.pdf$/i.test(n)?"📄":/\.(docx?|odt|rtf|txt|md)$/i.test(n)?"📝":/\.(xlsx?|csv|ods)$/i.test(n)?"📊":/\.(zip|tar|gz|7z|rar)$/i.test(n)?"🗜":/\.(py|js|html|css|json|sh)$/i.test(n)?"💻":"▫";
+const fsize=b=>b>1<<30?(b/(1<<30)).toFixed(1)+" GB":b>1<<20?(b/(1<<20)).toFixed(1)+" MB":b>1024?Math.round(b/1024)+" KB":b+" B";
+let FPATH="";
+async function loadFiles(path){ FPATH=path||""; let r={path:"",items:[]}; try{ r=await api.os_files(FPATH); }catch(e){} FPATH=r.path||"";
+  $("#fbar").innerHTML=["","Documents","Downloads","Pictures","Music","Videos","Desktop"].map(f=>`<button data-f="${f}" class="${FPATH===f?"on":""}">${f||"Home"}</button>`).join("");
+  $$("#fbar [data-f]").forEach(b=>b.onclick=()=>loadFiles(b.dataset.f));
+  const parts=FPATH?FPATH.split("/"):[]; $("#crumbs").innerHTML=`<button data-c="">Home</button>`+parts.map((p,i)=>`›<button data-c="${esc(parts.slice(0,i+1).join("/"))}">${esc(p)}</button>`).join("");
+  $$("#crumbs [data-c]").forEach(b=>b.onclick=()=>loadFiles(b.dataset.c));
+  $("#flist").innerHTML=r.items.length?r.items.map(f=>`<button data-n="${esc(f.name)}" data-d="${f.dir?1:0}"><em>${f.dir?"📁":FICON(f.name)}</em><span>${esc(f.name)}</span><small>${f.dir?"":fsize(f.size)}</small><small>${new Date(f.mtime*1000).toLocaleDateString("en-GB",{day:"numeric",month:"short"})}</small></button>`).join(""):`<p class="hint">This folder is empty.</p>`;
+  $$("#flist [data-n]").forEach(b=>b.onclick=()=>{ const p=(FPATH?FPATH+"/":"")+b.dataset.n; if(b.dataset.d==="1") loadFiles(p); else { api.os_open(p); notice("Opening "+b.dataset.n+". Press the Windows key to come back."); } }); }
+
+/* ============ power countdown (automations, or when you ask) ============ */
+let CD=null;
+function countdown(action,secs,why){ clearInterval(CD&&CD.t); const W={shutdown:"Shutting down",restart:"Restarting",sleep:"Going to sleep"};
+  CD={action,n:secs}; $("#cdWhat").textContent=W[action]||"Shutting down"; $("#cdN").textContent=secs; $("#cdWhy").textContent=why?`${why}. Save anything you're working on.`:"Save anything you're working on.";
+  $("#count").classList.add("show"); try{ api.os_lock("front"); }catch(e){}
+  CD.t=setInterval(()=>{ CD.n--; $("#cdN").textContent=CD.n; if(CD.n<=0){ clearInterval(CD.t); $("#count").classList.remove("show"); doPower(CD.action); } },1000); }
+$("#cdNo").onclick=()=>{ clearInterval(CD&&CD.t); $("#count").classList.remove("show"); notice("Cancelled. The PC stays on."); };
+$("#cdNow").onclick=()=>{ clearInterval(CD&&CD.t); $("#count").classList.remove("show"); doPower(CD.action); };
+function doPower(a){ if(a==="sleep") return goSleep(); api.os_power(a); }
+function goSleep(){ lock(); const c=$("#curtain"); c.querySelector("p").textContent="SLEEPING"; c.classList.remove("gone"); setTimeout(()=>api.os_power("sleep"),900); setTimeout(()=>c.classList.add("gone"),2600); }
+
+/* ============ farewell: Orion folds into its belt and goes out ============ */
+function farewell(kind){ if(fare) return; fareK=kind||"shutdown"; document.body.classList.add("leaving"); clearInterval(CD&&CD.t);
+  $("#byeT").textContent=fareK==="restart"?"SEE YOU SHORTLY":"GOODBYE"; $("#byeS").textContent=fareK==="restart"?`Restarting, ${title}.`:`Powering down, ${title}.`;
+  setTimeout(()=>{ fare=performance.now(); },900); setTimeout(()=>$("#bye").classList.add("show"),2100);
+  setTimeout(()=>{ $("#bye").classList.remove("show"); document.body.classList.add("gone-dark"); const c=$("#curtain"); c.querySelector("p").textContent=""; c.classList.remove("gone"); },5600); }
 /* ============ start ============ */
 window.OS_HUB=()=>{};
-async function start(){ window.OS_API=api; let c={}; try{ c=await api.init(); }catch(e){} title=c.title||"sir";
+async function start(){ window.OS_API=api; let c={}; try{ c=await api.init(); }catch(e){} title=c.title||"sir"; setSky(c.os_sky||"night"); setDnd(!!c.os_dnd); try{ api.os_signal("os_start"); }catch(e){}
   tickClock(); loadDay(); tray(); setInterval(loadDay,60000); setInterval(tray,5000);
   await loadLock(); lock();
   setTimeout(()=>{ $("#curtain").classList.add("gone"); boot0=performance.now(); },400);
@@ -507,6 +666,8 @@ if(/[?&]preview/.test(location.search)) setTimeout(()=>{ if(api) return; window.
     os_apps:()=>A([["epiphany","Web","🌐","Browse the web"],["pcmanfm","Files","📁","Your documents, music and downloads"],["lxterminal","Terminal","⌨","Command line"],["mousepad","Text editor","📝","Write and edit text"],["ristretto","Photos","🖼","View pictures"],["mpv","Media player","🎬","Videos and music"],["galculator","Calculator","🧮","Sums"],["pavucontrol","Sound","🔊","Speakers and microphones"]].map(a=>({id:a[0],name:a[1],icon:a[2],desc:a[3],cat:""}))),
     os_wifi:s=>A(s==null?[{ssid:"VM0420-Home",on:true,signal:78,secure:true},{ssid:"BT-Hub-7K2",on:false,signal:51,secure:true},{ssid:"Desford Library",on:false,signal:22,secure:false}]:{ok:true}),
     os_lock:(a,p)=>A(a==='check'?{ok:p==='1234'}:{pin:/pin/.test(location.search),idle_min:10,idle_now:3}),
+    os_sysinfo:()=>A({cpu:23,ram:41,ram_gb:16,temp:54,disk_free:18.2,uptime:8040}), os_screenshot:()=>A("/home/orion/Pictures/Screenshots/x.png"), os_pref:(k,v)=>A(v), os_signal:()=>A(true),
+    os_files:p=>A({path:p||"",items:(p?[{name:"Maths mock revision.pdf",dir:false,size:2480000,mtime:1762900000},{name:"Circle theorems notes.md",dir:false,size:5400,mtime:1762990000}]:[{name:"Documents",dir:true,size:0,mtime:1762990000},{name:"Downloads",dir:true,size:0,mtime:1762990000},{name:"Music",dir:true,size:0,mtime:1762000000},{name:"Pictures",dir:true,size:0,mtime:1762900000},{name:"Videos",dir:true,size:0,mtime:1762000000},{name:"Business ideas.txt",dir:false,size:12800,mtime:1762980000},{name:"ORION screenshot.png",dir:false,size:845000,mtime:1762990000}])}),
     os_set:()=>A({}), os_launch:()=>A(true), os_window:()=>A(true), os_power:()=>A(true), stop:()=>A(true), mic_start:()=>{ ui.event({kind:"listening",on:true}); setTimeout(()=>ui.event({kind:"listening",on:false}),4000); return A(true); }, mic_stop:()=>A(true),
     send:async t=>{ ui.event({kind:"state",state:"thinking"}); ui.event({kind:"stream_start",id:"x"}); ui.event({kind:"tool",name:"schedule_list",status:"running"}); await W(900);
       for(const w of "Your maths mock is tomorrow at 8:40, sir. You've got circle theorems pencilled in for four, so I'd do twenty minutes on them tonight and get an early night.".split(" ")){ ui.event({kind:"delta",id:"x",text:w+" "}); await W(40); }

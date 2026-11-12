@@ -8,6 +8,7 @@ import ctypes
 import glob
 import os
 import re
+import shlex
 import shutil
 import subprocess
 import time
@@ -34,6 +35,13 @@ ICONS = {"web": "🌐", "browser": "🌐", "epiphany": "🌐", "firefox": "🌐"
          "screenshot": "📸", "archive": "🗜", "disk": "💽", "gparted": "💽", "volume": "🔊", "pavucontrol": "🔊", "code": "💻"}
 
 
+FRIENDLY = {"galculator": ("Calculator", "Sums and scientific maths"), "lxterminal": ("Terminal", "Command line"),
+            "mpv": ("Media player", "Videos and music"), "org.gnome.Epiphany": ("Web", "Browse the web"),
+            "org.xfce.mousepad": ("Text editor", "Write and edit text"), "org.xfce.ristretto": ("Photos", "View your pictures"),
+            "pavucontrol": ("Sound", "Speakers and microphones"), "pcmanfm": ("Files", "Your documents, music and downloads")}
+HIDE_IDS = {"org.xfce.mousepad-settings", "pcmanfm-desktop-pref", "lxterminal-preferences"}
+
+
 def apps():
     out, seen = [], set()
     for f in sorted(glob.glob("/usr/share/applications/*.desktop") + glob.glob(os.path.expanduser("~/.local/share/applications/*.desktop"))):
@@ -46,8 +54,12 @@ def apps():
         if d.get("NoDisplay", "false").lower() == "true" or d.get("Type") != "Application" or d.get("Terminal", "false") == "true":
             continue
         name, base = d.get("Name", ""), os.path.basename(f)[:-8]
-        if not name or name in seen or HIDE.match(base) or "orion" in base.lower():
+        if not name or name in seen or HIDE.match(base) or "orion" in base.lower() or base in HIDE_IDS:
             continue
+        if base in FRIENDLY:
+            name = FRIENDLY[base][0]
+            d = dict(d)
+            d["Comment"] = FRIENDLY[base][1]
         seen.add(name)
         key = (base + " " + name + " " + d.get("Categories", "")).lower()
         icon = next((v for k, v in ICONS.items() if k in key), "▣")
@@ -61,9 +73,20 @@ def launch(app_id):
         return False
     if shutil.which("gtk-launch"):
         subprocess.Popen(["gtk-launch", app_id], start_new_session=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    else:
-        subprocess.Popen([app_id], start_new_session=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    return True
+        return True
+    cmd = None
+    for d in ("/usr/share/applications", os.path.expanduser("~/.local/share/applications")):
+        f = os.path.join(d, app_id + ".desktop")
+        if os.path.exists(f):
+            cp = configparser.ConfigParser(interpolation=None, strict=False)
+            cp.read(f, encoding="utf-8")
+            ex = cp["Desktop Entry"].get("Exec", "")
+            cmd = [a for a in shlex.split(ex) if not re.fullmatch(r"%[a-zA-Z]", a)]
+    try:
+        subprocess.Popen(cmd or [app_id], start_new_session=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        return True
+    except Exception:
+        return False
 
 
 def windows():
@@ -203,15 +226,28 @@ def open_path(path):
 
 
 # ------------------------------------------------------------------ tools for the brain (only useful on ORION OS)
+ALIASES = {"browser": "web", "internet": "web", "chrome": "web", "firefox": "web", "explorer": "files", "file manager": "files",
+           "notepad": "text editor", "editor": "text editor", "music": "media player", "video": "media player", "vlc": "media player",
+           "pictures": "photos", "images": "photos", "cmd": "terminal", "console": "terminal"}
+
+
+def open_by_name(name):
+    a = apps()
+    n = ALIASES.get(name.lower().strip(), name.lower().strip())
+    hit = next((x for x in a if x["name"].lower() == n), None) or \
+        next((x for x in a if n in x["name"].lower() or n in x["id"].lower() or n in x["desc"].lower()), None)
+    if not hit:
+        return None, a
+    launch(hit["id"])
+    return hit, a
+
+
 @tool("ORION OS: open an installed app (browser, files, terminal, text editor…) by name.",
       {"name": ("string", "App name", True)})
 def os_open_app(name):
-    a = apps()
-    n = name.lower()
-    hit = next((x for x in a if x["name"].lower() == n), None) or next((x for x in a if n in x["name"].lower() or n in x["id"].lower()), None)
+    hit, a = open_by_name(name)
     if not hit:
         return f"No app called {name}. Installed: " + ", ".join(x["name"] for x in a[:25])
-    launch(hit["id"])
     return f"Opening {hit['name']}."
 
 
@@ -318,3 +354,77 @@ def os_lock_screen():
     from .tools import CTX
     CTX.get("emit") and CTX["emit"]("os_lock")
     return "Locked."
+
+
+# ------------------------------------------------------------------ PC stats, screenshots
+def sysinfo():
+    import psutil
+    temp = None
+    try:
+        t = psutil.sensors_temperatures()
+        vals = [x.current for k in ("coretemp", "k10temp", "cpu_thermal", "acpitz") for x in t.get(k, []) if x.current]
+        temp = round(max(vals)) if vals else None
+    except Exception:
+        pass
+    vm, du = psutil.virtual_memory(), psutil.disk_usage(os.path.expanduser("~"))
+    return {"cpu": round(psutil.cpu_percent(interval=.3)), "ram": round(vm.percent), "ram_gb": round(vm.total / 2**30),
+            "temp": temp, "disk_free": round(du.free / 2**30, 1), "uptime": int(time.time() - psutil.boot_time())}
+
+
+SHOTS = os.path.join(os.path.expanduser("~"), "Pictures", "Screenshots")
+
+
+def screenshot():
+    """Saves the whole screen to Pictures/Screenshots (runs the helper in its own process, GTK-safe)."""
+    os.makedirs(SHOTS, exist_ok=True)
+    code, out = _run(["python3", os.path.join(os.path.dirname(__file__), "osshot.py")], 20)
+    path = out.strip().splitlines()[-1] if out.strip() else ""
+    return path if code == 0 and os.path.exists(path) else None
+
+
+def online():
+    import socket
+    try:
+        socket.create_connection(("1.1.1.1", 53), timeout=2).close()
+        return True
+    except Exception:
+        return False
+
+
+def wifi_ssid():
+    code, out = _run(["nmcli", "-t", "-f", "ACTIVE,SSID", "dev", "wifi"], 6)
+    return next((ln.split(":", 1)[1] for ln in out.splitlines() if ln.startswith("yes:")), None)
+
+
+@tool("ORION OS: take a screenshot of the whole screen (saved to Pictures/Screenshots).")
+def os_screenshot():
+    p = screenshot()
+    return f"Screenshot saved: {p}" if p else "Couldn't take a screenshot."
+
+
+@tool("ORION OS: shut down, restart or sleep the PC. Shows a 15-second countdown the user can cancel. Only when the user asks.",
+      {"action": ("string", "shutdown | restart | sleep", True)})
+def os_power_off(action="shutdown"):
+    from .tools import CTX
+    if action not in ("shutdown", "restart", "sleep"):
+        return "Say shutdown, restart or sleep."
+    CTX.get("emit") and CTX["emit"]("os_power_countdown", action=action, seconds=15, name="You asked")
+    return f"{action.title()} in 15 seconds — there's a Cancel button on screen."
+
+
+@tool("ORION OS: change the sky behind ORION. sky: night, aurora, dawn or deep.",
+      {"sky": ("string", "night | aurora | dawn | deep", True)})
+def os_sky(sky="night"):
+    from .tools import CTX
+    if sky not in SKIES:
+        return "Skies: " + ", ".join(SKIES)
+    cfg = CTX.get("config")
+    if cfg is not None:
+        cfg["os_sky"] = sky
+        from . import config
+        config.save(cfg)
+    CTX.get("emit") and CTX["emit"]("os_sky", sky=sky)
+    return f"Sky set to {sky}."
+
+
+SKIES = ("night", "aurora", "dawn", "deep")

@@ -67,7 +67,7 @@ SMART = re.compile(r"\b(code|script|program|build|make|create|write|fix|debug|ex
 CORE = {"plan_show", "plan_tick", "recall", "show_card", "close_popups", "skill_find", "skill_use", "habit", "ambient", "screensaver_show", "suit_up", "threat_scan_tool", "hologram", "globe", "local_intel", "queue_job", "mission_start", "weather", "note_add", "homework_add", "get_time", "open_app", "open_website", "web_search", "remember",
         "request_more_tools", "set_theme", "schedule_add", "schedule_list", "check_availability"}
 GROUPS = {
-    "orionos": ({"os_open_app", "os_volume", "os_wifi", "os_lock_screen"}, r"lock|wi-?fi|volume|louder|quieter|mute|open (the )?(browser|files|terminal|editor|app)|network"),
+    "orionos": ({"os_open_app", "os_volume", "os_wifi", "os_lock_screen", "os_screenshot", "os_power_off", "os_sky"}, r"lock|screenshot|screen ?shot|shut ?down|restart|reboot|sleep|sky|aurora|wi-?fi|volume|louder|quieter|mute|open (the )?(browser|files|terminal|editor|app)|network"),
     "automation": ({"automation_add", "automation_list", "automation_remove", "routine_add", "routine_list"},
                    r"when(ever)? i |every time|automat|whenever|if i (open|close|start|haven)|rule|trigger|routine"),
     "computer": ({"type_text", "press_keys", "mouse_click", "scroll", "read_screen", "find_on_screen",

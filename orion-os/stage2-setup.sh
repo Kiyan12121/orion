@@ -52,6 +52,7 @@ p="/home/orion/.config/openbox/rc.xml"; h=open(p).read()
 h=h.replace("<keyboard>","""<keyboard>
     <keybind key="W-space"><action name="Execute"><command>wmctrl -a ORION</command></action></keybind>
     <keybind key="Super_L"><action name="Execute"><command>wmctrl -a ORION</command></action></keybind>
+    <keybind key="Print"><action name="Execute"><command>python3 /opt/orion/core/osshot.py</command></action></keybind>
     <keybind key="W-q"><action name="Close"/></keybind>""",1)
 h=h.replace("<applications>","""<applications>
     <application class="*"><decor>yes</decor><maximized>true</maximized></application>
