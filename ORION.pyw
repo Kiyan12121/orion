@@ -2057,6 +2057,23 @@ class Api:
             return oslinux.power("sleep")
         return self.power_down(action)
 
+    def os_lock(self, action="status", pin="", old="", minutes=None):
+        if not hasattr(self, "_lock"):
+            self._lock = oslinux.Lock(self._cfg, config_mod.save)
+        L = self._lock
+        if action == "check":
+            return L.check(pin)
+        if action == "set":
+            return L.set_pin(pin, old)
+        if action == "idle":
+            return L.set_idle(minutes or 0)
+        if action == "front":
+            oslinux.focus_orion()
+            return True
+        st = L.status()
+        st["idle_now"] = oslinux.idle_seconds()
+        return st
+
     def os_files(self, path=""):
         return oslinux.files(path)
 

@@ -4,6 +4,7 @@ Gives the interface what a desktop needs: apps (launch / switch / close), Wi-Fi,
 power (shut down / restart / sleep), files, and system info. Everything uses standard Linux tools
 (nmcli, wpctl/pactl, brightnessctl, wmctrl, systemctl, xdg-open)."""
 import configparser
+import ctypes
 import glob
 import os
 import re
@@ -229,3 +230,91 @@ def os_wifi(ssid="", password=""):
         return "\n".join(f"{'✓ ' if n['on'] else ''}{n['ssid']} ({n['signal']}%{', locked' if n['secure'] else ''})" for n in wifi_list()[:12]) or "No networks found."
     r = wifi_connect(ssid, password)
     return "Connected." if r["ok"] else f"Couldn't connect: {r['msg']}"
+
+
+# ------------------------------------------------------------------ idle time and the lock screen
+class _XSSInfo(ctypes.Structure):
+    _fields_ = [("window", ctypes.c_ulong), ("state", ctypes.c_int), ("kind", ctypes.c_int), ("til_or_since", ctypes.c_ulong),
+                ("idle", ctypes.c_ulong), ("eventMask", ctypes.c_ulong)]
+
+
+_xss = None
+
+
+def idle_seconds():
+    """How long since the last key press or mouse move anywhere on the PC (not just in ORION)."""
+    global _xss
+    try:
+        if _xss is None:
+            x11, xss = ctypes.cdll.LoadLibrary("libX11.so.6"), ctypes.cdll.LoadLibrary("libXss.so.1")
+            x11.XOpenDisplay.restype = ctypes.c_void_p
+            x11.XDefaultRootWindow.argtypes = [ctypes.c_void_p]
+            x11.XDefaultRootWindow.restype = ctypes.c_ulong
+            xss.XScreenSaverAllocInfo.restype = ctypes.POINTER(_XSSInfo)
+            xss.XScreenSaverQueryInfo.argtypes = [ctypes.c_void_p, ctypes.c_ulong, ctypes.POINTER(_XSSInfo)]
+            dpy = x11.XOpenDisplay(None)
+            if not dpy:
+                _xss = False
+                return None
+            _xss = (xss, dpy, x11.XDefaultRootWindow(dpy), xss.XScreenSaverAllocInfo())
+        if not _xss:
+            return None
+        xss, dpy, root, info = _xss
+        xss.XScreenSaverQueryInfo(dpy, root, info)
+        return info.contents.idle // 1000
+    except Exception:
+        _xss = False
+        return None
+
+
+def _pin_hash(pin, salt):
+    import hashlib
+    return hashlib.pbkdf2_hmac("sha256", str(pin).encode(), bytes.fromhex(salt), 120000).hex()
+
+
+class Lock:
+    """Lock-screen PIN (stored only as a salted hash) with a cool-down after wrong guesses."""
+    def __init__(self, cfg, save):
+        self.cfg, self.save, self.fails, self.until = cfg, save, 0, 0
+
+    def status(self):
+        return {"pin": bool(self.cfg.get("os_pin_hash")), "idle_min": int(self.cfg.get("os_lock_idle", 10)),
+                "wait": max(0, int(self.until - time.time()))}
+
+    def check(self, pin):
+        if time.time() < self.until:
+            return {"ok": False, "wait": int(self.until - time.time())}
+        h = self.cfg.get("os_pin_hash")
+        if not h or _pin_hash(pin, self.cfg.get("os_pin_salt", "")) == h:
+            self.fails = 0
+            return {"ok": True}
+        self.fails += 1
+        if self.fails >= 5:
+            self.until, self.fails = time.time() + 30, 0
+        return {"ok": False, "wait": max(0, int(self.until - time.time()))}
+
+    def set_pin(self, pin, old=""):
+        if self.cfg.get("os_pin_hash") and not self.check(old)["ok"]:
+            return {"ok": False, "msg": "Your current PIN wasn't right."}
+        if pin:
+            if not re.fullmatch(r"\d{4,8}", str(pin)):
+                return {"ok": False, "msg": "Use 4 to 8 digits."}
+            salt = os.urandom(16).hex()
+            self.cfg["os_pin_salt"], self.cfg["os_pin_hash"] = salt, _pin_hash(pin, salt)
+        else:
+            self.cfg.pop("os_pin_hash", None)
+            self.cfg.pop("os_pin_salt", None)
+        self.save(self.cfg)
+        return {"ok": True}
+
+    def set_idle(self, minutes):
+        self.cfg["os_lock_idle"] = max(0, min(240, int(minutes)))
+        self.save(self.cfg)
+        return self.status()
+
+
+@tool("ORION OS: lock the screen.")
+def os_lock_screen():
+    from .tools import CTX
+    CTX.get("emit") and CTX["emit"]("os_lock")
+    return "Locked."

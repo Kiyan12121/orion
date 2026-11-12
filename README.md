@@ -7,11 +7,12 @@ ORION can now be the whole computer. Flash **ORION OS** to a USB stick, boot fro
 - **Places** (Overview, Plan, Study, Gaming, Money, Globe, Settings) slide up over the sky, and every ORION feature works there.
 - **Apps**: open the web browser, files, terminal, notes, photos, video and calculator. Press the **Windows key** to get back to ORION.
 - **Control centre**: Wi-Fi, volume, brightness, battery, and sleep, restart or shut down. ORION can do these by voice too ("turn it down", "open the browser").
+- **Lock screen**: ORION OS starts on a lock screen. Orion moves to the centre of the sky, with the time, your next things and anything that happened while you were away. Set a PIN, lock it yourself, or let it lock after 5–60 minutes away (from any app). You can also say "lock the screen".
 - **Saves your stuff**: with a persistent partition, chats, settings and files survive reboots.
 - Build it yourself with `orion-os/build.sh`, or download the ready-made ISO from the ORION OS release.
 
 ### Putting ORION OS on a USB (Windows, free)
-1. Download `ORION-OS-1.0.iso` and **Rufus** (rufus.ie).
+1. Download `ORION-OS-1.1.iso` and **Rufus** (rufus.ie).
 2. In Rufus pick the USB stick and the ISO, then set **Persistent partition size** to about 20 GB. Click Start; if asked, pick **ISO image mode**.
 3. Restart the PC and press the boot-menu key (F8, F11 or F12, or Esc). Pick the USB.
 4. If it won't boot, turn **Secure Boot** off in the BIOS.

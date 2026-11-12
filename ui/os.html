@@ -139,14 +139,58 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--glacier);outlin
 .curtain p{font:300 15px var(--disp);letter-spacing:.5em;color:var(--glacier);opacity:.8}
 .confirm{position:fixed;inset:0;z-index:30;display:none;place-items:center;background:rgba(2,5,12,.6);backdrop-filter:blur(6px)}
 .confirm.show{display:grid}
-.confirm div{width:380px;padding:26px;border-radius:22px;background:rgba(8,17,36,.97);border:1px solid var(--edge)}
+.confirm>div{width:400px;padding:26px;border-radius:22px;background:rgba(8,17,36,.97);border:1px solid var(--edge)}
 .confirm h2{font:500 22px var(--disp);margin-bottom:6px}
 .confirm p{color:var(--mist);font-size:14.5px}
 .confirm nav{display:flex;justify-content:flex-end;gap:10px;margin-top:22px}
-.confirm nav button{height:42px;padding:0 20px;border-radius:21px;font-weight:600}
+.confirm nav button{height:42px;padding:0 18px;border-radius:21px;font-weight:600;white-space:nowrap}
 .confirm .yes{background:var(--ember);color:#1b0503}
 .confirm .no:hover{background:rgba(139,233,255,.08)}
 
+
+/* ---------- lock screen: the UI dissolves, Orion moves to the centre of the sky ---------- */
+.top,.day,.talk,.places{transition:opacity .7s,transform .7s}
+body.locked .top,body.locked .day,body.locked .talk,body.locked .places{opacity:0;pointer-events:none}
+body.locked .day{transform:translateX(-24px)}body.locked .places{transform:translateY(16px)}
+body.locked .sheet,body.locked .veil,body.locked .cc,body.locked .notices{display:none}
+.lock{position:fixed;inset:0;z-index:25;display:none;cursor:default}
+body.locked .lock{display:block}
+.lock .tray{position:absolute;top:0;right:34px;height:64px;color:var(--mist);font:500 13px var(--ui);gap:18px}
+.lock .tray span{display:flex;align-items:center;gap:7px}.lock .tray span[hidden]{display:none}.lock .tray em{font-style:normal}
+.lock .tray svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.lockC{position:absolute;left:0;right:0;top:61vh;text-align:center;animation:lin 1.2s cubic-bezier(.2,.8,.2,1)}
+@keyframes lin{from{opacity:0;transform:translateY(18px)}}
+.lockC .lt{font:300 clamp(84px,10vw,150px)/.9 var(--disp);letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+.lockC .lt span{color:var(--glacier);opacity:.55}
+.lockC .ld{font:500 18px var(--ui);color:var(--mist);margin-top:12px}
+.glance{display:flex;justify-content:center;gap:28px;margin-top:26px;color:var(--frost);font-size:14.5px;flex-wrap:wrap;padding:0 40px}
+.glance div{display:flex;align-items:center;gap:9px}.glance i{width:7px;height:7px;border-radius:50%}
+.glance small{color:var(--mist);font-size:13px;margin-left:2px}
+.away{position:absolute;left:34px;bottom:7vh;display:flex;flex-direction:column;gap:6px;align-items:flex-start;max-width:30vw}
+.away p{padding:8px 16px;border-radius:14px;background:rgba(10,22,46,.7);border:1px solid var(--edge);font-size:13.5px;color:var(--frost);max-width:520px}
+.away h4{font:500 12px var(--ui);color:var(--mist);margin-bottom:2px}
+.wake{position:absolute;left:0;right:0;bottom:7vh;text-align:center;color:var(--mist);font-size:14px}
+.wake b{color:var(--frost);font-weight:500}
+.wake .breath{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--glacier);margin-right:10px;vertical-align:2px;box-shadow:0 0 12px var(--glacier);animation:br 3.2s ease-in-out infinite}
+@keyframes br{50%{opacity:.25;transform:scale(.6)}}
+.pin{display:none;flex-direction:column;align-items:center;gap:14px}
+.lock.askpin .pin{display:flex}.lock.askpin .wakeT{display:none}.glance{transition:opacity .3s}.lock.askpin .glance{opacity:0}
+.pin label{font:500 14px var(--ui);color:var(--frost)}
+.pin input{width:230px;height:48px;border-radius:24px;border:1px solid var(--edge2);background:rgba(8,18,38,.8);color:var(--frost);text-align:center;font:500 26px var(--disp);letter-spacing:.5em;padding-left:.5em;outline:none}
+.pin input::placeholder{letter-spacing:0}.pin input:focus{border-color:var(--glacier);box-shadow:0 0 0 4px rgba(139,233,255,.1)}
+.pin.bad input{border-color:var(--ember);animation:shake .4s}
+.pin .err{min-height:18px;font-size:13px;color:var(--ember)}
+@keyframes shake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+body.unlocking .lock{animation:lout .6s forwards}
+@keyframes lout{to{opacity:0;transform:scale(1.03)}}
+.cc .lockrow{display:flex;gap:8px;align-items:center;margin-bottom:6px}
+.cc .lockrow button{white-space:nowrap;height:36px;padding:0 14px;border-radius:18px;background:rgba(139,233,255,.08);font-weight:500;font-size:13.5px}
+.cc .lockrow button:hover{background:rgba(139,233,255,.16)}
+.cc .lockrow select{margin-left:auto;min-width:0;height:36px;border-radius:18px;background:rgba(8,18,38,.9);color:var(--frost);border:1px solid var(--edge);padding:0 10px;font:500 13px var(--ui)}
+.confirm input{width:100%;height:44px;margin-top:12px;border-radius:12px;border:1px solid var(--edge2);background:rgba(4,10,22,.8);color:var(--frost);padding:0 14px;font:500 18px var(--disp);letter-spacing:.3em;outline:none}
+.confirm input::placeholder{font:400 15px var(--ui);letter-spacing:0;color:var(--dim)}.confirm input:focus{border-color:var(--glacier)}
+.confirm .msg{min-height:18px;margin-top:8px;font-size:13px;color:var(--ember)}
+.confirm .yes.blue{background:var(--glacier);color:#03131c}
 @media (max-width:1100px){.day{width:46vw}.talk{width:80vw}.sheet{width:calc(100vw - 40px);right:20px}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -210,6 +254,8 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--glacier);outlin
   <h3>Sound</h3><div class="row"><input type="range" id="vol" min="0" max="150"><output id="volO"></output></div>
   <div id="briW"><h3>Brightness</h3><div class="row"><input type="range" id="bri" min="5" max="100"><output id="briO"></output></div></div>
   <h3>Wi-Fi</h3><div class="nets" id="nets"></div>
+  <h3>Lock screen</h3><div class="lockrow"><button id="pLock">Lock now</button><button id="pPin">Set PIN</button>
+    <select id="pIdle" title="Lock after I've been away"><option value="0">Never</option><option value="5">5 min</option><option value="10">10 min</option><option value="30">30 min</option><option value="60">1 hour</option></select></div>
   <div class="pwr"><button id="pSleep"><svg viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg>Sleep</button>
     <button id="pRe"><svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.6M20 4v5h-5"/></svg>Restart</button>
     <button class="off" id="pOff"><svg viewBox="0 0 24 24"><path d="M12 3v8M6.3 6.3a8 8 0 1 0 11.4 0"/></svg>Shut down</button></div>
@@ -220,13 +266,32 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--glacier);outlin
   <nav><button class="no" id="cfNo">Cancel</button><button class="yes" id="cfYes">Shut down</button></nav></div></div>
 
 <div class="notices" id="notices"></div>
+
+<div class="lock" id="lock" aria-label="Locked">
+  <div class="tray"><span id="lNet"><svg viewBox="0 0 24 24"><path d="M2 9a15 15 0 0 1 20 0M5.5 12.5a10 10 0 0 1 13 0M9 16a5 5 0 0 1 6 0"/><circle cx="12" cy="19.5" r=".8"/></svg><em id="lNetT"></em></span><span id="lBat" hidden><svg viewBox="0 0 24 24"><rect x="2.5" y="7" width="17" height="10" rx="2"/><path d="M21.5 10.5v3"/></svg><em id="lBatT"></em></span></div>
+  <div class="away" id="away"></div>
+  <div class="lockC">
+    <div class="lt" id="lTime">--<span>:</span>--</div>
+    <div class="ld" id="lDate"></div>
+    <div class="glance" id="glance"></div>
+  </div>
+  <div class="wake">
+    <p class="wakeT"><span class="breath"></span><b>Press any key</b> or click to wake ORION</p>
+    <form class="pin" id="pinF"><label for="pinI">Enter your PIN, <span id="pinWho">sir</span></label><input id="pinI" type="password" inputmode="numeric" maxlength="8" autocomplete="off"><div class="err" id="pinE"></div></form>
+  </div>
+</div>
+<div class="confirm" id="pinD"><div><h2 id="pdT">Set a PIN</h2><p id="pdP">4 to 8 digits. You'll need it to unlock ORION.</p>
+  <input id="pdOld" type="password" inputmode="numeric" maxlength="8" placeholder="Current PIN" hidden>
+  <input id="pdNew" type="password" inputmode="numeric" maxlength="8" placeholder="New PIN">
+  <div class="msg" id="pdM"></div>
+  <nav><button class="no" id="pdRm" hidden>Remove PIN</button><button class="no" id="pdNo">Cancel</button><button class="yes blue" id="pdOk">Save PIN</button></nav></div></div>
 <div class="curtain" id="curtain"><p>ORION</p></div>
 <audio id="voice"></audio>
 
 <script>
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-let api=null, title="sir", mood="idle", level=0, booted=false;
+let api=null, title="sir", mood="idle", level=0, booted=false, locked=false, lk=0, missed=[];
 
 /* ============ the sky: the Orion constellation is ORION ============ */
 const STARS=[ // x,y across the figure (0..1), magnitude, colour
@@ -242,7 +307,7 @@ function drawSky(now){ const W=sky.width,H=sky.height,k=sky.k,t=(now-t0)/1000; s
   for(const d of dust){ sx.globalAlpha=d.a*(.7+.3*Math.sin(t*.8+d.tw)); sx.fillStyle="#cfe6ff"; sx.beginPath(); sx.arc(d.x*W,d.y*H,d.r*k,0,7); sx.fill(); }
   sx.globalAlpha=1;
   // the figure sits right of centre, tall
-  const fh=Math.min(H*.7,W*.5), fw=fh*.62, ox=W*.67-fw/2, oy=H*.43-fh/2; const P=s=>[ox+s.x*fw, oy+s.y*fh];
+  lk+=((locked?1:0)-lk)*.06; const fh=Math.min(H*.7,W*.5)*(1-lk*.4), fw=fh*.62, ox=W*(.67-lk*.17)-fw/2, oy=H*(.43-lk*.07)-fh/2; const P=s=>[ox+s.x*fw, oy+s.y*fh];
   const b=boot0?Math.min(1,(now-boot0)/2600):0;          // startup: stars ignite one by one, then the lines draw
   const lv=mood==="speaking"?level:0, think=mood==="thinking", listen=mood==="listening";
   // lines
@@ -287,7 +352,7 @@ async function loadDay(){ if(!api) return; try{ const d=await api.saver_data(); 
     if(d.job) L.push(["var(--mint)",`Working on: ${esc(d.job)}`,d.queued?`${d.queued} more queued`:"" ]);
     if(d.money!=null) L.push(["var(--solar)",`£${(+d.money).toLocaleString("en-GB",{maximumFractionDigits:0})} earned this month`,""]);
     if(!L.length) L.push(["var(--glacier)","Nothing planned yet","Ask ORION to plan your evening"]);
-    $("#today").innerHTML=L.map(([c,a,b])=>`<div><i style="background:${c};box-shadow:0 0 10px ${c}"></i><span>${a}${b?`<small>${b}</small>`:""}</span></div>`).join(""); }catch(e){} }
+    dayL=L; if(locked) paintGlance(); $("#today").innerHTML=L.map(([c,a,b])=>`<div><i style="background:${c};box-shadow:0 0 10px ${c}"></i><span>${a}${b?`<small>${b}</small>`:""}</span></div>`).join(""); }catch(e){} }
 
 /* ============ conversation ============ */
 let cur=null;
@@ -328,9 +393,10 @@ function handle(e){ switch(e.kind){
   case "toast": notice(e.text,e.level); break;
   case "card": if(e.card&&e.card.title) notice(`<b>${esc(e.card.icon||"")} ${esc(e.card.title)}</b>`,"",()=>openPlace("comms")); break;
   case "stopped": document.body.classList.remove("busy"); mood="idle"; break;
+  case "os_lock": lock(); break;
   default: if(OVERLAYS.has(e.kind)) openPlace(null,true); } }
 
-function notice(text,level,click){ const n=document.createElement("div"); n.className="notice "+(level==="warn"?"warn":""); n.innerHTML=/<b>/.test(text)?text:esc(text);
+function notice(text,level,click){ if(locked){ missed.push(text.replace(/<[^>]+>/g,"")); paintAway(); return; } const n=document.createElement("div"); n.className="notice "+(level==="warn"?"warn":""); n.innerHTML=/<b>/.test(text)?text:esc(text);
   n.onclick=()=>{ n.remove(); click&&click(); }; $("#notices").appendChild(n); setTimeout(()=>n.remove(),6500); while($("#notices").children.length>3) $("#notices").firstChild.remove(); }
 
 /* ============ places ============ */
@@ -340,7 +406,7 @@ function openPlace(p,full){ $("#veil").classList.add("show"); $("#sheet").classL
   const isApps=p==="apps"; $("#apps").classList.toggle("show",isApps); hub.style.visibility=isApps?"hidden":"visible"; $("#sheetT").textContent=NAMES[p]||"ORION";
   try{ if(p==="settings") H().document.querySelector("#nSet").click(); else if(p==="globe") H().globeOpen(null); else if(p&&!isApps) H().go(p); }catch(e){}
   if(isApps){ loadApps(); setTimeout(()=>$("#appQ").focus(),300); } }
-function closePlace(){ $("#veil").classList.remove("show"); $("#sheet").classList.remove("show","full"); $$("#places button").forEach(b=>b.classList.remove("on")); $("#q").focus(); }
+function closePlace(quiet){ $("#veil").classList.remove("show"); $("#sheet").classList.remove("show","full"); $$("#places button").forEach(b=>b.classList.remove("on")); if(!quiet) $("#q").focus(); }
 $$("#places button").forEach(b=>b.onclick=()=>b.classList.contains("on")?closePlace():openPlace(b.dataset.p));
 $("#veil").onclick=closePlace; $("#sheetX").onclick=closePlace; $("#sheetFull").onclick=()=>$("#sheet").classList.toggle("full");
 addEventListener("keydown",e=>{ if(e.key==="Escape"){ if($("#cc").classList.contains("show")) $("#cc").classList.remove("show"); else if($("#confirm").classList.contains("show")) $("#confirm").classList.remove("show"); else closePlace(); }
@@ -371,7 +437,7 @@ async function nets(){ $("#nets").innerHTML=`<p class="hint" style="padding:0 10
   $$("#nets [data-s]").forEach(b=>b.onclick=()=>{ if(b.classList.contains("on")) return; $$("#nets form").forEach(f=>f.remove()); if(b.dataset.sec==="0") return join(b.dataset.s,"");
     const f=document.createElement("form"); f.innerHTML=`<input type="password" placeholder="Password for ${esc(b.dataset.s)}"><button>Join</button>`; b.after(f); f.querySelector("input").focus(); f.onsubmit=e=>{ e.preventDefault(); join(b.dataset.s,f.querySelector("input").value); }; }); }
 async function join(s,p){ notice("Joining "+s+"…"); const r=await api.os_wifi(s,p); notice(r.ok?"Connected to "+s+".":"Couldn't join "+s+": "+(r.msg||"wrong password?"),r.ok?"":"warn"); nets(); tray(); }
-function toggleCC(){ const c=$("#cc"); c.classList.toggle("show"); if(c.classList.contains("show")){ nets(); tray(); } }
+function toggleCC(){ const c=$("#cc"); c.classList.toggle("show"); if(c.classList.contains("show")){ nets(); tray(); loadLock(); } }
 $("#tNet").onclick=$("#tVol").onclick=$("#tBat").onclick=e=>{ e.stopPropagation(); toggleCC(); };
 document.addEventListener("click",e=>{ const c=$("#cc"); if(c.classList.contains("show")&&!c.contains(e.target)) c.classList.remove("show"); });
 $("#vol").oninput=()=>{ $("#volO").textContent=$("#vol").value+"%"; clearTimeout(window._v); window._v=setTimeout(()=>api.os_set({volume:+$("#vol").value}).then(tray),120); };
@@ -382,16 +448,56 @@ let pend=null;
 function askPower(a){ $("#cc").classList.remove("show"); pend=a; $("#cfT").textContent=a==="restart"?"Restart?":"Shut down?"; $("#cfP").textContent=a==="restart"?"ORION will restart the PC. Anything unsaved in other apps will close.":"ORION will say goodbye and switch the PC off. Anything unsaved in other apps will close.";
   $("#cfYes").textContent=a==="restart"?"Restart":"Shut down"; $("#confirm").classList.add("show"); $("#cfYes").focus(); }
 $("#tPow").onclick=e=>{ e.stopPropagation(); toggleCC(); };
-$("#pOff").onclick=()=>askPower("shutdown"); $("#pRe").onclick=()=>askPower("restart"); $("#pSleep").onclick=()=>{ $("#cc").classList.remove("show"); api.os_power("sleep"); };
+$("#pOff").onclick=()=>askPower("shutdown"); $("#pRe").onclick=()=>askPower("restart"); $("#pSleep").onclick=()=>{ $("#cc").classList.remove("show"); lock(); setTimeout(()=>api.os_power("sleep"),700); };
 $("#cfNo").onclick=()=>$("#confirm").classList.remove("show");
 $("#cfYes").onclick=()=>{ $("#confirm").classList.remove("show"); const c=$("#curtain"); c.querySelector("p").textContent=pend==="restart"?"RESTARTING":"GOODBYE"; c.classList.remove("gone"); api.os_power(pend); };
 
+
+/* ============ lock screen ============ */
+let LS={pin:false,idle_min:10}, dayL=[];
+function paintLock(){ const d=new Date(); $("#lTime").innerHTML=`${String(d.getHours()).padStart(2,"0")}<span>:</span>${String(d.getMinutes()).padStart(2,"0")}`;
+  $("#lDate").textContent=d.toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long"});
+  $("#lNetT").textContent=ST.wired?"Wired":ST.wifi?ST.wifi.ssid:"Offline"; $("#lBat").hidden=!ST.battery; if(ST.battery) $("#lBatT").textContent=(ST.battery.plugged?"⚡ ":"")+ST.battery.pct+"%"; }
+setInterval(()=>locked&&paintLock(),1000);
+function paintGlance(){ $("#glance").innerHTML=dayL.slice(0,3).map(([c,a,b])=>`<div><i style="background:${c};box-shadow:0 0 10px ${c}"></i>${a}${b?`<small>${b}</small>`:""}</div>`).join(""); }
+function paintAway(){ const m=missed.slice(-3); $("#away").innerHTML=m.length?`<h4>While you were away${missed.length>3?` (${missed.length})`:""}</h4>`+m.map(t=>`<p>${esc(t)}</p>`).join(""):""; }
+function lock(){ if(locked) return; locked=true; document.body.classList.add("locked"); document.body.classList.remove("unlocking");
+  $("#cc").classList.remove("show"); $("#confirm").classList.remove("show"); $("#pinD").classList.remove("show"); closePlace(true);
+  $("#lock").classList.remove("askpin"); $("#pinI").value=""; $("#pinE").textContent=""; $("#pinWho").textContent=title;
+  paintGlance();
+  paintLock(); paintAway(); document.activeElement&&document.activeElement.blur(); try{ api&&api.os_lock("front"); }catch(e){} }
+function unlock(){ if(!locked) return; document.body.classList.add("unlocking"); pulse=1.4;
+  setTimeout(()=>{ locked=false; document.body.classList.remove("locked","unlocking"); const m=missed.length; missed=[]; paintAway();
+    if(m) setTimeout(()=>notice(`<b>${m} thing${m>1?"s":""} happened while you were away</b>`,"",()=>openPlace("comms")),500); $("#q").focus(); },550); }
+function tryWake(){ if(!locked) return; if(!LS.pin) return unlock(); const L=$("#lock"); if(!L.classList.contains("askpin")){ L.classList.add("askpin"); } setTimeout(()=>$("#pinI").focus(),30); }
+$("#lock").addEventListener("click",tryWake);
+addEventListener("keydown",e=>{ if(locked&&document.activeElement!==$("#pinI")){ e.preventDefault(); e.stopImmediatePropagation(); tryWake(); if(LS.pin&&/^\d$/.test(e.key)) $("#pinI").value+=e.key; } },true);
+$("#pinF").onsubmit=async e=>{ e.preventDefault(); const v=$("#pinI").value; if(!v) return; let r={ok:false}; try{ r=await api.os_lock("check",v); }catch(err){}
+  if(r.ok) return unlock(); const f=$("#pinF"); f.classList.remove("bad"); void f.offsetWidth; f.classList.add("bad"); $("#pinI").value="";
+  $("#pinE").textContent=r.wait?`Too many tries. Wait ${r.wait} seconds.`:"That's not it. Try again."; };
+$("#pinI").addEventListener("input",()=>{ $("#pinE").textContent=""; });
+addEventListener("keydown",e=>{ if(locked&&e.key==="Escape"){ $("#lock").classList.remove("askpin"); $("#pinI").value=""; $("#pinI").blur(); } });
+// auto-lock when the whole PC has been left alone (any app, not just ORION)
+let lastIn=Date.now(); ["keydown","pointermove","pointerdown","wheel"].forEach(t=>addEventListener(t,()=>lastIn=Date.now(),true));
+setInterval(async()=>{ if(!api||locked) return; try{ const s=await api.os_lock(); LS=s; const idle=s.idle_now!=null?s.idle_now:(Date.now()-lastIn)/1000;
+  if(s.idle_min>0&&idle>=s.idle_min*60) lock(); }catch(e){} },15000);
+async function loadLock(){ try{ LS=await api.os_lock(); }catch(e){} $("#pPin").textContent=LS.pin?"Change PIN":"Set PIN"; $("#pIdle").value=String(LS.idle_min); }
+$("#pLock").onclick=e=>{ e.stopPropagation(); lock(); };
+$("#pIdle").onchange=async()=>{ LS=await api.os_lock("idle","","",+$("#pIdle").value); notice(LS.idle_min?`ORION will lock after ${LS.idle_min} minutes away.`:"Auto-lock is off."); };
+$("#pPin").onclick=e=>{ e.stopPropagation(); $("#cc").classList.remove("show"); $("#pdOld").hidden=!LS.pin; $("#pdRm").hidden=!LS.pin; $("#pdT").textContent=LS.pin?"Change your PIN":"Set a PIN";
+  $("#pdOld").value=$("#pdNew").value=""; $("#pdM").textContent=""; $("#pinD").classList.add("show"); (LS.pin?$("#pdOld"):$("#pdNew")).focus(); };
+$("#pdNo").onclick=()=>$("#pinD").classList.remove("show");
+async function savePin(newPin){ const r=await api.os_lock("set",newPin,$("#pdOld").value); if(!r.ok){ $("#pdM").textContent=r.msg||"Couldn't save that."; return; }
+  $("#pinD").classList.remove("show"); await loadLock(); notice(newPin?"PIN saved. You'll need it to unlock ORION.":"PIN removed. Any key unlocks ORION now."); }
+$("#pdOk").onclick=()=>savePin($("#pdNew").value.trim()); $("#pdRm").onclick=()=>savePin("");
+$("#pdNew").onkeydown=e=>{ if(e.key==="Enter") $("#pdOk").click(); };
 /* ============ start ============ */
 window.OS_HUB=()=>{};
 async function start(){ window.OS_API=api; let c={}; try{ c=await api.init(); }catch(e){} title=c.title||"sir";
   tickClock(); loadDay(); tray(); setInterval(loadDay,60000); setInterval(tray,5000);
+  await loadLock(); lock();
   setTimeout(()=>{ $("#curtain").classList.add("gone"); boot0=performance.now(); },400);
-  setTimeout(()=>$("#q").focus(),1200); }
+  }
 window.addEventListener("pywebviewready",()=>{ if(api) return; api=window.pywebview.api; start(); });
 (function poll(){ if(api) return; const P=window.pywebview; if(P&&P.api&&typeof P.api.init==="function"){ api=P.api; start(); } else setTimeout(poll,250); })();
 if(/[?&]preview/.test(location.search)) setTimeout(()=>{ if(api) return; window.OS_PREVIEW=true;   // opened in a normal browser: a pretend ORION so the shell can be previewed
@@ -400,6 +506,7 @@ if(/[?&]preview/.test(location.search)) setTimeout(()=>{ if(api) return; window.
     os_status:()=>A({volume:62,muted:false,brightness:null,battery:null,wifi:{ssid:"VM0420-Home",signal:78},wired:false,persist:true,windows:[]}),
     os_apps:()=>A([["epiphany","Web","🌐","Browse the web"],["pcmanfm","Files","📁","Your documents, music and downloads"],["lxterminal","Terminal","⌨","Command line"],["mousepad","Text editor","📝","Write and edit text"],["ristretto","Photos","🖼","View pictures"],["mpv","Media player","🎬","Videos and music"],["galculator","Calculator","🧮","Sums"],["pavucontrol","Sound","🔊","Speakers and microphones"]].map(a=>({id:a[0],name:a[1],icon:a[2],desc:a[3],cat:""}))),
     os_wifi:s=>A(s==null?[{ssid:"VM0420-Home",on:true,signal:78,secure:true},{ssid:"BT-Hub-7K2",on:false,signal:51,secure:true},{ssid:"Desford Library",on:false,signal:22,secure:false}]:{ok:true}),
+    os_lock:(a,p)=>A(a==='check'?{ok:p==='1234'}:{pin:/pin/.test(location.search),idle_min:10,idle_now:3}),
     os_set:()=>A({}), os_launch:()=>A(true), os_window:()=>A(true), os_power:()=>A(true), stop:()=>A(true), mic_start:()=>{ ui.event({kind:"listening",on:true}); setTimeout(()=>ui.event({kind:"listening",on:false}),4000); return A(true); }, mic_stop:()=>A(true),
     send:async t=>{ ui.event({kind:"state",state:"thinking"}); ui.event({kind:"stream_start",id:"x"}); ui.event({kind:"tool",name:"schedule_list",status:"running"}); await W(900);
       for(const w of "Your maths mock is tomorrow at 8:40, sir. You've got circle theorems pencilled in for four, so I'd do twenty minutes on them tonight and get an early night.".split(" ")){ ui.event({kind:"delta",id:"x",text:w+" "}); await W(40); }
