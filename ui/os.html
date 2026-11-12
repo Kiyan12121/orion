@@ -19,6 +19,7 @@
 }
 *{box-sizing:border-box;margin:0}
 html,body{height:100%;overflow:hidden}
+:root{color-scheme:dark}select option{background:#0a1630;color:#e9f4fb}
 body{background:radial-gradient(120% 90% at 68% 40%,#0c1d3c 0%,var(--space) 58%,#02050c 100%);color:var(--frost);font:400 15px/1.5 var(--ui);user-select:none;-webkit-font-smoothing:antialiased}
 button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 button:focus-visible,input:focus-visible{outline:2px solid var(--glacier);outline-offset:3px;border-radius:8px}
@@ -186,7 +187,7 @@ body.unlocking .lock{animation:lout .6s forwards}
 .cc .lockrow{display:flex;gap:8px;align-items:center;margin-bottom:6px}
 .cc .lockrow button{white-space:nowrap;height:36px;padding:0 14px;border-radius:18px;background:rgba(139,233,255,.08);font-weight:500;font-size:13.5px}
 .cc .lockrow button:hover{background:rgba(139,233,255,.16)}
-.cc .lockrow select{margin-left:auto;min-width:0;height:36px;border-radius:18px;background:rgba(8,18,38,.9);color:var(--frost);border:1px solid var(--edge);padding:0 10px;font:500 13px var(--ui)}
+.cc .lockrow select{-webkit-appearance:none;appearance:none;padding-right:28px!important;background:rgba(8,18,38,.9) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%238fa6bd' fill='none' stroke-width='1.6'/%3E%3C/svg%3E") no-repeat right 12px center!important;margin-left:auto;min-width:0;height:36px;border-radius:18px;background:rgba(8,18,38,.9);color:var(--frost);border:1px solid var(--edge);padding:0 10px;font:500 13px var(--ui)}
 .confirm input{width:100%;height:44px;margin-top:12px;border-radius:12px;border:1px solid var(--edge2);background:rgba(4,10,22,.8);color:var(--frost);padding:0 14px;font:500 18px var(--disp);letter-spacing:.3em;outline:none}
 .confirm input::placeholder{font:400 15px var(--ui);letter-spacing:0;color:var(--dim)}.confirm input:focus{border-color:var(--glacier)}
 .confirm .msg{min-height:18px;margin-top:8px;font-size:13px;color:var(--ember)}

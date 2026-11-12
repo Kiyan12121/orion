@@ -68,9 +68,29 @@ def apps():
     return out
 
 
+def _maximise_new(before, secs=15):
+    """Some apps (the web browser) pick their own window size — fill the screen with whatever opens next."""
+    import threading
+
+    def run():
+        end = time.time() + secs
+        while time.time() < end:
+            time.sleep(.6)
+            code, out = _run(["wmctrl", "-l"], 4)
+            ids = {ln.split()[0] for ln in out.splitlines() if ln.strip()} - before
+            for wid in ids:
+                _run(["wmctrl", "-i", "-r", wid, "-b", "add,maximized_vert,maximized_horz"], 4)
+                _run(["wmctrl", "-i", "-a", wid], 4)
+            if ids:
+                return
+    threading.Thread(target=run, daemon=True).start()
+
+
 def launch(app_id):
     if not re.fullmatch(r"[\w.+-]+", app_id or ""):
         return False
+    code, out = _run(["wmctrl", "-l"], 4)
+    _maximise_new({ln.split()[0] for ln in out.splitlines() if ln.strip()})
     if shutil.which("gtk-launch"):
         subprocess.Popen(["gtk-launch", app_id], start_new_session=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         return True
