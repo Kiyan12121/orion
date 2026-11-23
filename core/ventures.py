@@ -113,6 +113,9 @@ def earn_add(venture, amount, note="", date=None):
            "note": (note or "")[:120], "date": date or time.strftime("%Y-%m-%d")}
     e.append(rec)
     _save(EARN, e)
+    from .tools import CTX
+    au = CTX.get("automate")
+    au and au.signal("money_in", amount=rec["amount"], venture=rec["venture"])
     return rec
 
 

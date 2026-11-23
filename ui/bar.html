@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>ORION bar</title>
+<style>
+@font-face{font-family:Ox;src:url(fonts/oxanium-latin-500-normal.woff2);font-weight:500}
+@font-face{font-family:In;src:url(fonts/instrument-sans-latin-400-normal.woff2);font-weight:400}
+@font-face{font-family:In;src:url(fonts/instrument-sans-latin-500-normal.woff2);font-weight:500}
+:root{--ice:#8be9ff;--frost:#e6f3fb;--mist:#7f97ae;--edge:rgba(139,233,255,.22)}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:transparent;overflow:hidden;font:400 16px In,"Segoe UI",sans-serif;color:var(--frost);user-select:none}
+.bar{position:absolute;inset:0;border-radius:22px;background:rgba(6,14,28,.97);border:1px solid var(--edge);display:flex;flex-direction:column;overflow:hidden}
+body.halo .bar{background:rgba(26,19,60,.97);border-color:rgba(255,255,255,.18)}
+.row{display:flex;align-items:center;gap:14px;height:72px;flex:none;padding:0 14px 0 22px}
+.dot{width:12px;height:12px;border-radius:50%;background:var(--ice);box-shadow:0 0 14px var(--ice);flex:none;transition:.3s}
+body.thinking .dot{background:#ffb23e;box-shadow:0 0 16px #ffb23e;animation:p .8s infinite}
+body.listening .dot{background:#ff6b8a;box-shadow:0 0 16px #ff6b8a;animation:p .6s infinite}
+@keyframes p{50%{transform:scale(.6)}}
+input{flex:1;background:none;border:0;outline:none;color:var(--frost);font:400 19px In,"Segoe UI",sans-serif;user-select:text}
+input::placeholder{color:#5d7590}
+kbd{font:500 11px Ox;letter-spacing:.12em;color:var(--mist);border:1px solid var(--edge);border-radius:7px;padding:5px 8px}
+button{font:500 13px In;color:var(--frost);background:rgba(139,233,255,.08);border:1px solid var(--edge);border-radius:12px;padding:8px 12px;cursor:pointer}
+button:hover{background:rgba(139,233,255,.16)}
+.out{flex:1;overflow:auto;padding:4px 24px 18px 48px;font-size:15.5px;line-height:1.55;white-space:pre-wrap;user-select:text;border-top:1px solid rgba(139,233,255,.1)}
+.out:empty{display:none}
+.out .tool{display:block;color:var(--mist);font-size:13px;margin:6px 0}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-thumb{background:rgba(139,233,255,.25);border-radius:3px}
+</style></head>
+<body>
+<div class="bar">
+  <div class="row"><span class="dot"></span><input id="q" placeholder="Ask ORION anything…" autocomplete="off" spellcheck="false"><kbd>ESC</kbd><button id="full" title="Open the full ORION">Open ORION</button></div>
+  <div class="out" id="out"></div>
+</div>
+<script>
+let api=null, cur=null, open=false;
+const $=s=>document.querySelector(s), out=$("#out");
+function size(){ const h=out.textContent.trim()?Math.min(460,74+out.scrollHeight+24):74; api&&api.bar_size(h); }
+function esc(s){ return String(s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c])); }
+window.ui={event(e){
+  switch(e.kind){
+    case "state": document.body.className=(document.body.classList.contains("halo")?"halo ":"")+(e.state||""); break;
+    case "stream_start": if(!open) return; cur=e.id; out.innerHTML=""; break;
+    case "delta": if(!open||e.id!==cur) return; out.insertAdjacentText("beforeend",e.text); size(); out.scrollTop=1e9; break;
+    case "stream_end": cur=null; size(); break;
+    case "message": if(!open||e.role!=="assistant") return; out.textContent=e.text; size(); break;
+    case "tool": if(!open||e.status!=="running") return; out.insertAdjacentHTML("beforeend",`<span class="tool">⚙ ${esc(e.label||e.name||"working")}…</span>`); size(); break;
+    case "bar_show": open=true; document.body.classList.toggle("halo",e.look==="halo"); $("#q").value=""; out.innerHTML=""; size(); setTimeout(()=>$("#q").focus(),30); break;
+    case "bar_hide": open=false; break;
+  }}};
+$("#q").addEventListener("keydown",e=>{
+  if(e.key==="Enter"&&$("#q").value.trim()){ out.innerHTML=""; api.send($("#q").value.trim()); $("#q").value=""; }
+  if(e.key==="Escape") api.bar_toggle(false);
+});
+addEventListener("keydown",e=>{ if(e.key==="Escape") api&&api.bar_toggle(false); });
+$("#full").onclick=()=>api.bar_open_full();
+window.addEventListener("pywebviewready",()=>{ api=window.pywebview.api; });
+</script></body></html>

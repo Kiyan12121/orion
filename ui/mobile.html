@@ -172,6 +172,18 @@ body.busy .horb u{animation-duration:.9s}body.busy .horb i{animation-duration:1.
 .subnav button{flex:none;background:var(--glass);border:1px solid var(--edge);border-radius:999px;padding:9px 15px;font:600 14px var(--ui);color:var(--dim)}
 .subnav button.on{color:#03101a;background:linear-gradient(135deg,var(--a),var(--b2));border-color:transparent}
 .msub{display:none}.msub.on{display:block;animation:viewin .3s}
+.msd{display:flex;gap:14px;margin-top:4px;font-weight:600}.msd small{color:var(--dim);font-weight:400;font-size:12px}.msd .up{color:var(--green,#6cffc4)}.msd .dn{color:#ff8a7a}
+.mss{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--edge)}.mss:last-child{border-bottom:0}
+.mss b{display:block;font-size:15px}.mss small{color:var(--dim);font-size:12.5px}.mss .k{text-align:right}
+.mar{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--edge)}.mar:last-child{border-bottom:0}
+.mar div{flex:1;min-width:0}.mar b{display:block;font-size:14.5px}.mar small{display:block;color:var(--dim);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mar input{width:22px;height:22px;accent-color:var(--a)}
+.maIdeas{display:flex;flex-wrap:wrap;gap:6px}.maIdeas button{font:500 13px var(--ui);color:var(--text);background:rgba(var(--ar),.08);border:1px solid var(--edge);border-radius:14px;padding:8px 12px}
+.aiu{font-style:normal;font-size:10px;padding:1px 5px;border-radius:6px;background:rgba(255,178,62,.2);color:#ffcf7a;margin-left:3px}
+/* 7.0: Halo colours on the phone when the PC uses the Halo look */
+body.mhalo{--a:#7fffd0;--a2:#c9fff0;--ar:127,255,208;--b2:#a58bff;--b2r:165,139,255;--bg:#0c0a24}
+body.mhalo{background:radial-gradient(80% 60% at 50% 20%,#2a1f5c 0%,#160f38 45%,#0a0820 100%) fixed}
+body.ghostpc .ghostnote{display:block}.ghostnote{display:none;margin:0 0 12px;padding:10px 14px;border-radius:14px;background:rgba(var(--ar),.08);border:1px solid var(--edge);font-size:13px;color:var(--dim)}
 .hwr{display:flex;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}.hwr:last-child{border-bottom:0}
 .hwr input{accent-color:var(--a);width:21px;height:21px;flex:none}.hwr div{flex:1;min-width:0}.hwr b{font-weight:600}.hwr small{display:block;color:var(--dim);font-size:13px}
 .hwr .st.late{color:var(--red)}.hwr .st.soon{color:var(--amber)}
@@ -413,11 +425,12 @@ body.busy .horb u{animation-duration:.9s}body.busy .horb i{animation-duration:1.
       </div>
       <div class="wxline" id="wxline"></div>
       <div class="today" id="today"></div>
+      <div class="ghostnote">🎮 You're gaming — ORION is hiding on your PC so your game runs smooth. Everything still works from here.</div>
       <div class="glance" id="glance">
         <div class="gl" data-tab="more" data-sub="study"><em>📚</em><b id="glStudy">–</b><span>REVISION</span></div>
         <div class="gl" data-tab="more" data-sub="money"><em>💷</em><b id="glMoney">–</b><span>THIS MONTH</span></div>
         <div class="gl" data-tab="more" data-sub="games"><em>🎮</em><b id="glGame">–</b><span>GAMING · 7D</span></div>
-        <div class="gl" data-tab="more" data-sub="health"><em>🩺</em><b id="glHealth">CHECK</b><span>HEALTH</span></div>
+        <div class="gl" data-tab="more" data-sub="streams"><em>📡</em><b id="glTik">–</b><span>TIKTOK · 7D</span></div><b id="glHealth" hidden></b>
       </div>
       <div class="card" id="pcCard"><h3>GAMING PC <i id="pcVer"></i></h3>
         <div class="stats"><div class="stat"><b id="sCpu">–</b><span>CPU</span><div class="bar"><div id="bCpu" style="width:0"></div></div></div>
@@ -527,7 +540,7 @@ body.busy .horb u{animation-duration:.9s}body.busy .horb i{animation-duration:1.
     <!-- MORE -->
     <section class="view" id="v-more">
       <div class="subnav" id="subnav"><button data-go="pc">🖥️ PC</button>
-        <button data-sub="study" class="on">📚 Study</button><button data-sub="money">💷 Money</button><button data-sub="games">🎮 Gaming</button>
+        <button data-sub="study" class="on">📚 Study</button><button data-sub="money">💷 Money</button><button data-sub="streams">📡 Streams</button><button data-sub="automate">⚡ Automate</button><button data-sub="games">🎮 Gaming</button>
         <button data-sub="skills">✨ Skills</button><button data-sub="brain">🧠 Brain</button><button data-sub="health">🩺 Health</button><button data-sub="local">📍 Local</button>
       </div>
       <div class="msub on" id="s-study">
@@ -577,6 +590,21 @@ body.busy .horb u{animation-duration:.9s}body.busy .horb i{animation-duration:1.
         <div class="card"><h3>BY VENTURE</h3><div id="mBy"><p class="empty">—</p></div></div>
         <div class="card"><h3>DEV QUEUE <i>OVERNIGHT</i></h3><div id="mDev"><p class="empty">—</p></div>
           <input class="inp" id="mDevT" placeholder="e.g. a tool that renames my clips" style="margin-top:8px"><button class="btn" id="mDevAdd">+ ADD TO DEV QUEUE</button></div>
+      </div>
+      <div class="msub" id="s-streams">
+        <div class="card"><h3>FOLLOWERS <i id="msUser"></i></h3><div class="bigm" id="msF">–</div><div class="msd" id="msD"></div>
+          <button class="btn" id="msGo" style="margin-top:12px">● I'M LIVE</button>
+          <p class="empty" style="font-size:12.5px;margin-top:8px">ORION also logs your streams by itself when TikTok LIVE Studio or OBS is open on your PC.</p></div>
+        <div class="card"><h3>THIS MONTH LIVE</h3><div class="bigm" id="msM">–</div><p class="empty" id="msMS">—</p></div>
+        <div class="card"><h3>STREAM LOG</h3><div id="msList"><p class="empty">No streams yet.</p></div></div>
+        <div class="card"><h3>YOUR TIKTOK</h3><div class="two" style="grid-template-columns:1fr auto"><input class="inp" id="msUserIn" placeholder="@username"><button class="btn sm" id="msSave">SAVE</button></div>
+          <p class="empty" style="font-size:12.5px;margin-top:8px">Read-only — ORION never posts or logs in.</p></div>
+      </div>
+      <div class="msub" id="s-automate">
+        <div class="card"><h3>AI BUDGET <i>TODAY</i></h3><div class="bigm" id="maB">–</div><p class="empty" style="font-size:12.5px">Only “ORION does…” steps and follow-up drafts use AI. Everything else is free.</p></div>
+        <div class="card"><h3>RUNNING <i id="maN"></i></h3><div id="maList"><p class="empty">—</p></div></div>
+        <div class="card"><h3>ONE-TAP IDEAS</h3><div id="maIdeas" class="maIdeas"></div>
+          <p class="empty" style="font-size:12.5px;margin-top:8px">Or just tell ORION: “when I go live, turn on game mode”.</p></div>
       </div>
       <div class="msub" id="s-games">
         <div class="card"><h3>THIS WEEK</h3><div class="bigm" id="mGTot">0h</div><p class="empty" id="mGSub">—</p>
@@ -1174,7 +1202,7 @@ $("#lmRe").onclick=()=>loadLocalM(true);
 $$("[data-ls]").forEach(b=>b.onclick=()=>{ LM.sort=b.dataset.ls; $$("[data-ls]").forEach(x=>x.classList.toggle("on",x===b)); lmLog(); });
 function goSub(n){ store.set("sub",n); $$("#subnav button").forEach(b=>b.classList.toggle("on",b.dataset.sub===n)); $$(".msub").forEach(x=>x.classList.toggle("on",x.id==="s-"+n));
   if(n==="skills") return loadSkillsM();
-  if(!pcOnline){ return; } ({study:loadStudyM,money:loadMoneyM,games:loadGamesM,brain:loadBrainM,health:loadHealthM,local:()=>{ if(!LM.D) loadLocalM(); else lmDraw(); }})[n]?.(); }
+  if(!pcOnline){ return; } ({streams:loadStreamsM,automate:loadAutoM,study:loadStudyM,money:loadMoneyM,games:loadGamesM,brain:loadBrainM,health:loadHealthM,local:()=>{ if(!LM.D) loadLocalM(); else lmDraw(); }})[n]?.(); }
 $$("#subnav button").forEach(b=>b.onclick=()=>goSub(b.dataset.sub));
 let MC=[], MCUR=null, MF=null, mfTick=null;
 async function loadStudyM(){ loadLifeM(); try{ const o=await api("/api/study"); paintFocusM(o.focus);
@@ -1604,6 +1632,29 @@ if(!Native) $("#nativeNote").style.display=""; if(store.get("bubble")==="1") $("
 setInterval(()=>{ if(!document.hidden) refresh(); },10000);
 go(store.get("tab","home")); refresh();
 if(!addr()&&!store.get("key")) setTimeout(()=>$("#setBtn").click(),700);
+
+/* ===== 7.0: streams, automations, matching look ===== */
+const sgnM=n=>n==null?"":(n>0?"+":"")+Number(n).toLocaleString("en-GB");
+async function loadStreamsM(){ try{ const o=await api("/api/streams"); const L=o.last;
+    $("#msUser").textContent=o.user?"@"+o.user:""; if(document.activeElement!==$("#msUserIn")) $("#msUserIn").value=o.user?"@"+o.user:"";
+    $("#msF").textContent=L?Number(L.followers).toLocaleString("en-GB"):"–"; $("#glTik").textContent=o.d7!=null?sgnM(o.d7):(L?Number(L.followers).toLocaleString("en-GB"):"–");
+    $("#msD").innerHTML=[["today",o.d1],["7d",o.d7],["30d",o.d30]].filter(x=>x[1]!=null).map(([l,v])=>`<span class="${v>0?"up":v<0?"dn":""}">${sgnM(v)} <small>${l}</small></span>`).join("")||'<small>Growth shows after a day or two.</small>';
+    $("#msGo").textContent=o.live?"■ END STREAM":"● I'M LIVE";
+    const M=o.month; $("#msM").textContent=M.hours+"h"; $("#msMS").textContent=`${M.streams} streams · ${sgnM(M.gained)||"0"} followers while live`;
+    const S=(o.sessions||[]).filter(x=>x.end).slice(0,8);
+    $("#msList").innerHTML=S.length?S.map(x=>{ const d=new Date(x.start*1000); return `<div class="mss"><div><b>${d.toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short"})}</b><small>${x.mins>=60?Math.floor(x.mins/60)+"h "+x.mins%60+"m":x.mins+" min"}</small></div><div class="k"><b>${x.gained!=null?sgnM(x.gained):"–"}</b><small>${x.peak?x.peak+" peak":"followers"}</small></div></div>`; }).join(""):'<p class="empty">No streams yet.</p>'; }catch(e){} }
+$("#msGo").onclick=async()=>{ try{ const o=await api("/api/streams"); await api("/api/streams",{action:o.live?"stop":"start"}); toast(o.live?"Stream ended — recap on its way.":"Logging your stream. Good luck!"); loadStreamsM(); }catch(e){ toast(e.message); } };
+$("#msSave").onclick=async()=>{ const u=$("#msUserIn").value.trim().replace(/^@/,""); try{ const o=await api("/api/streams",{action:"user",user:u}); if(o.error) toast(o.error); loadStreamsM(); }catch(e){ toast(e.message); } };
+async function loadAutoM(r){ try{ const a=r||await api("/api/automations"); const B=a.budget||{used:0,limit:15};
+    $("#maB").textContent=`${B.used} / ${B.limit}`; $("#maN").textContent=a.rules.filter(x=>x.on).length+" on";
+    $("#maList").innerHTML=a.rules.length?a.rules.map(x=>`<label class="mar"><input type="checkbox" data-mat="${x.id}" ${x.on?"checked":""}><div><b>⚡ ${esc(x.name)}</b><small>${esc(x.text)}</small></div></label>`).join(""):'<p class="empty">None yet — tap an idea below.</p>';
+    const have=new Set(a.rules.map(x=>x.name)); $("#maIdeas").innerHTML=a.presets.filter(p=>!have.has(p.name)).map(p=>`<button data-map="${esc(p.name)}">+ ${esc(p.name)}${(a.ai_actions||[]).includes(p.action.type)?'<i class="aiu">AI</i>':""}</button>`).join("");
+    $$("[data-mat]").forEach(c=>c.onchange=async()=>loadAutoM(await api("/api/automations",{action:"toggle",id:c.dataset.mat})));
+    $$("[data-map]").forEach(b=>b.onclick=async()=>{ loadAutoM(await api("/api/automations",{action:"preset",name:b.dataset.map})); toast("⚡ Added: "+b.dataset.map); }); }catch(e){} }
+async function lookM(){ try{ const l=await api("/api/look"); document.body.classList.toggle("mhalo",l.skin==="halo"); document.body.classList.toggle("ghostpc",!!l.ghost); store.set("mlook",l.skin); }catch(e){} }
+try{ if(store.get("mlook")==="halo") document.body.classList.add("mhalo"); }catch(e){}
+setInterval(()=>{ if(pcOnline) lookM(); },60000);
+setTimeout(()=>{ if(pcOnline){ lookM(); api("/api/streams").then(o=>{ $("#glTik").textContent=o.d7!=null?sgnM(o.d7):(o.last?Number(o.last.followers).toLocaleString("en-GB"):"–"); }).catch(()=>{}); } },2500);
 </script>
 </body>
 </html>

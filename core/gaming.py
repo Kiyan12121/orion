@@ -168,6 +168,8 @@ class GamingMode:
             CTX["set_theme"]("stealth")
         name = game.replace(".exe", "").replace("PlayerBeta", "")
         self.emit("gaming", on=True, game=name)
+        gh = CTX.get("ghost")
+        gh and gh(True)
         self.emit("toast", level="info", text=f"Gaming Mode: {name}" + (f" — {', '.join(boosted)}" if boosted else ""))
 
     def exit(self):
@@ -181,6 +183,8 @@ class GamingMode:
         if prev and prev != "stealth" and self.cfg.get("theme") == "stealth" and CTX.get("set_theme"):
             CTX["set_theme"](prev)
         self.emit("gaming", on=False, game=None)
+        gh = CTX.get("ghost")
+        gh and gh(False)
         mins = int((time.time() - self.started) // 60)
         self._unboost()
         self._stop_buffer()

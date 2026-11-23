@@ -1,5 +1,34 @@
 # ORION 6.1 — Personal Intelligence System
 
+## New in 7.0: a new look, and ORION gets out of your way
+**Two new looks.** Switch between them in Settings, or with the style button in the top bar.
+- **Orion Core** (the new default): the reactor is now a slowly turning gyroscope with the Orion constellation inside. Your next exam, home-time weather, TikTok growth and money hang off it as holo-labels. The stars light up when ORION thinks, and the belt pulses when it talks.
+- **Halo**: calm and light. A glowing ring with your places orbiting it, plus frosted-glass cards.
+- The classic Jarvis HUD and Aurora are still there.
+- Pop-ups match the look: ORION's browser opens as a holo-window (Core) or a glass sheet (Halo). The "are you sure?" box is now a calm "Before I do this" card that shows exactly what ORION wants to send.
+
+**Game mode = ghost mode.** When Roblox (or any game) starts, ORION hides its window, stops every animation and the camera, and hands its spare memory back to Windows. It comes back to the taskbar when you stop playing. Built for 16 GB PCs.
+
+**Alt+Space quick bar.** A slim bar pops up anywhere, even over a game. Ask, get the answer, press Esc, and it's gone.
+
+**Streams.** A new page for your TikTok:
+- Followers, likes and growth today, this week and this month, read from your public profile. ORION never logs in or posts.
+- Every stream is logged automatically when TikTok LIVE Studio or OBS is open: length, plus followers gained while live.
+- Add peak viewers and gifts from TikTok Studio in one go. There's a growth chart, a recap after each stream, and milestone alerts.
+- Ask "how did my stream go?" and ORION answers from the log.
+
+**Automate (its own page now).**
+- New triggers:
+  - Money: money in, goal hit, spending over £X, a lead going quiet, a deal won.
+  - Streams: going live, stream ended, follower milestones.
+  - Other: website down, new file in any folder, ORION starting, and weekly (day + time).
+- New actions: Discord/webhook post, open a website, CEO report to your phone, draft follow-ups, back up ORION, add a note, remind me later, and stream recap.
+- Up to 3 steps per rule, plus "only between" times.
+- **AI budget:** most automations use no AI at all. The ones that do ("ORION does…", follow-up drafts) stop for the day once your daily limit is spent, so your free credits last.
+- One-click ideas, grouped into Money & business, Streams, School, and PC & home.
+
+**Phone.** Streams and Automate are on the phone too. There's a TikTok tile on the home screen, a note when ORION is hiding because you're gaming, and the Halo colours if your PC uses Halo.
+
 ## New in 6.3: ORION OS 1.2
 - **Shutdown animation**: Orion glides to the centre, folds into its belt, flares once, says goodbye, and the screen fades to black. Restart says "See you shortly".
 - **Automations for ORION OS**:

@@ -34,7 +34,7 @@ from core import money                                      # noqa: E402
 from core import holo                                       # noqa: E402,F401
 from core import plus                                       # noqa: E402
 from core import skillbook                                  # noqa: E402
-from core import saver, pctools, proactive, ironman, gestures, localintel, brain6, skills6, automate, ceo, oslinux         # noqa: E402
+from core import saver, pctools, proactive, ironman, gestures, localintel, brain6, skills6, automate, ceo, oslinux, streams, looks         # noqa: E402
 from core.autonomy import Autonomy                          # noqa: E402
 from core import gaming as gaming_mod                        # noqa: E402
 from core.routines import NightShift                        # noqa: E402
@@ -92,6 +92,11 @@ class Api:
         tools.CTX["stop_all"] = self.stop
         self._scheduler = schedule.Scheduler(self._cfg, self._sched_notify)
         self._hotkey = Hotkey(self._cfg.get("hotkey", "ctrl+alt+space"), self._hk_start, self._hk_stop)
+        try:                                                   # 7.0 quick bar
+            import keyboard
+            keyboard.add_hotkey(self._cfg.get("quickbar_hotkey", "alt+space"), lambda: self.bar_toggle(), suppress=True)
+        except Exception:
+            pass
         tools.CTX["brain"] = self._brain
         tools.CTX["lite"] = self.lite_profile
         try:   # instant "clip that" hotkey, works inside games
@@ -120,6 +125,9 @@ class Api:
         tools.CTX["sync"] = self._sync
         self._shift = NightShift(self._cfg, self._jobs, self._shift_notify, self._emit, self._updater)
         self._automate = automate.Engine(self._cfg, self._emit, self._auto_action)
+        self._streams = streams.Watcher(self._cfg, self._emit, self._notify)
+        tools.CTX["ghost"] = self._ghost
+        tools.CTX["streams"] = self._streams
         self._weekly = ceo.Weekly(self._cfg, self._notify)
         tools.CTX["push_phone"] = lambda t: self._push.send(t, "ORION", 5, "iphone")
         self._voice_id = VoiceID(self._cfg)
@@ -176,6 +184,60 @@ class Api:
         threading.Thread(target=run, daemon=True).start()
         return True
 
+    # ---------------------------------------------------------------- 7.0: ghost — ORION gets out of the way while gaming
+    def _ghost(self, on):
+        g = self._cfg.setdefault("gaming", {})
+        if not g.get("ghost", True):
+            return
+        if on:
+            self._ghosted = {"cam": bool(self._gestures.on), "shown": True}
+            if self._gestures.on:
+                self._gestures.stop()
+            self._emit("ghost", on=True)               # UI stops every animation and timer
+            if self._window and not getattr(self, "_mini", None):
+                try:
+                    self._window.hide()
+                except Exception:
+                    pass
+            threading.Timer(3, self._trim_memory).start()
+        else:
+            gh = getattr(self, "_ghosted", None) or {}
+            self._ghosted = None
+            self._emit("ghost", on=False)
+            if self._window and gh.get("shown"):
+                try:
+                    self._window.show()
+                    self._window.minimize()            # back in the taskbar, never on top of what you're doing
+                except Exception:
+                    pass
+            if gh.get("cam") and self._gestures.gc.get("enabled"):
+                self._gestures.start()
+
+    def _trim_memory(self):
+        """Hand ORION's spare memory back to Windows (its own process and its WebView windows)."""
+        if os.name != "nt":
+            return
+        try:
+            import ctypes
+            import psutil
+            k32, psapi = ctypes.windll.kernel32, ctypes.windll.psapi
+            me = psutil.Process()
+            procs = [me] + me.children(recursive=True)
+            freed = 0
+            for p in procs:
+                try:
+                    before = p.memory_info().rss
+                    h = k32.OpenProcess(0x1F0FFF, False, p.pid)
+                    if h:
+                        psapi.EmptyWorkingSet(h)
+                        k32.CloseHandle(h)
+                    freed += max(0, before - p.memory_info().rss)
+                except Exception:
+                    pass
+            log.info("ghost: trimmed %.0f MB", freed / 2**20)
+        except Exception:
+            pass
+
     def backup_now(self):
         try:
             return health.backup_cloud(self._cfg)
@@ -219,6 +281,12 @@ class Api:
                 mini.evaluate_js(f"window.ui && window.ui.event({json.dumps({'kind': kind, **data})})")
             except Exception:
                 self._mini = None
+        bar = getattr(self, "_bar", None)
+        if bar and getattr(self, "_bar_open", False) and kind in ("state", "stream_start", "delta", "stream_end", "message", "tool"):
+            try:
+                bar.evaluate_js(f"window.ui && window.ui.event({json.dumps({'kind': kind, **data})})")
+            except Exception:
+                self._bar = None
         if not self._window:
             return
         try:
@@ -1223,7 +1291,10 @@ class Api:
         if path == "/api/autonomy":
             return self.autonomy_get()
         simple = {"/api/local": self.globe_local, "/api/local_map": self.globe_local_map, "/api/skilllib": self.skilllib_get, "/api/plus": self.plus_get, "/api/life": self.life_get, "/api/health": self.health_get, "/api/study": self.study_get, "/api/ventures": self.ventures_get,
-                  "/api/gaming": self.gaming_get, "/api/brain": self.brain_get}
+                  "/api/gaming": self.gaming_get, "/api/brain": self.brain_get, "/api/streams": self.streams_get,
+                  "/api/automations": self.automations_get,
+                  "/api/look": lambda: {"skin": self._cfg.get("ui", {}).get("skin", "core"), "glance": self.look_data(),
+                                        "ghost": bool(getattr(self, "_ghosted", None))}}
         if path.split("?")[0] in simple:
             return simple[path.split("?")[0]]()
         if path.startswith("/api/study/cards"):
@@ -1273,6 +1344,10 @@ class Api:
             return self.brain_action(body)
         if path == "/api/gaming":
             return self.gaming_set(body)
+        if path == "/api/streams":
+            return self.streams_action(body)
+        if path == "/api/automations":
+            return self.automations_action(body)
         if path == "/api/clipnow":
             return {"result": self.clip_now()}
         if path == "/api/life":
@@ -1728,6 +1803,67 @@ class Api:
             self._window.minimize()
         return True
 
+    # ---------------------------------------------------------------- 7.0 quick bar (Alt+Space)
+    def bar_toggle(self, on=None):
+        import webview
+        want = (not getattr(self, "_bar_open", False)) if on is None else bool(on)
+        look = self._cfg.get("ui", {}).get("skin", "core")
+        if want:
+            if not getattr(self, "_bar", None):
+                sw, sh = 1920, 1080
+                try:
+                    import ctypes
+                    sw, sh = ctypes.windll.user32.GetSystemMetrics(0), ctypes.windll.user32.GetSystemMetrics(1)
+                except Exception:
+                    pass
+                self._bar_pos = ((sw - 720) // 2, int(sh * .22))
+                self._bar = webview.create_window("ORION bar", url=os.path.join(os.path.dirname(UI_PATH), "bar.html"), js_api=self,
+                                                  width=720, height=74, x=self._bar_pos[0], y=self._bar_pos[1], frameless=True,
+                                                  on_top=True, resizable=False, transparent=True, focus=True, background_color="#060e1c")
+                self._bar_open = True
+                threading.Timer(1.2, lambda: self._bar_event("bar_show", look=look)).start()
+                return True
+            self._bar_open = True
+            try:
+                self._bar.resize(720, 74)
+                self._bar.show()
+            except Exception:
+                self._bar = None
+                return self.bar_toggle(True)
+            self._bar_event("bar_show", look=look)
+        else:
+            self._bar_open = False
+            if getattr(self, "_bar", None):
+                self._bar_event("bar_hide")
+                try:
+                    self._bar.hide()
+                except Exception:
+                    pass
+        return self._bar_open
+
+    def _bar_event(self, kind, **data):
+        try:
+            self._bar.evaluate_js(f"window.ui && window.ui.event({json.dumps({'kind': kind, **data})})")
+        except Exception:
+            pass
+
+    def bar_size(self, h):
+        try:
+            self._bar.resize(720, max(74, min(480, int(h))))
+        except Exception:
+            pass
+        return True
+
+    def bar_open_full(self):
+        self.bar_toggle(False)
+        if self._window:
+            try:
+                self._window.show()
+                self._window.restore()
+            except Exception:
+                pass
+        return True
+
     def toggle_fullscreen(self):
         if self._window:
             self._window.toggle_fullscreen()
@@ -1785,7 +1921,19 @@ class Api:
 
     # ---------------------------------------------------------------- automations (when → then)
     def _auto_action(self, r, ctx):
-        a, v = r["action"]["type"], str(r["action"].get("value") or "")
+        steps = [r["action"]] + list(r.get("then") or [])
+        for i, st in enumerate(steps):
+            if i:
+                time.sleep(1.5)
+            try:
+                self._auto_one(r, st, ctx)
+            except Exception as e:
+                self._emit("toast", level="warn", text=f"⚡ {r['name']}: step {i + 1} failed ({e})")
+
+    def _auto_one(self, r, step, ctx):
+        a, v = step["type"], str(step.get("value") or "")
+        if self._auto_extra(r, a, v, ctx):
+            return
         if a == "say":
             self._speaker.say(v or r["name"])
         elif a == "notify":
@@ -1829,11 +1977,107 @@ class Api:
         elif a == "focus":
             study.focus_start(int(float(v or 25)))
 
+    def _auto_extra(self, r, a, v, ctx):
+        """7.0 actions. Returns True if handled. None of these use AI except 'followups'."""
+        title = self._cfg.get("user_title", "sir")
+        if a == "open_url" and v.startswith("https://"):
+            webbrowser.open(v)
+        elif a == "webhook" and v.startswith("https://"):
+            import requests
+            msg = (f"⚡ {r['name']}" + (": " + ", ".join(f"{k} {x}" for k, x in ctx.items() if k != "test") if ctx else ""))[:1900]
+            requests.post(v, json={"content": msg, "text": msg}, timeout=15)
+        elif a == "report":
+            self._notify(ceo.board_report(), important=True)
+        elif a == "followups":
+            def run():
+                fp, n = ceo.draft_followups(self._brain)
+                self._notify(f"Drafted {n} follow-up(s) — they're in Documents › ORION Leads. Nothing was sent." if fp
+                             else "No leads need a follow-up right now.", important=False)
+            threading.Thread(target=run, daemon=True).start()
+        elif a == "backup":
+            self._notify(f"Backed up ORION, {title}: {self._backup_local()} (in Documents › ORION Backups).", important=False)
+        elif a == "note":
+            fp = os.path.join(os.path.expanduser("~"), "Documents", "ORION notes.txt")
+            os.makedirs(os.path.dirname(fp), exist_ok=True)
+            with open(fp, "a", encoding="utf-8") as f:
+                f.write(f"{time.strftime('%Y-%m-%d %H:%M')}  {v or r['name']}\n")
+        elif a == "remind":
+            mins = max(1, min(1440, int(float(v or 30))))
+            threading.Timer(mins * 60, lambda: self._notify(f"⏰ Reminder ({r['name']})", important=True)).start()
+        elif a == "stream_recap":
+            last = next((x for x in sorted(streams.sessions(), key=lambda x: x["start"], reverse=True) if x.get("end")), None)
+            self._notify(streams.recap_text(last) if last else "No stream logged yet.", important=False)
+        else:
+            return False
+        return True
+
+    def _backup_local(self):
+        """Zip ORION's memory, settings and data into Documents/ORION Backups (keeps the last 8). Keys are left out."""
+        import zipfile
+        from core.paths import DATA_DIR
+        out = os.path.join(os.path.expanduser("~"), "Documents", "ORION Backups")
+        os.makedirs(out, exist_ok=True)
+        fp = os.path.join(out, time.strftime("ORION backup %Y-%m-%d %H%M.zip"))
+        safe = {k: v for k, v in self._cfg.items() if "key" not in k.lower() and "token" not in k.lower() and "pin" not in k.lower()}
+        with zipfile.ZipFile(fp, "w", zipfile.ZIP_DEFLATED) as z:
+            z.writestr("settings (no keys).json", json.dumps(safe, indent=1, default=str))
+            for root_, _, files in os.walk(DATA_DIR):
+                for f in files:
+                    full = os.path.join(root_, f)
+                    if os.path.getsize(full) < 50_000_000 and not f.endswith((".mp3", ".wav", ".mp4")):
+                        z.write(full, os.path.relpath(full, DATA_DIR))
+        olds = sorted(x for x in os.listdir(out) if x.startswith("ORION backup"))
+        for x in olds[:-8]:
+            try:
+                os.remove(os.path.join(out, x))
+            except Exception:
+                pass
+        return os.path.basename(fp)
+
+    # ---------------------------------------------------------------- 7.0: streams
+    def streams_get(self):
+        return streams.overview()
+
+    def streams_action(self, b):
+        a = b.get("action")
+        try:
+            if a == "user":
+                u = str(b.get("user", "")).strip().lstrip("@")[:30]
+                self._cfg["tiktok_user"] = u
+                config_mod.save(self._cfg)
+                if u:
+                    streams.snapshot(u, force=True)
+            elif a == "refresh" and self._cfg.get("tiktok_user"):
+                streams.snapshot(self._cfg["tiktok_user"], force=True)
+            elif a == "manual":
+                streams.add_manual(b.get("followers"), b.get("likes"))
+            elif a == "start":
+                self._streams.start("manual")
+            elif a == "stop":
+                self._streams.stop()
+            elif a == "update":
+                streams.session_update(b.get("id"), **(b.get("data") or {}))
+            elif a == "delete":
+                streams.session_delete(b.get("id"))
+            elif a == "auto":
+                self._cfg["streams_auto"] = bool(b.get("on"))
+                config_mod.save(self._cfg)
+            elif a == "studio":
+                webbrowser.open(streams.STUDIO_URL)
+        except Exception as e:
+            return {**streams.overview(), "error": str(e)}
+        return streams.overview()
+
+    # ---------------------------------------------------------------- 7.0: the new looks' at-a-glance data
+    def look_data(self):
+        return looks.glance(self._cfg)
+
     def automations_get(self):
         rs = automate.load()
         return {"on": self._cfg.get("automations_on", True), "rules": [{**r, "text": automate.describe(r)} for r in rs],
                 "triggers": automate.TRIGGERS, "actions": automate.ACTIONS,
                 "presets": [{**p, "text": automate.describe({**p, "on": True})} for p in automate.PRESETS if oslinux.ACTIVE or not p.get("os")],
+                "budget": automate.budget_state(self._cfg), "no_ai": sorted(automate.NO_AI), "ai_actions": sorted(automate.AI_ACTIONS),
                 "goals": self._cfg.get("autonomy_goals", "")}
 
     def automations_action(self, b):
@@ -1841,13 +2085,13 @@ class Api:
         rs = automate.load()
         if a == "add":
             try:
-                automate.add(b.get("name", ""), b.get("trigger") or {}, b.get("act") or {})
+                automate.add(b.get("name", ""), b.get("trigger") or {}, b.get("act") or {}, then=b.get("then"), only=b.get("only"))
             except ValueError as e:
                 self._emit("toast", level="warn", text=str(e))
         elif a == "preset":
             p = next((p for p in automate.PRESETS if p["name"] == b.get("name")), None)
             if p and not any(r["name"] == p["name"] for r in rs):
-                automate.add(p["name"], dict(p["trigger"]), dict(p["action"]), p.get("cooldown"))
+                automate.add(p["name"], dict(p["trigger"]), dict(p["action"]), p.get("cooldown"), then=p.get("then"))
         elif a in ("toggle", "delete"):
             for r in rs:
                 if r["id"] == b.get("id"):
@@ -1859,6 +2103,9 @@ class Api:
             r = next((r for r in rs if r["id"] == b.get("id")), None)
             if r:
                 self._automate._fire(r, {"test": True})
+        elif a == "budget":
+            self._cfg["ai_budget_auto"] = max(0, min(200, int(b.get("limit", 15))))
+            config_mod.save(self._cfg)
         elif a == "master":
             self._cfg["automations_on"] = bool(b.get("on"))
             config_mod.save(self._cfg)
@@ -1904,7 +2151,11 @@ class Api:
 
     def ui_prefs(self, b=None):
         """Interface style: skin (hud/aurora), text size, simple layout, proactive pop-ups."""
-        u = self._cfg.setdefault("ui", {"skin": "hud", "text": "m", "simple": True})
+        u = self._cfg.setdefault("ui", {"skin": "core", "text": "m", "simple": True})
+        if not self._cfg.get("look7_seen"):              # 7.0: show off the new look once; the old ones are a click away
+            self._cfg["look7_seen"] = True
+            u["skin"] = "core"
+            config_mod.save(self._cfg)
         if b:
             for k in ("skin", "text"):
                 if k in b:

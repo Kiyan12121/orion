@@ -68,7 +68,8 @@ CORE = {"plan_show", "plan_tick", "recall", "show_card", "close_popups", "skill_
         "request_more_tools", "set_theme", "schedule_add", "schedule_list", "check_availability"}
 GROUPS = {
     "orionos": ({"os_open_app", "os_volume", "os_wifi", "os_lock_screen", "os_screenshot", "os_power_off", "os_sky"}, r"lock|screenshot|screen ?shot|shut ?down|restart|reboot|sleep|sky|aurora|wi-?fi|volume|louder|quieter|mute|open (the )?(browser|files|terminal|editor|app)|network"),
-    "automation": ({"automation_add", "automation_list", "automation_remove", "routine_add", "routine_list"},
+    "streams": ({"tiktok_stats", "stream_mark"}, r"tik ?tok|stream|go(?:ing)? live|i'?m live|follower|viewer|gift|diamond"),
+    "automation": ({"automation_add", "automation_list", "automation_remove", "automation_budget", "routine_add", "routine_list"},
                    r"when(ever)? i |every time|automat|whenever|if i (open|close|start|haven)|rule|trigger|routine"),
     "computer": ({"type_text", "press_keys", "mouse_click", "scroll", "read_screen", "find_on_screen",
                   "click_text", "wait", "list_running_apps", "close_app"},
