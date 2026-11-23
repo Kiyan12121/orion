@@ -2701,9 +2701,12 @@ addEventListener("resize",initBg);
 (function(){ const g=$("#ticks"); let s=""; for(let i=0;i<144;i++){ const a=i/144*Math.PI*2,r1=208,r2=i%12===0?221:214;
   s+=`<line x1="${250+Math.cos(a)*r1}" y1="${250+Math.sin(a)*r1}" x2="${250+Math.cos(a)*r2}" y2="${250+Math.sin(a)*r2}" stroke="var(--c)" stroke-opacity="${i%12===0?.9:.3}" stroke-width="${i%12===0?2:1}"/>`; } g.innerHTML=s; })();
 const wv=$("#wave"),wx=wv.getContext("2d"); let phase=0,amps=Array(108).fill(0),lastFrame=0;
-function frame(t){ requestAnimationFrame(frame); if(lite&&t-lastFrame<33) return; lastFrame=t;
-  const size=Math.round(wv.clientWidth*(lite?1:2)); if(wv.width!==size){ wv.width=wv.height=size; }
-  const cx=size/2,R=size*.24,cs=getComputedStyle(document.body),col=cs.getPropertyValue("--c2").trim(); wx.clearRect(0,0,size,size); phase+=.05; audioLevel=Voice.level();
+function frame(t){ requestAnimationFrame(frame);
+  const busy=state!=="idle"||speaking||Voice.playing;            // 7.0: 30 fps when something's happening, 12 when idle
+  if(t-lastFrame<(lite?(busy?50:250):(busy?33:83))) return; lastFrame=t; audioLevel=Voice.level();
+  if(document.hidden||document.body.classList.contains("look7")||document.body.classList.contains("ghost")||!wv.offsetParent) return;
+  const size=Math.round(wv.clientWidth*(lite?1:1.5)); if(wv.width!==size){ wv.width=wv.height=size; }
+  const cx=size/2,R=size*.24,cs=getComputedStyle(document.body),col=cs.getPropertyValue("--c2").trim(); wx.clearRect(0,0,size,size); phase+=.05;
   for(let i=0;i<amps.length;i++){ let target=.035+Math.sin(phase+i*.3)*.018;
     if(state==="thinking") target=.12+Math.abs(Math.sin(phase*3+i*.5))*.18;
     if(Voice.playing) target=.08+audioLevel*(.5+.5*Math.abs(Math.sin(phase*2.3+i*.41))); else if(speaking) target=.1+Math.random()*.45*Math.abs(Math.sin(phase*2+i*.2));

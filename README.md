@@ -1,5 +1,12 @@
 # ORION 6.1 — Personal Intelligence System
 
+## 7.0.1: much smoother on older PCs
+- The new looks now use roughly a third of the work they did: the parts of the core that never move are drawn once, and only the core itself redraws.
+- The core animates at 12 fps when idle, 30 fps while ORION is busy, and 5 fps when ORION isn't the window you're using. It pauses completely when something covers it.
+- No more frosted-glass blur (very heavy on older graphics cards). The hidden old reactor and two always-running animations no longer keep repainting behind the new looks.
+- The classic HUD's reactor is capped at 30 fps too, and idles at 12.
+- Fixed the core drawing at the wrong size with Windows display scaling.
+
 ## New in 7.0: a new look, and ORION gets out of your way
 **Two new looks.** Switch between them in Settings, or with the style button in the top bar.
 - **Orion Core** (the new default): the reactor is now a slowly turning gyroscope with the Orion constellation inside. Your next exam, home-time weather, TikTok growth and money hang off it as holo-labels. The stars light up when ORION thinks, and the belt pulses when it talks.
