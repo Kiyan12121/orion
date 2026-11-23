@@ -19,6 +19,13 @@ import android.provider.AlarmClock;
 import android.provider.Settings;
 
 import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 import com.getcapacitor.JSArray;
 import com.getcapacitor.JSObject;
@@ -563,5 +570,83 @@ public class OrionNativePlugin extends Plugin {
             ((DownloadManager) getContext().getSystemService(Context.DOWNLOAD_SERVICE)).enqueue(r);
             call.resolve();
         } catch (Exception ex) { call.reject(ex.getMessage()); }
+    }
+
+    /** 7.0.2 — in-app update: download the new ORION.apk and hand it to Android's installer ("Update"). Settings are kept. */
+    @PluginMethod
+    public void installUpdate(PluginCall call) {
+        final String url = call.getString("url", "");
+        if (!url.startsWith("https://github.com/Kiyan12121/orion/releases/") && !url.startsWith("https://objects.githubusercontent.com/")) {
+            call.reject("Updates only come from ORION's own GitHub releases.");
+            return;
+        }
+        final Context c = getContext();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && !c.getPackageManager().canRequestPackageInstalls()) {
+            Intent i = new Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES, Uri.parse("package:" + c.getPackageName()));
+            launch(i);
+            JSObject r = new JSObject();
+            r.put("status", "permission");
+            call.resolve(r);
+            return;
+        }
+        new Thread(() -> {
+            try {
+                File dir = new File(c.getCacheDir(), "updates");
+                dir.mkdirs();
+                File apk = new File(dir, "ORION-update.apk");
+                String u = url;
+                HttpURLConnection con = null;
+                for (int hop = 0; hop < 6; hop++) {             // follow GitHub's redirects to the file
+                    con = (HttpURLConnection) new URL(u).openConnection();
+                    con.setInstanceFollowRedirects(false);
+                    con.setConnectTimeout(20000);
+                    con.setReadTimeout(30000);
+                    int code = con.getResponseCode();
+                    if (code / 100 == 3) { u = con.getHeaderField("Location"); con.disconnect(); continue; }
+                    if (code != 200) throw new Exception("download failed (" + code + ")");
+                    break;
+                }
+                long total = con.getContentLengthLong(), done = 0;
+                int lastPct = -1;
+                try (InputStream in = con.getInputStream(); FileOutputStream out = new FileOutputStream(apk)) {
+                    byte[] buf = new byte[65536];
+                    int n;
+                    while ((n = in.read(buf)) > 0) {
+                        out.write(buf, 0, n);
+                        done += n;
+                        int pct = total > 0 ? (int) (done * 100 / total) : -1;
+                        if (pct != lastPct && pct % 5 == 0) {
+                            lastPct = pct;
+                            JSObject ev = new JSObject();
+                            ev.put("pct", pct);
+                            notifyListeners("updateProgress", ev);
+                        }
+                    }
+                }
+                if (apk.length() < 1_000_000) throw new Exception("the download looks incomplete");
+                Uri uri = FileProvider.getUriForFile(c, c.getPackageName() + ".fileprovider", apk);
+                Intent i = new Intent(Intent.ACTION_VIEW);
+                i.setDataAndType(uri, "application/vnd.android.package-archive");
+                i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_ACTIVITY_NEW_TASK);
+                c.startActivity(i);
+                JSObject r = new JSObject();
+                r.put("status", "installing");
+                call.resolve(r);
+            } catch (Exception e) {
+                call.reject("Couldn't update: " + e.getMessage());
+            }
+        }).start();
+    }
+
+    /** The installed app's version name (e.g. 7.0.2). */
+    @PluginMethod
+    public void appVersion(PluginCall call) {
+        JSObject r = new JSObject();
+        try {
+            r.put("version", getContext().getPackageManager().getPackageInfo(getContext().getPackageName(), 0).versionName);
+        } catch (Exception e) {
+            r.put("version", "");
+        }
+        call.resolve(r);
     }
 }

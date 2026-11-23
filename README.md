@@ -1,5 +1,10 @@
 # ORION 6.1 — Personal Intelligence System
 
+## 7.0.2: the phone app updates itself
+- **Update button**: the phone checks for new versions on launch. Tap **UPDATE** on Home (or **CHECK** in the PC tab) and it downloads the new app and opens Android's "Update" screen. Your PC link, PIN and settings are kept.
+- Every build can now be signed with the same key (kept as a hidden GitHub secret, `ORION_KEYSTORE`, never in the repo), so updates install over the top. No more uninstalling.
+- One last time: 7.0.2 has to be installed fresh (uninstall the old app first), because older builds were signed with a random key. From 7.0.2 on, just tap Update.
+
 ## 7.0.1: much smoother on older PCs
 - The new looks now use roughly a third of the work they did: the parts of the core that never move are drawn once, and only the core itself redraws.
 - The core animates at 12 fps when idle, 30 fps while ORION is busy, and 5 fps when ORION isn't the window you're using. It pauses completely when something covers it.

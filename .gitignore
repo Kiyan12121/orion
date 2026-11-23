@@ -10,3 +10,4 @@ mobile-app/node_modules/
 mobile-app/android/
 mobile-app/www/
 ORION.apk
+mobile-app/native/*.keystore

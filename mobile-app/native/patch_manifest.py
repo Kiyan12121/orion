@@ -12,7 +12,8 @@ perms = ["android.permission.RECORD_AUDIO", "android.permission.CAMERA", "androi
          "android.permission.ACCESS_FINE_LOCATION", "android.permission.ACCESS_COARSE_LOCATION",
          "android.permission.ACCESS_BACKGROUND_LOCATION", "android.permission.FOREGROUND_SERVICE_LOCATION",
          "android.permission.FOREGROUND_SERVICE_MICROPHONE", "android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS",
-         "android.permission.POST_PROMOTED_NOTIFICATIONS", "android.permission.USE_EXACT_ALARM"]
+         "android.permission.POST_PROMOTED_NOTIFICATIONS", "android.permission.USE_EXACT_ALARM",
+         "android.permission.REQUEST_INSTALL_PACKAGES"]
 block = "".join(f'    <uses-permission android:name="{x}" />\n' for x in perms if x not in s)
 block += ('    <queries>\n        <intent>\n            <action android:name="android.intent.action.MAIN" />\n'
           '            <category android:name="android.intent.category.LAUNCHER" />\n        </intent>\n    </queries>\n')
@@ -74,6 +75,39 @@ if os.path.exists(gradle):
     if "vosk-android" not in g:
         g = re.sub(r"dependencies\s*\{", "dependencies {\n    implementation 'net.java.dev.jna:jna:5.13.0@aar'\n"
                    "    implementation 'com.alphacephei:vosk-android:0.3.47@aar'", g, count=1)
-        open(gradle, "w", encoding="utf-8").write(g)
-    print("gradle patched")
+    # 7.0.2: every build is signed with the SAME key, so updates install over the old app (keeping its settings).
+    # The key is NOT in the repo: it comes from the GitHub secret ORION_KEYSTORE (base64) passed in by the workflow.
+    import base64
+    ks = os.environ.get("ORION_KEYSTORE", "").strip()
+    ks_file = os.path.join(here, "orion-app.keystore")
+    if ks:
+        open(ks_file, "wb").write(base64.b64decode(ks))
+    elif not os.path.exists(ks_file):
+        print("WARNING: no ORION_KEYSTORE secret - this APK gets a random key and won't update over older installs")
+    if os.path.exists(ks_file) and "signingConfigs.orion" not in g:
+        g = re.sub(r"android\s*\{", "android {\n    signingConfigs { orion { storeFile file('../../native/orion-app.keystore'); "
+                   "storePassword 'orionapp'; keyAlias 'orion'; keyPassword 'orionapp' } }\n"
+                   "    buildTypes { debug { signingConfig signingConfigs.orion } }", g, count=1)
+    try:                                        # versionCode/Name from ORION's version (7.0.2 -> 70002) so Android sees a real update
+        import json as _j
+        v = _j.load(open(os.path.join(here, "..", "package.json"), encoding="utf-8"))["version"]
+        a_, b_, c_ = (int(x) for x in (v.split(".") + ["0", "0"])[:3])
+        g = re.sub(r"versionCode\s+\d+", f"versionCode {a_ * 10000 + b_ * 100 + c_}", g)
+        g = re.sub(r'versionName\s+"[^"]*"', f'versionName "{v}"', g)
+    except Exception as e:
+        print("version code skipped:", e)
+    open(gradle, "w", encoding="utf-8").write(g)
+    print("gradle patched (vosk + fixed signing key + version)")
+
+# stamp the app's version into the bundled page so the in-app updater knows what it is
+import json
+app = os.path.join(here, "..")
+try:
+    ver = json.load(open(os.path.join(app, "package.json"), encoding="utf-8"))["version"]
+    idx = os.path.join(app, "www", "index.html")
+    h = open(idx, encoding="utf-8").read()
+    open(idx, "w", encoding="utf-8").write(h.replace("__APP_VERSION__", ver))
+    print("stamped version", ver)
+except Exception as e:
+    print("version stamp skipped:", e)
 

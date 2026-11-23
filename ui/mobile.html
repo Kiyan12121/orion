@@ -172,6 +172,8 @@ body.busy .horb u{animation-duration:.9s}body.busy .horb i{animation-duration:1.
 .subnav button{flex:none;background:var(--glass);border:1px solid var(--edge);border-radius:999px;padding:9px 15px;font:600 14px var(--ui);color:var(--dim)}
 .subnav button.on{color:#03101a;background:linear-gradient(135deg,var(--a),var(--b2));border-color:transparent}
 .msub{display:none}.msub.on{display:block;animation:viewin .3s}
+.updbar{display:flex;align-items:center;gap:12px;margin:0 0 12px;padding:12px 14px;border-radius:16px;background:linear-gradient(135deg,rgba(var(--ar),.16),rgba(var(--ar),.05));border:1px solid rgba(var(--ar),.4)}
+.updbar[hidden]{display:none}.updbar div{flex:1}.updbar b{display:block;font-size:15px}.updbar small{color:var(--dim);font-size:12.5px}
 .msd{display:flex;gap:14px;margin-top:4px;font-weight:600}.msd small{color:var(--dim);font-weight:400;font-size:12px}.msd .up{color:var(--green,#6cffc4)}.msd .dn{color:#ff8a7a}
 .mss{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--edge)}.mss:last-child{border-bottom:0}
 .mss b{display:block;font-size:15px}.mss small{color:var(--dim);font-size:12.5px}.mss .k{text-align:right}
@@ -425,6 +427,7 @@ body.ghostpc .ghostnote{display:block}.ghostnote{display:none;margin:0 0 12px;pa
       </div>
       <div class="wxline" id="wxline"></div>
       <div class="today" id="today"></div>
+      <div class="updbar" id="updBar" hidden><div><b id="updT">Update ready</b><small id="updS">Your settings and PC link stay as they are.</small></div><button class="btn sm" id="updGo">UPDATE</button></div>
       <div class="ghostnote">🎮 You're gaming — ORION is hiding on your PC so your game runs smooth. Everything still works from here.</div>
       <div class="glance" id="glance">
         <div class="gl" data-tab="more" data-sub="study"><em>📚</em><b id="glStudy">–</b><span>REVISION</span></div>
@@ -505,6 +508,8 @@ body.ghostpc .ghostnote{display:block}.ghostnote{display:none;margin:0 0 12px;pa
 
     <!-- PC -->
     <section class="view" id="v-pc">
+      <div class="card"><h3>ORION APP <i id="appVer"></i></h3>
+        <div class="two" style="grid-template-columns:1fr auto;align-items:center"><span class="empty" id="appUpd" style="font-size:13px">Updates install over the top — your PC link and PIN are kept.</span><button class="btn sm" id="appChk">CHECK</button></div></div>
       <div class="card"><h3>SHARE WITH PC</h3>
         <div class="ctrls">
           <button class="qa" id="clipUp"><em>📤</em>Clip → PC</button><button class="qa" id="clipDown"><em>📥</em>PC clip</button>
@@ -1655,6 +1660,35 @@ async function lookM(){ try{ const l=await api("/api/look"); document.body.class
 try{ if(store.get("mlook")==="halo") document.body.classList.add("mhalo"); }catch(e){}
 setInterval(()=>{ if(pcOnline) lookM(); },60000);
 setTimeout(()=>{ if(pcOnline){ lookM(); api("/api/streams").then(o=>{ $("#glTik").textContent=o.d7!=null?sgnM(o.d7):(o.last?Number(o.last.followers).toLocaleString("en-GB"):"–"); }).catch(()=>{}); } },2500);
+
+/* ===== 7.0.2: in-app updates (no more uninstalling) ===== */
+const APP_VERSION="__APP_VERSION__".startsWith("__")?"":"__APP_VERSION__";
+const vnum=v=>String(v||"").replace(/^v/,"").split(".").map(n=>parseInt(n)||0);
+const newer=(a,b)=>{ const x=vnum(a),y=vnum(b); for(let i=0;i<3;i++){ if((x[i]||0)!==(y[i]||0)) return (x[i]||0)>(y[i]||0); } return false; };
+let UPD=null;
+async function checkUpdate(manual){
+  $("#appVer").textContent=APP_VERSION?"v"+APP_VERSION:"";
+  try{ const r=await fetch("https://api.github.com/repos/Kiyan12121/orion/releases/latest",{headers:{Accept:"application/vnd.github+json"}}); const j=await r.json();
+    const apk=(j.assets||[]).find(a=>a.name==="ORION.apk"); store.set("updChecked",String(Date.now()));
+    if(apk&&APP_VERSION&&newer(j.tag_name,APP_VERSION)){ UPD={tag:j.tag_name,url:apk.browser_download_url,size:apk.size};
+      $("#updT").textContent=`ORION ${j.tag_name} is ready`; $("#updS").textContent=`${Math.round(apk.size/1048576)} MB · your settings and PC link stay as they are.`; $("#updBar").hidden=false;
+      $("#appUpd").textContent=`${j.tag_name} is ready — tap UPDATE on Home, or here.`; $("#appChk").textContent="UPDATE"; }
+    else { $("#updBar").hidden=true; $("#appUpd").textContent=APP_VERSION?`You're on the latest (v${APP_VERSION}).`:"Can't tell this app's version — update once from GitHub."; $("#appChk").textContent="CHECK"; if(manual) toast("You're up to date."); }
+  }catch(e){ if(manual) toast("Couldn't check for updates — are you online?"); } }
+async function doUpdate(){ if(!UPD) return checkUpdate(true);
+  if(!Native||!Native.installUpdate){ window.open(UPD.url,"_system"); toast("Downloading — tap the download, then Update."); return; }
+  try{ $("#updGo").textContent="0%"; $("#updGo").disabled=true;
+    const h=Native.addListener&&Native.addListener("updateProgress",e=>{ if(e.pct>=0){ $("#updGo").textContent=e.pct+"%"; $("#appChk").textContent=e.pct+"%"; } });
+    const r=await Native.installUpdate({url:UPD.url});
+    if(r&&r.status==="permission"){ toast("Allow ORION to install updates (one time), then tap UPDATE again."); }
+    else toast("Tap “Update” on the next screen. Your settings are kept.");
+    try{ (await h)&&(await h).remove(); }catch(e){}
+  }catch(e){ toast(e.message||"Update failed."); }
+  $("#updGo").textContent="UPDATE"; $("#updGo").disabled=false; $("#appChk").textContent="UPDATE"; }
+$("#updGo").onclick=doUpdate;
+$("#appChk").onclick=()=>UPD?doUpdate():checkUpdate(true);
+setTimeout(()=>checkUpdate(false),3000);
+document.addEventListener("visibilitychange",()=>{ if(!document.hidden&&Date.now()-(+store.get("updChecked","0"))>6*3600e3) checkUpdate(false); });
 </script>
 </body>
 </html>
