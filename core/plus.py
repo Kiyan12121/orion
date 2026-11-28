@@ -9,6 +9,12 @@ import time
 from .tools import CTX, tool
 
 
+def _nap(sec):
+    from .procs import nap
+    nap(sec)   # 7.1: waits 3x longer while you're gaming
+
+
+
 def _brain_json(system, user, tier="smart"):
     brain = CTX.get("brain")
     if not brain:
@@ -250,7 +256,7 @@ class Bedtime:
         from .daily import day_cfg
         from .jobs import idle_seconds
         while True:
-            time.sleep(45)
+            _nap(45)
             try:
                 if not self.cfg.get("bedtime_nudge", True):
                     continue

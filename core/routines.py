@@ -25,6 +25,12 @@ import zipfile
 from .paths import APP_DIR, DATA_DIR, PROJECTS_DIR, SKILLS_DIR
 from .tools import CTX, tool
 
+
+def _nap(sec):
+    from .procs import nap
+    nap(sec)   # 7.1: waits 3x longer while you're gaming
+
+
 STATE = os.path.join(DATA_DIR, "routines_state.json")
 VIDEO_EXT = (".mp4", ".mkv", ".mov", ".webm")
 TYPES = {"Images": (".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp", ".svg", ".heic"),
@@ -261,7 +267,7 @@ class NightShift:
                     self.tick()
             except Exception:
                 pass
-            time.sleep(30)
+            _nap(30)
 
     def _due(self, rid, hhmm, days, st):
         now = dt.datetime.now()

@@ -222,15 +222,8 @@ class Engine:
         self.signals.append((kind, ctx))
 
     def _procs(self):
-        out = set()
-        for p in psutil.process_iter(["name"]):
-            try:
-                n = (p.info["name"] or "").lower()
-                if n:
-                    out.add(n.removesuffix(".exe"))
-            except Exception:
-                continue
-        return out
+        from . import procs
+        return {n.removesuffix(".exe") for n in procs.names()}
 
     def _downloads(self):
         d = os.path.join(os.path.expanduser("~"), "Downloads")

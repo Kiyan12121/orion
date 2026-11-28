@@ -11,6 +11,12 @@ import time
 from .paths import DATA_DIR
 from .tools import CTX, tool
 
+
+def _nap(sec):
+    from .procs import nap
+    nap(sec)   # 7.1: waits 3x longer while you're gaming
+
+
 HOME = os.path.expanduser("~")
 
 
@@ -443,7 +449,7 @@ class Breaks:
     def _loop(self):
         from .jobs import idle_seconds
         while True:
-            time.sleep(30)
+            _nap(30)
             try:
                 if idle_seconds() > 300:
                     self.active_since = time.time()

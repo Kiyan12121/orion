@@ -18,7 +18,8 @@ try:   # real pixel coordinates on scaled (125%/150%/175%) screens, so clicks la
 except Exception:
     pass
 # let the interface play ORION's voice without needing a click first
-os.environ.setdefault("WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS", "--autoplay-policy=no-user-gesture-required")
+os.environ.setdefault("WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS", "--autoplay-policy=no-user-gesture-required --disable-background-networking --disable-component-update "
+                      "--disable-features=msSmartScreenProtection,msEdgeShoppingUI,msWebOOUI --renderer-process-limit=2")  # 7.1: lighter
 
 from core import config as config_mod                       # noqa: E402
 from core import tools                                      # noqa: E402
@@ -34,7 +35,7 @@ from core import money                                      # noqa: E402
 from core import holo                                       # noqa: E402,F401
 from core import plus                                       # noqa: E402
 from core import skillbook                                  # noqa: E402
-from core import saver, pctools, proactive, ironman, gestures, localintel, brain6, skills6, automate, ceo, oslinux, streams, looks         # noqa: E402
+from core import saver, pctools, proactive, ironman, gestures, localintel, brain6, skills6, automate, ceo, oslinux, streams, looks, hustle  # noqa: E402,F401
 from core.autonomy import Autonomy                          # noqa: E402
 from core import gaming as gaming_mod                        # noqa: E402
 from core.routines import NightShift                        # noqa: E402
@@ -874,6 +875,7 @@ class Api:
     def get_settings(self):
         c = self._cfg
         return {"name": c["assistant_name"], "title": c["user_title"], "owner": c.get("owner_name", ""),
+                "about": c.get("about_me", ""),
                 "local_vision": c["local"].get("vision_model", ""),
                 "providers": [{"id": p["id"], "label": p["label"], "key": p.get("api_key", ""),
                                "key_url": p.get("key_url", "")} for p in c["providers"]],
@@ -897,6 +899,8 @@ class Api:
         c["local"]["vision_model"] = (s.get("local_vision") or "").strip()
         if (s.get("owner") or "").strip():
             c["owner_name"] = s["owner"].strip()[:30]
+        if "about" in s:
+            c["about_me"] = (s.get("about") or "").strip()[:600]
         v = c["voice"]
         v["speak_replies"] = bool(s.get("speak"))
         v["engine"] = s.get("engine") if s.get("engine") in ("neural", "offline") else "neural"
@@ -2037,6 +2041,33 @@ class Api:
     # ---------------------------------------------------------------- 7.0: streams
     def streams_get(self):
         return streams.overview()
+
+    # ---- 7.1: merch hub + week balance
+    def hustle_get(self):
+        w = hustle.week_balance_data()
+        t = self._cfg.get("user_title", "sir")
+        if w["exam"] and w["exam"]["days"] <= 30 and w["study_mins"] < 120:
+            tip = f"Under 2 hours of revision with an exam this close — a focus round a day would help, {t}."
+        elif w["study_mins"] == 0:
+            tip = f"No revision logged yet this week. One 25-minute focus round before you go live, {t}?"
+        elif w["study_mins"] >= w["play_only_mins"]:
+            tip = "Good balance — revision is keeping up with gaming."
+        else:
+            tip = "Gaming's ahead of revision this week."
+        return {"merch": hustle.merch_overview(), "week": {**w, "tip": tip}}
+
+    def hustle_action(self, b):
+        a = (b or {}).get("action")
+        try:
+            if a == "shop":
+                r = hustle.merch_shop(b.get("url") or "")
+            elif a in ("sale", "order", "idea", "done"):
+                r = hustle.merch_log(a, b.get("amount") or 0, b.get("item") or "")
+            else:
+                return {"error": "Unknown action."}
+        except Exception as e:
+            return {"error": str(e)[:160]}
+        return {"error": r[7:]} if r.startswith("ERROR: ") else {"text": r}
 
     def streams_action(self, b):
         a = b.get("action")

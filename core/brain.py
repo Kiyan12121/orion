@@ -68,7 +68,9 @@ CORE = {"plan_show", "plan_tick", "recall", "show_card", "close_popups", "skill_
         "request_more_tools", "set_theme", "schedule_add", "schedule_list", "check_availability"}
 GROUPS = {
     "orionos": ({"os_open_app", "os_volume", "os_wifi", "os_lock_screen", "os_screenshot", "os_power_off", "os_sky"}, r"lock|screenshot|screen ?shot|shut ?down|restart|reboot|sleep|sky|aurora|wi-?fi|volume|louder|quieter|mute|open (the )?(browser|files|terminal|editor|app)|network"),
-    "streams": ({"tiktok_stats", "stream_mark"}, r"tik ?tok|stream|go(?:ing)? live|i'?m live|follower|viewer|gift|diamond"),
+    "streams": ({"tiktok_stats", "stream_mark", "go_live_prep"}, r"tik ?tok|stream|go(?:ing)? live|i'?m live|follower|viewer|gift|diamond|rivals"),
+    "merch": ({"merch_log", "merch_summary", "merch_shop"}, r"merch|fourthwall|hoodie|t-?shirt|tee\b|shop|order|design idea|sold a"),
+    "balance": ({"week_balance", "focus_start", "exam_add"}, r"balance|my week|this week|how much (have i|did i) (play|game|revis|stream)|too much|revis|wasted"),
     "automation": ({"automation_add", "automation_list", "automation_remove", "automation_budget", "routine_add", "routine_list"},
                    r"when(ever)? i |every time|automat|whenever|if i (open|close|start|haven)|rule|trigger|routine"),
     "computer": ({"type_text", "press_keys", "mouse_click", "scroll", "read_screen", "find_on_screen",
@@ -146,8 +148,23 @@ if not __import__("os").path.exists("/etc/orion-os"):         # ORION OS desktop
 AUTOPILOT_RE = re.compile(r"^\s*(auto ?pilot|autonomous(ly)?)\s*[:,\-]?\s*", re.I)
 
 
-def pick_tier(text):
-    return "smart" if len(text) > 160 or SMART.search(text) else "fast"
+DEEP = re.compile(r"\b(properly|in detail|step by step|think (hard|carefully)|thorough|deep ?dive|exam question|"
+                  r"\d+ ?marks?|prove|derive|simultaneous|quadratic|equation|algorithm|strategy|business plan)\b", re.I)
+FOLLOW = re.compile(r"^\s*(and|also|now|then|ok(ay)?|yes|yeah|yep|go on|carry on|continue|do it|keep going|more|next|"
+                    r"what about|how about|same|again|that|it)\b", re.I)
+CHAT = re.compile(r"^\s*(hi|hey|hello|yo|thanks|thank you|cheers|nice|cool|lol|ok|good (morning|night)|gn|gm)\W*$", re.I)
+
+
+def pick_tier(text, prev_tier=None):
+    """7.1: smarter routing — tiny chat stays on the fast model, hard/school/maths work goes to the smart one,
+    and a short follow-up ('and the next one?', 'do it') keeps the tier of the conversation it continues."""
+    if CHAT.match(text):
+        return "fast"
+    if len(text) > 160 or SMART.search(text) or DEEP.search(text) or re.search(r"\d\s*[-+*/^×÷=]\s*\d", text):
+        return "smart"
+    if prev_tier == "smart" and len(text) < 60 and FOLLOW.match(text):
+        return "smart"
+    return "fast"
 
 
 def pick_tools(texts):
@@ -173,6 +190,8 @@ class Brain:
         self.emit = emit
         self.extra_context = extra_context
         self.force_cloud = False          # set by Gaming Mode
+        self._last_tier = None            # 7.1: follow-ups keep the conversation's tier
+        self._recent_tools = []           # 7.1: tools used in the last couple of turns stay on hand
         self.reload_providers()
 
     def reload_providers(self):
@@ -200,6 +219,9 @@ class Brain:
     def _system(self, autopilot=False, text=""):
         title = self.cfg.get("user_title", "sir")
         extra = self.extra_context() or ""
+        about = (self.cfg.get("about_me") or "").strip()
+        if about:
+            extra = f"About {title} (in their own words): {about}\n" + extra
         if autopilot:
             extra += "\n" + AUTOPILOT_RULES
         return PERSONA.format(name=self.cfg.get("assistant_name", "ORION"), title=title,
@@ -364,8 +386,13 @@ class Brain:
         allowed = None if autopilot else (pick_tools([text] + recent_user)
                                           | {n for n in REGISTRY if n.startswith("skill_")}
                                           | {t for g in modes.groups(self.cfg.get("theme", "standby"), self.cfg)
-                                             for t in GROUPS.get(g, (set(),))[0]})
-        tier = "smart" if autopilot else pick_tier(text)
+                                             for t in GROUPS.get(g, (set(),))[0]}
+                                          | {t for turn in self._recent_tools[-2:] for t in turn if t in REGISTRY})
+        tier = "smart" if autopilot else pick_tier(text, self._last_tier)
+        self._last_tier = tier
+        used = set()
+        self._recent_tools.append(used)
+        del self._recent_tools[:-3]
         max_steps = int(self.cfg.get("autopilot_steps", 40) if autopilot else self.cfg.get("max_steps", 12))
         limit = 3500 if autopilot else 6000
         said, state, out, prov = [], {}, None, None
@@ -403,10 +430,11 @@ class Brain:
                     if allowed is not None and fname not in allowed:
                         allowed = None
                     result = self.tools.run(fname, args)
+                    used.add(fname)
                 messages.append({"role": "tool", "tool_call_id": c.get("id") or fname,
                                  "name": fname, "content": result[:limit]})
             if step >= 1:
-                tier = "smart"
+                tier = self._last_tier = "smart"
         messages.append({"role": "user", "content": "Stop using tools now. Briefly say what you did and what's left."})
         out, prov = self._call(messages, set(), tier, stream if on_delta else None, cancel, autopilot, state)
         said.append(out["content"].strip() or "I've hit my step limit on that one.")

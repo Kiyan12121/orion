@@ -10,6 +10,12 @@ import uuid
 from .paths import DATA_DIR
 from .tools import CTX, tool
 
+
+def _nap(sec):
+    from .procs import nap
+    nap(sec)   # 7.1: waits 3x longer while you're gaming
+
+
 PATH = os.path.join(DATA_DIR, "schedule.json")
 _lock = threading.Lock()
 FMT = "%Y-%m-%d %H:%M"
@@ -239,7 +245,7 @@ class Scheduler:
                 self.tick()
             except Exception:
                 pass
-            time.sleep(20)
+            _nap(20)
 
     def tick(self):
         now = dt.datetime.now()

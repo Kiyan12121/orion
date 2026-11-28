@@ -1,6 +1,26 @@
 # ORION 6.1 — Personal Intelligence System
 
-## 7.0.2: the phone app updates itself
+## 7.1: lighter, smarter, and built around streaming, merch and GCSEs
+**Faster & lighter on the PC**
+- Starts quicker: heavy add-ons (screen reading, mouse control) only load the first time they're needed (about 0.4s less at start-up, less RAM).
+- One shared list of running apps instead of four separate scans every few seconds.
+- In game mode, ORION's background checks run 3× less often. Stream detection keeps its normal speed, because you stream while you game.
+- A lighter built-in browser engine (fewer background processes, no SmartScreen or shopping add-ons).
+
+**Smarter brain**
+- Knows what's going on in your life right now: your TikTok numbers, whether you're LIVE, your next exam, this month's money and what you're playing. It refreshes in the background, so replies are never slowed down.
+- New **About you** box in Settings. Whatever you write there, ORION keeps in mind every time.
+- Better model choice. Quick chat stays on the fast model; maths, exam questions and "explain properly" go to the smart one. A short follow-up like "and the next one?" stays on whichever model the conversation was using.
+- Remembers which tools it just used, so follow-ups ("do the same for the other one") don't lose them.
+
+**New features**
+- **Merch hub (Fourthwall)** on the Streams page and by voice ("log a £12 hoodie sale", "add a merch idea", "open my shop"). Sales count towards your money.
+- **Your week:** gaming, LIVE and revision hours for the last 7 days, with your next exam and one honest nudge. Ask "how's my week looking?"
+- **Go-live prep:** say "I'm about to go live". ORION turns game mode on, opens TikTok LIVE Studio and starts logging the stream.
+
+**Phone app: screens update themselves.** The app now downloads the newest ORION screens from GitHub when it opens, so most updates arrive with no reinstall. If a new version ever fails to start, it falls back to the built-in one. **Install 7.1 fresh one last time** (uninstall the old app first). After that, a "ready, tap to restart" bar appears whenever there's an update.
+
+## 7.0.2: phone update button
 - **Update button**: the phone checks for new versions on launch. Tap **UPDATE** on Home (or **CHECK** in the PC tab) and it downloads the new app and opens Android's "Update" screen. Your PC link, PIN and settings are kept.
 - Every build can now be signed with the same key (kept as a hidden GitHub secret, `ORION_KEYSTORE`, never in the repo), so updates install over the top. No more uninstalling.
 - One last time: 7.0.2 has to be installed fresh (uninstall the old app first), because older builds were signed with a random key. From 7.0.2 on, just tap Update.

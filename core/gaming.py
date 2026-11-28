@@ -103,12 +103,8 @@ class GamingMode:
     def _running_game(self):
         if psutil is None:
             return None
-        games = {x.lower() for x in self.g.get("games", [])}
-        for p in psutil.process_iter(["name"]):
-            n = (p.info["name"] or "").lower()
-            if n in games:
-                return p.info["name"]
-        return None
+        from . import procs
+        return procs.first({x.lower() for x in self.g.get("games", [])})
 
     def _watch(self):
         while True:

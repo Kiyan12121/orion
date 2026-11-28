@@ -2,6 +2,29 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<script>
+/* 7.1 live screens: the phone app runs the newest ORION screens from GitHub (cached), so updates arrive without reinstalling.
+   Falls back to the built-in copy if offline, and drops a new copy that fails to start. */
+(function(){
+  var BUNDLED="__APP_VERSION__";
+  if(window.__ORION_LIVE||!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform())) return;
+  function num(v){ return String(v||"").replace(/^v/,"").split(".").map(function(n){ return parseInt(n,10)||0; }); }
+  function newer(a,b){ var x=num(a),y=num(b); for(var i=0;i<3;i++){ if((x[i]||0)!==(y[i]||0)) return (x[i]||0)>(y[i]||0); } return false; }
+  try{
+    var html=localStorage.getItem("orion_liveui"), ver=localStorage.getItem("orion_liveui_v"), boot=localStorage.getItem("orion_liveui_boot");
+    if(boot==="pending"&&ver){ localStorage.removeItem("orion_liveui"); localStorage.setItem("orion_liveui_bad",ver); localStorage.removeItem("orion_liveui_boot"); return; }
+    if(html&&ver&&html.length>100000&&(BUNDLED.indexOf("__")===0||newer(ver,BUNDLED))){
+      window.__ORION_LIVE=ver; localStorage.setItem("orion_liveui_boot","pending");
+      try{ window.stop(); }catch(e){}
+      var nd=new DOMParser().parseFromString(html,"text/html");
+      var root=document.importNode(nd.documentElement,true);
+      document.replaceChild(root,document.documentElement);
+      var ss=root.querySelectorAll("script");
+      for(var i=0;i<ss.length;i++){ var o=ss[i], n=document.createElement("script"); for(var k=0;k<o.attributes.length;k++) n.setAttribute(o.attributes[k].name,o.attributes[k].value); n.text=o.text; o.parentNode.replaceChild(n,o); }
+    }
+  }catch(e){}
+})();
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
 <meta name="theme-color" content="#04060a">
 <link rel="manifest" href="/manifest.json">
@@ -509,7 +532,7 @@ body.ghostpc .ghostnote{display:block}.ghostnote{display:none;margin:0 0 12px;pa
     <!-- PC -->
     <section class="view" id="v-pc">
       <div class="card"><h3>ORION APP <i id="appVer"></i></h3>
-        <div class="two" style="grid-template-columns:1fr auto;align-items:center"><span class="empty" id="appUpd" style="font-size:13px">Updates install over the top — your PC link and PIN are kept.</span><button class="btn sm" id="appChk">CHECK</button></div></div>
+        <div class="two" style="grid-template-columns:1fr auto;align-items:center"><span class="empty" id="appUpd" style="font-size:13px">ORION updates itself when you open it.</span><button class="btn sm" id="appChk">CHECK</button></div></div>
       <div class="card"><h3>SHARE WITH PC</h3>
         <div class="ctrls">
           <button class="qa" id="clipUp"><em>📤</em>Clip → PC</button><button class="qa" id="clipDown"><em>📥</em>PC clip</button>
@@ -1666,29 +1689,26 @@ const APP_VERSION="__APP_VERSION__".startsWith("__")?"":"__APP_VERSION__";
 const vnum=v=>String(v||"").replace(/^v/,"").split(".").map(n=>parseInt(n)||0);
 const newer=(a,b)=>{ const x=vnum(a),y=vnum(b); for(let i=0;i<3;i++){ if((x[i]||0)!==(y[i]||0)) return (x[i]||0)>(y[i]||0); } return false; };
 let UPD=null;
+try{ if(localStorage.getItem("orion_liveui_boot")==="pending") localStorage.setItem("orion_liveui_boot","ok"); }catch(e){}   // this copy started fine
 async function checkUpdate(manual){
-  $("#appVer").textContent=APP_VERSION?"v"+APP_VERSION:"";
-  try{ const r=await fetch("https://api.github.com/repos/Kiyan12121/orion/releases/latest",{headers:{Accept:"application/vnd.github+json"}}); const j=await r.json();
-    const apk=(j.assets||[]).find(a=>a.name==="ORION.apk"); store.set("updChecked",String(Date.now()));
-    if(apk&&APP_VERSION&&newer(j.tag_name,APP_VERSION)){ UPD={tag:j.tag_name,url:apk.browser_download_url,size:apk.size};
-      $("#updT").textContent=`ORION ${j.tag_name} is ready`; $("#updS").textContent=`${Math.round(apk.size/1048576)} MB · your settings and PC link stay as they are.`; $("#updBar").hidden=false;
-      $("#appUpd").textContent=`${j.tag_name} is ready — tap UPDATE on Home, or here.`; $("#appChk").textContent="UPDATE"; }
-    else { $("#updBar").hidden=true; $("#appUpd").textContent=APP_VERSION?`You're on the latest (v${APP_VERSION}).`:"Can't tell this app's version — update once from GitHub."; $("#appChk").textContent="CHECK"; if(manual) toast("You're up to date."); }
+  const running=window.__ORION_LIVE||APP_VERSION; $("#appVer").textContent=running?"v"+running:"";
+  if(!(Cap&&Cap.isNativePlatform&&Cap.isNativePlatform())){ $("#appUpd").textContent="Updates itself."; return; }
+  try{ const j=await (await fetch("https://api.github.com/repos/Kiyan12121/orion/releases/latest",{headers:{Accept:"application/vnd.github+json"}})).json();
+    const tag=String(j.tag_name||""), v=tag.replace(/^v/,""); store.set("updChecked",String(Date.now()));
+    const have=localStorage.getItem("orion_liveui_v")||"";
+    if(v&&newer(v,running)&&v!==localStorage.getItem("orion_liveui_bad")){
+      if(v!==have){ const h=await (await fetch(`https://raw.githubusercontent.com/Kiyan12121/orion/${encodeURIComponent(tag)}/ui/mobile.html`,{cache:"no-store"})).text();
+        if(h.length<100000||!h.includes('id="v-home"')||!h.includes("orion_liveui")) throw new Error("bad download");
+        localStorage.setItem("orion_liveui",h.split("__APP_VERSION__").join(v)); localStorage.setItem("orion_liveui_v",v); }
+      UPD={v}; $("#updT").textContent=`ORION v${v} is ready`; $("#updS").textContent="Tap to switch now — it'll also switch by itself next time you open the app."; $("#updBar").hidden=false; $("#updGo").textContent="RESTART";
+      $("#appUpd").textContent=`v${v} downloaded — restart to use it.`; $("#appChk").textContent="RESTART";
+    } else { $("#updBar").hidden=true; $("#appUpd").textContent=`Up to date (v${running}). Updates download by themselves.`; $("#appChk").textContent="CHECK"; if(manual) toast("You're on the latest."); }
   }catch(e){ if(manual) toast("Couldn't check for updates — are you online?"); } }
-async function doUpdate(){ if(!UPD) return checkUpdate(true);
-  if(!Native||!Native.installUpdate){ window.open(UPD.url,"_system"); toast("Downloading — tap the download, then Update."); return; }
-  try{ $("#updGo").textContent="0%"; $("#updGo").disabled=true;
-    const h=Native.addListener&&Native.addListener("updateProgress",e=>{ if(e.pct>=0){ $("#updGo").textContent=e.pct+"%"; $("#appChk").textContent=e.pct+"%"; } });
-    const r=await Native.installUpdate({url:UPD.url});
-    if(r&&r.status==="permission"){ toast("Allow ORION to install updates (one time), then tap UPDATE again."); }
-    else toast("Tap “Update” on the next screen. Your settings are kept.");
-    try{ (await h)&&(await h).remove(); }catch(e){}
-  }catch(e){ toast(e.message||"Update failed."); }
-  $("#updGo").textContent="UPDATE"; $("#updGo").disabled=false; $("#appChk").textContent="UPDATE"; }
+function doUpdate(){ if(!UPD) return checkUpdate(true); toast("Switching to the new version…"); setTimeout(()=>location.reload(),400); }
 $("#updGo").onclick=doUpdate;
 $("#appChk").onclick=()=>UPD?doUpdate():checkUpdate(true);
 setTimeout(()=>checkUpdate(false),3000);
-document.addEventListener("visibilitychange",()=>{ if(!document.hidden&&Date.now()-(+store.get("updChecked","0"))>6*3600e3) checkUpdate(false); });
+document.addEventListener("visibilitychange",()=>{ if(!document.hidden&&Date.now()-(+store.get("updChecked","0"))>3*3600e3) checkUpdate(false); });
 </script>
 </body>
 </html>

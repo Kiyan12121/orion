@@ -13,6 +13,12 @@ import time
 from .paths import DATA_DIR
 from .tools import CTX, tool
 
+
+def _nap(sec):
+    from .procs import nap
+    nap(sec)   # 7.1: waits 3x longer while you're gaming
+
+
 LOG = os.path.join(DATA_DIR, "autonomy.json")
 
 RULES = """AUTONOMOUS MODE — the user has been away from the PC for {mins} minutes. You're working on your own.
@@ -151,7 +157,7 @@ class Autonomy:
                     self.run(int(idle // 60))
             except Exception:
                 pass
-            time.sleep(60)
+            _nap(60)
 
     def run(self, mins=0, why="you were away"):
         self.last_run = time.time()

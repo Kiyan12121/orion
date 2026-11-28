@@ -28,6 +28,12 @@ import requests
 from . import config as config_mod
 from .paths import APP_DIR, DATA_DIR, FROZEN, RES_DIR
 
+
+def _nap(sec):
+    from .procs import nap
+    nap(sec)   # 7.1: waits 3x longer while you're gaming
+
+
 # ====================================================================== push notifications (ntfy)
 class Push:
     def __init__(self, cfg):
@@ -332,7 +338,7 @@ class Sync:
                     self.sync_now()
                 except Exception as e:
                     self.status = f"error: {str(e)[:80]}"
-            time.sleep(120)
+            _nap(120)
 
     def sync_now(self):
         with self._lock:

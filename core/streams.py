@@ -181,10 +181,8 @@ class Watcher:
 
     def _streaming_app(self):
         try:
-            import psutil
-            for p in psutil.process_iter(["name"]):
-                if (p.info["name"] or "").lower() in STREAM_APPS:
-                    return p.info["name"]
+            from . import procs
+            return procs.first(STREAM_APPS, max_age=15)
         except Exception:
             pass
         return None
@@ -261,7 +259,7 @@ class Watcher:
                         pass
             except Exception:
                 pass
-            time.sleep(20)
+            time.sleep(20)   # not slowed in game mode — you stream while gaming
 
     def _milestone(self, before, now):
         if before is None or now is None or now <= before:

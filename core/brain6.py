@@ -142,6 +142,59 @@ def stats():
 
 
 # ------------------------------------------------------------------ situational context for the system prompt
+# ------------------------------------------------------------------ 7.1: live pulse of his world (cached, never blocks a reply)
+_pulse = {"t": 0.0, "text": "", "busy": False}
+
+
+def _build_pulse():
+    bits = []
+    try:
+        from .streams import overview as so
+        o = so()
+        if o.get("live"):
+            bits.append("He is LIVE on TikTok right now — keep replies very short and don't interrupt the stream.")
+        last = o.get("last") or {}
+        if last.get("followers") is not None:
+            d7 = o.get("d7")
+            bits.append(f"TikTok: {last['followers']:,} followers" + (f" ({d7:+d} this week)" if d7 else "") + ".")
+        done = [x for x in o.get("sessions", []) if x.get("end")]
+        if done:
+            bits.append(f"Last LIVE was {done[0].get('mins', 0)} min.")
+    except Exception:
+        pass
+    try:
+        from .study import overview
+        ex = overview().get("exams") or []
+        if ex:
+            e = ex[0]
+            bits.append(f"Next exam: {e.get('subject', 'exam')} in {e['days']} day{'s' if e['days'] != 1 else ''}"
+                        + (f"; {len(ex)} exams booked in total" if len(ex) > 1 else "") + ".")
+    except Exception:
+        pass
+    try:
+        from .ceo import hq
+        m = hq()["month"]
+        bits.append(f"Money this month: £{m['in']:.0f} in, £{m['profit']:.0f} profit.")
+    except Exception:
+        pass
+    try:
+        from .tools import CTX
+        g = CTX.get("gaming")
+        if g and g.active and g.game:
+            bits.append(f"Currently playing {g.game}.")
+    except Exception:
+        pass
+    _pulse.update(t=time.time(), text=" ".join(bits), busy=False)
+
+
+def pulse():
+    """Up-to-date facts about his life (streams, exams, money) for the brain. Refreshed in the background every 10 min."""
+    if time.time() - _pulse["t"] > 600 and not _pulse["busy"]:
+        _pulse["busy"] = True
+        threading.Thread(target=_build_pulse, daemon=True).start()
+    return _pulse["text"]
+
+
 def situation():
     now = dt.datetime.now()
     bits = []
@@ -168,6 +221,9 @@ def situation():
             bits.append("Homework due soon: " + ", ".join(f"{h['subject']} ({h['days']}d)" for h in hw[:3]) + ".")
     except Exception:
         pass
+    p = pulse()
+    if p:
+        bits.append(p)
     return " ".join(bits)
 
 

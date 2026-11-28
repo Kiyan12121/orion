@@ -28,14 +28,7 @@ ROOT_EXE = "Root.exe"
 ROOT_PATH = os.path.expandvars(r"%LOCALAPPDATA%\Root\current\Root.exe")
 _lock = threading.RLock()   # one Root action at a time
 
-try:
-    import pyautogui
-except Exception:
-    pyautogui = None
-try:
-    import pyperclip
-except Exception:
-    pyperclip = None
+from .tools import pyautogui, pyperclip  # lazy (7.1)
 
 
 # ------------------------------------------------------------------ window helpers

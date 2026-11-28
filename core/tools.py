@@ -25,24 +25,47 @@ from .paths import DATA_DIR
 IS_WIN = platform.system() == "Windows"
 
 # Optional libraries — ORION still runs if any are missing, that tool just reports it.
-try:
-    import pyautogui
-    pyautogui.FAILSAFE = True   # slam the mouse into a screen corner to abort any automation
-    pyautogui.PAUSE = 0.05
-except Exception:
-    pyautogui = None
+class _Lazy:
+    """Imports a heavy optional library the first time it's actually used (7.1: faster start, less RAM).
+    Falsy when the library isn't installed, so `if not pyautogui` / _need() still work."""
+    def __init__(self, name, setup=None):
+        self._name, self._setup, self._mod, self._tried = name, setup, None, False
+
+    def _load(self):
+        if not self._tried:
+            self._tried = True
+            try:
+                import importlib
+                self._mod = importlib.import_module(self._name)
+                if self._setup:
+                    self._setup(self._mod)
+            except Exception:
+                self._mod = None
+        return self._mod
+
+    def __bool__(self):
+        return self._load() is not None
+
+    def __getattr__(self, attr):
+        m = self._load()
+        if m is None:
+            raise AttributeError(f"{self._name} isn't installed")
+        return getattr(m, attr)
+
+
+def _pag_setup(m):
+    m.FAILSAFE = True   # slam the mouse into a screen corner to abort any automation
+    m.PAUSE = 0.05
+
+
+# Optional libraries — ORION still runs if any are missing, that tool just reports it.
+pyautogui = _Lazy("pyautogui", _pag_setup)
+pyperclip = _Lazy("pyperclip")
+pytesseract = _Lazy("pytesseract")
 try:
     import psutil
 except Exception:
     psutil = None
-try:
-    import pyperclip
-except Exception:
-    pyperclip = None
-try:
-    import pytesseract
-except Exception:
-    pytesseract = None
 
 UA = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
                     "(KHTML, like Gecko) Chrome/124.0 Safari/537.36"}
@@ -75,7 +98,7 @@ def tool(description, params=None, dangerous=False):
 
 
 def _need(lib, name):
-    if lib is None:
+    if not lib:
         raise RuntimeError(f"'{name}' isn't installed — run setup.bat again.")
 
 
@@ -431,7 +454,7 @@ def _screenshot():
 
 
 def _ocr_ready():
-    if pytesseract is None:
+    if not pytesseract:
         return False
     tp = CTX["config"].get("tesseract_path")
     if tp and os.path.exists(tp):

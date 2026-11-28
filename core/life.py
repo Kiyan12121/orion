@@ -15,6 +15,12 @@ import requests
 from .paths import DATA_DIR
 from .tools import CTX, tool
 
+
+def _nap(sec):
+    from .procs import nap
+    nap(sec)   # 7.1: waits 3x longer while you're gaming
+
+
 HW = os.path.join(DATA_DIR, "homework.json")
 NOTES = os.path.join(DATA_DIR, "notes.json")
 CLIPS = os.path.join(DATA_DIR, "clipboard.json")
@@ -334,7 +340,7 @@ class ScreenTime:
     def _loop(self):
         from .jobs import idle_seconds
         while True:
-            time.sleep(20)
+            _nap(20)
             try:
                 if os.name != "nt" or idle_seconds() > 120:
                     continue

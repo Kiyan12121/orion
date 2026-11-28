@@ -17,6 +17,12 @@ from .paths import DATA_DIR
 from .safeio import write_json
 from .tools import CTX, tool
 
+
+def _nap(sec):
+    from .procs import nap
+    nap(sec)   # 7.1: waits 3x longer while you're gaming
+
+
 COSTS = os.path.join(DATA_DIR, "expenses.json")
 # chance a deal at each stage turns into money — used for the forecast
 STAGE_P = {"lead": .05, "contacted": .1, "replied": .25, "call": .4, "proposal": .6, "won": 1.0, "lost": 0}
@@ -192,7 +198,7 @@ class Weekly:
                         self.notify(board_report(), important=False)
             except Exception:
                 pass
-            time.sleep(600)
+            _nap(600)
 
 
 # ------------------------------------------------------------------ tools

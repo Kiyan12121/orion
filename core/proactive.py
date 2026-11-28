@@ -8,6 +8,12 @@ import time
 from .tools import CTX
 
 
+def _nap(sec):
+    from .procs import nap
+    nap(sec)   # 7.1: waits 3x longer while you're gaming
+
+
+
 class Proactive:
     def __init__(self, cfg, emit, say=None):
         self.cfg, self.emit, self.say = cfg, emit, say or (lambda t: None)
@@ -59,7 +65,7 @@ class Proactive:
                     self._checks()
             except Exception:
                 pass
-            time.sleep(45)
+            _nap(45)
 
     # ------------------------------------------------------------------ what's worth saying
     def _briefing(self):
